@@ -1,5 +1,6 @@
 ---
 import { nav, headerCTAs } from '../data/site';
+import Logo from './Logo.astro';
 ---
 
 <a href="#main" class="skip-link">Skip to content</a>
@@ -10,7 +11,7 @@ import { nav, headerCTAs } from '../data/site';
       <!-- Logo (left) -->
       <div class="flex-shrink-0">
         <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg">
-          <img src="/logo.svg" alt="IHARC" class="h-8 w-auto" fetchpriority="high" decoding="async" />
+          <Logo size="sm" alt="IHARC - Return to homepage" />
         </a>
       </div>
 

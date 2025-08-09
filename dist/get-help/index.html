@@ -40,8 +40,120 @@
           }
         ]
       }
-    </script><link rel="stylesheet" href="/assets/get-help.C20XX6TA.css"><script type="module">document.addEventListener("DOMContentLoaded",()=>{window.matchMedia("(prefers-reduced-motion: reduce)").matches&&document.documentElement.style.setProperty("--animation-duration","0.01ms")});class o{container;config;previousFocus=null;isActive=!1;constructor(e,t={}){this.container=e,this.config={escapeDeactivates:!0,clickOutsideDeactivates:!0,returnFocusOnDeactivate:!0,...t}}activate(){if(this.isActive)return;this.previousFocus=document.activeElement,this.isActive=!0;const e=this.getFirstFocusableElement();e&&e.focus(),document.addEventListener("keydown",this.handleKeyDown),this.config.clickOutsideDeactivates&&document.addEventListener("click",this.handleClickOutside)}deactivate(){this.isActive&&(this.isActive=!1,document.removeEventListener("keydown",this.handleKeyDown),document.removeEventListener("click",this.handleClickOutside),this.config.returnFocusOnDeactivate&&this.previousFocus&&this.previousFocus.focus())}handleKeyDown=e=>{if(this.isActive){if(e.key==="Escape"&&this.config.escapeDeactivates){e.preventDefault(),this.deactivate();return}e.key==="Tab"&&this.handleTabKey(e)}};handleTabKey=e=>{const t=this.getFocusableElements(),s=t[0],n=t[t.length-1];e.shiftKey?document.activeElement===s&&(e.preventDefault(),n?.focus()):document.activeElement===n&&(e.preventDefault(),s?.focus())};handleClickOutside=e=>{this.container.contains(e.target)||this.deactivate()};getFocusableElements(){const e=["a[href]","button:not([disabled])","input:not([disabled])","select:not([disabled])","textarea:not([disabled])",'[tabindex]:not([tabindex="-1"])'].join(", ");return Array.from(this.container.querySelectorAll(e))}getFirstFocusableElement(){return this.getFocusableElements()[0]||null}}class a{button;menu;isOpen=!1;focusTrap=null;constructor(){this.button=document.getElementById("mobile-menu-button"),this.menu=document.getElementById("mobile-menu"),this.button&&this.menu&&this.init()}init(){this.button.addEventListener("click",this.toggle.bind(this)),this.focusTrap=new o(this.menu,{escapeDeactivates:!0,clickOutsideDeactivates:!0,returnFocusOnDeactivate:!0}),window.addEventListener("resize",()=>{window.innerWidth>=1024&&this.isOpen&&this.close()}),document.addEventListener("focus-trap:deactivate",()=>{this.isOpen&&this.close()})}toggle(){this.isOpen?this.close():this.open()}open(){this.isOpen=!0,this.button.setAttribute("aria-expanded","true"),this.menu.classList.remove("hidden"),this.updateButtonAnimation(),this.focusTrap?.activate()}close(){this.isOpen=!1,this.button.setAttribute("aria-expanded","false"),this.menu.classList.add("hidden"),this.updateButtonAnimation(),this.focusTrap?.deactivate()}updateButtonAnimation(){const e=this.button.querySelectorAll("span");this.isOpen?(e[0]?.classList.add("rotate-45","translate-y-1.5"),e[1]?.classList.add("opacity-0"),e[2]?.classList.add("-rotate-45","-translate-y-1.5")):(e[0]?.classList.remove("rotate-45","translate-y-1.5"),e[1]?.classList.remove("opacity-0"),e[2]?.classList.remove("-rotate-45","-translate-y-1.5"))}}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>new a):new a;
-</script></head> <body class="min-h-screen bg-white text-gray-900 font-body" data-astro-cid-37fxchfa> <div class="flex flex-col min-h-screen" data-astro-cid-37fxchfa>  <a href="#main" class="skip-link">Skip to content</a> <header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm"> <div class="container"> <div class="flex items-center py-4"> <!-- Logo (left) --> <div class="flex-shrink-0"> <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg"> <img src="/logo.svg" alt="IHARC" class="h-8 w-auto" fetchpriority="high" decoding="async"> </a> </div> <!-- Desktop Navigation (center) --> <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation"> <div class="flex items-center space-x-8"> <a href="/about" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> About  </a><a href="/programs" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Programs &amp; Services  </a><a href="/get-help" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Help  </a><a href="/tools" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Community Tools  </a><a href="/news" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> News  </a><a href="/involved" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Involved  </a><a href="/contact" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Contact  </a> </div> </nav> <!-- Desktop CTAs (right) --> <div class="hidden lg:flex items-center space-x-3 flex-shrink-0"> <a href="/get-help" class="btn-primary"> Get Help Now </a><a href="/donate" class="btn-secondary"> Donate </a> </div> <!-- Mobile Menu Button (right on mobile) --> <div class="lg:hidden flex-shrink-0 ml-auto"> <button id="mobile-menu-button" class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu"> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> </button> </div> </div> </div> <!-- Mobile Menu --> <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200" aria-label="Mobile navigation"> <div class="container py-6"> <nav class="space-y-4" role="navigation"> <a href="/about" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> About  </a><a href="/programs" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Programs &amp; Services  </a><a href="/get-help" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Help  </a><a href="/tools" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Community Tools  </a><a href="/news" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> News  </a><a href="/involved" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Involved  </a><a href="/contact" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Contact  </a> </nav> <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200"> <a href="/get-help" class="btn-primary text-center"> Get Help Now </a><a href="/donate" class="btn-secondary text-center"> Donate </a> </div> </div> </div> </header>  <main id="main" class="flex-1"> <!-- Hero Section --> <section class="py-16 bg-gradient-to-br from-brand-red to-brand-redDark text-white"> <div class="container"> <div class="max-w-4xl mx-auto text-center"> <h1 class="text-4xl lg:text-5xl font-heading font-bold mb-6">
+    </script><!-- Analytics and Tracking --><script>
+      // Global event tracking function
+      window.trackEvent = function(eventName, eventData = {}) {
+        // Check Do Not Track
+        if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+          console.log('Event tracking disabled: Do Not Track is enabled');
+          return;
+        }
+
+        try {
+          // Google Analytics 4
+          if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventData);
+          }
+
+          // Facebook Pixel
+          if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, eventData);
+          }
+
+          console.log('Event tracked:', eventName, eventData);
+        } catch (error) {
+          console.error('Error tracking event:', error);
+        }
+      };
+
+      // Track common events automatically
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track form submissions
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const formId = this.id || 'unknown';
+            window.trackEvent('form_submit', { form_id: formId });
+          });
+        });
+
+        // Track external link clicks
+        document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.hostname + '"])').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('external_link_click', { 
+              url: this.href,
+              text: this.textContent.trim()
+            });
+          });
+        });
+
+        // Track phone number clicks
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('phone_click', { 
+              number: this.href.replace('tel:', '')
+            });
+          });
+        });
+
+        // Track email clicks
+        document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('email_click', { 
+              email: this.href.replace('mailto:', '')
+            });
+          });
+        });
+      });
+    </script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   PUBLIC_GA4_ID=G-XXXXXXXXXX
+   PUBLIC_GTM_ID=GTM-XXXXXXX
+   PUBLIC_FACEBOOK_PIXEL_ID=123456789
+   PUBLIC_HOTJAR_ID=1234567
+
+2. Add to BaseLayout.astro:
+   <Analytics />
+
+3. Custom event tracking in your pages:
+   <script>
+     // Track button clicks
+     document.getElementById('donate-button').addEventListener('click', () => {
+       window.trackEvent('donate_button_click', { source: 'header' });
+     });
+     
+     // Track newsletter signups
+     window.trackEvent('newsletter_signup', { email: userEmail });
+   </script>
+
+4. Privacy Compliance:
+   - Respects Do Not Track browser setting
+   - Uses privacy-friendly GA4 settings
+   - Anonymizes IP addresses
+   - Secure cookie settings
+
+5. GDPR Compliance Ready:
+   - Add consent management by setting disabled={!userConsent}
+   - All tracking can be disabled with a single prop
+--><link rel="stylesheet" href="/assets/about.D2eIfluO.css"><script type="module" src="/assets/hoisted.CyvWrU8e.js"></script></head> <body class="min-h-screen bg-white text-gray-900 font-body" data-astro-cid-37fxchfa> <div class="flex flex-col min-h-screen" data-astro-cid-37fxchfa>  <a href="#main" class="skip-link">Skip to content</a> <header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm"> <div class="container"> <div class="flex items-center py-4"> <!-- Logo (left) --> <div class="flex-shrink-0"> <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg"> <img src="/logo.svg" alt="IHARC - Return to homepage" class="h-8 w-auto" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> </a> </div> <!-- Desktop Navigation (center) --> <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation"> <div class="flex items-center space-x-8"> <a href="/about" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> About  </a><a href="/programs" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Programs &amp; Services  </a><a href="/get-help" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Help  </a><a href="/tools" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Community Tools  </a><a href="/news" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> News  </a><a href="/involved" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Involved  </a><a href="/contact" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Contact  </a> </div> </nav> <!-- Desktop CTAs (right) --> <div class="hidden lg:flex items-center space-x-3 flex-shrink-0"> <a href="/get-help" class="btn-primary"> Get Help Now </a><a href="/donate" class="btn-secondary"> Donate </a> </div> <!-- Mobile Menu Button (right on mobile) --> <div class="lg:hidden flex-shrink-0 ml-auto"> <button id="mobile-menu-button" class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu"> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> </button> </div> </div> </div> <!-- Mobile Menu --> <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200" aria-label="Mobile navigation"> <div class="container py-6"> <nav class="space-y-4" role="navigation"> <a href="/about" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> About  </a><a href="/programs" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Programs &amp; Services  </a><a href="/get-help" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Help  </a><a href="/tools" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Community Tools  </a><a href="/news" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> News  </a><a href="/involved" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Involved  </a><a href="/contact" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Contact  </a> </nav> <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200"> <a href="/get-help" class="btn-primary text-center"> Get Help Now </a><a href="/donate" class="btn-secondary text-center"> Donate </a> </div> </div> </div> </header>  <main id="main" class="flex-1"> <!-- Hero Section --> <section class="py-16 bg-gradient-to-br from-brand-red to-brand-redDark text-white"> <div class="container"> <div class="max-w-4xl mx-auto text-center"> <h1 class="text-4xl lg:text-5xl font-heading font-bold mb-6">
 Get Help Now
 </h1> <p class="text-xl text-white/90 max-w-2xl mx-auto">
 Immediate support is available 24/7. Find crisis resources, shelter information, and community services in Northumberland County.
@@ -71,7 +183,24 @@ Partner with us to improve safety and health across Northumberland.
 Donate Now
 </a> <a href="/volunteer" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
 Volunteer
-</a> </div> </div> </div> </section> <!-- Main Footer Content --> <div class="container py-12"> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Organization Info --> <div class="lg:col-span-1"> <img src="/logo.svg" alt="IHARC" class="h-10 w-auto mb-4" loading="lazy" decoding="async"> <p class="text-gray-600 mb-4 leading-relaxed">
+</a> </div> </div> </div> </section> <!-- Main Footer Content --> <div class="container py-12"> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Organization Info --> <div class="lg:col-span-1"> <img src="/logo.svg" alt="IHARC - Integrated Homelessness &#38; Addictions Response Centre" class="h-12 w-auto mb-4" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> <p class="text-gray-600 mb-4 leading-relaxed">
 Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
 </p> <div class="text-sm text-gray-500 italic"> <p>Contact information will be updated soon.</p> <p class="mt-2"> <a href="/contact" class="text-brand-red hover:underline">
 Visit our contact page for current information
@@ -83,4 +212,62 @@ Social media links will be available soon.
 (905) 555-HELP
 </a> </div> <div class="ml-0 sm:ml-6 text-sm text-gray-300">
 For life-threatening emergencies, call 911
-</div> </div> </div> </div> </footer>  </div>  </body> </html> 
+</div> </div> </div> </div> </footer>  </div>  <!-- Live Chat Widget --> <script>(function(){const provider = "crisp";
+
+    console.warn('Chat widget not loaded: Missing required configuration for provider:', provider);
+  })();</script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   # Choose one provider and set its variables
+   
+   # Intercom
+   PUBLIC_INTERCOM_APP_ID=abc123
+   
+   # Zendesk
+   PUBLIC_ZENDESK_KEY=your_zendesk_key
+   
+   # Crisp (Free tier available)
+   PUBLIC_CRISP_WEBSITE_ID=your_website_id
+   
+   # Tawk.to (Free)
+   PUBLIC_TAWK_PROPERTY_ID=your_property_id
+   PUBLIC_TAWK_WIDGET_ID=your_widget_id
+
+2. Add to BaseLayout.astro:
+   <ChatWidget provider="crisp" />
+
+3. Custom user data:
+   <ChatWidget 
+     provider="crisp" 
+     config={{
+       user: { email: "user@example.com", name: "User Name" },
+       session: { page: "contact", source: "header" }
+     }}
+   />
+
+4. Programmatic control:
+   <script>
+     // Show chat widget
+     window.chatWidget.show();
+     
+     // Hide chat widget
+     window.chatWidget.hide();
+     
+     // Set user information
+     window.chatWidget.setUser({
+       name: "John Doe",
+       email: "john@example.com"
+     });
+   </script>
+
+5. Disable chat on specific pages:
+   <ChatWidget disabled={true} />
+
+PROVIDER COMPARISON:
+- Crisp: Free tier, easy setup, good features
+- Tawk.to: Completely free, unlimited chats
+- Intercom: Premium features, paid service
+- Zendesk: Enterprise features, paid service
+- Custom: Full control, requires implementation
+--> </body></html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-37fxchfa> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v4.16.18"><!-- Primary Meta Tags --><title>New Mobile Outreach Program Launched - IHARC News</title><meta name="title" content="New Mobile Outreach Program Launched - IHARC News"><meta name="description" content="IHARC introduces enhanced mobile outreach services to better serve individuals experiencing homelessness across Northumberland County."><link rel="canonical" href="https://iharc.ca/news/new-outreach-program/"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://iharc.ca/news/new-outreach-program/"><meta property="og:title" content="New Mobile Outreach Program Launched - IHARC News"><meta property="og:description" content="IHARC introduces enhanced mobile outreach services to better serve individuals experiencing homelessness across Northumberland County."><meta property="og:image" content="/og-default.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://iharc.ca/news/new-outreach-program/"><meta property="twitter:title" content="New Mobile Outreach Program Launched - IHARC News"><meta property="twitter:description" content="IHARC introduces enhanced mobile outreach services to better serve individuals experiencing homelessness across Northumberland County."><meta property="twitter:image" content="/og-default.jpg"><!-- SEO --><meta name="robots" content="noindex,nofollow"><meta name="author" content="IHARC - Integrated Homelessness & Addictions Response Centre"><meta name="keywords" content="IHARC, Northumberland County, community health, crisis response, emergency shelter, community safety, Ontario"><!-- Theme Color --><meta name="theme-color" content="#CE2029"><!-- Preconnect to Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><!-- Preload critical fonts --><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2" crossorigin><!-- JSON-LD Structured Data --><script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://iharc.ca/#organization",
+            "name": "IHARC - Integrated Homelessness & Addictions Response Centre",
+            "url": "https://iharc.ca",
+            "logo": "https://iharc.ca/logo.svg",
+            "description": "Integrated Homelessness & Addictions Response Centre serving Northumberland County, Ontario with comprehensive support and community safety initiatives.",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "123 Main Street",
+              "addressLocality": "Cobourg",
+              "addressRegion": "ON",
+              "postalCode": "K9A 2N4",
+              "addressCountry": "CA"
+            },
+            "telephone": "(905) 555-HELP",
+            "email": "info@iharc.ca",
+            "areaServed": "Northumberland County, Ontario",
+            "sameAs": [
+              "https://facebook.com/iharc",
+              "https://twitter.com/iharc",
+              "https://linkedin.com/company/iharc"
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://iharc.ca/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://iharc.ca"
+              }
+            ]
+          }
+        ]
+      }
+    </script><!-- Analytics and Tracking --><script>
+      // Global event tracking function
+      window.trackEvent = function(eventName, eventData = {}) {
+        // Check Do Not Track
+        if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+          console.log('Event tracking disabled: Do Not Track is enabled');
+          return;
+        }
+
+        try {
+          // Google Analytics 4
+          if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventData);
+          }
+
+          // Facebook Pixel
+          if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, eventData);
+          }
+
+          console.log('Event tracked:', eventName, eventData);
+        } catch (error) {
+          console.error('Error tracking event:', error);
+        }
+      };
+
+      // Track common events automatically
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track form submissions
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const formId = this.id || 'unknown';
+            window.trackEvent('form_submit', { form_id: formId });
+          });
+        });
+
+        // Track external link clicks
+        document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.hostname + '"])').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('external_link_click', { 
+              url: this.href,
+              text: this.textContent.trim()
+            });
+          });
+        });
+
+        // Track phone number clicks
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('phone_click', { 
+              number: this.href.replace('tel:', '')
+            });
+          });
+        });
+
+        // Track email clicks
+        document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('email_click', { 
+              email: this.href.replace('mailto:', '')
+            });
+          });
+        });
+      });
+    </script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   PUBLIC_GA4_ID=G-XXXXXXXXXX
+   PUBLIC_GTM_ID=GTM-XXXXXXX
+   PUBLIC_FACEBOOK_PIXEL_ID=123456789
+   PUBLIC_HOTJAR_ID=1234567
+
+2. Add to BaseLayout.astro:
+   <Analytics />
+
+3. Custom event tracking in your pages:
+   <script>
+     // Track button clicks
+     document.getElementById('donate-button').addEventListener('click', () => {
+       window.trackEvent('donate_button_click', { source: 'header' });
+     });
+     
+     // Track newsletter signups
+     window.trackEvent('newsletter_signup', { email: userEmail });
+   </script>
+
+4. Privacy Compliance:
+   - Respects Do Not Track browser setting
+   - Uses privacy-friendly GA4 settings
+   - Anonymizes IP addresses
+   - Secure cookie settings
+
+5. GDPR Compliance Ready:
+   - Add consent management by setting disabled={!userConsent}
+   - All tracking can be disabled with a single prop
+--><link rel="stylesheet" href="/assets/about.D2eIfluO.css">
+<style>.prose[data-astro-cid-cubnwgbf]{color:#374151;max-width:none}.prose[data-astro-cid-cubnwgbf] h2[data-astro-cid-cubnwgbf]{color:#111827;font-weight:700;font-size:1.875rem;line-height:2.25rem;margin-top:2rem;margin-bottom:1rem}.prose[data-astro-cid-cubnwgbf] h3[data-astro-cid-cubnwgbf]{color:#111827;font-weight:600;font-size:1.5rem;line-height:2rem;margin-top:1.75rem;margin-bottom:.75rem}.prose[data-astro-cid-cubnwgbf] p[data-astro-cid-cubnwgbf]{margin-bottom:1.25rem;line-height:1.75}.prose[data-astro-cid-cubnwgbf] ul[data-astro-cid-cubnwgbf]{margin:1.25rem 0;padding-left:1.625rem;list-style-type:disc}.prose[data-astro-cid-cubnwgbf] li[data-astro-cid-cubnwgbf]{margin-bottom:.5rem}.prose[data-astro-cid-cubnwgbf] strong[data-astro-cid-cubnwgbf]{color:#111827;font-weight:600}.prose[data-astro-cid-cubnwgbf] em[data-astro-cid-cubnwgbf]{font-style:italic;color:#6b7280}.prose[data-astro-cid-cubnwgbf] a[data-astro-cid-cubnwgbf]{color:#ce2029;text-decoration:underline}.prose[data-astro-cid-cubnwgbf] a[data-astro-cid-cubnwgbf]:hover{color:#b91c1c;text-decoration:none}.prose[data-astro-cid-cubnwgbf] blockquote[data-astro-cid-cubnwgbf]{border-left:4px solid #CE2029;padding-left:1rem;margin:1.5rem 0;font-style:italic;color:#6b7280}@media (prefers-reduced-motion: reduce){.prose[data-astro-cid-cubnwgbf] a[data-astro-cid-cubnwgbf]{transition:none}}
+</style><script type="module" src="/assets/hoisted.CyvWrU8e.js"></script></head> <body class="min-h-screen bg-white text-gray-900 font-body" data-astro-cid-37fxchfa> <div class="flex flex-col min-h-screen" data-astro-cid-37fxchfa>  <a href="#main" class="skip-link">Skip to content</a> <header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm"> <div class="container"> <div class="flex items-center py-4"> <!-- Logo (left) --> <div class="flex-shrink-0"> <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg"> <img src="/logo.svg" alt="IHARC - Return to homepage" class="h-8 w-auto" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> </a> </div> <!-- Desktop Navigation (center) --> <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation"> <div class="flex items-center space-x-8"> <a href="/about" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> About  </a><a href="/programs" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Programs &amp; Services  </a><a href="/get-help" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Help  </a><a href="/tools" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Community Tools  </a><a href="/news" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> News  </a><a href="/involved" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Involved  </a><a href="/contact" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Contact  </a> </div> </nav> <!-- Desktop CTAs (right) --> <div class="hidden lg:flex items-center space-x-3 flex-shrink-0"> <a href="/get-help" class="btn-primary"> Get Help Now </a><a href="/donate" class="btn-secondary"> Donate </a> </div> <!-- Mobile Menu Button (right on mobile) --> <div class="lg:hidden flex-shrink-0 ml-auto"> <button id="mobile-menu-button" class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu"> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> </button> </div> </div> </div> <!-- Mobile Menu --> <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200" aria-label="Mobile navigation"> <div class="container py-6"> <nav class="space-y-4" role="navigation"> <a href="/about" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> About  </a><a href="/programs" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Programs &amp; Services  </a><a href="/get-help" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Help  </a><a href="/tools" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Community Tools  </a><a href="/news" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> News  </a><a href="/involved" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Involved  </a><a href="/contact" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Contact  </a> </nav> <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200"> <a href="/get-help" class="btn-primary text-center"> Get Help Now </a><a href="/donate" class="btn-secondary text-center"> Donate </a> </div> </div> </div> </header>  <main id="main" class="flex-1" data-astro-cid-cubnwgbf> <!-- Article Header --> <section class="py-16 bg-gradient-to-br from-gray-50 to-white" data-astro-cid-cubnwgbf> <div class="container" data-astro-cid-cubnwgbf> <div class="max-w-4xl mx-auto" data-astro-cid-cubnwgbf> <!-- Breadcrumb --> <nav class="flex items-center text-sm text-gray-500 mb-8" aria-label="Breadcrumb" data-astro-cid-cubnwgbf> <a href="/" class="hover:text-brand-red transition-colors" data-astro-cid-cubnwgbf>Home</a> <svg class="w-5 h-5 mx-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" data-astro-cid-cubnwgbf> <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" data-astro-cid-cubnwgbf></path> </svg> <a href="/news" class="hover:text-brand-red transition-colors" data-astro-cid-cubnwgbf>News</a> <svg class="w-5 h-5 mx-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" data-astro-cid-cubnwgbf> <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" data-astro-cid-cubnwgbf></path> </svg> <span class="text-gray-700 truncate" data-astro-cid-cubnwgbf>New Mobile Outreach Program Launched</span> </nav> <!-- Article metadata --> <div class="flex items-center text-sm text-gray-500 mb-6" data-astro-cid-cubnwgbf> <div class="flex items-center mr-6" data-astro-cid-cubnwgbf> <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-cubnwgbf> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" data-astro-cid-cubnwgbf></path> </svg> <time datetime="2024-01-15T00:00:00.000Z" data-astro-cid-cubnwgbf> January 14, 2024 </time> </div> <div class="flex items-center mr-6" data-astro-cid-cubnwgbf> <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-cubnwgbf> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" data-astro-cid-cubnwgbf></path> </svg> <span data-astro-cid-cubnwgbf>2 min read</span> </div>  </div> <!-- Title --> <h1 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-gray-900 leading-tight mb-6" data-astro-cid-cubnwgbf> New Mobile Outreach Program Launched </h1> <!-- Excerpt --> <p class="text-xl text-gray-600 leading-relaxed" data-astro-cid-cubnwgbf> IHARC introduces enhanced mobile outreach services to better serve individuals experiencing homelessness across Northumberland County. </p> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- Article Content --> <article class="py-16 bg-white" data-astro-cid-cubnwgbf> <div class="container" data-astro-cid-cubnwgbf> <div class="max-w-4xl mx-auto" data-astro-cid-cubnwgbf> <div class="prose prose-lg max-w-none" data-astro-cid-cubnwgbf> <p>We’re excited to announce the launch of our new Mobile Outreach Program, designed to provide direct support and resources to individuals experiencing homelessness throughout Northumberland County.</p>
+<h2 id="program-overview">Program Overview</h2>
+<p>The Mobile Outreach Program features a specially equipped vehicle that serves as a mobile command center for our outreach team. This initiative allows us to bring services directly to those who need them most, regardless of their location.</p>
+<h3 id="key-services-include">Key Services Include:</h3>
+<ul>
+<li><strong>Immediate Crisis Support</strong>: On-site assessment and intervention for individuals in crisis situations</li>
+<li><strong>Resource Connection</strong>: Direct linkage to housing, healthcare, and social services</li>
+<li><strong>Harm Reduction Supplies</strong>: Distribution of safety equipment and health supplies</li>
+<li><strong>Case Management</strong>: Follow-up support and service coordination</li>
+</ul>
+<h2 id="impact-goals">Impact Goals</h2>
+<p>Through this program, we aim to:</p>
+<ul>
+<li>Reduce response times for crisis interventions</li>
+<li>Increase service accessibility in rural areas</li>
+<li>Provide more consistent follow-up support</li>
+<li>Strengthen connections between community members and available resources</li>
+</ul>
+<p>The Mobile Outreach Program operates seven days a week, with extended hours during extreme weather conditions. Community members can request outreach services by calling our main line or through our online referral system.</p>
+<p><em>This program is made possible through funding from the Provincial Community Safety Initiative and partnerships with local healthcare providers.</em></p> </div> </div> </div> </article> <!-- Tags --> <section class="py-8 bg-gray-50 border-t border-gray-200" data-astro-cid-cubnwgbf> <div class="container" data-astro-cid-cubnwgbf> <div class="max-w-4xl mx-auto" data-astro-cid-cubnwgbf> <div class="flex items-center flex-wrap gap-3" data-astro-cid-cubnwgbf> <span class="text-sm font-medium text-gray-700" data-astro-cid-cubnwgbf>Tags:</span> <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-red/10 text-brand-red capitalize" data-astro-cid-cubnwgbf> outreach </span><span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-red/10 text-brand-red capitalize" data-astro-cid-cubnwgbf> mobile services </span><span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-red/10 text-brand-red capitalize" data-astro-cid-cubnwgbf> homelessness </span> </div> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- Navigation & CTA --> <section class="py-16 bg-white" data-astro-cid-cubnwgbf> <div class="container" data-astro-cid-cubnwgbf> <div class="max-w-4xl mx-auto" data-astro-cid-cubnwgbf> <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" data-astro-cid-cubnwgbf> <!-- Back to News --> <div class="bg-gray-50 rounded-2xl p-8" data-astro-cid-cubnwgbf> <h3 class="text-xl font-semibold text-gray-900 mb-4" data-astro-cid-cubnwgbf>More Updates</h3> <p class="text-gray-600 mb-6" data-astro-cid-cubnwgbf>
+Stay up to date with all of IHARC's latest news, program updates, and community impact stories.
+</p> <a href="/news" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors" data-astro-cid-cubnwgbf> <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" data-astro-cid-cubnwgbf> <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" data-astro-cid-cubnwgbf></path> </svg>
+View All News
+</a> </div> <!-- Contact CTA --> <div class="bg-brand-red/5 border border-brand-red/20 rounded-2xl p-8" data-astro-cid-cubnwgbf> <h3 class="text-xl font-semibold text-gray-900 mb-4" data-astro-cid-cubnwgbf>Get Involved</h3> <p class="text-gray-600 mb-6" data-astro-cid-cubnwgbf>
+Interested in supporting our work or learning more about our programs? We'd love to hear from you.
+</p> <div class="flex flex-col sm:flex-row gap-3" data-astro-cid-cubnwgbf> <a href="/contact" class="btn-primary text-center" data-astro-cid-cubnwgbf>
+Contact Us
+</a> <a href="/get-involved" class="btn-secondary text-center" data-astro-cid-cubnwgbf>
+Get Involved
+</a> </div> </div> </div> </div> </div> </section> </main> <footer class="bg-white border-t border-gray-200"> <!-- CTA Band --> <section class="bg-brand-red text-white"> <div class="container py-12"> <div class="text-center"> <h2 class="text-2xl lg:text-3xl font-heading font-bold mb-4">
+Partner with us to improve safety and health across Northumberland.
+</h2> <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8"> <a href="/donate" class="btn-white">
+Donate Now
+</a> <a href="/volunteer" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
+Volunteer
+</a> </div> </div> </div> </section> <!-- Main Footer Content --> <div class="container py-12"> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Organization Info --> <div class="lg:col-span-1"> <img src="/logo.svg" alt="IHARC - Integrated Homelessness &#38; Addictions Response Centre" class="h-12 w-auto mb-4" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> <p class="text-gray-600 mb-4 leading-relaxed">
+Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
+</p> <div class="text-sm text-gray-500 italic"> <p>Contact information will be updated soon.</p> <p class="mt-2"> <a href="/contact" class="text-brand-red hover:underline">
+Visit our contact page for current information
+</a> </p> </div> </div> <!-- Footer Sections --> <div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Quick Access </h3> <ul class="space-y-2"> <li> <a href="/get-help" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Get Help Now  </a> </li><li> <a href="/report" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Report Concern  </a> </li><li> <a href="/programs" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Programs &amp; Services  </a> </li><li> <a href="/about" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> About IHARC  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Resources </h3> <ul class="space-y-2"> <li> <a href="/resources" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Service Directory  </a> </li><li> <a href="/tools" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Community Tools  </a> </li><li> <a href="/news" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> News &amp; Updates  </a> </li><li> <a href="/contact" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Contact Us  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Get Involved </h3> <ul class="space-y-2"> <li> <a href="/volunteer" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Volunteer  </a> </li><li> <a href="/donate" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Donate  </a> </li><li> <a href="/partnerships" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Partnerships  </a> </li><li> <a href="/careers" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Careers  </a> </li> </ul> </div> </div> <!-- Social Links -->  <div class="border-t border-gray-200 pt-8 mb-8 text-center"> <p class="text-sm text-gray-500 italic">
+Social media links will be available soon.
+</p> </div> <!-- Bottom Bar --> <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"> <div class="text-gray-500 text-sm">
+© 2025 IHARC. All rights reserved.
+</div> <nav class="flex space-x-6"> <a href="/privacy" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Privacy Policy </a><a href="/accessibility" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Accessibility </a><a href="/terms" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Terms of Service </a> </nav> </div> </div> <!-- Emergency Banner --> <div class="bg-brand-charcoal text-white"> <div class="container py-4"> <div class="flex flex-col sm:flex-row items-center justify-center text-center sm:text-left space-y-2 sm:space-y-0"> <div class="flex items-center text-sm"> <svg class="w-4 h-4 mr-2 text-brand-red" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path> </svg> <span class="mr-4">24/7 Crisis Support:</span> <a href="tel:905-555-HELP" class="font-semibold text-white hover:text-brand-red transition-colors">
+(905) 555-HELP
+</a> </div> <div class="ml-0 sm:ml-6 text-sm text-gray-300">
+For life-threatening emergencies, call 911
+</div> </div> </div> </div> </footer>  </div>  <!-- Live Chat Widget --> <script>(function(){const provider = "crisp";
+
+    console.warn('Chat widget not loaded: Missing required configuration for provider:', provider);
+  })();</script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   # Choose one provider and set its variables
+   
+   # Intercom
+   PUBLIC_INTERCOM_APP_ID=abc123
+   
+   # Zendesk
+   PUBLIC_ZENDESK_KEY=your_zendesk_key
+   
+   # Crisp (Free tier available)
+   PUBLIC_CRISP_WEBSITE_ID=your_website_id
+   
+   # Tawk.to (Free)
+   PUBLIC_TAWK_PROPERTY_ID=your_property_id
+   PUBLIC_TAWK_WIDGET_ID=your_widget_id
+
+2. Add to BaseLayout.astro:
+   <ChatWidget provider="crisp" />
+
+3. Custom user data:
+   <ChatWidget 
+     provider="crisp" 
+     config={{
+       user: { email: "user@example.com", name: "User Name" },
+       session: { page: "contact", source: "header" }
+     }}
+   />
+
+4. Programmatic control:
+   <script>
+     // Show chat widget
+     window.chatWidget.show();
+     
+     // Hide chat widget
+     window.chatWidget.hide();
+     
+     // Set user information
+     window.chatWidget.setUser({
+       name: "John Doe",
+       email: "john@example.com"
+     });
+   </script>
+
+5. Disable chat on specific pages:
+   <ChatWidget disabled={true} />
+
+PROVIDER COMPARISON:
+- Crisp: Free tier, easy setup, good features
+- Tawk.to: Completely free, unlimited chats
+- Intercom: Premium features, paid service
+- Zendesk: Enterprise features, paid service
+- Custom: Full control, requires implementation
+--> </body></html> 

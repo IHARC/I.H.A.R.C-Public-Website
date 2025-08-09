@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionDivider from '../components/SectionDivider.astro';
+---
+
+<BaseLayout 
+  title="About Us - IHARC" 
+  description="Learn about IHARC's integrated approach to addressing homelessness, addictions, and community safety across Northumberland County."
+>
+  <Header />
+  
+  <main id="main" class="flex-1">
+    <PageHero 
+      title="About IHARC"
+      description="We believe in direct action that creates real, lasting change for the most vulnerable members of our community."
+      background="red"
+      size="medium"
+    />
+
+    <!-- Our Mission -->
+    <section class="py-16 bg-white">
+      <div class="container">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-red/10 rounded-2xl mb-8">
+            <svg class="w-8 h-8 text-brand-red" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+            Our Mission
+          </h2>
+          <p class="text-xl text-gray-600 leading-relaxed mb-8">
+            To provide integrated, person-centered support that addresses homelessness, mental health, addictions, and community safety through collaborative, evidence-based approaches.
+          </p>
+          <div class="bg-gray-50 rounded-2xl p-8 text-left">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">We are committed to:</h3>
+            <ul class="space-y-3 text-gray-600">
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Treating every person with dignity and respect
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Removing barriers to accessing essential services
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Building stronger, safer communities for everyone
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Using data and evidence to guide our work
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <SectionDivider type="subtle" />
+
+    <!-- Our Approach -->
+    <section class="py-16 bg-gray-50">
+      <div class="container">
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Our Integrated Approach
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+              Rather than addressing issues in isolation, we recognize that homelessness, mental health, addiction, and community safety are interconnected challenges that require coordinated solutions.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Person-Centered</h3>
+              <p class="text-gray-600 leading-relaxed">
+                Every individual's needs, strengths, and goals guide the support we provide. We meet people where they are.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Trauma-Informed</h3>
+              <p class="text-gray-600 leading-relaxed">
+                We understand the widespread impact of trauma and actively work to create safe, supportive environments for healing.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Evidence-Based</h3>
+              <p class="text-gray-600 leading-relaxed">
+                Our programs are grounded in research and best practices, continuously evaluated for effectiveness and impact.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Collaborative</h3>
+              <p class="text-gray-600 leading-relaxed">
+                We work alongside community partners, government agencies, and residents to address systemic challenges.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Responsive</h3>
+              <p class="text-gray-600 leading-relaxed">
+                We adapt quickly to changing community needs and emerging challenges, maintaining flexibility in our approach.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
+                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Transparent</h3>
+              <p class="text-gray-600 leading-relaxed">
+                We maintain open communication with the community about our work, challenges, and outcomes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <SectionDivider type="subtle" />
+
+    <!-- Service Area -->
+    <section class="py-16 bg-white">
+      <div class="container">
+        <div class="max-w-4xl mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Serving Northumberland County
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+              IHARC proudly serves all communities across Northumberland County, working to ensure no one falls through the cracks.
+            </p>
+          </div>
+
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 lg:p-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Our Coverage Area</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <div class="space-y-2">
+                    <p class="font-medium text-gray-900">Cities & Towns</p>
+                    <ul class="text-gray-600 space-y-1">
+                      <li>Cobourg</li>
+                      <li>Port Hope</li>
+                      <li>Campbellford</li>
+                      <li>Brighton</li>
+                    </ul>
+                  </div>
+                  <div class="space-y-2">
+                    <p class="font-medium text-gray-900">Townships</p>
+                    <ul class="text-gray-600 space-y-1">
+                      <li>Hamilton Township</li>
+                      <li>Alnwick/Haldimand</li>
+                      <li>Cramahe Township</li>
+                      <li>Trent Hills</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white rounded-xl p-6 shadow-sm border border-blue-200">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-brand-red rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <h4 class="text-lg font-semibold text-gray-900 mb-2">Need Help?</h4>
+                  <p class="text-gray-600 text-sm mb-4">We provide services county-wide</p>
+                  <a href="/get-help" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark">
+                    Get Support Now
+                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <SectionDivider type="red-line" />
+
+    <!-- Call to Action -->
+    <section class="py-16 bg-gray-50">
+      <div class="container">
+        <div class="max-w-4xl mx-auto text-center">
+          <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+            Ready to Make a Difference?
+          </h2>
+          <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Whether you need support, want to volunteer, or are interested in partnering with us, we're here to work together.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/get-involved" class="btn-primary">
+              Get Involved
+            </a>
+            <a href="/contact" class="btn-secondary">
+              Contact Us
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>

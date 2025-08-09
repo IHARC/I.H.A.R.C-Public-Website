@@ -1,0 +1,291 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-37fxchfa> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v4.16.18"><!-- Primary Meta Tags --><title>Outreach Services - IHARC Programs</title><meta name="title" content="Outreach Services - IHARC Programs"><meta name="description" content="IHARC's street outreach and mobile support services connect people experiencing homelessness with housing, healthcare, and essential resources across Northumberland County."><link rel="canonical" href="https://iharc.ca/programs/outreach/"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://iharc.ca/programs/outreach/"><meta property="og:title" content="Outreach Services - IHARC Programs"><meta property="og:description" content="IHARC's street outreach and mobile support services connect people experiencing homelessness with housing, healthcare, and essential resources across Northumberland County."><meta property="og:image" content="/og-default.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://iharc.ca/programs/outreach/"><meta property="twitter:title" content="Outreach Services - IHARC Programs"><meta property="twitter:description" content="IHARC's street outreach and mobile support services connect people experiencing homelessness with housing, healthcare, and essential resources across Northumberland County."><meta property="twitter:image" content="/og-default.jpg"><!-- SEO --><meta name="robots" content="noindex,nofollow"><meta name="author" content="IHARC - Integrated Homelessness & Addictions Response Centre"><meta name="keywords" content="IHARC, Northumberland County, community health, crisis response, emergency shelter, community safety, Ontario"><!-- Theme Color --><meta name="theme-color" content="#CE2029"><!-- Preconnect to Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><!-- Preload critical fonts --><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2" crossorigin><!-- JSON-LD Structured Data --><script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://iharc.ca/#organization",
+            "name": "IHARC - Integrated Homelessness & Addictions Response Centre",
+            "url": "https://iharc.ca",
+            "logo": "https://iharc.ca/logo.svg",
+            "description": "Integrated Homelessness & Addictions Response Centre serving Northumberland County, Ontario with comprehensive support and community safety initiatives.",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "123 Main Street",
+              "addressLocality": "Cobourg",
+              "addressRegion": "ON",
+              "postalCode": "K9A 2N4",
+              "addressCountry": "CA"
+            },
+            "telephone": "(905) 555-HELP",
+            "email": "info@iharc.ca",
+            "areaServed": "Northumberland County, Ontario",
+            "sameAs": [
+              "https://facebook.com/iharc",
+              "https://twitter.com/iharc",
+              "https://linkedin.com/company/iharc"
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://iharc.ca/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://iharc.ca"
+              }
+            ]
+          }
+        ]
+      }
+    </script><!-- Analytics and Tracking --><script>
+      // Global event tracking function
+      window.trackEvent = function(eventName, eventData = {}) {
+        // Check Do Not Track
+        if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+          console.log('Event tracking disabled: Do Not Track is enabled');
+          return;
+        }
+
+        try {
+          // Google Analytics 4
+          if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventData);
+          }
+
+          // Facebook Pixel
+          if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, eventData);
+          }
+
+          console.log('Event tracked:', eventName, eventData);
+        } catch (error) {
+          console.error('Error tracking event:', error);
+        }
+      };
+
+      // Track common events automatically
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track form submissions
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const formId = this.id || 'unknown';
+            window.trackEvent('form_submit', { form_id: formId });
+          });
+        });
+
+        // Track external link clicks
+        document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.hostname + '"])').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('external_link_click', { 
+              url: this.href,
+              text: this.textContent.trim()
+            });
+          });
+        });
+
+        // Track phone number clicks
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('phone_click', { 
+              number: this.href.replace('tel:', '')
+            });
+          });
+        });
+
+        // Track email clicks
+        document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('email_click', { 
+              email: this.href.replace('mailto:', '')
+            });
+          });
+        });
+      });
+    </script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   PUBLIC_GA4_ID=G-XXXXXXXXXX
+   PUBLIC_GTM_ID=GTM-XXXXXXX
+   PUBLIC_FACEBOOK_PIXEL_ID=123456789
+   PUBLIC_HOTJAR_ID=1234567
+
+2. Add to BaseLayout.astro:
+   <Analytics />
+
+3. Custom event tracking in your pages:
+   <script>
+     // Track button clicks
+     document.getElementById('donate-button').addEventListener('click', () => {
+       window.trackEvent('donate_button_click', { source: 'header' });
+     });
+     
+     // Track newsletter signups
+     window.trackEvent('newsletter_signup', { email: userEmail });
+   </script>
+
+4. Privacy Compliance:
+   - Respects Do Not Track browser setting
+   - Uses privacy-friendly GA4 settings
+   - Anonymizes IP addresses
+   - Secure cookie settings
+
+5. GDPR Compliance Ready:
+   - Add consent management by setting disabled={!userConsent}
+   - All tracking can be disabled with a single prop
+--><link rel="stylesheet" href="/assets/about.D2eIfluO.css">
+<style>.hero-pattern[data-astro-cid-s5hxusys]{background-image:radial-gradient(circle at 25% 25%,rgba(255,255,255,.1) 0%,transparent 50%),radial-gradient(circle at 75% 75%,rgba(255,255,255,.1) 0%,transparent 50%);background-size:60px 60px;background-position:0 0,30px 30px}@media (prefers-reduced-motion: reduce){.hero-pattern[data-astro-cid-s5hxusys]{animation:none}}
+</style><script type="module" src="/assets/hoisted.CyvWrU8e.js"></script></head> <body class="min-h-screen bg-white text-gray-900 font-body" data-astro-cid-37fxchfa> <div class="flex flex-col min-h-screen" data-astro-cid-37fxchfa>  <a href="#main" class="skip-link">Skip to content</a> <header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm"> <div class="container"> <div class="flex items-center py-4"> <!-- Logo (left) --> <div class="flex-shrink-0"> <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg"> <img src="/logo.svg" alt="IHARC - Return to homepage" class="h-8 w-auto" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> </a> </div> <!-- Desktop Navigation (center) --> <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation"> <div class="flex items-center space-x-8"> <a href="/about" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> About  </a><a href="/programs" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Programs &amp; Services  </a><a href="/get-help" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Help  </a><a href="/tools" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Community Tools  </a><a href="/news" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> News  </a><a href="/involved" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Involved  </a><a href="/contact" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Contact  </a> </div> </nav> <!-- Desktop CTAs (right) --> <div class="hidden lg:flex items-center space-x-3 flex-shrink-0"> <a href="/get-help" class="btn-primary"> Get Help Now </a><a href="/donate" class="btn-secondary"> Donate </a> </div> <!-- Mobile Menu Button (right on mobile) --> <div class="lg:hidden flex-shrink-0 ml-auto"> <button id="mobile-menu-button" class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu"> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> </button> </div> </div> </div> <!-- Mobile Menu --> <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200" aria-label="Mobile navigation"> <div class="container py-6"> <nav class="space-y-4" role="navigation"> <a href="/about" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> About  </a><a href="/programs" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Programs &amp; Services  </a><a href="/get-help" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Help  </a><a href="/tools" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Community Tools  </a><a href="/news" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> News  </a><a href="/involved" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Involved  </a><a href="/contact" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Contact  </a> </nav> <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200"> <a href="/get-help" class="btn-primary text-center"> Get Help Now </a><a href="/donate" class="btn-secondary text-center"> Donate </a> </div> </div> </div> </header>  <main id="main" class="flex-1"> <section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white overflow-hidden" data-astro-cid-s5hxusys> <!-- Subtle background pattern --> <div class="absolute inset-0 opacity-5" aria-hidden="true" data-astro-cid-s5hxusys> <div class="hero-pattern" data-astro-cid-s5hxusys></div> </div> <!-- Content --> <div class="relative container py-16 lg:py-24" data-astro-cid-s5hxusys> <div class="max-w-4xl mx-auto text-center" data-astro-cid-s5hxusys> <h1 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6 leading-tight" data-astro-cid-s5hxusys> Outreach Services </h1> <p class="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed" data-astro-cid-s5hxusys> Mobile support services that meet people where they are, building trust and connections to help community members access housing, healthcare, and essential resources. </p> </div> </div> </section>  <!-- Breadcrumb --> <section class="py-6 bg-white border-b border-gray-100"> <div class="container"> <nav class="flex items-center text-sm text-gray-500" aria-label="Breadcrumb"> <a href="/" class="hover:text-brand-red transition-colors">Home</a> <svg class="w-5 h-5 mx-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path> </svg> <a href="/programs" class="hover:text-brand-red transition-colors">Programs & Services</a> <svg class="w-5 h-5 mx-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path> </svg> <span class="text-gray-700">Outreach Services</span> </nav> </div> </section> <!-- Program Overview --> <section class="py-16 bg-white"> <div class="container"> <div class="max-w-6xl mx-auto"> <div class="grid grid-cols-1 lg:grid-cols-3 gap-12"> <!-- Main Content --> <div class="lg:col-span-2"> <div class="prose prose-lg max-w-none"> <h2 class="text-3xl font-heading font-bold text-gray-900 mb-6">What We Do</h2> <p class="text-xl text-gray-600 leading-relaxed mb-8">
+Our outreach team provides mobile support services throughout Northumberland County, connecting with individuals experiencing homelessness or at risk of losing their housing. We meet people where they are, building relationships based on trust and respect while helping them access the resources they need to improve their circumstances.
+</p> <h3 class="text-2xl font-semibold text-gray-900 mb-4">Street Outreach</h3> <p class="text-gray-600 mb-6">
+Our street outreach workers regularly visit areas where people experiencing homelessness may be staying, including parks, transit stations, and other public spaces. We provide immediate support, assess needs, and help connect people to appropriate services and resources.
+</p> <h3 class="text-2xl font-semibold text-gray-900 mb-4">Mobile Outreach Unit</h3> <p class="text-gray-600 mb-6">
+Our specially equipped mobile unit brings services directly to the community. The unit carries essential supplies, communication equipment, and resources to provide immediate support and facilitate connections to longer-term services.
+</p> <h3 class="text-2xl font-semibold text-gray-900 mb-4">Follow-up Support</h3> <p class="text-gray-600 mb-6">
+We don't just make one-time connections. Our team provides ongoing follow-up support to help people navigate services, attend appointments, and work toward their goals for stable housing and improved well-being.
+</p> </div> </div> <!-- Quick Info Sidebar --> <div class="lg:col-span-1"> <div class="bg-gray-50 rounded-2xl p-8 sticky top-8"> <h3 class="text-xl font-semibold text-gray-900 mb-6">Quick Information</h3> <!-- Operating Hours --> <div class="mb-6"> <h4 class="font-medium text-gray-900 mb-3 flex items-center"> <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path> </svg>
+Operating Hours
+</h4> <ul class="text-sm text-gray-600 space-y-1"> <li>Monday - Sunday: 8:00 AM - 8:00 PM</li> <li>Extended hours during extreme weather</li> <li>24/7 crisis response available</li> </ul> </div> <!-- Coverage Area --> <div class="mb-6"> <h4 class="font-medium text-gray-900 mb-3 flex items-center"> <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path> </svg>
+Service Area
+</h4> <p class="text-sm text-gray-600">
+All communities across Northumberland County, including rural and urban areas.
+</p> </div> <!-- Contact --> <div class="mb-8"> <h4 class="font-medium text-gray-900 mb-3 flex items-center"> <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path> </svg>
+Request Outreach
+</h4> <p class="text-sm text-gray-600 mb-2">Call for outreach services or to report someone in need:</p> <p class="text-lg font-semibold text-blue-600"> <a href="tel:905-555-HELP" class="hover:underline">(905) 555-HELP</a> </p> </div> <a href="/contact" class="btn-primary w-full text-center">
+Get More Information
+</a> </div> </div> </div> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- Services Provided --> <section class="py-16 bg-gray-50"> <div class="container"> <div class="max-w-6xl mx-auto"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+Services We Provide
+</h2> <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+Our outreach team offers comprehensive support designed to meet immediate needs while working toward longer-term stability.
+</p> </div> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"> <!-- Immediate Support --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-brand-red" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Immediate Support</h3> <ul class="space-y-2 text-gray-600"> <li>• Food, water, and snacks</li> <li>• Blankets and warm clothing</li> <li>• Personal hygiene items</li> <li>• First aid and basic medical care</li> <li>• Crisis intervention</li> </ul> </div> <!-- Resource Connection --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Resource Connection</h3> <ul class="space-y-2 text-gray-600"> <li>• Emergency shelter placement</li> <li>• Healthcare referrals</li> <li>• Mental health services</li> <li>• Addiction treatment programs</li> <li>• Income support applications</li> </ul> </div> <!-- Housing Support --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2v0"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Housing Support</h3> <ul class="space-y-2 text-gray-600"> <li>• Housing applications assistance</li> <li>• Rent supplement programs</li> <li>• Landlord liaison support</li> <li>• Move-in assistance</li> <li>• Tenancy skill building</li> </ul> </div> <!-- Documentation --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Documentation Help</h3> <ul class="space-y-2 text-gray-600"> <li>• ID replacement assistance</li> <li>• ODSP/OW applications</li> <li>• Health card renewals</li> <li>• Banking support</li> <li>• Legal document assistance</li> </ul> </div> <!-- Transportation --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Transportation</h3> <ul class="space-y-2 text-gray-600"> <li>• Rides to appointments</li> <li>• Transit passes and tokens</li> <li>• Transportation to services</li> <li>• Emergency transportation</li> <li>• Service location directions</li> </ul> </div> <!-- Advocacy --> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6"> <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Advocacy</h3> <ul class="space-y-2 text-gray-600"> <li>• Service navigation support</li> <li>• Rights and entitlements education</li> <li>• Complaint resolution</li> <li>• System advocacy</li> <li>• Empowerment and skill building</li> </ul> </div> </div> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- How to Access --> <section class="py-16 bg-white"> <div class="container"> <div class="max-w-4xl mx-auto"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+How to Access Outreach Services
+</h2> <p class="text-xl text-gray-600">
+Our outreach services are available to anyone experiencing or at risk of homelessness in Northumberland County.
+</p> </div> <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"> <!-- Self-Referral --> <div class="bg-blue-50 border border-blue-200 rounded-2xl p-8"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4"> <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900">Call for Yourself</h3> </div> <p class="text-gray-600 mb-4">
+If you need support or services, call us directly. Our team will work with you to understand your situation and provide appropriate assistance.
+</p> <p class="text-2xl font-bold text-blue-600"> <a href="tel:905-555-HELP" class="hover:underline">(905) 555-HELP</a> </p> </div> <!-- Third-Party Referral --> <div class="bg-green-50 border border-green-200 rounded-2xl p-8"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-4"> <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900">Refer Someone</h3> </div> <p class="text-gray-600 mb-4">
+If you're concerned about someone who may need support, you can request an outreach visit. We'll approach the person respectfully and offer assistance.
+</p> <div class="flex flex-col gap-2"> <p class="font-medium text-green-700">Call or email us with:</p> <ul class="text-sm text-gray-600 space-y-1 ml-4"> <li>• Location information</li> <li>• Description of concerns</li> <li>• Best times for contact</li> </ul> </div> </div> </div> <div class="bg-gray-50 rounded-2xl p-8 text-center"> <h3 class="text-2xl font-semibold text-gray-900 mb-4">All Services Are Free</h3> <p class="text-gray-600 max-w-2xl mx-auto mb-6">
+There is no cost for outreach services. We respect confidentiality and work at the pace that feels right for each individual.
+</p> <div class="flex flex-col sm:flex-row gap-4 justify-center"> <a href="tel:905-555-HELP" class="btn-primary">
+Request Outreach Services
+</a> <a href="/contact" class="btn-secondary">
+Ask Questions
+</a> </div> </div> </div> </div> </section> <div class="bg-white py-4" aria-hidden="true"><div class="container"><div class="h-0.5 bg-gradient-to-r from-transparent via-brand-red to-transparent max-w-2xl mx-auto opacity-30"></div></div></div> <!-- Related Programs --> <section class="py-16 bg-gray-50"> <div class="container"> <div class="max-w-4xl mx-auto text-center"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+Related Programs
+</h2> <p class="text-xl text-gray-600 mb-12">
+Our outreach services work closely with other IHARC programs to provide comprehensive support.
+</p> <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> <a href="/programs/health-support" class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-brand-red hover:shadow-lg transition-all"> <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-red transition-colors">Health Support Services</h3> <p class="text-sm text-gray-600">Health and safety supplies and overdose response</p> </a> <a href="/programs/crisis-response" class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-brand-red hover:shadow-lg transition-all"> <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-red transition-colors">Crisis Response</h3> <p class="text-sm text-gray-600">Immediate intervention during emergencies</p> </a> <a href="/resources" class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-brand-red hover:shadow-lg transition-all"> <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V4.804z"></path> </svg> </div> <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-red transition-colors">Resource Directory</h3> <p class="text-sm text-gray-600">Comprehensive service and support listings</p> </a> </div> </div> </div> </section> </main> <footer class="bg-white border-t border-gray-200"> <!-- CTA Band --> <section class="bg-brand-red text-white"> <div class="container py-12"> <div class="text-center"> <h2 class="text-2xl lg:text-3xl font-heading font-bold mb-4">
+Partner with us to improve safety and health across Northumberland.
+</h2> <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8"> <a href="/donate" class="btn-white">
+Donate Now
+</a> <a href="/volunteer" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
+Volunteer
+</a> </div> </div> </div> </section> <!-- Main Footer Content --> <div class="container py-12"> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Organization Info --> <div class="lg:col-span-1"> <img src="/logo.svg" alt="IHARC - Integrated Homelessness &#38; Addictions Response Centre" class="h-12 w-auto mb-4" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> <p class="text-gray-600 mb-4 leading-relaxed">
+Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
+</p> <div class="text-sm text-gray-500 italic"> <p>Contact information will be updated soon.</p> <p class="mt-2"> <a href="/contact" class="text-brand-red hover:underline">
+Visit our contact page for current information
+</a> </p> </div> </div> <!-- Footer Sections --> <div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Quick Access </h3> <ul class="space-y-2"> <li> <a href="/get-help" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Get Help Now  </a> </li><li> <a href="/report" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Report Concern  </a> </li><li> <a href="/programs" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Programs &amp; Services  </a> </li><li> <a href="/about" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> About IHARC  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Resources </h3> <ul class="space-y-2"> <li> <a href="/resources" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Service Directory  </a> </li><li> <a href="/tools" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Community Tools  </a> </li><li> <a href="/news" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> News &amp; Updates  </a> </li><li> <a href="/contact" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Contact Us  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Get Involved </h3> <ul class="space-y-2"> <li> <a href="/volunteer" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Volunteer  </a> </li><li> <a href="/donate" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Donate  </a> </li><li> <a href="/partnerships" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Partnerships  </a> </li><li> <a href="/careers" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Careers  </a> </li> </ul> </div> </div> <!-- Social Links -->  <div class="border-t border-gray-200 pt-8 mb-8 text-center"> <p class="text-sm text-gray-500 italic">
+Social media links will be available soon.
+</p> </div> <!-- Bottom Bar --> <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"> <div class="text-gray-500 text-sm">
+© 2025 IHARC. All rights reserved.
+</div> <nav class="flex space-x-6"> <a href="/privacy" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Privacy Policy </a><a href="/accessibility" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Accessibility </a><a href="/terms" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Terms of Service </a> </nav> </div> </div> <!-- Emergency Banner --> <div class="bg-brand-charcoal text-white"> <div class="container py-4"> <div class="flex flex-col sm:flex-row items-center justify-center text-center sm:text-left space-y-2 sm:space-y-0"> <div class="flex items-center text-sm"> <svg class="w-4 h-4 mr-2 text-brand-red" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path> </svg> <span class="mr-4">24/7 Crisis Support:</span> <a href="tel:905-555-HELP" class="font-semibold text-white hover:text-brand-red transition-colors">
+(905) 555-HELP
+</a> </div> <div class="ml-0 sm:ml-6 text-sm text-gray-300">
+For life-threatening emergencies, call 911
+</div> </div> </div> </div> </footer>  </div>  <!-- Live Chat Widget --> <script>(function(){const provider = "crisp";
+
+    console.warn('Chat widget not loaded: Missing required configuration for provider:', provider);
+  })();</script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   # Choose one provider and set its variables
+   
+   # Intercom
+   PUBLIC_INTERCOM_APP_ID=abc123
+   
+   # Zendesk
+   PUBLIC_ZENDESK_KEY=your_zendesk_key
+   
+   # Crisp (Free tier available)
+   PUBLIC_CRISP_WEBSITE_ID=your_website_id
+   
+   # Tawk.to (Free)
+   PUBLIC_TAWK_PROPERTY_ID=your_property_id
+   PUBLIC_TAWK_WIDGET_ID=your_widget_id
+
+2. Add to BaseLayout.astro:
+   <ChatWidget provider="crisp" />
+
+3. Custom user data:
+   <ChatWidget 
+     provider="crisp" 
+     config={{
+       user: { email: "user@example.com", name: "User Name" },
+       session: { page: "contact", source: "header" }
+     }}
+   />
+
+4. Programmatic control:
+   <script>
+     // Show chat widget
+     window.chatWidget.show();
+     
+     // Hide chat widget
+     window.chatWidget.hide();
+     
+     // Set user information
+     window.chatWidget.setUser({
+       name: "John Doe",
+       email: "john@example.com"
+     });
+   </script>
+
+5. Disable chat on specific pages:
+   <ChatWidget disabled={true} />
+
+PROVIDER COMPARISON:
+- Crisp: Free tier, easy setup, good features
+- Tawk.to: Completely free, unlimited chats
+- Intercom: Premium features, paid service
+- Zendesk: Enterprise features, paid service
+- Custom: Full control, requires implementation
+--> </body></html>

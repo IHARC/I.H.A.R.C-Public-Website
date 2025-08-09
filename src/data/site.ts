@@ -44,6 +44,25 @@ export interface ContentFlags {
   showNews: boolean;
 }
 
+export interface IntegrationsConfig {
+  analytics: {
+    enabled: boolean;
+    respectDNT: boolean; // Respect Do Not Track
+  };
+  chat: {
+    enabled: boolean;
+    provider: 'intercom' | 'zendesk' | 'crisp' | 'tawk' | 'custom';
+    config?: Record<string, any>;
+  };
+  logo: {
+    variants: {
+      header: 'default' | 'white' | 'dark' | 'symbol';
+      footer: 'default' | 'white' | 'dark' | 'symbol';
+      size: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    };
+  };
+}
+
 export const nav: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Programs & Services', href: '/programs' },
@@ -206,4 +225,35 @@ export const contentFlags: ContentFlags = {
   noindex: true, // Prevent search engine indexing during development
   showImpact: false, // Set to true when ready to show impact metrics
   showNews: false, // Set to true when news content is ready
+};
+
+export const integrations: IntegrationsConfig = {
+  analytics: {
+    enabled: true, // Set to false to disable all tracking
+    respectDNT: true, // Respect Do Not Track browser setting
+  },
+  chat: {
+    enabled: true, // Set to false to disable chat widget
+    provider: 'crisp', // Change to your preferred provider
+    config: {
+      // Custom configuration per provider
+      // Crisp example:
+      user: {
+        // Will be set dynamically if user info is available
+        // email: "user@example.com",
+        // name: "User Name"
+      },
+      session: {
+        organization: "IHARC",
+        website: "iharc.ca"
+      }
+    }
+  },
+  logo: {
+    variants: {
+      header: 'default', // Logo variant for header
+      footer: 'default', // Logo variant for footer
+      size: 'sm', // Default size for header
+    }
+  }
 };

@@ -1,0 +1,289 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionDivider from '../components/SectionDivider.astro';
+
+// Get all news articles, sorted by date (newest first)
+const newsArticles = await getCollection('news', ({ data }) => {
+  return !data.draft;
+});
+
+// Sort articles by date descending
+newsArticles.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+// Function to format date
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Function to get reading time estimate
+const getReadingTime = (content: string) => {
+  const wordsPerMinute = 200;
+  const wordCount = content.split(/\s+/).length;
+  const readingTime = Math.ceil(wordCount / wordsPerMinute);
+  return readingTime;
+};
+---
+
+<BaseLayout 
+  title="News & Updates - IHARC" 
+  description="Stay up to date with IHARC's latest programs, community impact stories, and important updates from across Northumberland County."
+>
+  <Header />
+  
+  <main id="main" class="flex-1">
+    <PageHero 
+      title="News & Updates"
+      description="Stay connected with the latest developments, success stories, and important updates from IHARC's work across the community."
+      background="red"
+      size="medium"
+    />
+
+    <!-- Featured Article -->
+    {newsArticles.length > 0 && (
+      <section class="py-16 bg-white">
+        <div class="container">
+          <div class="max-w-4xl mx-auto">
+            <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-8 lg:p-12">
+              <div class="flex items-center text-sm text-brand-red mb-4">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M9.243 3.03a1 1 0 01.727 1.213L9.53 6h2.94l.56-2.243a1 1 0 111.94.486L14.53 6H17a1 1 0 110 2h-2.97l-1 4H15a1 1 0 110 2h-2.47l-.56 2.243a1 1 0 11-1.94-.486L10.47 14H7.53l-.56 2.243a1 1 0 11-1.94-.486L5.47 14H3a1 1 0 110-2h2.97l1-4H5a1 1 0 110-2h2.47l.56-2.243a1 1 0 011.213-.727zM9.03 8l-1 4h2.94l1-4H9.03z" clip-rule="evenodd" />
+                </svg>
+                <span class="font-medium">Latest Update</span>
+                <span class="mx-2">•</span>
+                <time datetime={newsArticles[0].data.date.toISOString()}>
+                  {formatDate(newsArticles[0].data.date)}
+                </time>
+              </div>
+              
+              <h2 class="text-2xl lg:text-3xl font-heading font-bold text-gray-900 mb-4">
+                <a href={`/news/${newsArticles[0].slug}`} class="hover:text-brand-red transition-colors">
+                  {newsArticles[0].data.title}
+                </a>
+              </h2>
+              
+              <p class="text-lg text-gray-600 leading-relaxed mb-6">
+                {newsArticles[0].data.excerpt}
+              </p>
+              
+              <div class="flex items-center justify-between">
+                <div class="flex items-center text-sm text-gray-500">
+                  {newsArticles[0].data.tags && newsArticles[0].data.tags.length > 0 && (
+                    <div class="flex items-center mr-6">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="flex gap-2">
+                        {newsArticles[0].data.tags.slice(0, 3).map((tag: string) => (
+                          <span class="capitalize">
+                            {tag}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{getReadingTime(newsArticles[0].body)} min read</span>
+                  </div>
+                </div>
+                
+                <a 
+                  href={`/news/${newsArticles[0].slug}`}
+                  class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors"
+                >
+                  Read More
+                  <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <SectionDivider type="subtle" />
+
+    <!-- All Articles -->
+    <section class="py-16 bg-gray-50">
+      <div class="container">
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Recent Updates
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+              Stay informed about our programs, community impact, and important developments in Northumberland County's integrated support services.
+            </p>
+          </div>
+
+          {newsArticles.length > 0 ? (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {newsArticles.map((article) => (
+                <article class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-brand-red/20 transition-all group">
+                  <div class="p-8">
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                      <time datetime={article.data.date.toISOString()}>
+                        {formatDate(article.data.date)}
+                      </time>
+                      <span class="mx-2">•</span>
+                      <span>{getReadingTime(article.body)} min read</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 group-hover:text-brand-red transition-colors">
+                      <a href={`/news/${article.slug}`} class="block">
+                        {article.data.title}
+                      </a>
+                    </h3>
+                    
+                    <p class="text-gray-600 leading-relaxed mb-6 line-clamp-3">
+                      {article.data.excerpt}
+                    </p>
+                    
+                    <div class="flex items-center justify-between">
+                      {article.data.tags && article.data.tags.length > 0 && (
+                        <div class="flex gap-2">
+                          {article.data.tags.slice(0, 2).map((tag: string) => (
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-red/10 text-brand-red capitalize">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <a 
+                        href={`/news/${article.slug}`}
+                        class="inline-flex items-center text-brand-red font-medium text-sm hover:text-brand-redDark transition-colors"
+                        aria-label={`Read more about ${article.data.title}`}
+                      >
+                        Read More
+                        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class="text-center py-12">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">No news articles yet</h3>
+              <p class="text-gray-600">Check back soon for updates about our programs and community impact.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <SectionDivider type="subtle" />
+
+    <!-- Newsletter Signup -->
+    <section class="py-16 bg-white">
+      <div class="container">
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-gradient-to-br from-brand-red to-brand-redDark rounded-2xl p-8 lg:p-12 text-white text-center">
+            <div class="max-w-2xl mx-auto">
+              <h2 class="text-3xl font-heading font-bold mb-4">
+                Stay Informed
+              </h2>
+              <p class="text-xl text-white/90 mb-8">
+                Get the latest updates about IHARC's programs, community events, and important announcements delivered to your inbox.
+              </p>
+              
+              <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <label for="email-newsletter" class="sr-only">Email address</label>
+                <input 
+                  type="email" 
+                  id="email-newsletter"
+                  name="email" 
+                  placeholder="Enter your email address"
+                  required
+                  class="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-red"
+                />
+                <button 
+                  type="submit" 
+                  class="bg-white text-brand-red px-6 py-3 rounded-lg font-medium hover:bg-gray-50 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-red transition-colors"
+                >
+                  Subscribe
+                </button>
+              </form>
+              
+              <p class="text-sm text-white/70 mt-4">
+                We respect your privacy and won't share your information with third parties.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <SectionDivider type="red-line" />
+
+    <!-- Contact CTA -->
+    <section class="py-16 bg-gray-50">
+      <div class="container">
+        <div class="max-w-4xl mx-auto text-center">
+          <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+            Have News to Share?
+          </h2>
+          <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            If you have updates about community initiatives, success stories, or partnership opportunities you'd like us to feature, we'd love to hear from you.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/contact" class="btn-primary">
+              Get in Touch
+            </a>
+            <a href="mailto:info@iharc.ca?subject=News%20Submission" class="btn-secondary">
+              Email Us Directly
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+// Newsletter form handling
+document.addEventListener('DOMContentLoaded', () => {
+  const newsletterForm = document.querySelector('form');
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = (e.target as HTMLFormElement).email.value;
+      // This would typically integrate with a newsletter service
+      alert('Thank you for subscribing! We\'ll keep you updated on our latest news and programs.');
+      (e.target as HTMLFormElement).reset();
+    });
+  }
+});
+</script>

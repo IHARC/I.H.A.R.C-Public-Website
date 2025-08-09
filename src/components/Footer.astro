@@ -1,5 +1,6 @@
 ---
-import { footer } from '../data/site';
+import { footer, integrations } from '../data/site';
+import Logo from './Logo.astro';
 
 // Helper functions to detect placeholder data
 const isPlaceholderPhone = (phone: string) => phone.includes('555-') || phone.includes('TODO');
@@ -48,7 +49,12 @@ const socialIcons: Record<string, string> = {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
       <!-- Organization Info -->
       <div class="lg:col-span-1">
-        <img src="/logo.svg" alt="IHARC" class="h-10 w-auto mb-4" loading="lazy" decoding="async" />
+        <Logo 
+          variant={integrations.logo.variants.footer} 
+          size="md" 
+          class="mb-4" 
+          alt="IHARC - Integrated Homelessness & Addictions Response Centre" 
+        />
         <p class="text-gray-600 mb-4 leading-relaxed">
           Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
         </p>

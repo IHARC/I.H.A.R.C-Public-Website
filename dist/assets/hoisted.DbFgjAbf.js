@@ -1,0 +1,1 @@
+import"./hoisted.CyvWrU8e.js";document.addEventListener("DOMContentLoaded",()=>{const t=document.querySelector("form");t&&t.addEventListener("submit",e=>{e.preventDefault(),e.target.email.value,alert("Thank you for subscribing! We'll keep you updated on our latest news and programs."),e.target.reset()})});

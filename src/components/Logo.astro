@@ -1,0 +1,64 @@
+---
+export interface Props {
+  variant?: 'default' | 'white' | 'dark' | 'symbol';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  class?: string;
+  alt?: string;
+}
+
+const { 
+  variant = 'default', 
+  size = 'md', 
+  class: className = '',
+  alt = 'IHARC - Integrated Homelessness & Addictions Response Centre'
+} = Astro.props;
+
+// Size configurations
+const sizeClasses = {
+  xs: 'h-6 w-auto',      // 24px height
+  sm: 'h-8 w-auto',      // 32px height  
+  md: 'h-12 w-auto',     // 48px height
+  lg: 'h-16 w-auto',     // 64px height
+  xl: 'h-20 w-auto',     // 80px height
+  full: 'h-full w-full'  // Fill container
+};
+
+// Logo variants - you can add different logo versions here
+const logoSources = {
+  default: '/logo.svg',
+  white: '/logo-white.svg',     // For dark backgrounds
+  dark: '/logo-dark.svg',       // For very light backgrounds  
+  symbol: '/logo-symbol.svg'    // Just the symbol without text
+};
+
+// Fallback to default if variant doesn't exist
+const logoSrc = logoSources[variant] || logoSources.default;
+const sizeClass = sizeClasses[size];
+---
+
+<img 
+  src={logoSrc}
+  alt={alt}
+  class={`${sizeClass} ${className}`.trim()}
+  loading="eager"
+  decoding="async"
+/>
+
+<!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+-->

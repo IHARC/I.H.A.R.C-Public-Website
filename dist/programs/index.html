@@ -1,0 +1,311 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-37fxchfa> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v4.16.18"><!-- Primary Meta Tags --><title>Programs &amp; Services - IHARC</title><meta name="title" content="Programs &#38; Services - IHARC"><meta name="description" content="Comprehensive support services addressing homelessness, mental health, addictions, and community safety across Northumberland County."><link rel="canonical" href="https://iharc.ca/programs/"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://iharc.ca/programs/"><meta property="og:title" content="Programs &#38; Services - IHARC"><meta property="og:description" content="Comprehensive support services addressing homelessness, mental health, addictions, and community safety across Northumberland County."><meta property="og:image" content="/og-default.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://iharc.ca/programs/"><meta property="twitter:title" content="Programs &#38; Services - IHARC"><meta property="twitter:description" content="Comprehensive support services addressing homelessness, mental health, addictions, and community safety across Northumberland County."><meta property="twitter:image" content="/og-default.jpg"><!-- SEO --><meta name="robots" content="noindex,nofollow"><meta name="author" content="IHARC - Integrated Homelessness & Addictions Response Centre"><meta name="keywords" content="IHARC, Northumberland County, community health, crisis response, emergency shelter, community safety, Ontario"><!-- Theme Color --><meta name="theme-color" content="#CE2029"><!-- Preconnect to Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><!-- Preload critical fonts --><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2" crossorigin><!-- JSON-LD Structured Data --><script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://iharc.ca/#organization",
+            "name": "IHARC - Integrated Homelessness & Addictions Response Centre",
+            "url": "https://iharc.ca",
+            "logo": "https://iharc.ca/logo.svg",
+            "description": "Integrated Homelessness & Addictions Response Centre serving Northumberland County, Ontario with comprehensive support and community safety initiatives.",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "123 Main Street",
+              "addressLocality": "Cobourg",
+              "addressRegion": "ON",
+              "postalCode": "K9A 2N4",
+              "addressCountry": "CA"
+            },
+            "telephone": "(905) 555-HELP",
+            "email": "info@iharc.ca",
+            "areaServed": "Northumberland County, Ontario",
+            "sameAs": [
+              "https://facebook.com/iharc",
+              "https://twitter.com/iharc",
+              "https://linkedin.com/company/iharc"
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://iharc.ca/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://iharc.ca"
+              }
+            ]
+          }
+        ]
+      }
+    </script><!-- Analytics and Tracking --><script>
+      // Global event tracking function
+      window.trackEvent = function(eventName, eventData = {}) {
+        // Check Do Not Track
+        if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+          console.log('Event tracking disabled: Do Not Track is enabled');
+          return;
+        }
+
+        try {
+          // Google Analytics 4
+          if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventData);
+          }
+
+          // Facebook Pixel
+          if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, eventData);
+          }
+
+          console.log('Event tracked:', eventName, eventData);
+        } catch (error) {
+          console.error('Error tracking event:', error);
+        }
+      };
+
+      // Track common events automatically
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track form submissions
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const formId = this.id || 'unknown';
+            window.trackEvent('form_submit', { form_id: formId });
+          });
+        });
+
+        // Track external link clicks
+        document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.hostname + '"])').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('external_link_click', { 
+              url: this.href,
+              text: this.textContent.trim()
+            });
+          });
+        });
+
+        // Track phone number clicks
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('phone_click', { 
+              number: this.href.replace('tel:', '')
+            });
+          });
+        });
+
+        // Track email clicks
+        document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            window.trackEvent('email_click', { 
+              email: this.href.replace('mailto:', '')
+            });
+          });
+        });
+      });
+    </script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   PUBLIC_GA4_ID=G-XXXXXXXXXX
+   PUBLIC_GTM_ID=GTM-XXXXXXX
+   PUBLIC_FACEBOOK_PIXEL_ID=123456789
+   PUBLIC_HOTJAR_ID=1234567
+
+2. Add to BaseLayout.astro:
+   <Analytics />
+
+3. Custom event tracking in your pages:
+   <script>
+     // Track button clicks
+     document.getElementById('donate-button').addEventListener('click', () => {
+       window.trackEvent('donate_button_click', { source: 'header' });
+     });
+     
+     // Track newsletter signups
+     window.trackEvent('newsletter_signup', { email: userEmail });
+   </script>
+
+4. Privacy Compliance:
+   - Respects Do Not Track browser setting
+   - Uses privacy-friendly GA4 settings
+   - Anonymizes IP addresses
+   - Secure cookie settings
+
+5. GDPR Compliance Ready:
+   - Add consent management by setting disabled={!userConsent}
+   - All tracking can be disabled with a single prop
+--><link rel="stylesheet" href="/assets/about.D2eIfluO.css">
+<style>.hero-pattern[data-astro-cid-s5hxusys]{background-image:radial-gradient(circle at 25% 25%,rgba(255,255,255,.1) 0%,transparent 50%),radial-gradient(circle at 75% 75%,rgba(255,255,255,.1) 0%,transparent 50%);background-size:60px 60px;background-position:0 0,30px 30px}@media (prefers-reduced-motion: reduce){.hero-pattern[data-astro-cid-s5hxusys]{animation:none}}
+</style><script type="module" src="/assets/hoisted.CyvWrU8e.js"></script></head> <body class="min-h-screen bg-white text-gray-900 font-body" data-astro-cid-37fxchfa> <div class="flex flex-col min-h-screen" data-astro-cid-37fxchfa>  <a href="#main" class="skip-link">Skip to content</a> <header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm"> <div class="container"> <div class="flex items-center py-4"> <!-- Logo (left) --> <div class="flex-shrink-0"> <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg"> <img src="/logo.svg" alt="IHARC - Return to homepage" class="h-8 w-auto" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> </a> </div> <!-- Desktop Navigation (center) --> <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation"> <div class="flex items-center space-x-8"> <a href="/about" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> About  </a><a href="/programs" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Programs &amp; Services  </a><a href="/get-help" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Help  </a><a href="/tools" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Community Tools  </a><a href="/news" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> News  </a><a href="/involved" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Get Involved  </a><a href="/contact" class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"> Contact  </a> </div> </nav> <!-- Desktop CTAs (right) --> <div class="hidden lg:flex items-center space-x-3 flex-shrink-0"> <a href="/get-help" class="btn-primary"> Get Help Now </a><a href="/donate" class="btn-secondary"> Donate </a> </div> <!-- Mobile Menu Button (right on mobile) --> <div class="lg:hidden flex-shrink-0 ml-auto"> <button id="mobile-menu-button" class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu"> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span> <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span> </button> </div> </div> </div> <!-- Mobile Menu --> <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200" aria-label="Mobile navigation"> <div class="container py-6"> <nav class="space-y-4" role="navigation"> <a href="/about" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> About  </a><a href="/programs" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Programs &amp; Services  </a><a href="/get-help" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Help  </a><a href="/tools" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Community Tools  </a><a href="/news" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> News  </a><a href="/involved" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Get Involved  </a><a href="/contact" class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"> Contact  </a> </nav> <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200"> <a href="/get-help" class="btn-primary text-center"> Get Help Now </a><a href="/donate" class="btn-secondary text-center"> Donate </a> </div> </div> </div> </header>  <main id="main" class="flex-1"> <section class="relative bg-gradient-to-br from-brand-red to-brand-redDark text-white overflow-hidden" data-astro-cid-s5hxusys> <!-- Subtle background pattern --> <div class="absolute inset-0 opacity-5" aria-hidden="true" data-astro-cid-s5hxusys> <div class="hero-pattern" data-astro-cid-s5hxusys></div> </div> <!-- Content --> <div class="relative container py-16 lg:py-24" data-astro-cid-s5hxusys> <div class="max-w-4xl mx-auto text-center" data-astro-cid-s5hxusys> <h1 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6 leading-tight" data-astro-cid-s5hxusys> Programs &amp; Services </h1> <p class="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed" data-astro-cid-s5hxusys> Comprehensive, integrated support designed to meet you where you are and help you get where you want to go. </p> </div> </div> </section>  <!-- Quick Access to Services --> <section class="py-16 bg-white"> <div class="container"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+Need Help Right Now?
+</h2> <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+If you're experiencing a crisis or emergency, we have immediate support available 24/7.
+</p> </div> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto"> <a href="/get-help" class="group bg-red-50 border-2 border-red-200 rounded-2xl p-8 hover:border-brand-red hover:shadow-lg transition-all"> <div class="text-center"> <div class="w-16 h-16 bg-brand-red rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform"> <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-brand-red">Crisis Support</h3> <p class="text-gray-600">24/7 emergency assistance and immediate help</p> </div> </a> <a href="tel:905-555-HELP" class="group bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 hover:border-blue-600 hover:shadow-lg transition-all"> <div class="text-center"> <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform"> <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600">Call IHARC</h3> <p class="text-gray-600">(905) 555-HELP<br>Mon-Fri, 8:30-4:30</p> </div> </a> <a href="/contact" class="group bg-green-50 border-2 border-green-200 rounded-2xl p-8 hover:border-green-600 hover:shadow-lg transition-all"> <div class="text-center"> <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-105 transition-transform"> <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-green-600">Visit Us</h3> <p class="text-gray-600">Find our locations and office hours</p> </div> </a> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- All Programs --> <section class="py-16 bg-gray-50"> <div class="container"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+Our Services
+</h2> <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+We offer a full spectrum of support services designed to address the interconnected challenges of homelessness, mental health, addictions, and community safety.
+</p> </div> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Outreach </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Street outreach and mobile support services connecting people to resources and housing. </p> <div class="border-t border-gray-100 pt-6"> <a href="/programs/outreach" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div><div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Health Support Services </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Health and safety supplies, safe disposal of used health supplies, and overdose response kits reducing health risks. </p> <div class="border-t border-gray-100 pt-6"> <a href="/programs/health-support" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div><div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Crisis Response </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Immediate intervention and support during mental health and addiction emergencies. </p> <div class="border-t border-gray-100 pt-6"> <a href="/programs/crisis-response" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div><div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M9.504.43a1.516 1.516 0 012.437 0l8.5 11.09a1.516 1.516 0 01-1.218 2.48H1.777a1.516 1.516 0 01-1.218-2.48L9.504.43zM6.96 6.97a.75.75 0 011.06 0L10 8.94l2.98-1.97a.75.75 0 111.04 1.08L11.06 10l2.98 1.97a.75.75 0 11-1.04 1.08L10 11.06l-1.98 1.97a.75.75 0 01-1.04-1.08L8.94 10 5.96 8.03a.75.75 0 010-1.06z" clip-rule="evenodd" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Community Safety </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Collaborative approaches to improve safety and reduce crime in public spaces. </p> <div class="border-t border-gray-100 pt-6"> <a href="/programs/community-safety" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div><div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.477.859h4z" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Special Projects </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Innovative pilots and research initiatives addressing emerging community needs. </p> <div class="border-t border-gray-100 pt-6"> <a href="/programs/special-projects" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div><div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-lg hover:border-brand-red/20 transition-all group"> <div class="flex items-center mb-6"> <div class="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-brand-red group-hover:text-white transition-colors"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V4.804z" /> </svg> </div> <h3 class="text-xl font-semibold text-gray-900 group-hover:text-brand-red transition-colors"> Resources &amp; Info </h3> </div> <p class="text-gray-600 leading-relaxed mb-6"> Comprehensive directory of local services, supports, and emergency contacts. </p> <div class="border-t border-gray-100 pt-6"> <a href="/resources" class="inline-flex items-center text-brand-red font-medium hover:text-brand-redDark transition-colors">
+Learn More
+<svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </a> </div> </div> </div> </div> </section> <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div> <!-- How to Access Services --> <section class="py-16 bg-white"> <div class="container"> <div class="max-w-4xl mx-auto"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+How to Access Our Services
+</h2> <p class="text-xl text-gray-600">
+Getting help shouldn't be complicated. Here's how to connect with the support you need.
+</p> </div> <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> <div class="text-center"> <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6"> <span class="text-2xl font-bold text-blue-600">1</span> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">Reach Out</h3> <p class="text-gray-600">
+Call, email, or visit us. No appointment needed for crisis support.
+</p> </div> <div class="text-center"> <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"> <span class="text-2xl font-bold text-green-600">2</span> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">We Listen</h3> <p class="text-gray-600">
+Our team will understand your situation and identify how we can help.
+</p> </div> <div class="text-center"> <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6"> <span class="text-2xl font-bold text-purple-600">3</span> </div> <h3 class="text-xl font-semibold text-gray-900 mb-4">We Act</h3> <p class="text-gray-600">
+Together, we'll create a plan and connect you with the right supports.
+</p> </div> </div> <div class="bg-brand-red/5 border border-brand-red/20 rounded-2xl p-8 mt-12"> <div class="text-center"> <h3 class="text-2xl font-semibold text-gray-900 mb-4">
+No Wrong Door
+</h3> <p class="text-gray-600 leading-relaxed mb-6">
+You don't need to know exactly which service you need. Contact us through any of our programs, and we'll help you navigate to the right support. We work as one team to serve you.
+</p> <div class="flex flex-col sm:flex-row gap-4 justify-center"> <a href="/get-help" class="btn-primary">
+Get Help Now
+</a> <a href="/contact" class="btn-secondary">
+Contact Us
+</a> </div> </div> </div> </div> </div> </section> <div class="bg-white py-4" aria-hidden="true"><div class="container"><div class="h-0.5 bg-gradient-to-r from-transparent via-brand-red to-transparent max-w-2xl mx-auto opacity-30"></div></div></div> <!-- Service Eligibility --> <section class="py-16 bg-gray-50"> <div class="container"> <div class="max-w-4xl mx-auto"> <div class="text-center mb-12"> <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-6">
+Who We Serve
+</h2> </div> <div class="grid grid-cols-1 md:grid-cols-2 gap-8"> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4"> <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900">You're Eligible If</h3> </div> <ul class="space-y-3 text-gray-600"> <li class="flex items-start"> <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+You live in Northumberland County
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+You're experiencing or at risk of homelessness
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+You're struggling with mental health or addictions
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+You need community safety support
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-brand-red mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+You're concerned about someone else's wellbeing
+</li> </ul> </div> <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4"> <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path> </svg> </div> <h3 class="text-xl font-semibold text-gray-900">Good to Know</h3> </div> <ul class="space-y-3 text-gray-600"> <li class="flex items-start"> <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+All services are free of charge
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+We respect your privacy and confidentiality
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+No appointment needed for crisis support
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+We work with you at your own pace
+</li> <li class="flex items-start"> <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path> </svg>
+Cultural and language supports available
+</li> </ul> </div> </div> </div> </div> </section> </main> <footer class="bg-white border-t border-gray-200"> <!-- CTA Band --> <section class="bg-brand-red text-white"> <div class="container py-12"> <div class="text-center"> <h2 class="text-2xl lg:text-3xl font-heading font-bold mb-4">
+Partner with us to improve safety and health across Northumberland.
+</h2> <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8"> <a href="/donate" class="btn-white">
+Donate Now
+</a> <a href="/volunteer" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
+Volunteer
+</a> </div> </div> </div> </section> <!-- Main Footer Content --> <div class="container py-12"> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Organization Info --> <div class="lg:col-span-1"> <img src="/logo.svg" alt="IHARC - Integrated Homelessness &#38; Addictions Response Centre" class="h-12 w-auto mb-4" loading="eager" decoding="async"> <!-- 
+Usage Examples:
+
+Default logo:
+<Logo />
+
+Small white logo for dark backgrounds:
+<Logo variant="white" size="sm" />
+
+Large logo with custom classes:
+<Logo size="lg" class="mx-auto" />
+
+Symbol only:
+<Logo variant="symbol" size="md" />
+
+Full width logo:
+<Logo size="full" class="max-w-xs" />
+--> <p class="text-gray-600 mb-4 leading-relaxed">
+Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
+</p> <div class="text-sm text-gray-500 italic"> <p>Contact information will be updated soon.</p> <p class="mt-2"> <a href="/contact" class="text-brand-red hover:underline">
+Visit our contact page for current information
+</a> </p> </div> </div> <!-- Footer Sections --> <div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Quick Access </h3> <ul class="space-y-2"> <li> <a href="/get-help" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Get Help Now  </a> </li><li> <a href="/report" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Report Concern  </a> </li><li> <a href="/programs" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Programs &amp; Services  </a> </li><li> <a href="/about" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> About IHARC  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Resources </h3> <ul class="space-y-2"> <li> <a href="/resources" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Service Directory  </a> </li><li> <a href="/tools" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Community Tools  </a> </li><li> <a href="/news" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> News &amp; Updates  </a> </li><li> <a href="/contact" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Contact Us  </a> </li> </ul> </div><div> <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4"> Get Involved </h3> <ul class="space-y-2"> <li> <a href="/volunteer" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Volunteer  </a> </li><li> <a href="/donate" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Donate  </a> </li><li> <a href="/partnerships" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Partnerships  </a> </li><li> <a href="/careers" class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Careers  </a> </li> </ul> </div> </div> <!-- Social Links -->  <div class="border-t border-gray-200 pt-8 mb-8 text-center"> <p class="text-sm text-gray-500 italic">
+Social media links will be available soon.
+</p> </div> <!-- Bottom Bar --> <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"> <div class="text-gray-500 text-sm">
+© 2025 IHARC. All rights reserved.
+</div> <nav class="flex space-x-6"> <a href="/privacy" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Privacy Policy </a><a href="/accessibility" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Accessibility </a><a href="/terms" class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"> Terms of Service </a> </nav> </div> </div> <!-- Emergency Banner --> <div class="bg-brand-charcoal text-white"> <div class="container py-4"> <div class="flex flex-col sm:flex-row items-center justify-center text-center sm:text-left space-y-2 sm:space-y-0"> <div class="flex items-center text-sm"> <svg class="w-4 h-4 mr-2 text-brand-red" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path> </svg> <span class="mr-4">24/7 Crisis Support:</span> <a href="tel:905-555-HELP" class="font-semibold text-white hover:text-brand-red transition-colors">
+(905) 555-HELP
+</a> </div> <div class="ml-0 sm:ml-6 text-sm text-gray-300">
+For life-threatening emergencies, call 911
+</div> </div> </div> </div> </footer>  </div>  <!-- Live Chat Widget --> <script>(function(){const provider = "crisp";
+
+    console.warn('Chat widget not loaded: Missing required configuration for provider:', provider);
+  })();</script><!--
+USAGE INSTRUCTIONS:
+
+1. Environment Variables (add to .env file):
+   # Choose one provider and set its variables
+   
+   # Intercom
+   PUBLIC_INTERCOM_APP_ID=abc123
+   
+   # Zendesk
+   PUBLIC_ZENDESK_KEY=your_zendesk_key
+   
+   # Crisp (Free tier available)
+   PUBLIC_CRISP_WEBSITE_ID=your_website_id
+   
+   # Tawk.to (Free)
+   PUBLIC_TAWK_PROPERTY_ID=your_property_id
+   PUBLIC_TAWK_WIDGET_ID=your_widget_id
+
+2. Add to BaseLayout.astro:
+   <ChatWidget provider="crisp" />
+
+3. Custom user data:
+   <ChatWidget 
+     provider="crisp" 
+     config={{
+       user: { email: "user@example.com", name: "User Name" },
+       session: { page: "contact", source: "header" }
+     }}
+   />
+
+4. Programmatic control:
+   <script>
+     // Show chat widget
+     window.chatWidget.show();
+     
+     // Hide chat widget
+     window.chatWidget.hide();
+     
+     // Set user information
+     window.chatWidget.setUser({
+       name: "John Doe",
+       email: "john@example.com"
+     });
+   </script>
+
+5. Disable chat on specific pages:
+   <ChatWidget disabled={true} />
+
+PROVIDER COMPARISON:
+- Crisp: Free tier, easy setup, good features
+- Tawk.to: Completely free, unlimited chats
+- Intercom: Premium features, paid service
+- Zendesk: Enterprise features, paid service
+- Custom: Full control, requires implementation
+--> </body></html>
