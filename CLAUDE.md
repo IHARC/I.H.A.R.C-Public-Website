@@ -22,6 +22,8 @@ This is the main marketing website for IHARC (Integrated Homelessness & Addictio
 - `npm run build` - Build for production (outputs to `dist/`)
 - `npm run preview` - Preview production build locally
 
+**Note**: All scripts use `npx` prefix for CI/CD compatibility (fixes "Permission denied" errors in Azure Static Web Apps).
+
 ### Code Quality
 - `npm run lint` - Run ESLint on all files
 - `npm run format` - Format code with Prettier
