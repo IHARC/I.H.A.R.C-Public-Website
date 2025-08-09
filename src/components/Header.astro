@@ -2,32 +2,38 @@
 import { nav, headerCTAs } from '../data/site';
 ---
 
-<header class="sticky top-0 z-50 bg-white border-b-2 border-brand-red shadow-sm">
-  <div class="container">
-    <div class="flex items-center justify-between py-4">
-      <!-- Logo -->
-      <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg">
-        <img src="/logo.svg" alt="IHARC" class="h-8 w-auto" />
-      </a>
+<a href="#main" class="skip-link">Skip to content</a>
 
-      <!-- Desktop Navigation -->
-      <nav class="hidden lg:flex items-center space-x-8" role="navigation" aria-label="Main navigation">
-        {nav.map((item) => (
-          <a
-            href={item.href}
-            class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"
-            {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
-          >
-            {item.label}
-            {item.external && (
-              <span class="ml-1 text-xs" aria-label="(opens in new tab)">↗</span>
-            )}
-          </a>
-        ))}
+<header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm">
+  <div class="container">
+    <div class="flex items-center py-4">
+      <!-- Logo (left) -->
+      <div class="flex-shrink-0">
+        <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg">
+          <img src="/logo.svg" alt="IHARC" class="h-8 w-auto" fetchpriority="high" decoding="async" />
+        </a>
+      </div>
+
+      <!-- Desktop Navigation (center) -->
+      <nav class="hidden lg:flex flex-1 justify-center items-center" role="navigation" aria-label="Main navigation">
+        <div class="flex items-center space-x-8">
+          {nav.map((item) => (
+            <a
+              href={item.href}
+              class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"
+              {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
+            >
+              {item.label}
+              {item.external && (
+                <span class="ml-1 text-xs" aria-label="(opens in new tab)">↗</span>
+              )}
+            </a>
+          ))}
+        </div>
       </nav>
 
-      <!-- Desktop CTAs -->
-      <div class="hidden lg:flex items-center space-x-4">
+      <!-- Desktop CTAs (right) -->
+      <div class="hidden lg:flex items-center space-x-3 flex-shrink-0">
         {headerCTAs.map((cta) => (
           <a
             href={cta.href}
@@ -39,18 +45,20 @@ import { nav, headerCTAs } from '../data/site';
         ))}
       </div>
 
-      <!-- Mobile Menu Button -->
-      <button
-        id="mobile-menu-button"
-        class="lg:hidden flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"
-        aria-label="Toggle mobile menu"
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-      >
-        <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
-        <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span>
-        <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
-      </button>
+      <!-- Mobile Menu Button (right on mobile) -->
+      <div class="lg:hidden flex-shrink-0 ml-auto">
+        <button
+          id="mobile-menu-button"
+          class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"
+          aria-label="Toggle mobile menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
+          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span>
+          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -111,11 +119,22 @@ import { nav, headerCTAs } from '../data/site';
 
     private init() {
       this.button.addEventListener('click', this.toggle.bind(this));
-      this.focusTrap = new FocusTrap(this.menu);
+      this.focusTrap = new FocusTrap(this.menu, {
+        escapeDeactivates: true,
+        clickOutsideDeactivates: true,
+        returnFocusOnDeactivate: true,
+      });
       
       // Close on window resize to desktop size
       window.addEventListener('resize', () => {
         if (window.innerWidth >= 1024 && this.isOpen) {
+          this.close();
+        }
+      });
+
+      // Listen for deactivation from focus trap
+      document.addEventListener('focus-trap:deactivate', () => {
+        if (this.isOpen) {
           this.close();
         }
       });

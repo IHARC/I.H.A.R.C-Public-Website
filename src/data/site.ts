@@ -37,10 +37,14 @@ export interface FooterSection {
   links: NavItem[];
 }
 
+export interface ContentFlags {
+  showImpact: boolean;
+}
+
 export const nav: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Programs & Services', href: '/programs' },
-  { label: 'Get Help', href: '/help' },
+  { label: 'Get Help', href: '/get-help' },
   { label: 'Community Tools', href: '/tools' },
   { label: 'News', href: '/news' },
   { label: 'Get Involved', href: '/involved' },
@@ -48,7 +52,7 @@ export const nav: NavItem[] = [
 ];
 
 export const headerCTAs: CTAButton[] = [
-  { text: 'Get Help Now', href: '/help', variant: 'primary' },
+  { text: 'Get Help Now', href: '/get-help', variant: 'primary' },
   { text: 'Donate', href: '/donate', variant: 'secondary' },
 ];
 
@@ -74,7 +78,7 @@ export const quickAccess: QuickAccessItem[] = [
   },
   {
     title: 'Project Red Team',
-    description: 'Rapid response community safety initiative',
+    description: 'Security assessments for local businesses',
     href: '/red-team',
     icon: 'shield',
   },
@@ -89,7 +93,7 @@ export const programs: ProgramItem[] = [
   },
   {
     title: 'Harm Reduction',
-    description: 'Safe supply, needle exchange, and overdose prevention programs reducing health risks.',
+    description: 'Health supplies, safe disposal, and overdose response programs reducing health risks.',
     icon: 'heart',
     href: '/programs/harm-reduction',
   },
@@ -120,10 +124,10 @@ export const programs: ProgramItem[] = [
 ];
 
 export const impactCounters: CounterItem[] = [
-  { value: 1247, label: 'People Connected to Services' },
-  { value: 89, label: 'Emergency Interventions', suffix: 'this month' },
-  { value: 156, label: 'Successful Housing Placements' },
-  { value: 24, label: 'Community Partners', suffix: 'and growing' },
+  { value: 0, label: 'People Connected to Services' },
+  { value: 0, label: 'Emergency Interventions', suffix: 'this month' },
+  { value: 0, label: 'Successful Housing Placements' },
+  { value: 0, label: 'Community Partners', suffix: 'and growing' },
 ];
 
 export const cta = {
@@ -146,12 +150,21 @@ export const footer: {
 } = {
   sections: [
     {
-      title: 'Services',
+      title: 'Quick Access',
       links: [
-        { label: 'Crisis Support', href: '/crisis-support' },
-        { label: 'Outreach', href: '/programs/outreach' },
-        { label: 'Harm Reduction', href: '/programs/harm-reduction' },
-        { label: 'Community Safety', href: '/programs/community-safety' },
+        { label: 'Get Help Now', href: '/get-help' },
+        { label: 'Report Concern', href: '/report' },
+        { label: 'Programs & Services', href: '/programs' },
+        { label: 'About IHARC', href: '/about' },
+      ],
+    },
+    {
+      title: 'Resources',
+      links: [
+        { label: 'Service Directory', href: '/resources' },
+        { label: 'Community Tools', href: '/tools' },
+        { label: 'News & Updates', href: '/news' },
+        { label: 'Contact Us', href: '/contact' },
       ],
     },
     {
@@ -163,24 +176,15 @@ export const footer: {
         { label: 'Careers', href: '/careers' },
       ],
     },
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Service Directory', href: '/resources' },
-        { label: 'Community Tools', href: '/tools' },
-        { label: 'Reports & Data', href: '/reports' },
-        { label: 'News & Updates', href: '/news' },
-      ],
-    },
   ],
   contact: {
     address: [
       'IHARC',
-      '123 Main Street',
-      'Cobourg, ON K9A 2N4',
+      '123 Main Street', // TODO: Add real IHARC address
+      'Cobourg, ON K9A 2N4', // TODO: Add real postal code
     ],
-    phone: '(905) 555-HELP',
-    email: 'info@iharc.ca',
+    phone: '(905) 555-HELP', // TODO: Add real IHARC phone number
+    email: 'info@iharc.ca', // TODO: Add real IHARC email
   },
   social: [
     { label: 'Facebook', href: 'https://facebook.com/iharc', external: true },
@@ -192,4 +196,8 @@ export const footer: {
     { label: 'Accessibility', href: '/accessibility' },
     { label: 'Terms of Service', href: '/terms' },
   ],
+};
+
+export const contentFlags: ContentFlags = {
+  showImpact: false, // Set to true when ready to show impact metrics
 };

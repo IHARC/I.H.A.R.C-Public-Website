@@ -1,7 +1,8 @@
 ---
-import { impactCounters } from '../data/site';
+import { impactCounters, contentFlags } from '../data/site';
 ---
 
+{contentFlags.showImpact && (
 <section class="py-16 bg-brand-charcoal text-white">
   <div class="container">
     <div class="text-center mb-12">
@@ -27,7 +28,7 @@ import { impactCounters } from '../data/site';
               data-counter={counter.value}
               data-duration="2000"
             >
-              0
+              {counter.value === 0 ? 'Updating…' : counter.value}
             </span>
             {counter.suffix && (
               <span class="block text-sm text-brand-red font-medium mt-1">
@@ -54,10 +55,13 @@ import { impactCounters } from '../data/site';
     </div>
   </div>
 </section>
+)}
 
+{contentFlags.showImpact && (
 <script>
   import { initializeObservers } from '../lib/observe';
   
   // Initialize observers when the component loads
   initializeObservers();
 </script>
+)}

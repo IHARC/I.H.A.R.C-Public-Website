@@ -146,6 +146,21 @@ Article content goes here...
 2. **Update navigation**: Edit `nav` array in `src/data/site.ts`
 3. **Modify quick access**: Update `quickAccess` array in `src/data/site.ts`
 4. **Change impact numbers**: Update `impactCounters` in `src/data/site.ts`
+5. **Toggle Impact section**: Set `contentFlags.showImpact` to `true`/`false` in `src/data/site.ts`
+
+### Toggling the Impact Section
+The Impact section (with metrics/counters) can be hidden until ready for production:
+
+```typescript
+// In src/data/site.ts
+export const contentFlags: ContentFlags = {
+  showImpact: false, // Set to true when ready to show impact metrics
+};
+```
+
+- When `showImpact: false` - The entire Impact section is hidden from the homepage
+- When `showImpact: true` - The Impact section displays with the configured counter values
+- Counter values of 0 display as "Updating…" until real data is available
 
 ## 🧩 Adding Components
 

@@ -54,7 +54,7 @@
 
   /* Card base */
   .card {
-    @apply bg-white rounded-lg shadow-subtle p-6 hover:shadow-lg transition-all duration-250 ease-out;
+    @apply bg-white rounded-lg shadow-subtle p-6 transition-all duration-250 ease-out;
   }
 
   .card-hover {
@@ -63,7 +63,16 @@
 
   /* Skip link for accessibility */
   .skip-link {
-    @apply sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-brand-red text-white px-4 py-2 rounded z-50;
+    @apply fixed -top-10 left-4 bg-brand-red text-white px-4 py-2 rounded z-50 focus:top-4 transition-all duration-300;
+  }
+
+  /* Shadow utilities */
+  .shadow-subtle {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-red-glow {
+    box-shadow: 0 4px 14px rgba(206, 32, 41, 0.15), 0 2px 4px rgba(0, 0, 0, 0.06);
   }
 }
 
