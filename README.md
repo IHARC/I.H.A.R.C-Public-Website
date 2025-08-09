@@ -272,10 +272,30 @@ import InteractiveWidget from '../components/InteractiveWidget';
 ## 🚀 Deployment
 
 ### Azure Static Web Apps
-The project is configured for Azure Static Web Apps:
-- Build command: `npm run build`
+The project includes robust build scripts to handle permission issues in Azure's Oryx build system:
+
+**Build Configuration:**
+- Build command: `npm run build` (uses `build.js` script with fallback strategies)
 - Output directory: `dist/`
 - Existing GitHub Action workflow handles deployment
+
+**Build Strategies (automatic fallback):**
+1. **Primary**: Fix permissions + npx astro
+2. **Fallback 1**: Direct Node.js execution  
+3. **Fallback 2**: Yarn (if available)
+
+**Alternative Build Commands:**
+```bash
+# If main build fails, try these in Azure SWA config:
+npm run build:direct    # Direct npx approach
+npm run build:node      # Node.js direct execution
+bash build-simple.sh    # Simple shell script fallback
+```
+
+**Common Azure SWA Issues Fixed:**
+- ✅ "Permission denied" errors with astro binary
+- ✅ Oryx build system compatibility
+- ✅ Multiple fallback strategies for reliability
 
 ### Other Platforms
 - **Netlify**: Works out of the box

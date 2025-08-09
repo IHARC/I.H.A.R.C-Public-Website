@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "npx astro dev",
     "start": "npx astro dev", 
-    "build": "npx astro check && npx astro build",
+    "build": "node build.js",
+    "build:direct": "npx astro check && npx astro build",
+    "build:node": "node ./node_modules/astro/dist/cli/index.js check && node ./node_modules/astro/dist/cli/index.js build",
     "preview": "npx astro preview",
     "astro": "npx astro",
     "lint": "eslint . --ext .ts,.tsx,.astro",
