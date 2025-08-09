@@ -1,6 +1,20 @@
 ---
 import { footer } from '../data/site';
 
+// Helper functions to detect placeholder data
+const isPlaceholderPhone = (phone: string) => phone.includes('555-') || phone.includes('TODO');
+const isPlaceholderEmail = (email: string) => email.includes('TODO') || !email.includes('@');
+const isPlaceholderAddress = (address: string[]) => address.some(line => line.includes('TODO') || line.includes('123 Main Street'));
+const isPlaceholderSocial = (href: string) => href.includes('TODO') || href.includes('facebook.com/iharc') || href.includes('twitter.com/iharc') || href.includes('linkedin.com/company/iharc');
+
+// Check if we have real contact info
+const hasRealContactInfo = !isPlaceholderPhone(footer.contact.phone) && 
+                           !isPlaceholderEmail(footer.contact.email) && 
+                           !isPlaceholderAddress(footer.contact.address);
+
+// Filter out placeholder social links
+const realSocialLinks = footer.social.filter(social => !isPlaceholderSocial(social.href));
+
 // Social media icon mapping
 const socialIcons: Record<string, string> = {
   Facebook: 'M18.77 7.46H15.5v-1.9c0-.9.6-1.1 1-1.1h2.18V2.38h-3.06C13.54 2.38 12 3.92 12 6.04v1.42H9.5v2.28H12v7.88h3.5v-7.88h2.48l.29-2.28z',
@@ -38,21 +52,32 @@ const socialIcons: Record<string, string> = {
         <p class="text-gray-600 mb-4 leading-relaxed">
           Integrated Homelessness & Addictions Response Centre serving Northumberland County with comprehensive support and community safety initiatives.
         </p>
-        <div class="space-y-2 text-sm text-gray-600">
-          {footer.contact.address.map((line) => (
-            <p>{line}</p>
-          ))}
-          <p>
-            <a href={`tel:${footer.contact.phone}`} class="hover:text-brand-red transition-colors">
-              {footer.contact.phone}
-            </a>
-          </p>
-          <p>
-            <a href={`mailto:${footer.contact.email}`} class="hover:text-brand-red transition-colors">
-              {footer.contact.email}
-            </a>
-          </p>
-        </div>
+        {hasRealContactInfo ? (
+          <div class="space-y-2 text-sm text-gray-600">
+            {footer.contact.address.map((line) => (
+              <p>{line}</p>
+            ))}
+            <p>
+              <a href={`tel:${footer.contact.phone}`} class="hover:text-brand-red transition-colors">
+                {footer.contact.phone}
+              </a>
+            </p>
+            <p>
+              <a href={`mailto:${footer.contact.email}`} class="hover:text-brand-red transition-colors">
+                {footer.contact.email}
+              </a>
+            </p>
+          </div>
+        ) : (
+          <div class="text-sm text-gray-500 italic">
+            <p>Contact information will be updated soon.</p>
+            <p class="mt-2">
+              <a href="/contact" class="text-brand-red hover:underline">
+                Visit our contact page for current information
+              </a>
+            </p>
+          </div>
+        )}
       </div>
 
       <!-- Footer Sections -->
@@ -82,24 +107,34 @@ const socialIcons: Record<string, string> = {
     </div>
 
     <!-- Social Links -->
-    <div class="border-t border-gray-200 pt-8 mb-8">
-      <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4">Follow Us</h3>
-      <div class="flex space-x-4">
-        {footer.social.map((social) => (
-          <a
-            href={social.href}
-            class="flex items-center justify-center w-10 h-10 bg-brand-red text-white rounded-full hover:bg-brand-redDark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Follow us on ${social.label}`}
-          >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d={socialIcons[social.label] || socialIcons.Facebook} />
-            </svg>
-          </a>
-        ))}
+    {realSocialLinks.length > 0 && (
+      <div class="border-t border-gray-200 pt-8 mb-8">
+        <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4">Follow Us</h3>
+        <div class="flex space-x-4">
+          {realSocialLinks.map((social) => (
+            <a
+              href={social.href}
+              class="flex items-center justify-center w-10 h-10 bg-brand-red text-white rounded-full hover:bg-brand-redDark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Follow us on ${social.label}`}
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d={socialIcons[social.label] || socialIcons.Facebook} />
+              </svg>
+            </a>
+          ))}
+        </div>
       </div>
-    </div>
+    )}
+
+    {realSocialLinks.length === 0 && (
+      <div class="border-t border-gray-200 pt-8 mb-8 text-center">
+        <p class="text-sm text-gray-500 italic">
+          Social media links will be available soon.
+        </p>
+      </div>
+    )}
 
     <!-- Bottom Bar -->
     <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">

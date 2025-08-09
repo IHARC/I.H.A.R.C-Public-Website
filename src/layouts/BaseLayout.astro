@@ -1,4 +1,6 @@
 ---
+import { contentFlags } from '../data/site';
+
 export interface Props {
   title: string;
   description?: string;
@@ -7,6 +9,9 @@ export interface Props {
 }
 
 const { title, description = "IHARC - Integrated Homelessness & Addictions Response Centre serving Northumberland County, Ontario.", image = "/og-default.jpg", noindex = false } = Astro.props;
+
+// Use contentFlags.noindex if available, otherwise fall back to props
+const shouldNoIndex = contentFlags?.noindex ?? noindex;
 
 const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
 ---
@@ -40,7 +45,9 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
     <meta property="twitter:image" content={image} />
     
     <!-- SEO -->
-    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    {shouldNoIndex && <meta name="robots" content="noindex,nofollow" />}
+    <meta name="author" content="IHARC - Integrated Homelessness & Addictions Response Centre" />
+    <meta name="keywords" content="IHARC, Northumberland County, community health, crisis response, emergency shelter, community safety, Ontario" />
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#CE2029" />
@@ -99,8 +106,6 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
     </script>
   </head>
   <body class="min-h-screen bg-white text-gray-900 font-body">
-    <a href="#main" class="skip-link">Skip to main content</a>
-    
     <div class="flex flex-col min-h-screen">
       <slot />
     </div>

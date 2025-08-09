@@ -20,7 +20,7 @@ export interface ProgramItem {
 }
 
 export interface CounterItem {
-  value: number;
+  value: number | null;
   label: string;
   suffix?: string;
 }
@@ -38,7 +38,10 @@ export interface FooterSection {
 }
 
 export interface ContentFlags {
+  devNotice: boolean;
+  noindex: boolean;
   showImpact: boolean;
+  showNews: boolean;
 }
 
 export const nav: NavItem[] = [
@@ -92,10 +95,10 @@ export const programs: ProgramItem[] = [
     href: '/programs/outreach',
   },
   {
-    title: 'Harm Reduction',
-    description: 'Health supplies, safe disposal, and overdose response programs reducing health risks.',
+    title: 'Health Support Services',
+    description: 'Health and safety supplies, safe disposal of used health supplies, and overdose response kits reducing health risks.',
     icon: 'heart',
-    href: '/programs/harm-reduction',
+    href: '/programs/health-support',
   },
   {
     title: 'Crisis Response',
@@ -124,10 +127,10 @@ export const programs: ProgramItem[] = [
 ];
 
 export const impactCounters: CounterItem[] = [
-  { value: 0, label: 'People Connected to Services' },
-  { value: 0, label: 'Emergency Interventions', suffix: 'this month' },
-  { value: 0, label: 'Successful Housing Placements' },
-  { value: 0, label: 'Community Partners', suffix: 'and growing' },
+  { value: null, label: 'People Connected to Services', suffix: 'updating...' },
+  { value: null, label: 'Emergency Interventions', suffix: 'updating...' },
+  { value: null, label: 'Successful Housing Placements', suffix: 'updating...' },
+  { value: null, label: 'Community Partners', suffix: 'updating...' },
 ];
 
 export const cta = {
@@ -199,5 +202,8 @@ export const footer: {
 };
 
 export const contentFlags: ContentFlags = {
+  devNotice: true, // Show under development modal
+  noindex: true, // Prevent search engine indexing during development
   showImpact: false, // Set to true when ready to show impact metrics
+  showNews: false, // Set to true when news content is ready
 };

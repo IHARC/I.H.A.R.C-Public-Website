@@ -30,9 +30,12 @@ const iconMap: Record<string, string> = {
         
         return (
           <Component
-            {...(isClickable && { href: program.href })}
-            class={`group card transition-all duration-250 ease-out border-t-4 border-brand-red ${
-              isClickable ? 'hover:shadow-lg hover:-translate-y-1 cursor-pointer' : ''
+            {...(isClickable && { 
+              href: program.href, 
+              'aria-label': `Learn more about ${program.title} - ${program.description}` 
+            })}
+            class={`group card transition-all duration-250 ease-out border-t-4 border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 ${
+              isClickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : ''
             }`}
             data-fade-in
             data-delay={index * 100}

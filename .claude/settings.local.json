@@ -10,7 +10,8 @@
       "Bash(npm test)",
       "Bash(npm run lint)",
       "Bash(tree:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npm run check:*)"
     ],
     "deny": []
   }

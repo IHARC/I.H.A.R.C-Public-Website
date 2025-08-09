@@ -28,7 +28,7 @@ import { impactCounters, contentFlags } from '../data/site';
               data-counter={counter.value}
               data-duration="2000"
             >
-              {counter.value === 0 ? 'Updating…' : counter.value}
+              {counter.value === null || counter.value === 0 ? 'Updating…' : counter.value}
             </span>
             {counter.suffix && (
               <span class="block text-sm text-brand-red font-medium mt-1">
