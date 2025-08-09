@@ -88,10 +88,27 @@ This is the main marketing website for IHARC (Integrated Homelessness & Addictio
 
 ## Deployment Notes
 
-- Azure Static Web Apps workflow already configured
+- Azure Static Web Apps workflow already configured  
 - Build outputs to `dist/` directory
 - No server-side code (fully static)
 - Environment variables managed in Azure portal if needed
+
+### Azure SWA Build Issues & Solutions
+
+**Common Issue**: "Permission denied" error with astro binary in Oryx build system
+
+**Solution**: The project includes `build.js` with multiple fallback strategies:
+1. Fix permissions + npx (primary)
+2. Direct Node.js execution (fallback)
+3. Yarn execution (if available)
+
+**Available Build Commands**:
+- `npm run build` - Robust script with automatic fallbacks
+- `npm run build:direct` - Direct npx approach  
+- `npm run build:node` - Node.js direct execution
+- `bash build-simple.sh` - Simple shell script
+
+**Troubleshooting**: If build fails in Azure, try changing the build command in the GitHub workflow to use alternative commands above.
 
 ## When Adding Features
 
