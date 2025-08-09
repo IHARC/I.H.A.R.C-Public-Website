@@ -11,8 +11,14 @@
       "Bash(npm run lint)",
       "Bash(tree:*)",
       "Bash(rg:*)",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bun x ccusage statusline",
+    "padding": 0
   }
 }

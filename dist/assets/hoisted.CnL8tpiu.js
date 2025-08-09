@@ -1,1 +1,0 @@
-import"./hoisted.CyvWrU8e.js";document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelector("form");e&&e.addEventListener("submit",t=>{t.preventDefault(),alert("Thank you for your message. We will respond within 1 business day.")})});

@@ -22,7 +22,8 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     
@@ -72,7 +73,7 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
             "@id": "https://iharc.ca/#organization",
             "name": "IHARC - Integrated Homelessness & Addictions Response Centre",
             "url": "https://iharc.ca",
-            "logo": "https://iharc.ca/logo.svg",
+            "logo": "https://iharc.ca/logo.png",
             "description": "Integrated Homelessness & Addictions Response Centre serving Northumberland County, Ontario with comprehensive support and community safety initiatives.",
             "address": {
               "@type": "PostalAddress",
