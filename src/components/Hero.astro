@@ -1,0 +1,66 @@
+---
+// No props needed for hero - content is static
+---
+
+<section class="relative bg-gradient-to-br from-brand-red to-brand-redDark text-white overflow-hidden">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-10" aria-hidden="true">
+    <div class="hero-pattern"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative container py-20 lg:py-32">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight">
+        Direct Action.<br />
+        <span class="text-white/90">Real Impact.</span>
+      </h1>
+      
+      <p class="text-xl lg:text-2xl mb-8 text-white/90 max-w-2xl mx-auto leading-relaxed">
+        Integrated support for homelessness, addictions, and community safety across Northumberland County.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="/help" class="btn-white">
+          Get Help Now
+        </a>
+        <a href="/about" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
+          Learn More
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtle scroll indicator -->
+  <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white/60 animate-bounce" aria-hidden="true">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .hero-pattern {
+    background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    animation: float 20s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-pattern {
+      animation: none;
+    }
+    
+    .animate-bounce {
+      animation: none;
+    }
+  }
+</style>

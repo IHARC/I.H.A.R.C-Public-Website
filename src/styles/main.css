@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+
+@layer base {
+  html {
+    font-family: theme('fontFamily.body');
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme('fontFamily.heading');
+  }
+
+  /* Focus styles for better accessibility */
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.red');
+    outline-offset: 2px;
+  }
+
+  /* Remove outline for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: theme('screens.2xl');
+  }
+
+  /* Button variants */
+  .btn-base {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg transition-all duration-250 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn-base bg-brand-red text-white hover:bg-brand-redDark focus:ring-brand-red;
+  }
+
+  .btn-secondary {
+    @apply btn-base border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white focus:ring-brand-red;
+  }
+
+  .btn-ghost {
+    @apply btn-base text-brand-red hover:bg-brand-red hover:bg-opacity-10 focus:ring-brand-red;
+  }
+
+  .btn-white {
+    @apply btn-base bg-white text-brand-red hover:bg-gray-50 focus:ring-brand-red;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-white rounded-lg shadow-subtle p-6 hover:shadow-lg transition-all duration-250 ease-out;
+  }
+
+  .card-hover {
+    @apply hover:shadow-red-glow hover:scale-101 transform;
+  }
+
+  /* Skip link for accessibility */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-brand-red text-white px-4 py-2 rounded z-50;
+  }
+}
+
+@layer utilities {
+  .visually-hidden {
+    @apply sr-only;
+  }
+
+  .scale-101 {
+    transform: scale(1.01);
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High contrast for accessibility */
+  @media (prefers-contrast: high) {
+    .btn-primary {
+      @apply border-2 border-white;
+    }
+    
+    .btn-secondary {
+      @apply border-4;
+    }
+  }
+}
