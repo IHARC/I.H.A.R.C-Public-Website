@@ -31,16 +31,22 @@ const milestones: { label: string; done: boolean }[] = [
   <main class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-3xl mx-auto">
       <!-- Logo -->
-      <header class="mb-10 text-center">
-        <div class="inline-flex items-center justify-center w-24 h-24 bg-brand-red rounded-2xl shadow-sm mb-6 ring-4 ring-brand-red/10">
-          <Logo size="lg" variant="white" />
+      <header class="mb-14">
+        <div class="flex flex-col items-center">
+          <div class="relative mb-6 w-full max-w-lg">
+            <div class="aspect-[5/2] md:aspect-[5/2] w-full rounded-3xl bg-gradient-to-tr from-brand-red to-red-600 flex items-center justify-center shadow-md ring-4 ring-brand-red/10 overflow-hidden p-4 md:p-6">
+              <img src="/logos/iharclogowithtag.png" alt="IHARC - Integrated Homelessness & Addictions Response Centre" class="w-full h-full object-contain drop-shadow-sm" loading="eager" decoding="async" />
+            </div>
+            <!-- subtle decorative glow -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-brand-red/20 to-red-600/20 blur-2xl opacity-20 pointer-events-none" aria-hidden="true"></div>
+          </div>
+          <h1 class="text-center text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-gray-900 mb-4 leading-tight">
+            Our New Digital Home is Coming
+          </h1>
+          <p class="text-center text-lg md:text-xl text-gray-600 max-w-2xl leading-relaxed">
+            We&apos;re assembling a unified, accessible hub for homelessness & addictions response across Northumberland County. Thanks for your patience while we build.
+          </p>
         </div>
-        <h1 class="text-4xl md:text-5xl font-heading font-bold tracking-tight text-gray-900 mb-3">
-          IHARC is Building
-        </h1>
-        <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Our full website is on the way. We&apos;re crafting a modern, accessible hub for integrated homelessness & addictions support across Northumberland County.
-        </p>
       </header>
 
       <!-- Coming Soon Message -->
@@ -116,8 +122,49 @@ const milestones: { label: string; done: boolean }[] = [
           </div>
         </div>
 
+        <!-- About Us -->
+        <section class="border-t border-gray-200 pt-10">
+          <div class="grid lg:grid-cols-5 gap-10 items-start">
+            <div class="lg:col-span-3 space-y-6">
+              <h2 class="text-2xl md:text-3xl font-heading font-bold text-gray-900">About IHARC</h2>
+              <p class="text-gray-700 leading-relaxed text-base md:text-lg">
+                The Integrated Homelessness & Addictions Response Centre (IHARC) is a community-based non-profit serving Northumberland County. We provide direct outreach, crisis response, and practical supports for individuals experiencing homelessness or addiction. Our work includes connecting people with housing and treatment options, distributing essential supplies, and helping navigate the complexities of health and social services. We also engage with residents, businesses, and local organizations to address community concerns and promote practical, balanced solutions to complex challenges. IHARC operates independently to remain responsive, innovative, and focused on real-world results.
+              </p>
+              <div class="space-y-4" aria-label="Explainer video">
+                <!-- Primary Explainer Video -->
+                <div class="group relative rounded-2xl overflow-hidden bg-gray-900 text-white shadow-sm">
+                  <iframe
+                    class="w-full aspect-video"
+                    src="https://www.youtube.com/embed/LimsCSvFSCM"
+                    title="IHARC Explainer Video"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                  <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition" aria-hidden="true"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <a href="https://www.youtube.com/@bxc-Iharc" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium shadow hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition">
+                    More Videos on YouTube
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500">Primary explainer video embedded. Additional content available via our YouTube channel.</p>
+            </div>
+            <div class="lg:col-span-2 bg-white/60 border border-gray-200 rounded-2xl p-6 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-900 mb-3">What We&apos;re Building</h3>
+              <ul class="space-y-3 text-sm text-gray-700">
+                <li class="flex items-start"><span class="mt-1 mr-2 h-2 w-2 rounded-full bg-brand-red"></span> Real-time outreach & program availability</li>
+                <li class="flex items-start"><span class="mt-1 mr-2 h-2 w-2 rounded-full bg-brand-red"></span> Streamlined pathways to housing & treatment</li>
+                <li class="flex items-start"><span class="mt-1 mr-2 h-2 w-2 rounded-full bg-brand-red"></span> Mobile-friendly crisis & resource navigation</li>
+                <li class="flex items-start"><span class="mt-1 mr-2 h-2 w-2 rounded-full bg-brand-red"></span> Evidence-informed community engagement tools</li>
+                <li class="flex items-start"><span class="mt-1 mr-2 h-2 w-2 rounded-full bg-brand-red"></span> Accessibility-first design & multilingual expansion</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         <!-- Compact social footer -->
-        <div class="pt-6 border-t border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div class="flex items-center space-x-3">
             {socialLinks.map(link => (
               <a
@@ -133,9 +180,7 @@ const milestones: { label: string; done: boolean }[] = [
               </a>
             ))}
           </div>
-          <p class="text-sm text-gray-500 text-center md:text-right">
-            © {new Date().getFullYear()} IHARC • Serving Northumberland County, Ontario
-          </p>
+          <p class="text-sm text-gray-500 text-center md:text-right">© {new Date().getFullYear()} IHARC • Serving Northumberland County, Ontario</p>
         </div>
       </section>
     </div>
