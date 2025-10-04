@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { UserNav } from '@/components/layout/user-nav';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +25,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <div className="flex min-h-screen flex-col">
             <header className="border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-slate-800 dark:bg-slate-950/80">
-              <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-brand">IHARC Command Center</p>
-                  <h1 className="text-2xl font-bold leading-tight">Community Solutions Portal</h1>
-                  <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                    View key metrics. Propose and refine solutions. Collaborate with neighbors, agencies, and the Town. No identifying details allowed.
+              <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-1">
+                  <Link href="/" className="text-sm font-semibold uppercase tracking-wide text-brand">
+                    IHARC Command Center
+                  </Link>
+                  <h1 className="text-2xl font-bold leading-tight text-slate-900 dark:text-slate-50">
+                    Community data and solutions portal
+                  </h1>
+                  <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+                    Track live housing and harm reduction metrics, then collaborate on rapid solutions without sharing identifying information.
                   </p>
+                </div>
+                <div className="flex flex-col gap-3 lg:items-end">
+                  <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
+                    <Link href="/stats" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+                      Stats dashboard
+                    </Link>
+                    <Link href="/command-center" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+                      Command center
+                    </Link>
+                    <Link href="/solutions" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+                      Community ideas
+                    </Link>
+                    <Link href="/solutions/submit" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+                      Share an idea
+                    </Link>
+                  </nav>
+                  <UserNav />
                 </div>
               </div>
             </header>

@@ -18,6 +18,7 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
   }
 
   if (data) {
+    await syncAuthClaims(supabase, userId, data);
     return data;
   }
 
@@ -39,6 +40,8 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
   if (insertError) {
     throw insertError;
   }
+
+  await syncAuthClaims(supabase, userId, inserted);
 
   return inserted;
 }
@@ -68,4 +71,29 @@ export async function getUserEmailForProfile(profileId: string) {
   }
 
   return data.user?.email ?? null;
+}
+
+async function syncAuthClaims(
+  supabase: ReturnType<typeof createSupabaseServiceClient>,
+  userId: string,
+  profile: PortalProfile,
+) {
+  try {
+    const { error } = await supabase.auth.admin.updateUserById(userId, {
+      app_metadata: {
+        portal_role: profile.role,
+        portal_profile_id: profile.id,
+      },
+      user_metadata: {
+        display_name: profile.display_name,
+        organization_id: profile.organization_id,
+      },
+    });
+
+    if (error) {
+      console.error('Failed to update Supabase auth claims', error);
+    }
+  } catch (error) {
+    console.error('Failed to sync Supabase auth claims', error);
+  }
 }

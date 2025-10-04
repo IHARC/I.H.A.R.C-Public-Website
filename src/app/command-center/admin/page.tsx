@@ -85,6 +85,7 @@ export default async function CommandCenterAdminPage() {
     });
 
     revalidatePath('/command-center');
+    revalidatePath('/stats');
   }
 
   async function createOrganization(formData: FormData) {
@@ -128,6 +129,8 @@ export default async function CommandCenterAdminPage() {
     });
 
     revalidatePath('/command-center/admin');
+    revalidatePath('/solutions/profile');
+    revalidatePath('/register');
   }
 
   return (
