@@ -11,12 +11,23 @@ export const metadata: Metadata = {
   title: 'Community Solutions',
 };
 
-export default async function SolutionsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  const category = (searchParams.category as string) ?? null;
-  const status = (searchParams.status as string) ?? null;
-  const tag = (searchParams.tag as string) ?? null;
-  const sort = (searchParams.sort as string) ?? 'active';
-  const q = (searchParams.q as string) ?? null;
+export default async function SolutionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedParams = await searchParams;
+  const categoryParam = resolvedParams.category;
+  const statusParam = resolvedParams.status;
+  const tagParam = resolvedParams.tag;
+  const sortParam = resolvedParams.sort;
+  const queryParam = resolvedParams.q;
+
+  const category = categoryParam ? (Array.isArray(categoryParam) ? categoryParam[0] : categoryParam) : null;
+  const status = statusParam ? (Array.isArray(statusParam) ? statusParam[0] : statusParam) : null;
+  const tag = tagParam ? (Array.isArray(tagParam) ? tagParam[0] : tagParam) : null;
+  const sort = sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : 'active';
+  const q = queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null;
 
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');
