@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: 'Community Solutions',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function SolutionsPage({
   searchParams,
 }: {

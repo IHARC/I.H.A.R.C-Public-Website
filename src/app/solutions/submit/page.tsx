@@ -3,6 +3,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { IdeaSubmissionForm } from './idea-form';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SubmitIdeaPage() {
   const supabase = createSupabaseRSCClient();
   const {

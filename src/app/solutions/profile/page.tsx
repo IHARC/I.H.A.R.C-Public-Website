@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PortalProfilePage() {
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');

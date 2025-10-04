@@ -20,6 +20,8 @@ const METRIC_OPTIONS = [
   { key: 'warming_beds_available', label: 'Warming Beds Available' },
 ] as const;
 
+export const dynamic = 'force-dynamic';
+
 export default async function CommandCenterAdminPage() {
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');

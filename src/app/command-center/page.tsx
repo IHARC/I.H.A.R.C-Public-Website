@@ -12,6 +12,8 @@ const METRIC_LABELS: Record<string, string> = {
   warming_beds_available: 'Warming Beds Available',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function CommandCenterPage({
   searchParams,
 }: {

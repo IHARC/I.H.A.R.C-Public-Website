@@ -3,6 +3,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { ModerationQueue, type ModerationFlag } from '@/components/portal/moderation-queue';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ModerationPage() {
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');

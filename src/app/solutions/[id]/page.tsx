@@ -76,6 +76,8 @@ const SECTION_CONFIG = [
   { key: 'success_metrics', title: 'Success metrics' },
 ] as const;
 
+export const dynamic = 'force-dynamic';
+
 export default async function IdeaDetailPage({
   params,
 }: {
