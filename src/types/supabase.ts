@@ -1028,6 +1028,46 @@ export type Database = {
           }?,
         ];
       };
+      idea_metrics: {
+        Row: {
+          id: string;
+          idea_id: string;
+          metric_label: string;
+          success_definition: string | null;
+          baseline: string | null;
+          target: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          idea_id: string;
+          metric_label: string;
+          success_definition?: string | null;
+          baseline?: string | null;
+          target?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          idea_id?: string;
+          metric_label?: string;
+          success_definition?: string | null;
+          baseline?: string | null;
+          target?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "idea_metrics_idea_id_fkey";
+            columns: ["idea_id"];
+            referencedRelation: "ideas";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       comments: {
         Row: {
           id: string;
@@ -1040,6 +1080,7 @@ export type Database = {
           depth: number;
           created_at: string;
           updated_at: string;
+          evidence_url: string | null;
         };
         Insert: {
           id?: string;
@@ -1052,6 +1093,7 @@ export type Database = {
           depth?: number;
           created_at?: string;
           updated_at?: string;
+          evidence_url?: string | null;
         };
         Update: {
           id?: string;
@@ -1064,6 +1106,7 @@ export type Database = {
           depth?: number;
           created_at?: string;
           updated_at?: string;
+          evidence_url?: string | null;
         };
         Relationships: [
           {

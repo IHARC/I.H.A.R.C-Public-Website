@@ -79,18 +79,85 @@ Every mutation records a `portal.audit_log` entry with hashed IP + user-agent me
 3. Deploy the generated `.next/` output (Azure automatically wires SSR/API routes into the Functions host).
 4. Supabase Edge Functions (`portal-ingest-metrics`, `portal-moderate`) must be deployed separately via the Supabase CLI.
 
-## Seeding the MVP (No SQL Required)
-1. **Create a moderator account** via Supabase Auth (e.g., invite yourself) and elevate the `portal.profiles.role` to `moderator` or `admin` using the Supabase Dashboard.
-2. **Register a partner organization**
-   - Sign in to the portal, visit `/command-center/admin`, and use the “Register partner organization” form to add an agency. Toggle the verified checkbox if applicable.
-3. **Seed an initial metric**
-   - On the same admin page, submit one daily metric (e.g., `outdoor_count`) with today’s date so the dashboard cards render.
-4. **Create portal profile**
-   - Visit `/solutions/profile` to set your display name and link the organization you just created.
-5. **Post the first idea**
-   - Go to `/solutions/submit`, acknowledge the community rules, and share an idea. Attachments are optional but will be stored privately in `portal-attachments` with signed URLs.
+## Seeding the MVP (Supabase CLI)
+Use the Supabase CLI (or the MCP Supabase tool inside Codex) to insert a complete demo idea, official response, and live metrics. This keeps environments aligned without manual UI data entry.
 
-These steps populate the minimum data set that Azure SWA will surface publicly once deployed.
+```bash
+# Authenticate and link once
+supabase login
+supabase link --project-ref <your-project-ref>
+
+# Apply the demo seed bundle
+supabase db remote exec <<'SQL'
+insert into portal.organizations (id, name, verified) values
+  ('11111111-1111-4111-8111-111111111111', 'Northumberland Housing Taskforce', true)
+on conflict (id) do nothing;
+
+insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, is_anonymous, is_sso_user, created_at, updated_at) values
+  ('00000000-aaaa-bbbb-cccc-111111111111', 'authenticated', 'authenticated', 'demo-submit@iharc.example', '', timezone('utc', now()), jsonb_build_object('provider','seed'), jsonb_build_object('display_name','Jordan Demo'), false, false, timezone('utc', now()), timezone('utc', now())),
+  ('00000000-bbbb-cccc-dddd-222222222222', 'authenticated', 'authenticated', 'demo-org@iharc.example', '', timezone('utc', now()), jsonb_build_object('provider','seed'), jsonb_build_object('display_name','Housing Taskforce Lead'), false, false, timezone('utc', now()), timezone('utc', now()))
+on conflict (id) do nothing;
+
+insert into portal.profiles (id, user_id, display_name, organization_id, role, rules_acknowledged_at, display_name_confirmed_at) values
+  ('22222222-2222-4222-8222-222222222222', '00000000-aaaa-bbbb-cccc-111111111111', 'Jordan Demo', null, 'user', timezone('utc', now()), timezone('utc', now())),
+  ('33333333-3333-4333-8333-333333333333', '00000000-bbbb-cccc-dddd-222222222222', 'Housing Taskforce Lead', '11111111-1111-4111-8111-111111111111', 'org_rep', timezone('utc', now()), timezone('utc', now()))
+on conflict (id) do nothing;
+
+insert into portal.ideas (
+  id, author_profile_id, title, body, problem_statement, evidence, proposal_summary,
+  implementation_steps, risks, success_metrics, category, tags, status, is_anonymous, attachments
+) values (
+  '44444444-4444-4444-8444-444444444444',
+  '22222222-2222-4222-8222-222222222222',
+  'Expand Winter Overnight Outreach',
+  'Problem:\nEncampment residents lose contact with outreach teams during extreme cold.\n\nEvidence:\nCounty harm reduction logs show a 40% drop in overnight check-ins when temperatures fall below -10°C.\n\nProposal:\nPilot a coordinated overnight outreach schedule with peer navigators and a warming bus on standby.\n\nSteps:\n1. Map encampment clusters.\n2. Assign paired outreach teams including peers.\n3. Stage warming bus at rotating locations.\n\nRisks:\nRequires additional EMS standby and volunteer rotation planning.\n\nSuccess metrics:\n• Overnight welfare checks completed (Baseline: 6 per night • Target: 12 per night)\n• Unused warming bus capacity (Goal: under 10%)',
+  'Encampment residents lose contact with outreach teams during extreme cold snaps when crews suspend nightly rounds.',
+  'County harm reduction logs show a 40% drop in overnight check-ins below -10°C. Hospital discharge planners report repeat presentations from the same encampments.',
+  'Pilot a coordinated overnight outreach schedule with peer navigators and a warming bus on standby.',
+  'Map encampment clusters, assign paired outreach teams including peers, and stage the warming bus at rotating locations aligned to shift hand-offs.',
+  'Requires additional EMS standby and volunteer rotation planning.',
+  '• Overnight welfare checks completed (Baseline: 6 per night • Target: 12 per night)\n• Unused warming bus capacity (Goal: under 10%)',
+  'Health',
+  array['winter','outreach'],
+  'under_review',
+  false,
+  '[]'
+)
+on conflict (id) do nothing;
+
+insert into portal.idea_metrics (id, idea_id, metric_label, success_definition, baseline, target) values
+  ('55555555-5555-4555-8555-555555555555', '44444444-4444-4444-8444-444444444444', 'Overnight welfare checks', 'Number of documented check-ins with encampment residents during overnight outreach shifts.', '6 per night', '12 per night'),
+  ('55555555-5555-4555-8555-555555555556', '44444444-4444-4444-8444-444444444444', 'Warming bus utilisation', 'Percentage of warming bus capacity used between 11pm and 5am.', '70%', '90%')
+on conflict (id) do nothing;
+
+insert into portal.comments (id, idea_id, author_profile_id, body, is_official, comment_type, evidence_url) values (
+  '66666666-6666-4666-8666-666666666666',
+  '44444444-4444-4444-8444-444444444444',
+  '33333333-3333-4333-8333-333333333333',
+  'County outreach is prepared to stage the warming bus on rotating routes starting next Monday. EMS leadership confirmed overnight coverage for the pilot period.',
+  true,
+  'response',
+  'https://example.org/warming-bus-brief.pdf'
+)
+on conflict (id) do nothing;
+
+insert into portal.idea_decisions (id, idea_id, author_profile_id, summary, visibility) values
+  ('77777777-7777-4777-8777-777777777777',
+   '44444444-4444-4444-8444-444444444444',
+   '33333333-3333-4333-8333-333333333333',
+   'Pilot scheduled for 14 nights. Team will report nightly metrics to the command center.',
+   'public')
+on conflict (id) do nothing;
+
+insert into portal.metric_daily (metric_key, metric_date, value) values
+  ('outdoor_count', timezone('utc', now())::date, 48),
+  ('overdoses_reported', timezone('utc', now())::date, 3),
+  ('warming_beds_available', timezone('utc', now())::date, 12)
+on conflict (metric_key, metric_date) do update set value = excluded.value;
+SQL
+```
+
+Sign in with the seeded community account (`demo-submit@iharc.example`) or the verified organization lead to walk through the full intake workflow, comment types, official responses, status transitions, and moderation timeline entries.
 
 ## Testing & QA
 - `npm run lint` and `npm run typecheck` must pass before merging.

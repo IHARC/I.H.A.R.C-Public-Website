@@ -13,6 +13,7 @@ export type CommentNode = {
     organizationName?: string | null;
     orgVerified?: boolean;
   };
+  evidenceUrl?: string | null;
 };
 
 const TYPE_LABEL: Record<CommentNode['commentType'], string> = {
@@ -45,6 +46,19 @@ export function CommentThread({ comments }: { comments: CommentNode[] }) {
             <time dateTime={comment.createdAt}>{new Date(comment.createdAt).toLocaleString('en-CA')}</time>
           </header>
           <p className="mt-3 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">{comment.body}</p>
+          {comment.evidenceUrl ? (
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Evidence:{' '}
+              <a
+                href={comment.evidenceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-brand underline"
+              >
+                Open attached link
+              </a>
+            </p>
+          ) : null}
         </article>
       ))}
     </div>

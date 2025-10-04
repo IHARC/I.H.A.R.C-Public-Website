@@ -38,11 +38,22 @@ export function KanbanBoard({
   ideas: KanbanIdea[];
   viewerRole: 'user' | 'org_rep' | 'moderator' | 'admin' | null;
 }) {
-  const canEdit = viewerRole === 'moderator' || viewerRole === 'admin';
+  const canModerateAll = viewerRole === 'moderator' || viewerRole === 'admin';
+  const canTransitionLimited = viewerRole === 'org_rep';
+  const canDrag = canModerateAll || canTransitionLimited;
   const initialColumns = useMemo(() => buildColumns(ideas), [ideas]);
   const [columns, setColumns] = useState<ColumnState[]>(initialColumns);
   const [pending, startTransition] = useTransition();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const allowedOrgRepTransitions: Partial<Record<ColumnKey, ColumnKey[]>> = useMemo(
+    () => ({
+      new: ['under_review'],
+      under_review: ['in_progress', 'not_feasible'],
+      in_progress: ['adopted', 'not_feasible'],
+    }),
+    [],
+  );
 
   useEffect(() => {
     setColumns(initialColumns);
@@ -61,12 +72,24 @@ export function KanbanBoard({
       return;
     }
 
-    if (!canEdit) {
+    if (!canModerateAll && !canTransitionLimited) {
       toast({
         title: 'Read-only access',
         description: 'Only moderators can reorder ideas on the board.',
       });
       return;
+    }
+
+    if (canTransitionLimited && !canModerateAll) {
+      const allowedTargets = allowedOrgRepTransitions[sourceColumn.status] ?? [];
+      if (!allowedTargets.includes(targetStatus)) {
+        toast({
+          title: 'Move requires moderator support',
+          description: 'Reach out to a moderator to move ideas outside your lane.',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     const targetColumn = columns.find((column) => column.status === targetStatus);
@@ -151,7 +174,7 @@ export function KanbanBoard({
           <div
             key={column.status}
             onDragOver={(event) => {
-              if (canEdit) {
+              if (canDrag) {
                 event.preventDefault();
               }
             }}
@@ -170,7 +193,7 @@ export function KanbanBoard({
                 <KanbanCard
                   key={idea.id}
                   idea={idea}
-                  canDrag={canEdit}
+                  canDrag={canDrag}
                   isDragging={draggingId === idea.id}
                   onDragStart={() => setDraggingId(idea.id)}
                   onDragEnd={() => setDraggingId(null)}

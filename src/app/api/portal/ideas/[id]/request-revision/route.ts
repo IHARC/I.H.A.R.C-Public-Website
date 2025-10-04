@@ -79,6 +79,16 @@ export async function POST(
     return NextResponse.json({ error: 'Unable to request revision' }, { status: 500 });
   }
 
+  const { error: statusError } = await portal
+    .from('ideas')
+    .update({ status: 'new' })
+    .eq('id', ideaId);
+
+  if (statusError) {
+    console.error('Failed to reset idea status after revision request', statusError);
+    return NextResponse.json({ error: 'Unable to request revision' }, { status: 500 });
+  }
+
   await logAuditEvent({
     actorProfileId: profile.id,
     actorUserId: user.id,
@@ -87,6 +97,17 @@ export async function POST(
     entityId: ideaId,
     meta: {
       message,
+    },
+  });
+
+  await logAuditEvent({
+    actorProfileId: profile.id,
+    actorUserId: user.id,
+    action: 'idea_status_new',
+    entityType: 'idea',
+    entityId: ideaId,
+    meta: {
+      source: 'revision_request',
     },
   });
 

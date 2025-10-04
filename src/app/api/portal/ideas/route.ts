@@ -35,6 +35,14 @@ const ALLOWED_CATEGORIES = new Set([
 ]);
 
 const IDEA_COOLDOWN_MS = 2 * 60 * 1000;
+const MAX_METRICS = 6;
+
+type MetricDraft = {
+  label: string;
+  definition: string | null;
+  baseline: string | null;
+  target: string | null;
+};
 
 export const runtime = 'nodejs';
 
@@ -64,12 +72,38 @@ export async function POST(req: NextRequest) {
   const proposalSummary = (formData.get('proposal_summary') as string | null)?.trim();
   const implementationSteps = (formData.get('implementation_steps') as string | null)?.trim();
   const risks = (formData.get('risks') as string | null)?.trim();
-  const successMetrics = (formData.get('success_metrics') as string | null)?.trim();
+  const metricsRaw = (formData.get('metrics') as string | null) ?? '[]';
   const category = (formData.get('category') as string | null)?.trim();
   const tagsRaw = (formData.get('tags') as string | null) ?? '';
   const isAnonymous = (formData.get('is_anonymous') as string) === 'true';
   const acknowledged = (formData.get('acknowledged') as string) === 'true';
   const attachments = formData.getAll('attachments') as File[];
+
+  let metricsPayload: MetricDraft[] = [];
+  try {
+    const parsed = JSON.parse(metricsRaw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('Metrics payload must be an array');
+    }
+    metricsPayload = parsed
+      .slice(0, MAX_METRICS)
+      .map((metric) => {
+        const label = typeof metric?.label === 'string' ? metric.label.trim() : '';
+        const definition = typeof metric?.definition === 'string' ? metric.definition.trim() : '';
+        const baseline = typeof metric?.baseline === 'string' ? metric.baseline.trim() : '';
+        const target = typeof metric?.target === 'string' ? metric.target.trim() : '';
+        return {
+          label,
+          definition: definition || null,
+          baseline: baseline || null,
+          target: target || null,
+        } satisfies MetricDraft;
+      })
+      .filter((metric) => metric.label);
+  } catch (error) {
+    console.error('Invalid metrics payload', error);
+    return NextResponse.json({ error: 'Unable to parse metrics input.' }, { status: 400 });
+  }
 
   if (!title || !category) {
     return NextResponse.json({ error: 'Title and category are required' }, { status: 422 });
@@ -82,9 +116,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!evidence || !successMetrics) {
+  if (!evidence) {
     return NextResponse.json(
-      { error: 'Evidence and success metrics are required before submitting.' },
+      { error: 'Evidence is required before submitting.' },
+      { status: 422 },
+    );
+  }
+
+  if (!metricsPayload.length) {
+    return NextResponse.json(
+      { error: 'Add at least one success metric before submitting.' },
+      { status: 422 },
+    );
+  }
+
+  const invalidMetric = metricsPayload.find(
+    (metric) => metric.label.length < 3 || metric.label.length > 160 || metric.definition?.length > 500,
+  );
+  if (invalidMetric) {
+    return NextResponse.json(
+      { error: 'Each metric needs a concise title (3-160 chars) and optional notes up to 500 chars.' },
       { status: 422 },
     );
   }
@@ -97,8 +148,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Content exceeds length limits' }, { status: 422 });
   }
 
+  const metricsAggregate = metricsPayload
+    .map((metric) => [metric.label, metric.definition, metric.baseline, metric.target].filter(Boolean).join(' '))
+    .join('\n');
+
   const safety = scanContentForSafety(
-    [title, problemStatement, evidence, proposalSummary, implementationSteps, risks, successMetrics]
+    [title, problemStatement, evidence, proposalSummary, implementationSteps, risks, metricsAggregate]
       .filter(Boolean)
       .join('\n'),
   );
@@ -118,15 +173,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const withinLimit = await checkRateLimit({
+  const rateLimit = await checkRateLimit({
     profileId: profile.id,
     type: 'idea',
     limit: 10,
     cooldownMs: IDEA_COOLDOWN_MS,
   });
-  if (!withinLimit) {
+  if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: 'You are posting ideas too quickly. Please wait a few minutes and try again.' },
+      {
+        error: 'You are posting ideas too quickly. Please wait a few minutes and try again.',
+        retry_in_ms: rateLimit.retryInMs,
+      },
       { status: 429 },
     );
   }
@@ -190,13 +248,26 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .slice(0, 8);
 
+  const metricsSummary = metricsPayload
+    .map((metric) => {
+      const qualifier = metric.definition ? ` — ${metric.definition}` : '';
+      const meta = [
+        metric.baseline ? `Baseline: ${metric.baseline}` : null,
+        metric.target ? `Target: ${metric.target}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      return `• ${metric.label}${qualifier}${meta ? ` (${meta})` : ''}`;
+    })
+    .join('\n');
+
   const synthesizedBody = [
     `Problem:\n${problemStatement}`,
     `Evidence:\n${evidence}`,
     `Proposal:\n${proposalSummary}`,
     `Steps:\n${implementationSteps}`,
     risks ? `Risks:\n${risks}` : null,
-    `Success metrics:\n${successMetrics}`,
+    metricsSummary ? `Success metrics:\n${metricsSummary}` : null,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -213,7 +284,7 @@ export async function POST(req: NextRequest) {
       proposal_summary: proposalSummary,
       implementation_steps: implementationSteps,
       risks: risks ?? null,
-      success_metrics: successMetrics,
+      success_metrics: metricsSummary,
       category,
       tags,
       is_anonymous: isAnonymous,
@@ -237,12 +308,36 @@ export async function POST(req: NextRequest) {
       proposal_summary: proposalSummary,
       implementation_steps: implementationSteps,
       risks,
-      success_metrics: successMetrics,
+      success_metrics: metricsSummary,
     }),
   });
 
   if (editError) {
     console.error('Failed to insert idea history', editError);
+  }
+
+  if (metricsPayload.length) {
+    const metricRows = metricsPayload.map((metric) => ({
+      idea_id: ideaId,
+      metric_label: metric.label,
+      success_definition: metric.definition,
+      baseline: metric.baseline,
+      target: metric.target,
+    }));
+
+    const { error: metricError } = await supabaseService
+      .schema('portal')
+      .from('idea_metrics')
+      .insert(metricRows);
+
+    if (metricError) {
+      console.error('Failed to insert idea metrics', metricError);
+      await supabaseService.schema('portal').from('ideas').delete().eq('id', ideaId);
+      if (uploadedPaths.length) {
+        await supabaseService.storage.from('portal-attachments').remove(uploadedPaths);
+      }
+      return NextResponse.json({ error: 'Unable to save idea metrics. Please try again.' }, { status: 500 });
+    }
   }
 
   if (acknowledged && !profile.rules_acknowledged_at) {
@@ -262,24 +357,25 @@ export async function POST(req: NextRequest) {
   await logAuditEvent({
     actorProfileId: profile.id,
     actorUserId: user.id,
-      action: 'idea_created',
-      entityType: 'idea',
-      entityId: ideaId,
-      meta: {
-        category,
-        tags,
-        is_anonymous: isAnonymous,
-        attachment_count: attachmentMeta.length,
-        problem_statement: problemStatement,
-        evidence,
-        proposal_summary: proposalSummary,
-        implementation_steps: implementationSteps,
-        risks: risks ?? null,
-        success_metrics: successMetrics,
-        ip_hash: ipHash,
-        user_agent: userAgent ?? null,
-      },
-    });
+    action: 'idea_created',
+    entityType: 'idea',
+    entityId: ideaId,
+    meta: {
+      category,
+      tags,
+      is_anonymous: isAnonymous,
+      attachment_count: attachmentMeta.length,
+      problem_statement: problemStatement,
+      evidence,
+      proposal_summary: proposalSummary,
+      implementation_steps: implementationSteps,
+      risks: risks ?? null,
+      metrics_count: metricsPayload.length,
+      metrics_summary: metricsSummary,
+      ip_hash: ipHash,
+      user_agent: userAgent ?? null,
+    },
+  });
 
   return NextResponse.json({ id: ideaId });
 }

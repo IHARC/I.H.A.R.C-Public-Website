@@ -29,7 +29,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let payload: { body?: unknown; parent_id?: unknown; is_official?: unknown; comment_type?: unknown };
+  let payload: {
+    body?: unknown;
+    parent_id?: unknown;
+    is_official?: unknown;
+    comment_type?: unknown;
+    evidence_url?: unknown;
+  };
   try {
     payload = await req.json();
   } catch (error) {
@@ -41,6 +47,7 @@ export async function POST(req: NextRequest) {
   const parentId = typeof payload.parent_id === 'string' ? payload.parent_id : null;
   const wantsOfficial = Boolean(payload.is_official);
   const rawCommentType = typeof payload.comment_type === 'string' ? payload.comment_type : null;
+  const rawEvidenceUrl = typeof payload.evidence_url === 'string' ? payload.evidence_url.trim() : null;
 
   if (!body) {
     return NextResponse.json({ error: 'Comment body is required' }, { status: 422 });
@@ -67,6 +74,27 @@ export async function POST(req: NextRequest) {
 
   const profile = await ensurePortalProfile(user.id);
 
+  let viewerOrganization: { name: string | null; verified: boolean } | null = null;
+  if (profile.organization_id) {
+    const { data: organizationRow, error: organizationError } = await portal
+      .from('organizations')
+      .select('name, verified')
+      .eq('id', profile.organization_id)
+      .maybeSingle();
+
+    if (organizationError) {
+      console.error('Failed to load organization for comment', organizationError);
+      return NextResponse.json({ error: 'Unable to verify organization status.' }, { status: 500 });
+    }
+
+    if (organizationRow) {
+      viewerOrganization = {
+        name: organizationRow.name ?? null,
+        verified: Boolean(organizationRow.verified),
+      };
+    }
+  }
+
   if (!profile.rules_acknowledged_at) {
     return NextResponse.json({ error: 'Please acknowledge the community rules before posting.' }, { status: 412 });
   }
@@ -75,15 +103,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please confirm your display name before posting.' }, { status: 412 });
   }
 
-  const withinLimit = await checkRateLimit({
+  const rateLimit = await checkRateLimit({
     profileId: profile.id,
     type: 'comment',
     limit: 20,
     cooldownMs: COMMENT_COOLDOWN_MS,
   });
-  if (!withinLimit) {
+  if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: 'You are commenting very quickly. Please wait a few minutes and try again.' },
+      {
+        error: 'You are commenting very quickly. Please wait a few minutes and try again.',
+        retry_in_ms: rateLimit.retryInMs,
+      },
       { status: 429 },
     );
   }
@@ -108,6 +139,7 @@ export async function POST(req: NextRequest) {
   }
 
   let parentDepth = 0;
+  let evidenceUrl: string | null = null;
   if (parentId) {
     const { data: parent, error: parentError } = await portal
       .from('comments')
@@ -134,11 +166,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const isOfficial = wantsOfficial && OFFICIAL_ROLES.has(profile.role ?? '');
+  const canAttemptOfficial = wantsOfficial && OFFICIAL_ROLES.has(profile.role ?? '');
 
   let commentType: 'question' | 'suggestion' | 'response' | 'official_note';
 
-  if (isOfficial) {
+  let isOfficial = canAttemptOfficial;
+
+  if (canAttemptOfficial) {
+    if (profile.role === 'org_rep' && !viewerOrganization?.verified) {
+      return NextResponse.json(
+        { error: 'Only verified organizations can post official responses.' },
+        { status: 403 },
+      );
+    }
+
     commentType = normalizedType && ['response', 'official_note'].includes(normalizedType)
       ? normalizedType
       : 'response';
@@ -146,6 +187,30 @@ export async function POST(req: NextRequest) {
     commentType = normalizedType && ['question', 'suggestion'].includes(normalizedType)
       ? normalizedType
       : 'suggestion';
+    isOfficial = false;
+  }
+
+  if (rawEvidenceUrl) {
+    try {
+      const parsed = new URL(rawEvidenceUrl);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new Error('Invalid protocol');
+      }
+      if (rawEvidenceUrl.length > 600) {
+        throw new Error('Evidence link too long');
+      }
+      evidenceUrl = parsed.toString();
+    } catch (error) {
+      console.error('Invalid evidence URL', error);
+      return NextResponse.json(
+        { error: 'Provide a valid evidence link starting with http:// or https://.' },
+        { status: 422 },
+      );
+    }
+  }
+
+  if (commentType !== 'suggestion') {
+    evidenceUrl = null;
   }
 
   const { data: insertedComment, error: insertError } = await portal
@@ -157,8 +222,9 @@ export async function POST(req: NextRequest) {
       body,
       is_official: isOfficial,
       comment_type: commentType,
+      evidence_url: evidenceUrl,
     })
-    .select('id, created_at, body, is_official, parent_comment_id')
+    .select('id, created_at, body, is_official, parent_comment_id, evidence_url')
     .single();
 
   if (insertError) {
@@ -181,6 +247,7 @@ export async function POST(req: NextRequest) {
       parent_comment_id: parentId,
       is_official: isOfficial,
       comment_type: commentType,
+      evidence_url: evidenceUrl,
       ip_hash: ipHash,
       user_agent: userAgent ?? null,
     },
@@ -192,5 +259,6 @@ export async function POST(req: NextRequest) {
     body: insertedComment.body,
     isOfficial,
     parentId: insertedComment.parent_comment_id,
+    evidenceUrl: insertedComment.evidence_url,
   });
 }

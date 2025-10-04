@@ -34,7 +34,7 @@ type ModeratePayload =
   | {
       action: 'resolve_flag';
       flag_id: string;
-      status: 'resolved' | 'rejected';
+      status: 'resolved' | 'rejected' | 'reviewing';
       notes?: string;
     }
   | {
@@ -183,14 +183,30 @@ deno.serve(async (req) => {
       }
       case 'resolve_flag': {
         const { flag_id, status, notes } = payload;
+        if (!notes?.trim()) {
+          return new Response(JSON.stringify({ error: 'Moderator note required' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        const noteValue = notes.trim().slice(0, 2000);
+        const updatePayload: Record<string, unknown> = {
+          status,
+          resolution_note: noteValue,
+        };
+
+        if (status === 'resolved' || status === 'rejected') {
+          updatePayload.resolved_by_profile_id = profile.id;
+          updatePayload.resolved_at = new Date().toISOString();
+        } else {
+          updatePayload.resolved_by_profile_id = null;
+          updatePayload.resolved_at = null;
+        }
+
         const { error } = await supabase
           .from('portal.flags')
-          .update({
-            status,
-            resolved_by_profile_id: profile.id,
-            resolved_at: new Date().toISOString(),
-            resolution_note: notes ?? null,
-          })
+          .update(updatePayload)
           .eq('id', flag_id);
         if (error) throw error;
 
@@ -216,7 +232,7 @@ deno.serve(async (req) => {
             await supabase.from('portal.idea_decisions').insert({
               idea_id: targetIdeaId,
               author_profile_id: profile.id,
-              summary: notes.trim().slice(0, 2000),
+              summary: noteValue,
               visibility: 'public',
             });
           }
@@ -226,7 +242,7 @@ deno.serve(async (req) => {
           action: `flag_${status}`,
           entity_type: 'flag',
           entity_id: flag_id,
-          meta: { notes: notes ?? null },
+          meta: { notes: noteValue },
         });
 
         return new Response(JSON.stringify({ status: 'flag_updated' }), {

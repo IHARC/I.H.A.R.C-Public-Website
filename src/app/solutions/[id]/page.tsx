@@ -12,7 +12,9 @@ import { RequestRevisionCard } from '@/components/portal/request-revision-card';
 import { EmptyState } from '@/components/portal/empty-state';
 import { StatusBadge } from '@/components/portal/status-badge';
 import { TagChips } from '@/components/portal/tag-chips';
+import { IdeaMetricsList, type IdeaMetricDisplay } from '@/components/portal/idea-metrics';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { Database } from '@/types/supabase';
 
 type IdeaRow = Database['portal']['Tables']['ideas']['Row'];
@@ -36,11 +38,21 @@ type CommentRow = {
   created_at: string;
   comment_type: Database['portal']['Enums']['comment_type'];
   is_official: boolean;
+  evidence_url: string | null;
   author: {
     id: string;
     display_name: string;
     organization: { name: string; verified: boolean } | null;
   } | null;
+};
+
+type MetricRow = {
+  id: string;
+  metric_label: string;
+  success_definition: string | null;
+  baseline: string | null;
+  target: string | null;
+  created_at: string;
 };
 
 type DecisionRow = {
@@ -125,12 +137,19 @@ export default async function IdeaDetailPage({
   const { data: commentRows } = await servicePortal
     .from('comments')
     .select(
-      `id, body, created_at, comment_type, is_official,
+      `id, body, created_at, comment_type, is_official, evidence_url,
        author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
     )
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
     .returns<CommentRow[]>();
+
+  const { data: metricRows } = await servicePortal
+    .from('idea_metrics')
+    .select('id, metric_label, success_definition, baseline, target, created_at')
+    .eq('idea_id', idea.id)
+    .order('created_at', { ascending: true })
+    .returns<MetricRow[]>();
 
   const { data: decisionsData } = await servicePortal
     .from('idea_decisions')
@@ -165,6 +184,24 @@ export default async function IdeaDetailPage({
     voterProfileId = viewerProfile.id;
   }
 
+  let viewerOrgName: string | null = null;
+  let viewerOrgVerified = false;
+
+  if (viewerProfile?.organization_id) {
+    const { data: viewerOrg, error: viewerOrgError } = await servicePortal
+      .from('organizations')
+      .select('name, verified')
+      .eq('id', viewerProfile.organization_id)
+      .maybeSingle();
+
+    if (viewerOrgError) {
+      console.error('Failed to load viewer organization', viewerOrgError);
+    } else if (viewerOrg) {
+      viewerOrgName = viewerOrg.name ?? null;
+      viewerOrgVerified = Boolean(viewerOrg.verified);
+    }
+  }
+
   let hasVoted = false;
   if (voterProfileId) {
     const { data: voteRow } = await portal
@@ -176,6 +213,14 @@ export default async function IdeaDetailPage({
     hasVoted = Boolean(voteRow);
   }
 
+  const metrics: IdeaMetricDisplay[] = (metricRows ?? []).map((metric) => ({
+    id: metric.id,
+    label: metric.metric_label,
+    definition: metric.success_definition,
+    baseline: metric.baseline,
+    target: metric.target,
+  }));
+
   const officialResponses = (commentRows ?? []).filter((comment) => comment.is_official);
   const communityComments: CommentNode[] = (commentRows ?? [])
     .filter((comment) => !comment.is_official)
@@ -185,6 +230,7 @@ export default async function IdeaDetailPage({
       createdAt: comment.created_at,
       isOfficial: comment.is_official,
       commentType: comment.comment_type,
+      evidenceUrl: comment.evidence_url ?? null,
       author: {
         displayName: comment.author?.display_name ?? 'Community member',
         organizationName: comment.author?.organization?.name ?? null,
@@ -209,6 +255,12 @@ export default async function IdeaDetailPage({
     : null;
 
   const viewerRole = viewerProfile?.role ?? null;
+  const canPostOfficial = Boolean(
+    viewerRole &&
+      (viewerRole === 'moderator' ||
+        viewerRole === 'admin' ||
+        (viewerRole === 'org_rep' && viewerOrgVerified)),
+  );
 
   const displayAuthor = idea.is_anonymous
     ? 'Anonymous'
@@ -248,21 +300,30 @@ export default async function IdeaDetailPage({
           </div>
         </header>
 
-        <section className="space-y-4">
-          {SECTION_CONFIG.map((section) => {
-            const key = section.key as keyof IdeaRecord;
-            const content = idea[key];
-            if (!content) return null;
-            return (
-              <article
-                key={section.key}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950"
-              >
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{section.title}</h2>
-                <p className="mt-2 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">{String(content)}</p>
-              </article>
-            );
-          })}
+        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Canonical summary</h2>
+            <Badge variant="secondary" className="uppercase tracking-wide">Locked</Badge>
+          </div>
+          <div className="mt-4 space-y-6">
+            {SECTION_CONFIG.map((section) => {
+              const key = section.key as keyof IdeaRecord;
+              const content = idea[key];
+              if (!content) return null;
+              return (
+                <div key={section.key} className="space-y-2">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{section.title}</h3>
+                  <p className="whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">{String(content)}</p>
+                </div>
+              );
+            })}
+            {metrics.length ? (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Success metrics</h3>
+                <IdeaMetricsList metrics={metrics} />
+              </div>
+            ) : null}
+          </div>
         </section>
 
         {attachments.length ? (
@@ -288,7 +349,14 @@ export default async function IdeaDetailPage({
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Questions & suggestions</h2>
             {user ? null : <Link href="/login" className="text-sm text-brand hover:underline">Sign in to participate</Link>}
           </div>
-          {user ? <CommentComposer ideaId={idea.id} /> : null}
+          {user ? (
+            <CommentComposer
+              ideaId={idea.id}
+              viewerRole={viewerRole ?? 'user'}
+              canPostOfficial={canPostOfficial}
+              officialOrganizationName={viewerOrgName}
+            />
+          ) : null}
           {communityComments.length ? (
             <CommentThread comments={communityComments} />
           ) : (
@@ -314,6 +382,9 @@ export default async function IdeaDetailPage({
         {officialResponses.length ? (
           <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Official responses</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Updates shared by verified partners and moderators are pinned here for easy reference.
+            </p>
             <CommentThread
               comments={officialResponses.map((comment) => ({
                 id: comment.id,
@@ -321,6 +392,7 @@ export default async function IdeaDetailPage({
                 createdAt: comment.created_at,
                 isOfficial: true,
                 commentType: comment.comment_type,
+                evidenceUrl: comment.evidence_url ?? null,
                 author: {
                   displayName: comment.author?.display_name ?? 'Official response',
                   organizationName: comment.author?.organization?.name ?? null,

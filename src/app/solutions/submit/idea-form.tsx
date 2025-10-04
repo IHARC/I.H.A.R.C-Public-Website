@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,15 @@ const STEPS: Array<{ key: string; title: string; description: string }> = [
 ];
 
 const MIN_SECTION_LENGTH = 40;
+const MAX_METRICS = 6;
+
+type MetricDraft = {
+  id: string;
+  label: string;
+  definition: string;
+  baseline: string;
+  target: string;
+};
 
 type FormState = {
   title: string;
@@ -36,7 +45,6 @@ type FormState = {
   proposalSummary: string;
   implementationSteps: string;
   risks: string;
-  successMetrics: string;
   tags: string;
 };
 
@@ -48,9 +56,16 @@ const INITIAL_STATE: FormState = {
   proposalSummary: '',
   implementationSteps: '',
   risks: '',
-  successMetrics: '',
   tags: '',
 };
+
+const createMetricDraft = (): MetricDraft => ({
+  id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+  label: '',
+  definition: '',
+  baseline: '',
+  target: '',
+});
 
 export function IdeaSubmissionForm({
   rulesAcknowledged,
@@ -68,9 +83,30 @@ export function IdeaSubmissionForm({
   const [pending, startTransition] = useTransition();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
+  const [metrics, setMetrics] = useState<MetricDraft[]>([createMetricDraft()]);
+  const [cooldown, setCooldown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (cooldown === null) {
+      return;
+    }
+    if (cooldown <= 0) {
+      setCooldown(null);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setCooldown((prev) => {
+        if (prev === null) return null;
+        const next = prev - 1;
+        return next > 0 ? next : 0;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
 
   const currentStep = STEPS[step];
   const isFinalStep = step === STEPS.length - 1;
+  const isCoolingDown = typeof cooldown === 'number' && cooldown > 0;
 
   const handleRulesAcknowledge = async () => {
     try {
@@ -122,6 +158,34 @@ export function IdeaSubmissionForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const updateMetric = <K extends keyof Omit<MetricDraft, 'id'>>(metricId: string, key: K, value: MetricDraft[K]) => {
+    setMetrics((prev) =>
+      prev.map((metric) => (metric.id === metricId ? { ...metric, [key]: value } : metric)),
+    );
+  };
+
+  const addMetric = () => {
+    setMetrics((prev) => {
+      if (prev.length >= MAX_METRICS) return prev;
+      return [...prev, createMetricDraft()];
+    });
+  };
+
+  const removeMetric = (metricId: string) => {
+    setMetrics((prev) => (prev.length === 1 ? prev : prev.filter((metric) => metric.id !== metricId)));
+  };
+
+  const metricsAreValid = useMemo(
+    () =>
+      metrics.some((metric) => {
+        const label = metric.label.trim();
+        if (label.length < 3) return false;
+        const hasDetail = metric.definition.trim().length > 0 || metric.target.trim().length > 0 || metric.baseline.trim().length > 0;
+        return hasDetail;
+      }),
+    [metrics],
+  );
+
   const stepIsValid = useMemo(() => {
     switch (step) {
       case 0:
@@ -139,11 +203,11 @@ export function IdeaSubmissionForm({
       case 4:
         return true; // risks optional but encouraged
       case 5:
-        return form.successMetrics.trim().length >= MIN_SECTION_LENGTH;
+        return metricsAreValid;
       default:
         return false;
     }
-  }, [displayConfirmed, form, step]);
+  }, [displayConfirmed, form, step, metricsAreValid]);
 
   const handleNext = () => {
     if (step < STEPS.length - 1) {
@@ -158,6 +222,28 @@ export function IdeaSubmissionForm({
   };
 
   const handleSubmit = () => {
+    const normalizedMetrics = metrics
+      .map((metric) => ({
+        label: metric.label.trim(),
+        definition: metric.definition.trim(),
+        baseline: metric.baseline.trim(),
+        target: metric.target.trim(),
+      }))
+      .filter((metric) => metric.label.length > 0);
+
+    if (!normalizedMetrics.length) {
+      toast({
+        title: 'Add your success metrics',
+        description: 'Define at least one measurable indicator before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const metricsAggregate = normalizedMetrics
+      .map((metric) => `${metric.label} ${metric.definition} ${metric.baseline} ${metric.target}`.trim())
+      .join('\n');
+
     const aggregate = [
       form.title,
       form.problemStatement,
@@ -165,7 +251,7 @@ export function IdeaSubmissionForm({
       form.proposalSummary,
       form.implementationSteps,
       form.risks,
-      form.successMetrics,
+      metricsAggregate,
     ]
       .filter(Boolean)
       .join('\n');
@@ -197,10 +283,10 @@ export function IdeaSubmissionForm({
     formData.set('proposal_summary', form.proposalSummary.trim());
     formData.set('implementation_steps', form.implementationSteps.trim());
     formData.set('risks', form.risks.trim());
-    formData.set('success_metrics', form.successMetrics.trim());
     formData.set('tags', form.tags.trim());
     formData.set('is_anonymous', isAnon ? 'true' : 'false');
     formData.set('acknowledged', acknowledged ? 'true' : 'false');
+    formData.set('metrics', JSON.stringify(normalizedMetrics));
 
     attachments.forEach((attachment) => {
       formData.append('attachments', attachment.file, attachment.file.name);
@@ -214,6 +300,15 @@ export function IdeaSubmissionForm({
         });
         if (!response.ok) {
           const payload = await response.json().catch(() => ({}));
+          if (response.status === 429 && typeof payload.retry_in_ms === 'number') {
+            setCooldown(Math.ceil(payload.retry_in_ms / 1000));
+            toast({
+              title: 'Cooldown in effect',
+              description: 'Please wait before submitting another idea.',
+              variant: 'destructive',
+            });
+            return;
+          }
           throw new Error(payload.error || 'Idea submission failed');
         }
         const payload = await response.json();
@@ -235,6 +330,15 @@ export function IdeaSubmissionForm({
   return (
     <>
       <RulesModal open={!acknowledged} onAcknowledge={handleRulesAcknowledge} />
+      {typeof cooldown === 'number' && cooldown > 0 && (
+        <Alert className="mb-4 border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle>Cooling down</AlertTitle>
+          <AlertDescription>
+            Thanks for the momentum. You can submit another idea in approximately {cooldown} second{cooldown === 1 ? '' : 's'}.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="mb-6 flex flex-wrap gap-2 text-sm text-slate-500">
         {STEPS.map((item, index) => {
           const active = index === step;
@@ -346,6 +450,11 @@ export function IdeaSubmissionForm({
                 placeholder="Share data, lived experience, or observations that show this problem needs action."
               />
               <p className="text-xs text-slate-500">Evidence is required before you can continue.</p>
+              {form.evidence.trim().length < MIN_SECTION_LENGTH && (
+                <p className="text-xs text-amber-600 dark:text-amber-300">
+                  Cite a statistic, observation, or peer insight so moderators can validate quickly.
+                </p>
+              )}
             </div>
           )}
           {step === 2 && (
@@ -390,17 +499,103 @@ export function IdeaSubmissionForm({
           )}
           {step === 5 && (
             <div className="space-y-5">
-              <div className="grid gap-2">
-                <Label htmlFor="metrics">How will we measure success?</Label>
-                <Textarea
-                  id="metrics"
-                  rows={6}
-                  value={form.successMetrics}
-                  onChange={(event) => updateField('successMetrics', event.target.value)}
-                  maxLength={2500}
-                  placeholder="Define what success looks like, what data to collect, or milestones that prove it is working."
-                />
-                <p className="text-xs text-slate-500">Metrics are required before submitting.</p>
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Success metrics</Label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Define how neighbours will know the idea is working. Include targets or milestones.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={addMetric}
+                    disabled={metrics.length >= MAX_METRICS}
+                  >
+                    Add metric
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {metrics.map((metric, index) => {
+                    const metricLabelId = `metric-${metric.id}-label`;
+                    const metricDefinitionId = `metric-${metric.id}-definition`;
+                    const baselineId = `metric-${metric.id}-baseline`;
+                    const targetId = `metric-${metric.id}-target`;
+                    const showRemove = metrics.length > 1;
+                    return (
+                      <div
+                        key={metric.id}
+                        className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Metric {index + 1}
+                          </span>
+                          {showRemove && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeMetric(metric.id)}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor={metricLabelId}>Metric title</Label>
+                          <Input
+                            id={metricLabelId}
+                            value={metric.label}
+                            maxLength={160}
+                            onChange={(event) => updateMetric(metric.id, 'label', event.target.value)}
+                            placeholder="Ex: Encampment outreach visits completed"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor={metricDefinitionId}>Definition or methodology</Label>
+                          <Textarea
+                            id={metricDefinitionId}
+                            rows={3}
+                            maxLength={500}
+                            value={metric.definition}
+                            onChange={(event) => updateMetric(metric.id, 'definition', event.target.value)}
+                            placeholder="What counts towards this metric? Which partners are reporting it?"
+                          />
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label htmlFor={baselineId}>Baseline (optional)</Label>
+                            <Input
+                              id={baselineId}
+                              value={metric.baseline}
+                              maxLength={120}
+                              onChange={(event) => updateMetric(metric.id, 'baseline', event.target.value)}
+                              placeholder="Ex: 12 visits per week"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor={targetId}>Target / goal</Label>
+                            <Input
+                              id={targetId}
+                              value={metric.target}
+                              maxLength={120}
+                              onChange={(event) => updateMetric(metric.id, 'target', event.target.value)}
+                              placeholder="Ex: Increase to 20 visits by January"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!metricsAreValid && (
+                  <p className="text-xs text-amber-600 dark:text-amber-300">
+                    Add detail or a target so moderators can validate the metric with partners.
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label>Attachments</Label>
@@ -419,12 +614,12 @@ export function IdeaSubmissionForm({
               Back
             </Button>
             {!isFinalStep && (
-              <Button type="button" onClick={handleNext} disabled={!stepIsValid || pending}>
+              <Button type="button" onClick={handleNext} disabled={!stepIsValid || pending || isCoolingDown}>
                 Continue
               </Button>
             )}
             {isFinalStep && (
-              <Button type="button" onClick={handleSubmit} disabled={!stepIsValid || pending}>
+              <Button type="button" onClick={handleSubmit} disabled={!stepIsValid || pending || isCoolingDown}>
                 {pending ? 'Submitting…' : 'Submit idea'}
               </Button>
             )}

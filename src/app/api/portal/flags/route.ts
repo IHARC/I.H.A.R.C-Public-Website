@@ -57,10 +57,13 @@ export async function POST(req: NextRequest) {
 
   const profile = await ensurePortalProfile(user.id);
 
-  const withinLimit = await checkRateLimit({ profileId: profile.id, type: 'flag', limit: 10 });
-  if (!withinLimit) {
+  const rateLimit = await checkRateLimit({ profileId: profile.id, type: 'flag', limit: 10 });
+  if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: 'You are submitting flags very quickly. Please wait a few minutes and try again.' },
+      {
+        error: 'You are submitting flags very quickly. Please wait a few minutes and try again.',
+        retry_in_ms: rateLimit.retryInMs,
+      },
       { status: 429 },
     );
   }
