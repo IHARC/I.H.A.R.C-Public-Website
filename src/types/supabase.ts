@@ -855,6 +855,7 @@ export type Database = {
           bio: string | null;
           rules_acknowledged_at: string | null;
           last_seen_at: string | null;
+          display_name_confirmed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -868,6 +869,7 @@ export type Database = {
           bio?: string | null;
           rules_acknowledged_at?: string | null;
           last_seen_at?: string | null;
+          display_name_confirmed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -881,6 +883,7 @@ export type Database = {
           bio?: string | null;
           rules_acknowledged_at?: string | null;
           last_seen_at?: string | null;
+          display_name_confirmed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -905,6 +908,12 @@ export type Database = {
           author_profile_id: string;
           title: string;
           body: string;
+          problem_statement: string | null;
+          evidence: string | null;
+          proposal_summary: string | null;
+          implementation_steps: string | null;
+          risks: string | null;
+          success_metrics: string | null;
           category: Database["portal"]["Enums"]["idea_category"];
           tags: string[];
           status: Database["portal"]["Enums"]["idea_status"];
@@ -913,6 +922,7 @@ export type Database = {
           vote_count: number;
           comment_count: number;
           flag_count: number;
+          assignee_profile_id: string | null;
           last_activity_at: string;
           created_at: string;
           updated_at: string;
@@ -923,6 +933,12 @@ export type Database = {
           author_profile_id: string;
           title: string;
           body: string;
+          problem_statement?: string | null;
+          evidence?: string | null;
+          proposal_summary?: string | null;
+          implementation_steps?: string | null;
+          risks?: string | null;
+          success_metrics?: string | null;
           category?: Database["portal"]["Enums"]["idea_category"];
           tags?: string[];
           status?: Database["portal"]["Enums"]["idea_status"];
@@ -931,6 +947,7 @@ export type Database = {
           vote_count?: number;
           comment_count?: number;
           flag_count?: number;
+          assignee_profile_id?: string | null;
           last_activity_at?: string;
           created_at?: string;
           updated_at?: string;
@@ -940,6 +957,12 @@ export type Database = {
           author_profile_id?: string;
           title?: string;
           body?: string;
+          problem_statement?: string | null;
+          evidence?: string | null;
+          proposal_summary?: string | null;
+          implementation_steps?: string | null;
+          risks?: string | null;
+          success_metrics?: string | null;
           category?: Database["portal"]["Enums"]["idea_category"];
           tags?: string[];
           status?: Database["portal"]["Enums"]["idea_status"];
@@ -948,6 +971,7 @@ export type Database = {
           vote_count?: number;
           comment_count?: number;
           flag_count?: number;
+          assignee_profile_id?: string | null;
           last_activity_at?: string;
           created_at?: string;
           updated_at?: string;
@@ -956,6 +980,12 @@ export type Database = {
           {
             foreignKeyName: "ideas_author_profile_id_fkey";
             columns: ["author_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "ideas_assignee_profile_id_fkey";
+            columns: ["assignee_profile_id"];
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           }?,
@@ -1006,6 +1036,7 @@ export type Database = {
           parent_comment_id: string | null;
           body: string;
           is_official: boolean;
+          comment_type: Database["portal"]["Enums"]["comment_type"];
           depth: number;
           created_at: string;
           updated_at: string;
@@ -1017,6 +1048,7 @@ export type Database = {
           parent_comment_id?: string | null;
           body: string;
           is_official?: boolean;
+          comment_type?: Database["portal"]["Enums"]["comment_type"];
           depth?: number;
           created_at?: string;
           updated_at?: string;
@@ -1028,6 +1060,7 @@ export type Database = {
           parent_comment_id?: string | null;
           body?: string;
           is_official?: boolean;
+          comment_type?: Database["portal"]["Enums"]["comment_type"];
           depth?: number;
           created_at?: string;
           updated_at?: string;
@@ -1095,6 +1128,7 @@ export type Database = {
           status: Database["portal"]["Enums"]["flag_status"];
           resolved_by_profile_id: string | null;
           resolved_at: string | null;
+          resolution_note: string | null;
           created_at: string;
           updated_at: string;
           idea_id: string | null;
@@ -1110,6 +1144,7 @@ export type Database = {
           status?: Database["portal"]["Enums"]["flag_status"];
           resolved_by_profile_id?: string | null;
           resolved_at?: string | null;
+          resolution_note?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1123,6 +1158,7 @@ export type Database = {
           status?: Database["portal"]["Enums"]["flag_status"];
           resolved_by_profile_id?: string | null;
           resolved_at?: string | null;
+          resolution_note?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1147,6 +1183,110 @@ export type Database = {
           }?,
           {
             foreignKeyName: "portal_flags_idea_fk";
+            columns: ["idea_id"];
+            referencedRelation: "ideas";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      idea_decisions: {
+        Row: {
+          id: string;
+          idea_id: string;
+          author_profile_id: string | null;
+          summary: string;
+          visibility: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          idea_id: string;
+          author_profile_id?: string | null;
+          summary: string;
+          visibility?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          idea_id?: string;
+          author_profile_id?: string | null;
+          summary?: string;
+          visibility?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "idea_decisions_author_profile_id_fkey";
+            columns: ["author_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "idea_decisions_idea_id_fkey";
+            columns: ["idea_id"];
+            referencedRelation: "ideas";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          profile_id: string | null;
+          recipient_email: string;
+          subject: string;
+          body_text: string;
+          body_html: string | null;
+          idea_id: string | null;
+          notification_type: string;
+          channels: string[];
+          payload: Json;
+          status: string;
+          created_at: string;
+          sent_at: string | null;
+          acknowledged_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          profile_id?: string | null;
+          recipient_email: string;
+          subject: string;
+          body_text: string;
+          body_html?: string | null;
+          idea_id?: string | null;
+          notification_type: string;
+          channels?: string[];
+          payload?: Json;
+          status?: string;
+          created_at?: string;
+          sent_at?: string | null;
+          acknowledged_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string | null;
+          recipient_email?: string;
+          subject?: string;
+          body_text?: string;
+          body_html?: string | null;
+          idea_id?: string | null;
+          notification_type?: string;
+          channels?: string[];
+          payload?: Json;
+          status?: string;
+          created_at?: string;
+          sent_at?: string | null;
+          acknowledged_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "notifications_idea_id_fkey";
             columns: ["idea_id"];
             referencedRelation: "ideas";
             referencedColumns: ["id"];
@@ -1257,6 +1397,7 @@ export type Database = {
         | "adopted"
         | "not_feasible"
         | "archived";
+      comment_type: "question" | "suggestion" | "response" | "official_note";
       flag_entity_type: "idea" | "comment";
       flag_reason: "privacy" | "abuse" | "hate" | "spam" | "wrong_cat" | "other";
       flag_status: "open" | "reviewing" | "resolved" | "rejected";

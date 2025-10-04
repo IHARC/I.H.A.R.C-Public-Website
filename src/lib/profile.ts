@@ -41,3 +41,29 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
 
   return inserted;
 }
+
+export async function getUserEmailForProfile(profileId: string) {
+  const supabase = createSupabaseServiceClient();
+
+  const { data: profile, error } = await supabase
+    .from('portal.profiles')
+    .select('user_id')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!profile?.user_id) {
+    return null;
+  }
+
+  const { data, error: userError } = await supabase.auth.admin.getUserById(profile.user_id);
+
+  if (userError) {
+    throw userError;
+  }
+
+  return data.user?.email ?? null;
+}

@@ -1,163 +1,331 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { ensurePortalProfile } from '@/lib/profile';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
-import { IdeaCard } from '@/components/portal/idea-card';
+import { ensurePortalProfile } from '@/lib/profile';
 import { UpvoteButton } from '@/components/portal/upvote-button';
-import { InteractiveCommentThread } from '@/components/portal/interactive-comment-thread';
 import { CommentComposer } from '@/components/portal/comment-composer';
-import { CommentNode } from '@/components/portal/comment-thread';
+import { CommentThread, type CommentNode } from '@/components/portal/comment-thread';
+import { IdeaTimeline, type IdeaTimelineEvent } from '@/components/portal/idea-timeline';
+import { IdeaAssignmentCard, type AssignmentInfo } from '@/components/portal/assignment-card';
+import { RequestRevisionCard } from '@/components/portal/request-revision-card';
 import { EmptyState } from '@/components/portal/empty-state';
+import { StatusBadge } from '@/components/portal/status-badge';
+import { TagChips } from '@/components/portal/tag-chips';
 import { Button } from '@/components/ui/button';
+import type { Database } from '@/types/supabase';
+
+interface IdeaRecord extends Database['portal']['Tables']['ideas']['Row'] {
+  author: {
+    id: string;
+    display_name: string;
+    organization: { name: string; verified: boolean } | null;
+  } | null;
+  assignee: {
+    id: string;
+    display_name: string;
+    organization: { name: string; verified: boolean } | null;
+  } | null;
+}
+
+type CommentRow = {
+  id: string;
+  body: string;
+  created_at: string;
+  comment_type: Database['portal']['Enums']['comment_type'];
+  is_official: boolean;
+  author: {
+    id: string;
+    display_name: string;
+    organization: { name: string; verified: boolean } | null;
+  } | null;
+};
+
+type DecisionRow = {
+  id: string;
+  summary: string;
+  visibility: string;
+  created_at: string;
+  author: {
+    id: string;
+    display_name: string;
+    organization: { name: string; verified: boolean } | null;
+  } | null;
+};
+
+type AuditRow = {
+  id: string;
+  action: string;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+  actor: {
+    id: string | null;
+    display_name: string | null;
+    organization: { name: string; verified: boolean } | null;
+  } | null;
+};
+
+const SECTION_CONFIG = [
+  { key: 'problem_statement', title: 'Problem' },
+  { key: 'evidence', title: 'Evidence' },
+  { key: 'proposal_summary', title: 'Proposal' },
+  { key: 'implementation_steps', title: 'Steps' },
+  { key: 'risks', title: 'Risks & supports' },
+  { key: 'success_metrics', title: 'Success metrics' },
+] as const;
 
 export default async function IdeaDetailPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseRSCClient();
   const service = createSupabaseServiceClient();
 
-  const { data: idea, error } = await supabase
+  const { data: idea, error: ideaError } = await service
     .from('portal.ideas')
-    .select('*')
+    .select(
+      `*,
+      author:author_profile_id(
+        id,
+        display_name,
+        organization:organization_id(name, verified)
+      ),
+      assignee:assignee_profile_id(
+        id,
+        display_name,
+        organization:organization_id(name, verified)
+      )`
+    )
     .eq('id', params.id)
-    .maybeSingle();
+    .maybeSingle<IdeaRecord>();
 
-  if (error) {
-    console.error(error);
+  if (ideaError) {
+    console.error('Failed to load idea', ideaError);
   }
 
   if (!idea) {
     notFound();
   }
 
-  const { data: authorProfile } = await supabase
-    .from('portal.profiles')
-    .select('id, display_name, organization_id')
-    .eq('id', idea.author_profile_id)
-    .maybeSingle();
+  const attachments = await resolveAttachments(service, (idea.attachments as Array<{ path: string; name?: string }>) ?? []);
 
-  const organizationId = authorProfile?.organization_id;
-  const { data: organization } = organizationId
-    ? await supabase
-        .from('portal.organizations')
-        .select('id, name, verified')
-        .eq('id', organizationId)
-        .maybeSingle()
-    : { data: null };
-
-  const attachments = await resolveAttachments(service, idea.attachments ?? []);
-
-  const { data: comments } = await supabase
+  const { data: commentRows } = await service
     .from('portal.comments')
-    .select('*')
+    .select(
+      `id, body, created_at, comment_type, is_official,
+       author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
+    )
     .eq('idea_id', idea.id)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .returns<CommentRow[]>();
 
-  const commentProfilesIds = Array.from(new Set((comments ?? []).map((comment) => comment.author_profile_id)));
-  const { data: commentProfiles } = await supabase
-    .from('portal.profiles')
-    .select('id, display_name, organization_id')
-    .in('id', commentProfilesIds.length ? commentProfilesIds : ['00000000-0000-0000-0000-000000000000']);
+  const { data: decisionsData } = await service
+    .from('portal.idea_decisions')
+    .select(
+      `id, summary, visibility, created_at,
+       author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
+    )
+    .eq('idea_id', idea.id)
+    .order('created_at', { ascending: true })
+    .returns<DecisionRow[]>();
 
-  const commentOrgIds = Array.from(
-    new Set((commentProfiles ?? []).map((profile) => profile.organization_id).filter(Boolean)),
-  ) as string[];
-
-  const { data: commentOrganizations } = await supabase
-    .from('portal.organizations')
-    .select('id, name, verified')
-    .in('id', commentOrgIds.length ? commentOrgIds : ['00000000-0000-0000-0000-000000000000']);
-
-  const profileMap = new Map((commentProfiles ?? []).map((profile) => [profile.id, profile]));
-  const organizationMap = new Map((commentOrganizations ?? []).map((org) => [org.id, org]));
-
-  const commentTree = buildCommentTree(comments ?? [], profileMap, organizationMap);
+  const { data: auditEntries } = await service
+    .from('portal.audit_log')
+    .select(
+      `id, action, meta, created_at,
+       actor:actor_profile_id(id, display_name, organization:organization_id(name, verified))`
+    )
+    .eq('entity_id', idea.id)
+    .eq('entity_type', 'idea')
+    .order('created_at', { ascending: true })
+    .returns<AuditRow[]>();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let viewerProfile: Awaited<ReturnType<typeof ensurePortalProfile>> | null = null;
   let voterProfileId: string | null = null;
-  let userProfile = null;
+
   if (user) {
-    userProfile = await ensurePortalProfile(user.id);
-    voterProfileId = userProfile.id;
+    viewerProfile = await ensurePortalProfile(user.id);
+    voterProfileId = viewerProfile.id;
   }
 
-  const { data: voteRow } = voterProfileId
-    ? await supabase
-        .from('portal.votes')
-        .select('idea_id')
-        .eq('idea_id', idea.id)
-        .eq('voter_profile_id', voterProfileId)
-        .maybeSingle()
-    : { data: null };
+  let hasVoted = false;
+  if (voterProfileId) {
+    const { data: voteRow } = await supabase
+      .from('portal.votes')
+      .select('idea_id')
+      .eq('idea_id', idea.id)
+      .eq('voter_profile_id', voterProfileId)
+      .maybeSingle();
+    hasVoted = Boolean(voteRow);
+  }
 
-  const summaryIdea = {
-    id: idea.id,
-    title: idea.title,
-    body: idea.body,
-    category: idea.category,
-    status: idea.status,
-    tags: idea.tags ?? [],
-    voteCount: idea.vote_count ?? 0,
-    commentCount: idea.comment_count ?? 0,
-    lastActivityAt: idea.last_activity_at,
-    createdAt: idea.created_at,
-    isAnonymous: idea.is_anonymous,
-    authorDisplayName: authorProfile?.display_name ?? 'Community Member',
-    organizationName: organization?.name ?? null,
-    orgVerified: organization?.verified ?? false,
-    officialCount: comments?.filter((comment) => comment.is_official).length ?? 0,
-  };
+  const officialResponses = (commentRows ?? []).filter((comment) => comment.is_official);
+  const communityComments: CommentNode[] = (commentRows ?? [])
+    .filter((comment) => !comment.is_official)
+    .map((comment) => ({
+      id: comment.id,
+      body: comment.body,
+      createdAt: comment.created_at,
+      isOfficial: comment.is_official,
+      commentType: comment.comment_type,
+      author: {
+        displayName: comment.author?.display_name ?? 'Community member',
+        organizationName: comment.author?.organization?.name ?? null,
+        orgVerified: comment.author?.organization?.verified ?? false,
+      },
+    }));
+
+  const timelineEvents = buildTimeline({
+    idea,
+    officialResponses,
+    decisions: decisionsData ?? [],
+    audits: auditEntries ?? [],
+    viewerProfile,
+  });
+
+  const assignment: AssignmentInfo | null = idea.assignee
+    ? {
+        id: idea.assignee.id,
+        displayName: idea.assignee.display_name,
+        organizationName: idea.assignee.organization?.name ?? null,
+      }
+    : null;
+
+  const viewerRole = viewerProfile?.role ?? null;
+
+  const displayAuthor = idea.is_anonymous
+    ? 'Anonymous'
+    : idea.author?.display_name ?? 'Community member';
+  const lastActivity = idea.last_activity_at ?? idea.created_at;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10">
-      <IdeaCard
-        idea={summaryIdea}
-        actions={
-          voterProfileId ? (
-            <UpvoteButton ideaId={idea.id} initialVotes={summaryIdea.voteCount} initialVoted={Boolean(voteRow)} />
-          ) : null
-        }
-      />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+      <div className="space-y-6">
+        <header className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                <StatusBadge status={idea.status} />
+                <span className="uppercase tracking-wide">{idea.category}</span>
+              </div>
+              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">{idea.title}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+                <span>By {displayAuthor}</span>
+                {idea.author?.organization?.name && !idea.is_anonymous ? (
+                  <span>· {idea.author.organization.name}</span>
+                ) : null}
+                <span>
+                  Submitted {new Date(idea.created_at).toLocaleDateString('en-CA')} · Last activity{' '}
+                  {new Date(lastActivity).toLocaleDateString('en-CA')}
+                </span>
+              </div>
+              <TagChips tags={idea.tags ?? []} />
+            </div>
+            {voterProfileId ? (
+              <UpvoteButton ideaId={idea.id} initialVotes={idea.vote_count ?? 0} initialVoted={hasVoted} />
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login">Sign in to vote</Link>
+              </Button>
+            )}
+          </div>
+        </header>
 
-      {attachments.length ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Attachments</h2>
-          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-            {attachments.map((attachment) => (
-              <li key={attachment.path} className="flex items-center justify-between rounded border border-slate-200 p-2 dark:border-slate-800">
-                <span>{attachment.name}</span>
-                <Button asChild variant="outline" size="sm">
-                  <Link href={attachment.signedUrl} target="_blank" rel="noopener noreferrer">
-                    Download
-                  </Link>
-                </Button>
-              </li>
-            ))}
-          </ul>
+        <section className="space-y-4">
+          {SECTION_CONFIG.map((section) => {
+            const content = (idea as Record<string, unknown>)[section.key];
+            if (!content) return null;
+            return (
+              <article
+                key={section.key}
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+              >
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{section.title}</h2>
+                <p className="mt-2 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">{String(content)}</p>
+              </article>
+            );
+          })}
         </section>
-      ) : null}
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Discussion</h2>
-          {user ? null : <Link href="/login" className="text-sm text-brand hover:underline">Sign in to participate</Link>}
-        </div>
-        {user ? <CommentComposer ideaId={idea.id} /> : null}
-        {commentTree.length ? (
-          <InteractiveCommentThread ideaId={idea.id} comments={commentTree} canReply={Boolean(user)} />
-        ) : (
-          <EmptyState title="No comments yet" description="Start the conversation with your perspective." />
-        )}
-      </section>
+        {attachments.length ? (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Attachments</h2>
+            <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              {attachments.map((attachment) => (
+                <li key={attachment.path} className="flex items-center justify-between rounded border border-slate-200 p-2 dark:border-slate-800">
+                  <span>{attachment.name}</span>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={attachment.signedUrl} target="_blank" rel="noopener noreferrer">
+                      Download
+                    </Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Questions & suggestions</h2>
+            {user ? null : <Link href="/login" className="text-sm text-brand hover:underline">Sign in to participate</Link>}
+          </div>
+          {user ? <CommentComposer ideaId={idea.id} /> : null}
+          {communityComments.length ? (
+            <CommentThread comments={communityComments} />
+          ) : (
+            <EmptyState
+              title="No community input yet"
+              description="Share a question or suggestion to move this idea forward."
+            />
+          )}
+        </section>
+      </div>
+
+      <aside className="space-y-6">
+        <IdeaAssignmentCard
+          ideaId={idea.id}
+          assignee={assignment}
+          viewerProfileId={viewerProfile?.id ?? null}
+          viewerRole={viewerRole}
+          viewerDisplayName={viewerProfile?.display_name ?? null}
+        />
+
+        {viewerRole === 'moderator' || viewerRole === 'admin' ? <RequestRevisionCard ideaId={idea.id} /> : null}
+
+        {officialResponses.length ? (
+          <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Official responses</h2>
+            <CommentThread
+              comments={officialResponses.map((comment) => ({
+                id: comment.id,
+                body: comment.body,
+                createdAt: comment.created_at,
+                isOfficial: true,
+                commentType: comment.comment_type,
+                author: {
+                  displayName: comment.author?.display_name ?? 'Official response',
+                  organizationName: comment.author?.organization?.name ?? null,
+                  orgVerified: comment.author?.organization?.verified ?? false,
+                },
+              }))}
+            />
+          </section>
+        ) : null}
+
+        <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Timeline</h2>
+          <IdeaTimeline events={timelineEvents} />
+        </section>
+      </aside>
     </div>
   );
 }
 
 async function resolveAttachments(
   supabase: ReturnType<typeof createSupabaseServiceClient>,
-  attachments: Array<{ path: string; name?: string; content_type?: string; size?: number }> | null,
+  attachments: Array<{ path: string; name?: string }> | null,
 ) {
   if (!attachments?.length) return [] as Array<{ path: string; signedUrl: string; name: string }>;
 
@@ -178,50 +346,109 @@ async function resolveAttachments(
   return results.filter(Boolean) as Array<{ path: string; signedUrl: string; name: string }>;
 }
 
-function buildCommentTree(
-  comments: Array<{
-    id: string;
-    idea_id: string;
-    author_profile_id: string;
-    parent_comment_id: string | null;
-    body: string;
-    is_official: boolean;
-    depth: number;
-    created_at: string;
-  }>,
-  profileMap: Map<string, { id: string; display_name: string; organization_id: string | null }>,
-  organizationMap: Map<string, { id: string; name: string; verified: boolean }>,
-): CommentNode[] {
-  const nodes = comments.map<CommentNode>((comment) => {
-    const profile = profileMap.get(comment.author_profile_id);
-    const organization = profile?.organization_id ? organizationMap.get(profile.organization_id) : null;
-    return {
-      id: comment.id,
-      body: comment.body,
-      createdAt: comment.created_at,
-      isOfficial: comment.is_official,
-      depth: comment.depth,
-      author: {
-        displayName: profile?.display_name ?? 'Community Member',
-        organizationName: organization?.name ?? null,
-        orgVerified: organization?.verified ?? false,
-      },
-      children: [],
-    };
+type TimelineBuilderArgs = {
+  idea: IdeaRecord;
+  officialResponses: CommentRow[];
+  decisions: DecisionRow[];
+  audits: AuditRow[];
+  viewerProfile: Awaited<ReturnType<typeof ensurePortalProfile>> | null;
+};
+
+function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfile }: TimelineBuilderArgs) {
+  const events: IdeaTimelineEvent[] = [];
+
+  events.push({
+    id: `${idea.id}-created`,
+    timestamp: idea.created_at,
+    type: 'created',
+    title: 'Idea submitted',
+    actor: idea.is_anonymous
+      ? null
+      : {
+          displayName: idea.author?.display_name ?? 'Community member',
+          organizationName: idea.author?.organization?.name ?? undefined,
+        },
+    description: null,
   });
 
-  const nodeMap = new Map<string, CommentNode>();
-  nodes.forEach((node) => nodeMap.set(node.id, node));
-  const roots: CommentNode[] = [];
+  audits
+    .filter((entry) => entry.action.startsWith('idea_status_'))
+    .forEach((entry) => {
+      const status = entry.action.replace('idea_status_', '').replace(/_/g, ' ');
+      const note = typeof entry.meta?.note === 'string' ? String(entry.meta?.note) : null;
+      events.push({
+        id: entry.id,
+        timestamp: entry.created_at,
+        type: 'status',
+        title: `Status changed to ${status}`,
+        status,
+        description: note,
+        actor: entry.actor?.display_name
+          ? {
+              displayName: entry.actor.display_name,
+              organizationName: entry.actor.organization?.name ?? undefined,
+            }
+          : null,
+      });
+    });
 
-  comments.forEach((comment) => {
-    const node = nodeMap.get(comment.id)!;
-    if (comment.parent_comment_id && nodeMap.has(comment.parent_comment_id)) {
-      nodeMap.get(comment.parent_comment_id)!.children!.push(node);
-    } else {
-      roots.push(node);
-    }
+  audits
+    .filter((entry) => entry.action === 'idea_assigned')
+    .forEach((entry) => {
+      const meta = entry.meta ?? {};
+      events.push({
+        id: entry.id,
+        timestamp: entry.created_at,
+        type: 'assignment',
+        title:
+          typeof meta.assignee_display_name === 'string'
+            ? `Assigned to ${meta.assignee_display_name}`
+            : 'Assignment updated',
+        description: null,
+        actor: entry.actor?.display_name
+          ? {
+              displayName: entry.actor.display_name,
+              organizationName: entry.actor.organization?.name ?? undefined,
+            }
+          : null,
+      });
+    });
+
+  const canSeePrivate = viewerProfile && (viewerProfile.role === 'moderator' || viewerProfile.role === 'admin' || viewerProfile.id === idea.author_profile_id);
+
+  decisions
+    .filter((decision) => decision.visibility === 'public' || canSeePrivate)
+    .forEach((decision) => {
+      events.push({
+        id: decision.id,
+        timestamp: decision.created_at,
+        type: decision.visibility === 'author' ? 'revision' : 'decision',
+        title: decision.visibility === 'author' ? 'Revision requested' : 'Decision noted',
+        description: decision.summary,
+        actor: decision.author?.display_name
+          ? {
+              displayName: decision.author.display_name,
+              organizationName: decision.author.organization?.name ?? undefined,
+            }
+          : null,
+      });
+    });
+
+  officialResponses.forEach((comment) => {
+    events.push({
+      id: `official-${comment.id}`,
+      timestamp: comment.created_at,
+      type: 'official_response',
+      title: 'Official response recorded',
+      description: comment.body,
+      actor: comment.author?.display_name
+        ? {
+            displayName: comment.author.display_name,
+            organizationName: comment.author.organization?.name ?? undefined,
+          }
+        : null,
+    });
   });
 
-  return roots;
+  return events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 }

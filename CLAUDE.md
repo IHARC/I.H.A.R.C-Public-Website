@@ -1,237 +1,54 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) collaborating on the IHARC Command Center repository.
 
-## Project Overview
+## Project Snapshot
+- **Purpose:** Collaborative Solutions Command Center for IHARC partners, community members, and moderators.
+- **Framework:** Next.js 15 App Router (React Server Components + selective client islands).
+- **Data Stack:** Supabase Postgres (`portal` schema), Supabase Auth, Storage (`portal-attachments` bucket), edge functions for privileged operations.
+- **Styling:** Tailwind CSS with shadcn/ui primitives and shared tokens in `tailwind.config.ts`.
+- **Tooling:** TypeScript (strict), ESLint, Prettier, Vitest, Playwright, Supabase CLI.
 
-This is the main marketing website for IHARC (Integrated Homelessness & Addictions Response Centre) serving Northumberland County, Ontario. It's built with **Astro + TypeScript + Tailwind CSS** and designed to be maintainable, accessible, and high-performance.
+## Repository Landmarks
+- `src/app/` – App Router routes, layouts, and API handlers under `/api/portal/*`.
+- `src/components/` – UI primitives (forms, boards, modals, badges) used across the portal.
+- `src/lib/` – Utilities for auth/session handling, validation, formatting, and domain logic.
+- `supabase/` – Edge functions (`portal-*`) plus generated types/migrations (additive only; `portal` schema shared across apps).
+- `docs/portal/` – Architecture guidance, MVP milestones, operations notes.
 
-## Tech Stack
+## Local Workflow
+1. Ensure Node.js ≥ 18.18.0 and npm 9+.
+2. Copy `.env.example` → `.env.local` and populate Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`).
+3. Install deps with `npm install`.
+4. Run `npm run dev` (Next.js at http://localhost:3000).
+5. Build via `npm run build`; preview with `npm run start`. Azure SWA uses the same `build.js`.
 
-- **Framework**: Astro 4.x with TypeScript (strict mode)
-- **Styling**: Tailwind CSS with custom IHARC design system
-- **Content**: Astro Content Collections for news/blog posts
-- **Testing**: Vitest (units) + Playwright (E2E)
-- **Linting**: ESLint + Prettier with Astro plugins
-- **Hosting**: Azure Static Web Apps (existing workflow in place)
+## Code Standards
+- Maintain strict TypeScript; prefer shared types (`src/lib/types.ts`, Supabase generated types) instead of `any`.
+- Use semantic HTML and accessible patterns (labels, aria attrs, focus management). Confirm AA contrast.
+- Keep copy trauma-informed and community-positive.
+- Leverage Tailwind utilities; extend theme centrally. Follow existing shadcn component variants.
+- Prefer server components for data fetching and mutations via route handlers; isolate client-side logic to islands when necessary.
+- Respect Supabase RLS by scoping queries to the authenticated profile and using service-role keys only in trusted contexts (edge functions or server actions).
 
-## Common Development Commands
+## Testing & Quality
+- `npm run lint` – ESLint with Next.js + Tailwind rules.
+- `npm run typecheck` – `tsc --noEmit`.
+- `npm run test` – Vitest suites (utilities, guards, hooks).
+- `npm run e2e` – Playwright (requires `npm run build` first) for critical user journeys.
+- Update or add tests alongside significant logic/UI changes.
 
-### Development
-- `npm run dev` - Start development server (http://localhost:4321)
-- `npm run build` - Build for production (outputs to `dist/`)
-- `npm run preview` - Preview production build locally
+## Supabase Notes
+- `portal` schema tables power ideas, comments, flags, audit logs, metrics; other apps rely on them, so use additive migrations only.
+- Authentication relies on Supabase JWTs. Client-side sessions should read role/claims from `user.app_metadata` and `user_metadata`; server handlers should verify via `supabaseServerClient.auth.getUser()` and Postgres policies should reference `auth.jwt()` claims.
+- Edge functions (`portal-ingest-metrics`, `portal-moderate`, etc.) expect secrets and role checks; keep them in sync with database policies.
 
-**Note**: All scripts use `npx` prefix for CI/CD compatibility (fixes "Permission denied" errors in Azure Static Web Apps).
+## Deployment
+- Azure Static Web Apps pipeline runs `npm install` + `npm run build` using `build.js` resiliency.
+- Supabase functions deploy with `supabase functions deploy <slug>`; document any required env updates.
+- Coordinate releases to avoid breaking external consumers of shared Supabase resources.
 
-### Code Quality
-- `npm run lint` - Run ESLint on all files
-- `npm run format` - Format code with Prettier
-- `npm run check` - Run all quality checks (lint + test + e2e)
-
-### Testing
-- `npm run test` - Run Vitest unit tests
-- `npm run e2e` - Run Playwright end-to-end tests
-- For Playwright: must build first (`npm run build`) then run tests
-
-## Project Architecture
-
-### Content Management
-- **Site Data**: `src/data/site.ts` - Centralized config for nav, quick access, programs, counters, footer
-- **News Content**: `src/content/news/` - Markdown files with frontmatter for blog posts
-- **Content Schema**: `src/content/config.ts` - TypeScript schemas for content validation
-
-### Component Structure
-- **Layout**: `src/layouts/BaseLayout.astro` - Main page template with SEO, accessibility defaults
-- **Pages**: `src/pages/` - Route-based pages (currently just homepage)
-- **Components**: `src/components/` - Reusable UI components following established patterns
-
-### Design System
-- **Colors**: Brand red (#CE2029), charcoal (#1E1E1E), and supporting colors in Tailwind config
-- **Typography**: Poppins (headings), Inter (body)
-- **Components**: `.btn-primary`, `.btn-secondary`, `.card`, etc. defined in `src/styles/main.css`
-
-## Key Patterns to Follow
-
-### Content Updates
-- Navigation: Edit `nav` array in `src/data/site.ts`
-- Quick access cards: Update `quickAccess` array
-- Program listings: Modify `programs` array
-- Impact numbers: Change `impactCounters` values
-- News posts: Add `.md` files to `src/content/news/`
-
-### Component Development
-- Use semantic HTML (`<section>`, `<article>`, `<nav>`)
-- Apply `container` class for consistent spacing
-- Use `py-16` for section padding
-- Include proper ARIA labels and focus management
-- Support `prefers-reduced-motion` for animations
-
-### Accessibility Requirements
-- All interactive elements must be keyboard accessible
-- Include skip links and focus management
-- Use proper heading hierarchy (h1 → h2 → h3)
-- Maintain AA color contrast (4.5:1)
-- Test with screen readers and keyboard navigation
-
-### Performance Targets
-- Lighthouse mobile score: 90+
-- First Contentful Paint: < 1.5s
-- No layout shifts (CLS < 0.1)
-- Bundle size optimized with Astro's static generation
-
-## Testing Strategy
-
-- **Unit Tests**: Focus on utility functions in `src/lib/`
-- **E2E Tests**: Cover critical user paths, accessibility, and performance
-- **Manual Testing**: Keyboard navigation, screen readers, mobile responsive
-
-## Deployment Notes
-
-- Azure Static Web Apps workflow already configured  
-- Build outputs to `dist/` directory
-- No server-side code (fully static)
-- Environment variables managed in Azure portal if needed
-
-### Azure SWA Build Issues & Solutions
-
-**Common Issue**: "Permission denied" error with astro binary in Oryx build system
-
-**Solution**: The project includes `build.js` with multiple fallback strategies:
-1. Fix permissions + npx (primary)
-2. Direct Node.js execution (fallback)
-3. Yarn execution (if available)
-
-**Available Build Commands**:
-- `npm run build` - Robust script with automatic fallbacks
-- `npm run build:direct` - Direct npx approach  
-- `npm run build:node` - Node.js direct execution
-- `bash build-simple.sh` - Simple shell script
-
-**Troubleshooting**: If build fails in Azure, try changing the build command in the GitHub workflow to use alternative commands above.
-
-## When Adding Features
-
-1. Consider if it needs client-side JavaScript (use React islands sparingly)
-2. Update relevant data in `src/data/site.ts` first
-3. Create reusable components following established patterns
-4. Add appropriate tests (unit for logic, E2E for user flows)
-5. Ensure accessibility compliance before shipping
-
-## Content Editing for Non-Developers
-
-- **Text Changes**: Most content is in `src/data/site.ts`
-- **News Posts**: Add `.md` files to `src/content/news/` with proper frontmatter
-- **Images**: Place in `public/` directory and reference with `/filename.ext`
-- **Contact Info**: Update footer object in `src/data/site.ts`
-
-This is a production-ready codebase with proper tooling, testing, and accessibility built-in.
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-This is the main marketing website for IHARC (Integrated Homelessness & Addictions Response Centre) serving Northumberland County, Ontario. It's built with **Astro + TypeScript + Tailwind CSS** and designed to be maintainable, accessible, and high-performance.
-
-## Tech Stack
-
-- **Framework**: Astro 4.x with TypeScript (strict mode)
-- **Styling**: Tailwind CSS with custom IHARC design system
-- **Content**: Astro Content Collections for news/blog posts
-- **Testing**: Vitest (units) + Playwright (E2E)
-- **Linting**: ESLint + Prettier with Astro plugins
-- **Hosting**: Azure Static Web Apps (existing workflow in place)
-
-## Common Development Commands
-
-### Development
-- `npm run dev` - Start development server (http://localhost:4321)
-- `npm run build` - Build for production (outputs to `dist/`)
-- `npm run preview` - Preview production build locally
-
-### Code Quality
-- `npm run lint` - Run ESLint on all files
-- `npm run format` - Format code with Prettier
-- `npm run check` - Run all quality checks (lint + test + e2e)
-
-### Testing
-- `npm run test` - Run Vitest unit tests
-- `npm run e2e` - Run Playwright end-to-end tests
-- For Playwright: must build first (`npm run build`) then run tests
-
-## Project Architecture
-
-### Content Management
-- **Site Data**: `src/data/site.ts` - Centralized config for nav, quick access, programs, counters, footer
-- **News Content**: `src/content/news/` - Markdown files with frontmatter for blog posts
-- **Content Schema**: `src/content/config.ts` - TypeScript schemas for content validation
-
-### Component Structure
-- **Layout**: `src/layouts/BaseLayout.astro` - Main page template with SEO, accessibility defaults
-- **Pages**: `src/pages/` - Route-based pages (currently just homepage)
-- **Components**: `src/components/` - Reusable UI components following established patterns
-
-### Design System
-- **Colors**: Brand red (#CE2029), charcoal (#1E1E1E), and supporting colors in Tailwind config
-- **Typography**: Poppins (headings), Inter (body)
-- **Components**: `.btn-primary`, `.btn-secondary`, `.card`, etc. defined in `src/styles/main.css`
-
-## Key Patterns to Follow
-
-### Content Updates
-- Navigation: Edit `nav` array in `src/data/site.ts`
-- Quick access cards: Update `quickAccess` array
-- Program listings: Modify `programs` array
-- Impact numbers: Change `impactCounters` values
-- News posts: Add `.md` files to `src/content/news/`
-
-### Component Development
-- Use semantic HTML (`<section>`, `<article>`, `<nav>`)
-- Apply `container` class for consistent spacing
-- Use `py-16` for section padding
-- Include proper ARIA labels and focus management
-- Support `prefers-reduced-motion` for animations
-
-### Accessibility Requirements
-- All interactive elements must be keyboard accessible
-- Include skip links and focus management
-- Use proper heading hierarchy (h1 → h2 → h3)
-- Maintain AA color contrast (4.5:1)
-- Test with screen readers and keyboard navigation
-
-### Performance Targets
-- Lighthouse mobile score: 90+
-- First Contentful Paint: < 1.5s
-- No layout shifts (CLS < 0.1)
-- Bundle size optimized with Astro's static generation
-
-## Testing Strategy
-
-- **Unit Tests**: Focus on utility functions in `src/lib/`
-- **E2E Tests**: Cover critical user paths, accessibility, and performance
-- **Manual Testing**: Keyboard navigation, screen readers, mobile responsive
-
-## Deployment Notes
-
-- Azure Static Web Apps workflow already configured
-- Build outputs to `dist/` directory
-- No server-side code (fully static)
-- Environment variables managed in Azure portal if needed
-
-## When Adding Features
-
-1. Consider if it needs client-side JavaScript (use React islands sparingly)
-2. Update relevant data in `src/data/site.ts` first
-3. Create reusable components following established patterns
-4. Add appropriate tests (unit for logic, E2E for user flows)
-5. Ensure accessibility compliance before shipping
-
-## Content Editing for Non-Developers
-
-- **Text Changes**: Most content is in `src/data/site.ts`
-- **News Posts**: Add `.md` files to `src/content/news/` with proper frontmatter
-- **Images**: Place in `public/` directory and reference with `/filename.ext`
-- **Contact Info**: Update footer object in `src/data/site.ts`
-
-This is a production-ready codebase with proper tooling, testing, and accessibility built-in.
+## Collaboration Reminders
+- Keep changes scoped; ensure `git status` clean before handoff.
+- Document executed tests and Supabase migrations in summaries.
+- Flag any unexpected data mutations immediately to maintain trust and safety safeguards.

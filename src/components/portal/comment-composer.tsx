@@ -6,9 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { scanContentForSafety } from '@/lib/safety';
 import { toast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 export function CommentComposer({ ideaId }: { ideaId: string }) {
   const [value, setValue] = useState('');
+  const [commentType, setCommentType] = useState<'question' | 'suggestion'>('suggestion');
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -29,7 +32,7 @@ export function CommentComposer({ ideaId }: { ideaId: string }) {
         const response = await fetch(`/api/portal/ideas/${ideaId}/comments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body: value }),
+          body: JSON.stringify({ body: value, comment_type: commentType }),
         });
         if (!response.ok) {
           if (response.status === 412) {
@@ -57,6 +60,24 @@ export function CommentComposer({ ideaId }: { ideaId: string }) {
 
   return (
     <div className="space-y-2">
+      <RadioGroup
+        value={commentType}
+        onValueChange={(next) => setCommentType(next as 'question' | 'suggestion')}
+        className="flex gap-4"
+      >
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="question" id="comment-question" />
+          <Label htmlFor="comment-question" className="text-sm font-medium">
+            Question
+          </Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="suggestion" id="comment-suggestion" />
+          <Label htmlFor="comment-suggestion" className="text-sm font-medium">
+            Suggestion
+          </Label>
+        </div>
+      </RadioGroup>
       <Textarea
         value={value}
         onChange={(event) => setValue(event.target.value)}

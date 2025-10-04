@@ -8,7 +8,7 @@
 - Default timezone handling to `America/Toronto` across database timestamps, analytics, and UI presentation.
 
 ## High-Level Components
-1. **Next.js 14 App Router Frontend**
+1. **Next.js 15 App Router Frontend**
    - Routes `/command-center`, `/command-center/admin`, `/solutions`, `/solutions/submit`, `/solutions/[id]`, `/solutions/profile`, `/solutions/mod`.
    - Uses TypeScript, Tailwind, shadcn/ui primitives, and Supabase JS v2 for data access.
    - Implements reusable component library (Cards, TrendChart, IdeaCard, StatusBadge, TagChips, UpvoteButton, CommentThread, AttachmentUploader, OrgBadge, RulesModal, EmptyState, Paginator, SearchBar, Filters).
@@ -81,4 +81,3 @@
 - Determine caching strategy (e.g., Next.js cached data vs SWR) once data volume known.
 - Evaluate incremental static regeneration vs fully dynamic routes; initial build will use dynamic SSR to respect auth gating.
 - Choose charting approach compatible with Next+Tailwind and accessible fallback (e.g., Visx, Tremor, or custom d3). Baseline will use lightweight chart component with canvas fallback.
-

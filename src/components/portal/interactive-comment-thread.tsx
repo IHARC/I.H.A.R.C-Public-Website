@@ -1,52 +1,7 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { CommentThread, type CommentNode } from '@/components/portal/comment-thread';
-import { toast } from '@/components/ui/use-toast';
 
-export function InteractiveCommentThread({
-  ideaId,
-  comments,
-  canReply,
-}: {
-  ideaId: string;
-  comments: CommentNode[];
-  canReply: boolean;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const handleSubmit = async ({ body, parentId }: { body: string; parentId?: string }) => {
-    startTransition(async () => {
-      try {
-        const response = await fetch(`/api/portal/ideas/${ideaId}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body, parent_id: parentId, is_official: false }),
-        });
-        if (!response.ok) {
-          if (response.status === 412) {
-            toast({
-              title: 'Acknowledge the community rules',
-              description: 'Visit your portal profile to confirm the participation guidelines before replying.',
-              variant: 'destructive',
-            });
-            return;
-          }
-          const payload = await response.json().catch(() => ({}));
-          throw new Error(payload.error || 'Unable to post comment');
-        }
-        router.refresh();
-      } catch (error) {
-        toast({
-          title: 'Comment failed',
-          description: error instanceof Error ? error.message : 'Try again shortly.',
-          variant: 'destructive',
-        });
-      }
-    });
-  };
-
-  return <CommentThread comments={comments} ideaId={ideaId} onSubmit={handleSubmit} canReply={canReply && !pending} />;
+export function InteractiveCommentThread({ comments }: { ideaId: string; comments: CommentNode[]; canReply: boolean }) {
+  return <CommentThread comments={comments} />;
 }

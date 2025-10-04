@@ -7,6 +7,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { hashValue } from '@/lib/hash';
 
 const OFFICIAL_ROLES = new Set(['org_rep', 'moderator', 'admin']);
+const COMMENT_COOLDOWN_MS = 30 * 1000;
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const ideaId = params.id;
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let payload: { body?: unknown; parent_id?: unknown; is_official?: unknown };
+  let payload: { body?: unknown; parent_id?: unknown; is_official?: unknown; comment_type?: unknown };
   try {
     payload = await req.json();
   } catch (error) {
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const body = typeof payload.body === 'string' ? payload.body.trim() : '';
   const parentId = typeof payload.parent_id === 'string' ? payload.parent_id : null;
   const wantsOfficial = Boolean(payload.is_official);
+  const rawCommentType = typeof payload.comment_type === 'string' ? payload.comment_type : null;
 
   if (!body) {
     return NextResponse.json({ error: 'Comment body is required' }, { status: 422 });
@@ -43,6 +45,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (body.length > 2000) {
     return NextResponse.json({ error: 'Comments are limited to 2000 characters' }, { status: 422 });
   }
+
+  const normalizedType = rawCommentType?.toLowerCase() as
+    | 'question'
+    | 'suggestion'
+    | 'response'
+    | 'official_note'
+    | null;
 
   const safety = scanContentForSafety(body);
   if (safety.hasPii || safety.hasProfanity) {
@@ -58,7 +67,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Please acknowledge the community rules before posting.' }, { status: 412 });
   }
 
-  const withinLimit = await checkRateLimit({ profileId: profile.id, type: 'comment', limit: 20 });
+  if (!profile.display_name_confirmed_at) {
+    return NextResponse.json({ error: 'Please confirm your display name before posting.' }, { status: 412 });
+  }
+
+  const withinLimit = await checkRateLimit({
+    profileId: profile.id,
+    type: 'comment',
+    limit: 20,
+    cooldownMs: COMMENT_COOLDOWN_MS,
+  });
   if (!withinLimit) {
     return NextResponse.json(
       { error: 'You are commenting very quickly. Please wait a few minutes and try again.' },
@@ -103,12 +121,28 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     parentDepth = parent.depth ?? 0;
+    if (!OFFICIAL_ROLES.has(profile.role ?? '')) {
+      return NextResponse.json({ error: 'Only official accounts can reply to existing comments.' }, { status: 403 });
+    }
+
     if (parentDepth >= 2) {
       return NextResponse.json({ error: 'Replies are limited to two levels deep' }, { status: 409 });
     }
   }
 
   const isOfficial = wantsOfficial && OFFICIAL_ROLES.has(profile.role ?? '');
+
+  let commentType: 'question' | 'suggestion' | 'response' | 'official_note';
+
+  if (isOfficial) {
+    commentType = normalizedType && ['response', 'official_note'].includes(normalizedType)
+      ? normalizedType
+      : 'response';
+  } else {
+    commentType = normalizedType && ['question', 'suggestion'].includes(normalizedType)
+      ? normalizedType
+      : 'suggestion';
+  }
 
   const { data: insertedComment, error: insertError } = await supabase
     .from('portal.comments')
@@ -118,6 +152,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       parent_comment_id: parentId,
       body,
       is_official: isOfficial,
+      comment_type: commentType,
     })
     .select('id, created_at, body, is_official, parent_comment_id')
     .single();
@@ -141,6 +176,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       idea_id: ideaId,
       parent_comment_id: parentId,
       is_official: isOfficial,
+      comment_type: commentType,
       ip_hash: ipHash,
       user_agent: userAgent ?? null,
     },

@@ -2,8 +2,15 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service';
 
 const WINDOW_MS = 5 * 60 * 1000;
 
-export async function checkRateLimit(params: { profileId: string; type: 'idea' | 'comment' | 'flag'; limit: number }) {
-  const { profileId, type, limit } = params;
+type RateLimitParams = {
+  profileId: string;
+  type: 'idea' | 'comment' | 'flag';
+  limit: number;
+  cooldownMs?: number;
+};
+
+export async function checkRateLimit(params: RateLimitParams) {
+  const { profileId, type, limit, cooldownMs } = params;
   const supabase = createSupabaseServiceClient();
   const since = new Date(Date.now() - WINDOW_MS).toISOString();
 
@@ -31,5 +38,30 @@ export async function checkRateLimit(params: { profileId: string; type: 'idea' |
     throw error;
   }
 
-  return (count ?? 0) < limit;
+  if ((count ?? 0) >= limit) {
+    return false;
+  }
+
+  if (cooldownMs) {
+    const { data: latest, error: recentError } = await supabase
+      .from(table)
+      .select('created_at')
+      .eq(column, profileId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recentError) {
+      throw recentError;
+    }
+
+    if (latest?.created_at) {
+      const last = new Date(latest.created_at).getTime();
+      if (Date.now() - last < cooldownMs) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

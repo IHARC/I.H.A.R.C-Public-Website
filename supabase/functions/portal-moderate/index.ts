@@ -28,6 +28,8 @@ type ModeratePayload =
         body: string;
         attachments?: unknown;
       };
+      note?: string;
+      note_visibility?: 'public' | 'author';
     }
   | {
       action: 'resolve_flag';
@@ -135,7 +137,7 @@ deno.serve(async (req) => {
   try {
     switch (payload.action) {
       case 'update_status': {
-        const { idea_id, status, official_response } = payload;
+        const { idea_id, status, official_response, note, note_visibility } = payload;
         const { error } = await supabase
           .from('portal.ideas')
           .update({ status })
@@ -149,8 +151,18 @@ deno.serve(async (req) => {
             author_profile_id: profile.id,
             body: responseBody,
             is_official: true,
+            comment_type: 'response',
           });
           if (insertResult.error) throw insertResult.error;
+        }
+
+        if (note?.trim()) {
+          await supabase.from('portal.idea_decisions').insert({
+            idea_id,
+            author_profile_id: profile.id,
+            summary: note.trim().slice(0, 2000),
+            visibility: note_visibility === 'author' ? 'author' : 'public',
+          });
         }
 
         await logAudit({
@@ -160,6 +172,7 @@ deno.serve(async (req) => {
           meta: {
             status,
             official_response: Boolean(official_response?.body?.trim()),
+            note: note?.trim() ?? null,
           },
         });
 
@@ -168,17 +181,46 @@ deno.serve(async (req) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-     case 'resolve_flag': {
-       const { flag_id, status, notes } = payload;
+      case 'resolve_flag': {
+        const { flag_id, status, notes } = payload;
         const { error } = await supabase
           .from('portal.flags')
           .update({
             status,
             resolved_by_profile_id: profile.id,
             resolved_at: new Date().toISOString(),
+            resolution_note: notes ?? null,
           })
           .eq('id', flag_id);
         if (error) throw error;
+
+        if (notes?.trim()) {
+          const { data: flagRow } = await supabase
+            .from('portal.flags')
+            .select('idea_id, comment_id')
+            .eq('id', flag_id)
+            .maybeSingle();
+
+          let targetIdeaId = flagRow?.idea_id ?? null;
+
+          if (!targetIdeaId && flagRow?.comment_id) {
+            const { data: relatedComment } = await supabase
+              .from('portal.comments')
+              .select('idea_id')
+              .eq('id', flagRow.comment_id)
+              .maybeSingle();
+            targetIdeaId = relatedComment?.idea_id ?? null;
+          }
+
+          if (targetIdeaId) {
+            await supabase.from('portal.idea_decisions').insert({
+              idea_id: targetIdeaId,
+              author_profile_id: profile.id,
+              summary: notes.trim().slice(0, 2000),
+              visibility: 'public',
+            });
+          }
+        }
 
         await logAudit({
           action: `flag_${status}`,

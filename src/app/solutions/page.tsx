@@ -1,21 +1,17 @@
 import { Metadata } from 'next';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { IdeaCard, type IdeaSummary } from '@/components/portal/idea-card';
-import { UpvoteButton } from '@/components/portal/upvote-button';
+import { type IdeaSummary } from '@/components/portal/idea-card';
 import { SearchBar } from '@/components/portal/search-bar';
 import { Filters } from '@/components/portal/filters';
 import { EmptyState } from '@/components/portal/empty-state';
-import { Paginator } from '@/components/portal/paginator';
+import { KanbanBoard, type ColumnKey } from '@/components/portal/kanban-board';
 
 export const metadata: Metadata = {
   title: 'Community Solutions',
 };
 
-const PAGE_SIZE = 10;
-
 export default async function SolutionsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  const page = Math.max(parseInt((searchParams.page as string) ?? '1', 10), 1);
   const category = (searchParams.category as string) ?? null;
   const status = (searchParams.status as string) ?? null;
   const tag = (searchParams.tag as string) ?? null;
@@ -27,16 +23,15 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
     data: { user },
   } = await supabase.auth.getUser();
 
-  let voterProfileId: string | null = null;
+  let viewerProfile: Awaited<ReturnType<typeof ensurePortalProfile>> | null = null;
   if (user) {
-    const profile = await ensurePortalProfile(user.id);
-    voterProfileId = profile.id;
+    viewerProfile = await ensurePortalProfile(user.id);
   }
 
   let query = supabase
     .from('portal.ideas')
     .select('*', { count: 'exact' })
-    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    .range(0, 199);
 
   if (category) query = query.eq('category', category);
   if (status) query = query.eq('status', status);
@@ -55,7 +50,7 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
       break;
   }
 
-  const { data: ideas, error, count } = await query;
+  const { data: ideas, error } = await query;
   if (error) {
     console.error(error);
     throw new Error('Unable to load ideas');
@@ -78,23 +73,15 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
   const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
   const organizationMap = new Map((organizations ?? []).map((org) => [org.id, org]));
 
-  let votedIdeas = new Set<string>();
-  if (voterProfileId && ideaList.length) {
-    const { data: votes } = await supabase
-      .from('portal.votes')
-      .select('idea_id')
-      .eq('voter_profile_id', voterProfileId)
-      .in('idea_id', ideaList.map((idea) => idea.id));
-    votedIdeas = new Set((votes ?? []).map((row) => row.idea_id));
-  }
-
   const ideaSummaries: IdeaSummary[] = ideaList.map((idea) => {
     const profile = profileMap.get(idea.author_profile_id);
     const organization = profile?.organization_id ? organizationMap.get(profile.organization_id) : null;
     return {
       id: idea.id,
       title: idea.title,
-      body: idea.body,
+      body: idea.proposal_summary ?? idea.problem_statement ?? idea.body,
+      problemStatement: idea.problem_statement ?? null,
+      proposalSummary: idea.proposal_summary ?? null,
       category: idea.category,
       status: idea.status,
       tags: idea.tags ?? [],
@@ -110,21 +97,11 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
     };
   });
 
-  const total = count ?? 0;
-  const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
-
-  const search = new URLSearchParams();
-  if (category) search.set('category', category);
-  if (status) search.set('status', status);
-  if (tag) search.set('tag', tag);
-  if (sort) search.set('sort', sort);
-  if (q) search.set('q', q);
-
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
       <header className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Community Solutions</h2>
+          <h2 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Community Solutions Board</h2>
           <SearchBar placeholder="Search ideas by keyword" />
         </div>
         <Filters />
@@ -137,31 +114,11 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
           cta={{ label: 'Submit an idea', href: '/solutions/submit' }}
         />
       ) : (
-        <div className="space-y-4">
-          {ideaSummaries.map((idea) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              actions={
-                voterProfileId ? (
-                  <UpvoteButton
-                    ideaId={idea.id}
-                    initialVotes={idea.voteCount}
-                    initialVoted={votedIdeas.has(idea.id)}
-                  />
-                ) : null
-              }
-            />
-          ))}
-        </div>
+        <KanbanBoard
+          ideas={ideaSummaries.map((idea) => ({ ...idea, status: idea.status as ColumnKey }))}
+          viewerRole={viewerProfile?.role ?? null}
+        />
       )}
-
-      <Paginator
-        page={page}
-        pageCount={totalPages}
-        basePath="/solutions"
-        searchParams={search}
-      />
     </div>
   );
 }

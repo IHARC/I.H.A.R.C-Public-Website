@@ -8,6 +8,8 @@ export type IdeaSummary = {
   id: string;
   title: string;
   body: string;
+  problemStatement?: string | null;
+  proposalSummary?: string | null;
   category: string;
   status: string;
   tags: string[];
@@ -24,6 +26,7 @@ export type IdeaSummary = {
 
 export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React.ReactNode }) {
   const displayName = idea.isAnonymous ? 'Anonymous' : idea.authorDisplayName;
+  const preview = idea.proposalSummary || idea.problemStatement || idea.body;
 
   return (
     <Card className="border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
@@ -37,7 +40,7 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
           </CardTitle>
           <StatusBadge status={idea.status} />
         </div>
-        <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{idea.body}</p>
+        <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{preview}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">

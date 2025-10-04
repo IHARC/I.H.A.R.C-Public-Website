@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServiceClient } from '@/lib/supabase/service';
+import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
+import { logAuditEvent } from '@/lib/audit';
+import { queuePortalNotification } from '@/lib/notifications';
+
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const ideaId = params.id;
+  if (!ideaId) {
+    return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
+  }
+
+  const supabase = createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const profile = await ensurePortalProfile(user.id);
+  if (!['moderator', 'admin'].includes(profile.role ?? '')) {
+    return NextResponse.json({ error: 'Only moderators can assign ideas.' }, { status: 403 });
+  }
+
+  let payload: { assignee_profile_id?: unknown };
+  try {
+    payload = await req.json();
+  } catch (error) {
+    console.error('Invalid assignment payload', error);
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+  }
+
+  const rawAssignee = payload.assignee_profile_id;
+  let assigneeProfileId: string | null;
+
+  if (rawAssignee === null || rawAssignee === '') {
+    assigneeProfileId = null;
+  } else if (rawAssignee === 'self') {
+    assigneeProfileId = profile.id;
+  } else if (typeof rawAssignee === 'string') {
+    assigneeProfileId = rawAssignee;
+  } else {
+    return NextResponse.json({ error: 'Invalid assignee id' }, { status: 422 });
+  }
+
+  const service = createSupabaseServiceClient();
+
+  const { error: updateError } = await service
+    .from('portal.ideas')
+    .update({ assignee_profile_id: assigneeProfileId })
+    .eq('id', ideaId);
+
+  if (updateError) {
+    console.error('Failed to assign idea', updateError);
+    return NextResponse.json({ error: 'Assignment failed' }, { status: 500 });
+  }
+
+  let assigneeEmail: string | null = null;
+  let assigneeDisplayName: string | null = null;
+
+  if (assigneeProfileId) {
+    const { data: assigneeProfile, error: profileError } = await service
+      .from('portal.profiles')
+      .select('display_name')
+      .eq('id', assigneeProfileId)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('Failed to load assignee profile', profileError);
+    } else {
+      assigneeDisplayName = assigneeProfile?.display_name ?? null;
+    }
+
+    try {
+      assigneeEmail = await getUserEmailForProfile(assigneeProfileId);
+    } catch (emailError) {
+      console.error('Failed to resolve assignee email', emailError);
+    }
+  }
+
+  await logAuditEvent({
+    actorProfileId: profile.id,
+    actorUserId: user.id,
+    action: 'idea_assigned',
+    entityType: 'idea',
+    entityId: ideaId,
+    meta: {
+      assignee_profile_id: assigneeProfileId,
+      assignee_display_name: assigneeDisplayName,
+    },
+  });
+
+  if (assigneeProfileId && assigneeEmail) {
+    try {
+      await queuePortalNotification({
+        profileId: assigneeProfileId,
+        email: assigneeEmail,
+        subject: 'You have been assigned a community idea',
+        bodyText: `A moderator assigned you to follow up on Idea ${ideaId}.`,
+        bodyHtml: `<p>A moderator assigned you to follow up on Idea ${ideaId}.</p>`,
+        ideaId,
+        type: 'assignment',
+        payload: { assignee_display_name: assigneeDisplayName },
+      });
+    } catch (notificationError) {
+      console.error('Failed to queue assignment notification', notificationError);
+    }
+  }
+
+  return NextResponse.json({ status: 'assigned', assignee_profile_id: assigneeProfileId });
+}

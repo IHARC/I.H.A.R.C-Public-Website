@@ -34,6 +34,8 @@ const ALLOWED_CATEGORIES = new Set([
   'Other',
 ]);
 
+const IDEA_COOLDOWN_MS = 2 * 60 * 1000;
+
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
@@ -56,26 +58,49 @@ export async function POST(req: NextRequest) {
   }
 
   const title = (formData.get('title') as string | null)?.trim();
-  const body = (formData.get('body') as string | null)?.trim();
+  const problemStatement = (formData.get('problem_statement') as string | null)?.trim();
+  const evidence = (formData.get('evidence') as string | null)?.trim();
+  const proposalSummary = (formData.get('proposal_summary') as string | null)?.trim();
+  const implementationSteps = (formData.get('implementation_steps') as string | null)?.trim();
+  const risks = (formData.get('risks') as string | null)?.trim();
+  const successMetrics = (formData.get('success_metrics') as string | null)?.trim();
   const category = (formData.get('category') as string | null)?.trim();
   const tagsRaw = (formData.get('tags') as string | null) ?? '';
   const isAnonymous = (formData.get('is_anonymous') as string) === 'true';
   const acknowledged = (formData.get('acknowledged') as string) === 'true';
   const attachments = formData.getAll('attachments') as File[];
 
-  if (!title || !body || !category) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 422 });
+  if (!title || !category) {
+    return NextResponse.json({ error: 'Title and category are required' }, { status: 422 });
+  }
+
+  if (!problemStatement || !proposalSummary || !implementationSteps) {
+    return NextResponse.json(
+      { error: 'Problem, proposal, and steps are required sections.' },
+      { status: 422 },
+    );
+  }
+
+  if (!evidence || !successMetrics) {
+    return NextResponse.json(
+      { error: 'Evidence and success metrics are required before submitting.' },
+      { status: 422 },
+    );
   }
 
   if (!ALLOWED_CATEGORIES.has(category)) {
     return NextResponse.json({ error: 'Unsupported category' }, { status: 422 });
   }
 
-  if (title.length > 120 || body.length > 4000) {
+  if (title.length > 120) {
     return NextResponse.json({ error: 'Content exceeds length limits' }, { status: 422 });
   }
 
-  const safety = scanContentForSafety(`${title}\n${body}`);
+  const safety = scanContentForSafety(
+    [title, problemStatement, evidence, proposalSummary, implementationSteps, risks, successMetrics]
+      .filter(Boolean)
+      .join('\n'),
+  );
   if (safety.hasPii || safety.hasProfanity) {
     return NextResponse.json(
       { error: 'Remove personal information or flagged language before submitting.' },
@@ -85,7 +110,19 @@ export async function POST(req: NextRequest) {
 
   const profile = await ensurePortalProfile(user.id);
 
-  const withinLimit = await checkRateLimit({ profileId: profile.id, type: 'idea', limit: 10 });
+  if (!profile.display_name_confirmed_at) {
+    return NextResponse.json(
+      { error: 'Please confirm your display name before submitting ideas.' },
+      { status: 412 },
+    );
+  }
+
+  const withinLimit = await checkRateLimit({
+    profileId: profile.id,
+    type: 'idea',
+    limit: 10,
+    cooldownMs: IDEA_COOLDOWN_MS,
+  });
   if (!withinLimit) {
     return NextResponse.json(
       { error: 'You are posting ideas too quickly. Please wait a few minutes and try again.' },
@@ -152,13 +189,30 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .slice(0, 8);
 
+  const synthesizedBody = [
+    `Problem:\n${problemStatement}`,
+    `Evidence:\n${evidence}`,
+    `Proposal:\n${proposalSummary}`,
+    `Steps:\n${implementationSteps}`,
+    risks ? `Risks:\n${risks}` : null,
+    `Success metrics:\n${successMetrics}`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
   const { error: insertError } = await supabase
     .from('portal.ideas')
     .insert({
       id: ideaId,
       author_profile_id: profile.id,
       title,
-      body,
+      body: synthesizedBody,
+      problem_statement: problemStatement,
+      evidence,
+      proposal_summary: proposalSummary,
+      implementation_steps: implementationSteps,
+      risks: risks ?? null,
+      success_metrics: successMetrics,
       category,
       tags,
       is_anonymous: isAnonymous,
@@ -176,7 +230,14 @@ export async function POST(req: NextRequest) {
   const { error: editError } = await supabase.from('portal.idea_edits').insert({
     idea_id: ideaId,
     editor_profile_id: profile.id,
-    body,
+    body: JSON.stringify({
+      problem_statement: problemStatement,
+      evidence,
+      proposal_summary: proposalSummary,
+      implementation_steps: implementationSteps,
+      risks,
+      success_metrics: successMetrics,
+    }),
   });
 
   if (editError) {
@@ -200,18 +261,24 @@ export async function POST(req: NextRequest) {
   await logAuditEvent({
     actorProfileId: profile.id,
     actorUserId: user.id,
-    action: 'idea_created',
-    entityType: 'idea',
-    entityId: ideaId,
-    meta: {
-      category,
-      tags,
-      is_anonymous: isAnonymous,
-      attachment_count: attachmentMeta.length,
-      ip_hash: ipHash,
-      user_agent: userAgent ?? null,
-    },
-  });
+      action: 'idea_created',
+      entityType: 'idea',
+      entityId: ideaId,
+      meta: {
+        category,
+        tags,
+        is_anonymous: isAnonymous,
+        attachment_count: attachmentMeta.length,
+        problem_statement: problemStatement,
+        evidence,
+        proposal_summary: proposalSummary,
+        implementation_steps: implementationSteps,
+        risks: risks ?? null,
+        success_metrics: successMetrics,
+        ip_hash: ipHash,
+        user_agent: userAgent ?? null,
+      },
+    });
 
   return NextResponse.json({ id: ideaId });
 }
