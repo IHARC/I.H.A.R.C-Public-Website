@@ -26,11 +26,15 @@ interface IdeaRecord extends IdeaRow {
   author: {
     id: string;
     display_name: string;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
   assignee: {
     id: string;
     display_name: string;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 }
@@ -45,6 +49,8 @@ type CommentRow = {
   author: {
     id: string;
     display_name: string;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -66,6 +72,8 @@ type DecisionRow = {
   author: {
     id: string;
     display_name: string;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -78,6 +86,8 @@ type AuditRow = {
   actor: {
     id: string | null;
     display_name: string | null;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'] | null;
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -117,11 +127,15 @@ export default async function IdeaDetailPage({
       author:author_profile_id(
         id,
         display_name,
+        position_title,
+        affiliation_status,
         organization:organization_id(name, verified)
       ),
       assignee:assignee_profile_id(
         id,
         display_name,
+        position_title,
+        affiliation_status,
         organization:organization_id(name, verified)
       )`
     )
@@ -142,7 +156,7 @@ export default async function IdeaDetailPage({
     .from('comments')
     .select(
       `id, body, created_at, comment_type, is_official, evidence_url,
-       author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
+       author:author_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
     )
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
@@ -159,7 +173,7 @@ export default async function IdeaDetailPage({
     .from('idea_decisions')
     .select(
       `id, summary, visibility, created_at,
-       author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
+       author:author_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
     )
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
@@ -169,7 +183,7 @@ export default async function IdeaDetailPage({
     .from('audit_log')
     .select(
       `id, action, meta, created_at,
-       actor:actor_profile_id(id, display_name, organization:organization_id(name, verified))`
+       actor:actor_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
     )
     .eq('entity_id', idea.id)
     .eq('entity_type', 'idea')
@@ -239,6 +253,10 @@ export default async function IdeaDetailPage({
         displayName: comment.author?.display_name ?? 'Community member',
         organizationName: comment.author?.organization?.name ?? null,
         orgVerified: comment.author?.organization?.verified ?? false,
+        positionTitle:
+          comment.author?.affiliation_status === 'approved' && comment.author?.position_title
+            ? comment.author.position_title
+            : null,
       },
     }));
 
@@ -250,11 +268,17 @@ export default async function IdeaDetailPage({
     viewerProfile,
   });
 
+  const assignmentPosition =
+    idea.assignee?.affiliation_status === 'approved' && idea.assignee?.position_title
+      ? idea.assignee.position_title
+      : null;
+
   const assignment: AssignmentInfo | null = idea.assignee
     ? {
         id: idea.assignee.id,
         displayName: idea.assignee.display_name,
         organizationName: idea.assignee.organization?.name ?? null,
+        positionTitle: assignmentPosition,
       }
     : null;
 
@@ -279,6 +303,11 @@ export default async function IdeaDetailPage({
   const displayAuthor = idea.is_anonymous
     ? 'Anonymous'
     : idea.author?.display_name ?? 'Community member';
+
+  const authorPosition =
+    !idea.is_anonymous && idea.author?.affiliation_status === 'approved' && idea.author?.position_title
+      ? idea.author.position_title
+      : null;
   const lastActivity = idea.last_activity_at ?? idea.created_at;
 
   return (
@@ -295,6 +324,7 @@ export default async function IdeaDetailPage({
               <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">{idea.title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                 <span>By {displayAuthor}</span>
+                {authorPosition ? <span>· {authorPosition}</span> : null}
                 {idea.author?.organization?.name && !idea.is_anonymous ? (
                   <span>· {idea.author.organization.name}</span>
                 ) : null}
@@ -407,6 +437,7 @@ export default async function IdeaDetailPage({
           viewerProfileId={viewerProfile?.id ?? null}
           viewerRole={viewerRole}
           viewerDisplayName={viewerProfile?.display_name ?? null}
+          viewerPositionTitle={viewerProfile?.position_title ?? null}
         />
 
         {viewerRole === 'moderator' || viewerRole === 'admin' ? (
@@ -449,6 +480,10 @@ export default async function IdeaDetailPage({
                   displayName: comment.author?.display_name ?? 'Official response',
                   organizationName: comment.author?.organization?.name ?? null,
                   orgVerified: comment.author?.organization?.verified ?? false,
+                  positionTitle:
+                    comment.author?.affiliation_status === 'approved' && comment.author?.position_title
+                      ? comment.author.position_title
+                      : null,
                 },
               }))}
             />
@@ -497,6 +532,26 @@ type TimelineBuilderArgs = {
 };
 
 function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfile }: TimelineBuilderArgs) {
+  const actorFromProfile = (
+    profile:
+      | IdeaRecord['author']
+      | IdeaRecord['assignee']
+      | CommentRow['author']
+      | DecisionRow['author']
+      | AuditRow['actor']
+      | null,
+  ) => {
+    if (!profile || !profile.display_name) {
+      return null;
+    }
+    return {
+      displayName: profile.display_name,
+      organizationName: profile.organization?.name ?? undefined,
+      positionTitle:
+        profile.affiliation_status === 'approved' && profile.position_title ? profile.position_title : undefined,
+    };
+  };
+
   const events: IdeaTimelineEvent[] = [];
 
   events.push({
@@ -504,12 +559,7 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
     timestamp: idea.created_at,
     type: 'created',
     title: 'Idea submitted',
-    actor: idea.is_anonymous
-      ? null
-      : {
-          displayName: idea.author?.display_name ?? 'Community member',
-          organizationName: idea.author?.organization?.name ?? undefined,
-        },
+    actor: idea.is_anonymous ? null : actorFromProfile(idea.author),
     description: null,
   });
 
@@ -525,12 +575,7 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
         title: `Status changed to ${status}`,
         status,
         description: note,
-        actor: entry.actor?.display_name
-          ? {
-              displayName: entry.actor.display_name,
-              organizationName: entry.actor.organization?.name ?? undefined,
-            }
-          : null,
+        actor: actorFromProfile(entry.actor),
       });
     });
 
@@ -547,12 +592,7 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
             ? `Assigned to ${meta.assignee_display_name}`
             : 'Assignment updated',
         description: null,
-        actor: entry.actor?.display_name
-          ? {
-              displayName: entry.actor.display_name,
-              organizationName: entry.actor.organization?.name ?? undefined,
-            }
-          : null,
+        actor: actorFromProfile(entry.actor),
       });
     });
 
@@ -567,12 +607,7 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
         type: decision.visibility === 'author' ? 'revision' : 'decision',
         title: decision.visibility === 'author' ? 'Revision requested' : 'Decision noted',
         description: decision.summary,
-        actor: decision.author?.display_name
-          ? {
-              displayName: decision.author.display_name,
-              organizationName: decision.author.organization?.name ?? undefined,
-            }
-          : null,
+        actor: actorFromProfile(decision.author),
       });
     });
 
@@ -583,12 +618,7 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
       type: 'official_response',
       title: 'Official response recorded',
       description: comment.body,
-      actor: comment.author?.display_name
-        ? {
-            displayName: comment.author.display_name,
-            organizationName: comment.author.organization?.name ?? undefined,
-          }
-        : null,
+      actor: actorFromProfile(comment.author),
     });
   });
 

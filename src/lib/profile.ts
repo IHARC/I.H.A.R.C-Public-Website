@@ -24,6 +24,13 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
 
   const displayName = defaults?.display_name ?? 'Community Member';
   const role = defaults?.role ?? 'user';
+  const positionTitle = defaults?.position_title ?? null;
+  const affiliationType = defaults?.affiliation_type ?? 'community_member';
+  const affiliationStatus = defaults?.affiliation_status ?? 'approved';
+  const affiliationRequestedAt =
+    defaults?.affiliation_requested_at ?? (affiliationStatus === 'pending' ? new Date().toISOString() : null);
+  const affiliationReviewedAt = defaults?.affiliation_reviewed_at ?? null;
+  const affiliationReviewedBy = defaults?.affiliation_reviewed_by ?? null;
 
   const { data: inserted, error: insertError } = await portal
     .from('profiles')
@@ -33,6 +40,12 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
       role,
       organization_id: defaults?.organization_id ?? null,
       rules_acknowledged_at: defaults?.rules_acknowledged_at ?? null,
+      position_title: positionTitle,
+      affiliation_type: affiliationType,
+      affiliation_status: affiliationStatus,
+      affiliation_requested_at: affiliationRequestedAt,
+      affiliation_reviewed_at: affiliationReviewedAt,
+      affiliation_reviewed_by: affiliationReviewedBy,
     })
     .select('*')
     .single();
@@ -83,10 +96,15 @@ async function syncAuthClaims(
       app_metadata: {
         portal_role: profile.role,
         portal_profile_id: profile.id,
+        portal_affiliation_type: profile.affiliation_type,
+        portal_affiliation_status: profile.affiliation_status,
       },
       user_metadata: {
         display_name: profile.display_name,
         organization_id: profile.organization_id,
+        position_title: profile.position_title,
+        affiliation_type: profile.affiliation_type,
+        affiliation_status: profile.affiliation_status,
       },
     });
 

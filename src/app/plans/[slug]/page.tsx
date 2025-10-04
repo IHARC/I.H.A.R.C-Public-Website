@@ -22,11 +22,32 @@ type DecisionRow = Database['portal']['Tables']['plan_decision_notes']['Row'];
 type PlanRecord = PlanRow & {
   focus_areas: FocusRow[];
   key_dates: KeyDateRow[];
-  updates: (UpdateRow & { author: { id: string; display_name: string } | null })[];
-  decisions: (DecisionRow & { author: { id: string; display_name: string } | null })[];
+  updates: (UpdateRow & {
+    author: {
+      id: string;
+      display_name: string;
+      position_title: string | null;
+      affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    } | null;
+  })[];
+  decisions: (DecisionRow & {
+    author: {
+      id: string;
+      display_name: string;
+      position_title: string | null;
+      affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    } | null;
+  })[];
 };
 
-type PlanUpdateWithSupport = (UpdateRow & { author: { id: string; display_name: string } | null }) & {
+type PlanUpdateWithSupport = (UpdateRow & {
+  author: {
+    id: string;
+    display_name: string;
+    position_title: string | null;
+    affiliation_status: Database['portal']['Enums']['affiliation_status'];
+  } | null;
+}) & {
   support_count: number;
   viewer_supported: boolean;
 };
@@ -65,8 +86,8 @@ export default async function PlanDetailPage({
       `*,
        focus_areas:plan_focus_areas(id, name, summary, created_at),
        key_dates:plan_key_dates(id, title, notes, scheduled_for, created_at),
-       updates:plan_updates(id, problem, evidence, proposed_change, impact, risks, measurement, status, opened_at, decided_at, created_at, updated_at, author:author_profile_id(id, display_name)),
-       decisions:plan_decision_notes(id, decision, summary, created_at, author:author_profile_id(id, display_name))`
+       updates:plan_updates(id, problem, evidence, proposed_change, impact, risks, measurement, status, opened_at, decided_at, created_at, updated_at, author:author_profile_id(id, display_name, position_title, affiliation_status)),
+       decisions:plan_decision_notes(id, decision, summary, created_at, author:author_profile_id(id, display_name, position_title, affiliation_status))`
     )
     .eq('slug', slug)
     .maybeSingle<PlanRecord>();
@@ -263,7 +284,12 @@ export default async function PlanDetailPage({
                     <UpdateSection label="Risks" value={update.risks} />
                     <UpdateSection label="How we’ll measure success" value={update.measurement} />
                     {update.author ? (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Submitted by {update.author.display_name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Submitted by {update.author.display_name}
+                        {update.author.affiliation_status === 'approved' && update.author.position_title
+                          ? ` · ${update.author.position_title}`
+                          : ''}
+                      </p>
                     ) : null}
                     {viewerRole === 'moderator' || viewerRole === 'admin' ? (
                       <PlanUpdateModeratorActions
@@ -294,7 +320,12 @@ export default async function PlanDetailPage({
                     </div>
                     <p className="mt-2 text-slate-700 dark:text-slate-200">{decision.summary}</p>
                     {decision.author ? (
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Posted by {decision.author.display_name}</p>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        Posted by {decision.author.display_name}
+                        {decision.author.affiliation_status === 'approved' && decision.author.position_title
+                          ? ` · ${decision.author.position_title}`
+                          : ''}
+                      </p>
                     ) : null}
                   </li>
                 ))}

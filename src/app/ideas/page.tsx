@@ -325,7 +325,7 @@ async function loadIdeaBoard({
 
   const { data: profiles } = await portal
     .from('profiles')
-    .select('id, display_name, organization_id')
+    .select('id, display_name, organization_id, position_title, affiliation_status, role')
     .in('id', profileIds.length ? profileIds : ['00000000-0000-0000-0000-000000000000']);
 
   const organizationIds = Array.from(
@@ -343,6 +343,9 @@ async function loadIdeaBoard({
   const ideaSummaries: IdeaSummary[] = ideaList.map((idea) => {
     const profile = profileMap.get(idea.author_profile_id);
     const organization = profile?.organization_id ? organizationMap.get(profile.organization_id) : null;
+    const approvedPosition =
+      profile && profile.affiliation_status === 'approved' && profile.position_title ? profile.position_title : null;
+
     return {
       id: idea.id,
       title: idea.title,
@@ -358,6 +361,7 @@ async function loadIdeaBoard({
       createdAt: idea.created_at,
       isAnonymous: idea.is_anonymous,
       authorDisplayName: profile?.display_name ?? 'Community Member',
+      positionTitle: approvedPosition,
       organizationName: organization?.name ?? null,
       orgVerified: organization?.verified ?? false,
       officialCount: undefined,

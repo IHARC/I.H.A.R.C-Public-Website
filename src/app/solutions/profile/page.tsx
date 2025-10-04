@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ export default async function PortalProfilePage() {
     const portalClient = supa.schema('portal');
     const displayName = formData.get('display_name') as string;
     const organizationId = (formData.get('organization_id') as string) || null;
+    const positionTitle = (formData.get('position_title') as string | null)?.trim() || null;
 
     if (!displayName || displayName.length < 2) {
       throw new Error('Display name is required');
@@ -41,7 +43,7 @@ export default async function PortalProfilePage() {
 
     await portalClient
       .from('profiles')
-      .update({ display_name: displayName, organization_id: organizationId })
+      .update({ display_name: displayName, organization_id: organizationId, position_title: positionTitle })
       .eq('id', profile.id);
 
     revalidatePath('/solutions/profile');
@@ -50,11 +52,38 @@ export default async function PortalProfilePage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Portal profile</h1>
+      {profile.affiliation_status === 'pending' ? (
+        <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+          <AlertTitle>Verification in progress</AlertTitle>
+          <AlertDescription>
+            An IHARC administrator is verifying your agency or government role. You can keep collaborating as a community member in the meantime.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {profile.affiliation_status === 'revoked' ? (
+        <Alert className="mb-6 border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-100">
+          <AlertTitle>Verification declined</AlertTitle>
+          <AlertDescription>
+            Reach out to an IHARC administrator if details have changed or you need to update your affiliation.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <form action={updateProfile} className="space-y-4">
         <div className="grid gap-2">
           <Label htmlFor="display_name">Display name</Label>
           <Input id="display_name" name="display_name" defaultValue={profile.display_name} required maxLength={80} />
           <p className="text-xs text-slate-500">Shown publicly unless you choose to post anonymously.</p>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="position_title">Position or role</Label>
+          <Input
+            id="position_title"
+            name="position_title"
+            defaultValue={profile.position_title ?? ''}
+            placeholder="Public Health Nurse, Town Councillor, Outreach Supervisor, ..."
+            maxLength={120}
+          />
+          <p className="text-xs text-slate-500">Helps neighbours understand how you collaborate through the Command Center.</p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="organization_id">Organization affiliation</Label>

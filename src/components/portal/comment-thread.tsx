@@ -12,6 +12,7 @@ export type CommentNode = {
     displayName: string;
     organizationName?: string | null;
     orgVerified?: boolean;
+    positionTitle?: string | null;
   };
   evidenceUrl?: string | null;
 };
@@ -37,8 +38,11 @@ export function CommentThread({ comments }: { comments: CommentNode[] }) {
           aria-label={`Comment from ${comment.author.displayName}`}
         >
           <header className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-slate-700 dark:text-slate-200">{comment.author.displayName}</span>
+              {comment.author.positionTitle ? (
+                <span className="text-xs text-slate-500 dark:text-slate-400">· {comment.author.positionTitle}</span>
+              ) : null}
               <Badge variant={comment.isOfficial ? 'default' : 'secondary'} className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 {TYPE_LABEL[comment.commentType]}
               </Badge>

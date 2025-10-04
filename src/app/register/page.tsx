@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
+import type { PortalProfile } from '@/lib/profile';
 import { RegisterForm } from '@/components/auth/register-form';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +11,12 @@ export const dynamic = 'force-dynamic';
 type FormState = {
   error?: string;
 };
+
+const ALLOWED_AFFILIATIONS: PortalProfile['affiliation_type'][] = [
+  'community_member',
+  'agency_partner',
+  'government_partner',
+];
 
 export default async function RegisterPage() {
   const supabase = await createSupabaseRSCClient();
@@ -33,9 +41,20 @@ export default async function RegisterPage() {
     const password = (formData.get('password') as string | null) ?? '';
     const displayName = (formData.get('display_name') as string | null)?.trim();
     const organizationId = (formData.get('organization_id') as string | null)?.trim() || null;
+    const positionTitle = (formData.get('position_title') as string | null)?.trim() || null;
+    const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() || 'community_member';
+    const affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as PortalProfile['affiliation_type'])
+      ? (rawAffiliation as PortalProfile['affiliation_type'])
+      : 'community_member';
+    const affiliationStatus: PortalProfile['affiliation_status'] =
+      affiliationType === 'community_member' ? 'approved' : 'pending';
+    const affiliationRequestedAt = affiliationStatus === 'pending' ? new Date().toISOString() : null;
 
     if (!email || !email.includes('@')) {
       return { error: 'Enter a valid email address.' };
+    }
+    if (affiliationType !== 'community_member' && !positionTitle) {
+      return { error: 'Share the position or role you hold with your agency or government team.' };
     }
     if (password.length < 8) {
       return { error: 'Password must be at least 8 characters.' };
@@ -69,11 +88,84 @@ export default async function RegisterPage() {
         return { error: 'Account created, but we could not establish a session. Try signing in.' };
       }
 
-      await ensurePortalProfile(createdUser.id, {
+      let portalServiceClient: ReturnType<typeof createSupabaseServiceClient> | null = null;
+      type InviteRow = {
+        id: string;
+        affiliation_type: PortalProfile['affiliation_type'];
+        position_title: string | null;
+        organization_id: string | null;
+        invited_by_profile_id: string | null;
+        created_at: string;
+      };
+      let invite: InviteRow | null = null;
+
+      try {
+        portalServiceClient = createSupabaseServiceClient();
+        const portalAdmin = portalServiceClient.schema('portal');
+        const { data: inviteRow, error: inviteError } = await portalAdmin
+          .from('profile_invites')
+          .select('id, affiliation_type, position_title, organization_id, invited_by_profile_id, created_at')
+          .eq('email', email)
+          .eq('status', 'pending')
+          .maybeSingle();
+
+        if (inviteError) {
+          console.error('Unable to load pending invite for registration', inviteError);
+        } else {
+          invite = inviteRow;
+        }
+      } catch (serviceError) {
+        console.error('Unable to initialize service client for invite lookup', serviceError);
+      }
+
+      let profileRole: PortalProfile['role'] = 'user';
+      let finalAffiliationType = affiliationType;
+      let finalAffiliationStatus = affiliationStatus;
+      let finalOrganizationId = organizationId;
+      let finalPositionTitle = positionTitle;
+      let finalAffiliationRequestedAt = affiliationRequestedAt;
+      let affiliationReviewedAt: string | null = null;
+      let affiliationReviewedBy: string | null = null;
+
+      if (invite) {
+        finalAffiliationType = invite.affiliation_type;
+        finalAffiliationStatus = 'approved';
+        profileRole = invite.affiliation_type === 'community_member' ? 'user' : 'org_rep';
+        finalOrganizationId = finalOrganizationId ?? invite.organization_id ?? null;
+        finalPositionTitle = finalPositionTitle ?? invite.position_title ?? null;
+        finalAffiliationRequestedAt = invite.created_at ?? finalAffiliationRequestedAt;
+        affiliationReviewedAt = new Date().toISOString();
+        affiliationReviewedBy = invite.invited_by_profile_id;
+      }
+
+      const profile = await ensurePortalProfile(createdUser.id, {
         display_name: displayName,
-        organization_id: organizationId,
-        role: 'user',
+        organization_id: finalOrganizationId,
+        position_title: finalPositionTitle,
+        role: profileRole,
+        affiliation_type: finalAffiliationType,
+        affiliation_status: finalAffiliationStatus,
+        affiliation_requested_at: finalAffiliationRequestedAt,
+        affiliation_reviewed_at: affiliationReviewedAt,
+        affiliation_reviewed_by: affiliationReviewedBy,
       });
+
+      if (invite && portalServiceClient) {
+        try {
+          await portalServiceClient
+            .schema('portal')
+            .from('profile_invites')
+            .update({
+              status: 'accepted',
+              user_id: createdUser.id,
+              profile_id: profile.id,
+              responded_at: new Date().toISOString(),
+            })
+            .eq('id', invite.id);
+        } catch (updateError) {
+          console.error('Unable to mark invite as accepted', updateError);
+        }
+      }
     } catch (error) {
       if (error instanceof Error) {
         return { error: error.message };

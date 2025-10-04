@@ -874,6 +874,12 @@ export type Database = {
           rules_acknowledged_at: string | null;
           last_seen_at: string | null;
           display_name_confirmed_at: string | null;
+          position_title: string | null;
+          affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
+          affiliation_status: Database["portal"]["Enums"]["affiliation_status"];
+          affiliation_requested_at: string | null;
+          affiliation_reviewed_at: string | null;
+          affiliation_reviewed_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -888,6 +894,12 @@ export type Database = {
           rules_acknowledged_at?: string | null;
           last_seen_at?: string | null;
           display_name_confirmed_at?: string | null;
+          position_title?: string | null;
+          affiliation_type?: Database["portal"]["Enums"]["affiliation_type"];
+          affiliation_status?: Database["portal"]["Enums"]["affiliation_status"];
+          affiliation_requested_at?: string | null;
+          affiliation_reviewed_at?: string | null;
+          affiliation_reviewed_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -902,6 +914,12 @@ export type Database = {
           rules_acknowledged_at?: string | null;
           last_seen_at?: string | null;
           display_name_confirmed_at?: string | null;
+          position_title?: string | null;
+          affiliation_type?: Database["portal"]["Enums"]["affiliation_type"];
+          affiliation_status?: Database["portal"]["Enums"]["affiliation_status"];
+          affiliation_requested_at?: string | null;
+          affiliation_reviewed_at?: string | null;
+          affiliation_reviewed_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -914,6 +932,100 @@ export type Database = {
           }?,
           {
             foreignKeyName: "profiles_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profiles_affiliation_reviewed_by_fkey";
+            columns: ["affiliation_reviewed_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      profile_invites: {
+        Row: {
+          id: string;
+          email: string;
+          display_name: string | null;
+          position_title: string | null;
+          affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
+          organization_id: string | null;
+          message: string | null;
+          status: Database["portal"]["Enums"]["invite_status"];
+          token: string;
+          invited_by_profile_id: string | null;
+          invited_by_user_id: string | null;
+          user_id: string | null;
+          profile_id: string | null;
+          responded_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          display_name?: string | null;
+          position_title?: string | null;
+          affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
+          organization_id?: string | null;
+          message?: string | null;
+          status?: Database["portal"]["Enums"]["invite_status"];
+          token?: string;
+          invited_by_profile_id?: string | null;
+          invited_by_user_id?: string | null;
+          user_id?: string | null;
+          profile_id?: string | null;
+          responded_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          display_name?: string | null;
+          position_title?: string | null;
+          affiliation_type?: Database["portal"]["Enums"]["affiliation_type"];
+          organization_id?: string | null;
+          message?: string | null;
+          status?: Database["portal"]["Enums"]["invite_status"];
+          token?: string;
+          invited_by_profile_id?: string | null;
+          invited_by_user_id?: string | null;
+          user_id?: string | null;
+          profile_id?: string | null;
+          responded_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_invites_invited_by_profile_id_fkey";
+            columns: ["invited_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_invites_invited_by_user_id_fkey";
+            columns: ["invited_by_user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_invites_organization_id_fkey";
+            columns: ["organization_id"];
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_invites_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_invites_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];
@@ -1720,6 +1832,9 @@ export type Database = {
     };
     Enums: {
       profile_role: "user" | "org_rep" | "moderator" | "admin";
+      affiliation_type: "community_member" | "agency_partner" | "government_partner";
+      affiliation_status: "approved" | "pending" | "revoked";
+      invite_status: "pending" | "accepted" | "cancelled" | "expired";
       idea_category: "Housing" | "Health" | "Policing" | "Community" | "Prevention" | "Other";
       idea_status:
         | "new"
@@ -1978,6 +2093,9 @@ export const Constants = {
   portal: {
     Enums: {
       profile_role: ["user", "org_rep", "moderator", "admin"] as const,
+      affiliation_type: ["community_member", "agency_partner", "government_partner"] as const,
+      affiliation_status: ["approved", "pending", "revoked"] as const,
+      invite_status: ["pending", "accepted", "cancelled", "expired"] as const,
       idea_category: ["Housing", "Health", "Policing", "Community", "Prevention", "Other"] as const,
       idea_status: ["new", "under_review", "in_progress", "adopted", "not_feasible", "archived"] as const,
       flag_entity_type: ["idea", "comment"] as const,

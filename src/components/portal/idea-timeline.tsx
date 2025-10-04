@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 export type TimelineActor = {
   displayName: string;
   organizationName?: string | null;
+  positionTitle?: string | null;
 };
 
 export type IdeaTimelineEvent = {
@@ -55,6 +56,7 @@ export function IdeaTimeline({ events }: { events: IdeaTimelineEvent[] }) {
               {event.actor ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   by {event.actor.displayName}
+                  {event.actor.positionTitle ? ` · ${event.actor.positionTitle}` : ''}
                   {event.actor.organizationName ? ` · ${event.actor.organizationName}` : ''}
                 </p>
               ) : null}

@@ -19,6 +19,7 @@ export type IdeaSummary = {
   createdAt: string;
   isAnonymous: boolean;
   authorDisplayName: string;
+  positionTitle?: string | null;
   organizationName?: string | null;
   orgVerified?: boolean;
   officialCount?: number;
@@ -45,6 +46,7 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
       <CardContent className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span>By {displayName}</span>
+          {idea.positionTitle ? <span>· {idea.positionTitle}</span> : null}
           {idea.organizationName && (
             <Badge variant="outline" className="border-brand/40 text-brand">
               {idea.organizationName}

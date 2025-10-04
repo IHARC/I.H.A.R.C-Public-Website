@@ -8,6 +8,7 @@ export type AssignmentInfo = {
   id: string;
   displayName: string;
   organizationName?: string | null;
+  positionTitle?: string | null;
 };
 
 export function IdeaAssignmentCard({
@@ -16,12 +17,14 @@ export function IdeaAssignmentCard({
   viewerProfileId,
   viewerRole,
   viewerDisplayName,
+  viewerPositionTitle,
 }: {
   ideaId: string;
   assignee: AssignmentInfo | null;
   viewerProfileId: string | null;
   viewerRole: 'user' | 'org_rep' | 'moderator' | 'admin' | null;
   viewerDisplayName: string | null;
+  viewerPositionTitle: string | null;
 }) {
   const [pending, startTransition] = useTransition();
   const canAssign = viewerRole === 'moderator' || viewerRole === 'admin';
@@ -53,6 +56,7 @@ export function IdeaAssignmentCard({
           setLocalAssignee({
             id: viewerProfileId,
             displayName: viewerDisplayName ?? 'You',
+            positionTitle: viewerPositionTitle,
           });
         } else if (!target) {
           setLocalAssignee(null);
@@ -75,6 +79,7 @@ export function IdeaAssignmentCard({
           <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
             {localAssignee.displayName}
             {localAssignee.organizationName ? ` · ${localAssignee.organizationName}` : ''}
+            {localAssignee.positionTitle ? ` · ${localAssignee.positionTitle}` : ''}
           </p>
         ) : (
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">No one is assigned yet.</p>
