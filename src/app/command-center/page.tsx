@@ -12,8 +12,14 @@ const METRIC_LABELS: Record<string, string> = {
   warming_beds_available: 'Warming Beds Available',
 };
 
-export default async function CommandCenterPage({ searchParams }: { searchParams: { range?: string } }) {
-  const range = searchParams.range === '30d' ? 30 : 7;
+export default async function CommandCenterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedParams = await searchParams;
+  const rangeParam = resolvedParams.range;
+  const range = (Array.isArray(rangeParam) ? rangeParam[0] : rangeParam) === '30d' ? 30 : 7;
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
