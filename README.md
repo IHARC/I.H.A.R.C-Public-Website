@@ -162,6 +162,7 @@ Sign in with the seeded community account (`demo-submit@iharc.example`) or the v
 ## Testing & QA
 - `npm run lint` and `npm run typecheck` must pass before merging.
 - Add unit tests alongside non-trivial utilities (rate limiting, safety checks, etc.).
+- Vitest uses the `jsdom` test environment; install it locally with `npm install --save-dev jsdom` before running `npm run test`.
 - Use `npm run e2e` for playwright smoke tests (requires `npm run build` beforehand).
 - When adding Supabase migrations or policies, verify with `supabase db diff` and document changes in `docs/portal/`.
 

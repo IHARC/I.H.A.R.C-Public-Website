@@ -201,7 +201,7 @@ export function KanbanBoard({
               ))}
               {!column.items.length && (
                 <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400 dark:border-slate-700 dark:text-slate-500">
-                  {canEdit ? 'Drop ideas here' : 'No ideas yet'}
+                  {canDrag ? 'Drop ideas here' : 'No ideas yet'}
                 </div>
               )}
             </div>

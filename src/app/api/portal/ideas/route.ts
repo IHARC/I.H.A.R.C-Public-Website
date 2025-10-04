@@ -130,9 +130,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const invalidMetric = metricsPayload.find(
-    (metric) => metric.label.length < 3 || metric.label.length > 160 || metric.definition?.length > 500,
-  );
+  const invalidMetric = metricsPayload.find((metric) => {
+    if (metric.label.length < 3 || metric.label.length > 160) {
+      return true;
+    }
+    if (metric.definition && metric.definition.length > 500) {
+      return true;
+    }
+    return false;
+  });
   if (invalidMetric) {
     return NextResponse.json(
       { error: 'Each metric needs a concise title (3-160 chars) and optional notes up to 500 chars.' },
