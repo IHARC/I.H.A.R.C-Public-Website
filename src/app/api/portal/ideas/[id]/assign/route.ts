@@ -6,13 +6,11 @@ import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 
-type RouteContext = {
-  params: Promise<{ id: string }> | { id: string };
-};
-
-export async function POST(req: NextRequest, context: RouteContext) {
-  const params = await context.params;
-  const ideaId = params.id;
+export async function POST(req: NextRequest) {
+  const url = new URL(req.url);
+  const segments = url.pathname.split('/');
+  const ideaIndex = segments.findIndex((segment) => segment === 'ideas');
+  const ideaId = ideaIndex >= 0 ? segments[ideaIndex + 1] : null;
   if (!ideaId) {
     return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
   }

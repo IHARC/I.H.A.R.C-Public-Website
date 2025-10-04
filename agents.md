@@ -1,62 +1,75 @@
 # AGENTS.md
 
 ## Mission & Audience Context
-- This repository powers the IHARC Solutions Command Center, an internal/external collaboration portal for homelessness and addictions response partners in Northumberland County, Ontario.
-- Stakeholders include community members, municipal partners, outreach teams, and IHARC moderators who coordinate service improvements.
-- Maintain empathetic, strengths-based, community-focused language across UI copy, notifications, and documentation.
+- This repository contains the public marketing website for the Integrated Homelessness & Addictions Response Centre (IHARC).
+- IHARC is a non-profit based in Northumberland County, Ontario, Canada supporting people who are unhoused and/or navigating substance use challenges, with a focus on outreach services.
+- Keep language empathetic, strengths-based, and community-focused when editing content.
 
 ## Tech & Architecture Overview
-- **Framework:** Next.js 15 App Router with React Server Components, TypeScript, and edge runtime support.
-- **Styling:** Tailwind CSS with shadcn/ui primitives and custom tokens defined in `tailwind.config.ts` and global styles under `src/app/globals.css`.
-- **Data & Auth:** Supabase (Postgres + Auth + Storage) using the `portal` schema, RLS, and edge functions for privileged workflows.
-- **Testing & Quality:** ESLint, Prettier, TypeScript `tsc --noEmit`, Vitest for unit tests, Playwright for end-to-end specs.
-- **Hosting:** Azure Static Web Apps (Node build) deploying Next.js output via `build.js` orchestration.
+- **Framework:** Astro 4.x with strict TypeScript and JSX/TSX support for islands when needed.
+- **Styling:** Tailwind CSS with additional global styles in `src/styles/main.css` implementing the IHARC design system.
+- **Content:** Astro Content Collections (`src/content/`) with schemas in `src/content/config.ts` plus structured data in `src/data/site.ts`.
+- **Utilities & Tests:** Vitest for unit tests, Playwright for end-to-end tests, ESLint + Prettier (with Astro plugins) for linting/formatting.
+- **Hosting:** Azure Static Web Apps. Build pipeline relies on `npm run build` which invokes `build.js` (fallback strategies for Oryx permission issues).
 
 ### Key Directories & Files
-- `src/app/` – App Router pages, layouts, route handlers, and API endpoints under `/api/portal/*`.
-- `src/components/` – Shared UI building blocks (cards, status badges, comment widgets, modals, forms).
-- `src/lib/` – Domain utilities (auth helpers, formatting functions, Supabase client wrappers, validation guards).
-- `supabase/` – Edge function source (`portal-*`) plus any generated type definitions/migrations.
-- `docs/portal/` – Architecture notes, MVP plan, and operational guidelines for the Command Center.
-- `tests/` – Playwright specs; unit tests colocated near implementation files.
+- `src/pages/` – Route files (currently homepage in `index.astro`).
+- `src/layouts/BaseLayout.astro` – Global layout handling SEO, metadata, and accessibility defaults.
+- `src/components/` – Reusable Astro components (header, hero, quick access, programs grid, impact counters, news strip, footer, etc.).
+- `src/data/site.ts` – Central configuration for navigation, quick access cards, program listings, impact counters, footer content, logo + integration settings.
+- `src/content/` – Markdown content for news/blog posts and static pages validated by schemas in `src/content/config.ts`.
+- `src/lib/` – Utility helpers (accessibility, observers, etc.) that should be covered by unit tests.
+- `public/` – Static assets (images, favicons, downloadable resources). Reference with root-relative URLs (e.g., `/logo.svg`).
+- `tests/` – Playwright E2E specs; Vitest unit tests colocated where appropriate.
 
 ## Local Development Workflow
-1. Install Node.js ≥ 18.18.0 (Next.js 15 requirement) and npm.
+1. Install Node.js ≥ 18.17.0 and npm.
 2. Install dependencies: `npm install`.
-3. Create `.env.local` with Supabase keys (see `README.md`).
-4. Run `npm run dev` to start the Next.js dev server at http://localhost:3000.
-5. Production build: `npm run build`; serve locally with `npm run start`. `build.js` aligns local builds with Azure SWA expectations.
+3. Start local dev server: `npm run dev` (serves at http://localhost:4321).
+4. Build production bundle: `npm run build`; preview build with `npm run preview`.
+5. To resolve Azure Oryx build issues there are alternative scripts: `npm run build:direct`, `npm run build:node`, or `bash build-simple.sh`.
 
 ## Code Style & Implementation Guidelines
-- Use semantic HTML and accessible patterns; follow the existing heading hierarchy for page sections.
-- Prefer Tailwind utilities; extend design tokens centrally rather than adding ad-hoc CSS. Keep button and badge variants consistent.
-- Typescript is strict—leverage shared interfaces (e.g., `src/lib/types.ts`, Supabase generated types) instead of `any`.
-- Favor server components for data fetching when possible; isolate client interactivity in responsive islands.
-- Enforce security & privacy: respect RLS policies, sanitize inputs, guard against over-fetching, and surface rate-limit messaging clearly.
-- Ensure UI copy reflects trauma-informed, non-stigmatizing language.
+- Favor semantic HTML (`<section>`, `<article>`, `<nav>`) and maintain logical heading hierarchy (H1 → H2 → H3).
+- Apply the shared layout conventions: wrap sections with the `container` class for width constraints and `py-16` (or responsive equivalents) for vertical rhythm.
+- Tailwind is the primary styling tool. Use utility classes over ad-hoc CSS; if global styles are needed, extend `src/styles/main.css` while preserving existing component classes (`.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.btn-white`, `.card`, etc.).
+- Maintain brand colors (primary red `#CE2029`, charcoal `#1E1E1E`, supporting palette defined in Tailwind config) and typography (Poppins for headings, Inter for body text).
+- Keep TypeScript strictness intact—add/adjust types rather than `any`. Use existing interfaces/types from `src/data/site.ts` and content schemas.
+- Accessibility is a top priority: ensure keyboard access, visible focus states, ARIA labels where appropriate, skip links, and support `prefers-reduced-motion`. Maintain AA contrast or better.
+- Aim for high performance: minimize unused JavaScript, prefer static rendering, and keep Lighthouse mobile score ≥ 90, FCP < 1.5s, CLS < 0.1.
+- When introducing interactive behavior, prefer Astro islands sparingly; if adding React, follow README guidance and update `astro.config.mjs` accordingly.
 
 ## Content & Data Editing
-- Portal navigation, quick actions, and role strings live in `src/lib/constants.ts` and related config files.
-- Idea submission copy and form schema live in `src/app/solutions/submit` components; update validations in tandem with API handlers.
-- Static assets reside in `public/`; reference with root-relative paths (`/logo.svg`).
-- Docs for deployment/architecture are under `docs/portal`; keep them updated when workflows change.
+- Update navigation, quick access, programs, impact counters, footer contact info, logo configuration, and integration toggles within `src/data/site.ts`.
+- Add news/blog entries by creating Markdown files inside `src/content/news/` with proper frontmatter matching schemas in `src/content/config.ts`.
+- Global copy edits can often be made directly in Astro components or site data; keep tone compassionate and community-oriented.
+- Store new static media in `public/` and reference via root-relative paths.
 
 ## Integrations & Environment Variables
-- Required env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`, plus optional analytics/chat keys. Never commit secrets.
-- Supabase auth uses JWT claims; ensure role checks run via `auth.jwt()` claims, Postgres policies, or `getSession()` helpers.
-- Edge functions (`portal-ingest-metrics`, `portal-moderate`, etc.) rely on secrets defined in Supabase project settings; sync updates after changes.
+- Copy `.env.example` to `.env` to configure analytics, chat, and other integrations. Never commit `.env`.
+- Supported analytics: Google Analytics 4, Google Tag Manager, Facebook Pixel, Hotjar. Chat provider defaults to Crisp.
+- Toggle integrations through the `integrations` object in `src/data/site.ts`. `analytics.enabled` and `chat.enabled` gate all tracking/chat behavior; `respectDNT` honors Do Not Track.
+- Development override: `PUBLIC_ENABLE_INTEGRATIONS_IN_DEV=true npm run dev` enables integrations locally for testing.
+- Console logs (in dev) confirm which IDs/providers are active. Verify environment variables begin with `PUBLIC_` as required by Astro.
 
 ## Testing Expectations
-- Run `npm run lint`, `npm run typecheck`, and `npm run test` for unit coverage before submitting changes that touch logic.
-- Execute `npm run e2e` (after `npm run build`) when altering flows that impact routing, auth, or cross-page behavior.
-- Update/add tests alongside new features—especially around moderation, rate limiting, and multi-step forms.
+- **Linting:** `npm run lint` (ESLint + Prettier). Fix formatting with `npm run format` when needed.
+- **Unit tests:** `npm run test` (Vitest). Focus on utilities in `src/lib/` and any logic-heavy modules.
+- **E2E tests:** `npm run e2e` (Playwright). Run `npm run build` beforehand to generate the production build Playwright expects.
+- **Comprehensive check:** `npm run check` runs lint, unit, and e2e suites sequentially. Execute relevant commands before submitting changes.
+- Update or add tests alongside new features. Mock browser APIs (e.g., IntersectionObserver) where appropriate.
 
 ## Deployment Notes
-- Azure SWA pipeline runs `npm install` + `npm run build`; confirm environment variables are configured in Azure.
-- Supabase edge functions must be deployed with the Supabase CLI (`supabase functions deploy portal-…`). Keep versions in sync with repo code.
-- Coordinate database migrations carefully: `portal` schema is shared with other apps. Avoid breaking changes; use additive migrations only.
+- Azure Static Web Apps GitHub Action is configured; build output lives in `dist/`.
+- `build.js` includes fallback strategies (permission fixes + `npx astro`, direct Node execution, Yarn fallback) to mitigate Oryx issues. If Azure builds fail, try alternate scripts listed above.
+- Ensure environment variables are configured in hosting platform before deployment (analytics IDs, chat configs, etc.).
+
+## Documentation & Further Reading
+- Additional project details: `README.md` (setup, project structure, design system, performance goals).
+- Integration-specific instructions: `INTEGRATIONS.md` (logos, analytics, chat widget configuration, troubleshooting, deployment checklist).
+- There are currently no nested `AGENTS.md` files; if you add new directories with unique conventions, include scoped instructions there.
 
 ## Workflow Expectations for Future Changes
-- Keep PRs focused and ensure `git status` is clean before completion.
-- Document relevant test runs and Supabase updates in summaries.
-- Uphold accessibility, performance, and data security standards across all contributions.
+- Keep commits focused and ensure `git status` is clean before completion.
+- Run the relevant quality commands for any code/content change and document the results in your summary.
+- Preserve accessibility, performance, and design consistency across all contributions.
