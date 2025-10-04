@@ -31,7 +31,7 @@ export function IdeaAssignmentCard({
     setLocalAssignee(assignee);
   }, [assignee]);
 
-  const isSelfAssigned = localAssignee && localAssignee.id === viewerProfileId;
+  const isSelfAssigned = Boolean(localAssignee && localAssignee.id === viewerProfileId);
 
   const assign = (target: 'self' | null) => {
     startTransition(async () => {

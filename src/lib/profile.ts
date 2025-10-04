@@ -5,9 +5,10 @@ export type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
 
 export async function ensurePortalProfile(userId: string, defaults?: Partial<PortalProfile>) {
   const supabase = createSupabaseServiceClient();
+  const portal = supabase.schema('portal');
 
-  const { data, error } = await supabase
-    .from('portal.profiles')
+  const { data, error } = await portal
+    .from('profiles')
     .select('*')
     .eq('user_id', userId)
     .maybeSingle();
@@ -23,8 +24,8 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
   const displayName = defaults?.display_name ?? 'Community Member';
   const role = defaults?.role ?? 'user';
 
-  const { data: inserted, error: insertError } = await supabase
-    .from('portal.profiles')
+  const { data: inserted, error: insertError } = await portal
+    .from('profiles')
     .insert({
       user_id: userId,
       display_name: displayName,
@@ -44,9 +45,10 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
 
 export async function getUserEmailForProfile(profileId: string) {
   const supabase = createSupabaseServiceClient();
+  const portal = supabase.schema('portal');
 
-  const { data: profile, error } = await supabase
-    .from('portal.profiles')
+  const { data: profile, error } = await portal
+    .from('profiles')
     .select('user_id')
     .eq('id', profileId)
     .maybeSingle();

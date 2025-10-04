@@ -18,7 +18,7 @@ Guidance for Claude Code (claude.ai/code) collaborating on the IHARC Command Cen
 
 ## Local Workflow
 1. Ensure Node.js ≥ 18.18.0 and npm 9+.
-2. Copy `.env.example` → `.env.local` and populate Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`).
+2. Copy `.env.example` → `.env.local` and populate Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`).
 3. Install deps with `npm install`.
 4. Run `npm run dev` (Next.js at http://localhost:3000).
 5. Build via `npm run build`; preview with `npm run start`. Azure SWA uses the same `build.js`.

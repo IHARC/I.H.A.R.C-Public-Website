@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  let payload: unknown;
+  let payload: Record<string, unknown>;
   try {
     payload = await req.json();
   } catch {
@@ -46,29 +46,29 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ status: 'ok' });
 }
 
-async function handleFollowUps(payload: unknown, actorProfileId: string) {
-  if (!payload || typeof payload !== 'object') {
+async function handleFollowUps(payload: Record<string, unknown> | null | undefined, actorProfileId: string) {
+  if (!payload) {
     return;
   }
 
-  const body = payload as Record<string, unknown>;
-  const action = body.action;
+  const action = typeof payload.action === 'string' ? payload.action : null;
 
   if (action !== 'update_status') {
     return;
   }
 
-  const ideaId = typeof body.idea_id === 'string' ? body.idea_id : null;
-  const note = typeof body.note === 'string' ? body.note : null;
-  const status = typeof body.status === 'string' ? body.status : null;
+  const ideaId = typeof payload.idea_id === 'string' ? payload.idea_id : null;
+  const note = typeof payload.note === 'string' ? payload.note : null;
+  const status = typeof payload.status === 'string' ? payload.status : null;
 
   if (!ideaId || !status) {
     return;
   }
 
   const service = createSupabaseServiceClient();
-  const { data: idea } = await service
-    .from('portal.ideas')
+  const portal = service.schema('portal');
+  const { data: idea } = await portal
+    .from('ideas')
     .select('id, title, author_profile_id')
     .eq('id', ideaId)
     .maybeSingle();

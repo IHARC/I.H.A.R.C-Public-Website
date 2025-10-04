@@ -1,9 +1,29 @@
-import { toast as sonnerToast } from 'sonner';
+'use client'
 
-export function useToast() {
-  return {
-    toast: sonnerToast,
-  };
+import { toast as sonnerToast } from 'sonner'
+
+export type ToastVariant = 'default' | 'destructive'
+
+export type ToastOptions = {
+  title: string
+  description?: string
+  variant?: ToastVariant
+  duration?: number
 }
 
-export const toast = sonnerToast;
+export function toast({ title, description, variant = 'default', duration }: ToastOptions) {
+  const options = {
+    description,
+    duration,
+  } as const
+
+  if (variant === 'destructive') {
+    return sonnerToast.error(title, options)
+  }
+
+  return sonnerToast(title, options)
+}
+
+export function useToast() {
+  return { toast }
+}

@@ -62,7 +62,9 @@ export function CommentComposer({ ideaId }: { ideaId: string }) {
     <div className="space-y-2">
       <RadioGroup
         value={commentType}
-        onValueChange={(next) => setCommentType(next as 'question' | 'suggestion')}
+        onValueChange={(nextValue: string) =>
+          setCommentType((nextValue as 'question' | 'suggestion') ?? 'suggestion')
+        }
         className="flex gap-4"
       >
         <div className="flex items-center gap-2">

@@ -45,9 +45,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const service = createSupabaseServiceClient();
+  const portal = service.schema('portal');
 
-  const { data: idea, error: ideaError } = await service
-    .from('portal.ideas')
+  const { data: idea, error: ideaError } = await portal
+    .from('ideas')
     .select('author_profile_id, title')
     .eq('id', ideaId)
     .maybeSingle();
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
   }
 
-  const { error: decisionError } = await service.from('portal.idea_decisions').insert({
+  const { error: decisionError } = await portal.from('idea_decisions').insert({
     idea_id: ideaId,
     author_profile_id: profile.id,
     summary: message,

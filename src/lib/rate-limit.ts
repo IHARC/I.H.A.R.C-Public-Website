@@ -12,23 +12,24 @@ type RateLimitParams = {
 export async function checkRateLimit(params: RateLimitParams) {
   const { profileId, type, limit, cooldownMs } = params;
   const supabase = createSupabaseServiceClient();
+  const portal = supabase.schema('portal');
   const since = new Date(Date.now() - WINDOW_MS).toISOString();
 
-  let table: 'portal.ideas' | 'portal.comments' | 'portal.flags';
+  let table: 'ideas' | 'comments' | 'flags';
   let column: string;
 
   if (type === 'idea') {
-    table = 'portal.ideas';
+    table = 'ideas';
     column = 'author_profile_id';
   } else if (type === 'comment') {
-    table = 'portal.comments';
+    table = 'comments';
     column = 'author_profile_id';
   } else {
-    table = 'portal.flags';
+    table = 'flags';
     column = 'reporter_profile_id';
   }
 
-  const { count, error } = await supabase
+  const { count, error } = await portal
     .from(table)
     .select('*', { count: 'exact', head: true })
     .eq(column, profileId)
@@ -43,7 +44,7 @@ export async function checkRateLimit(params: RateLimitParams) {
   }
 
   if (cooldownMs) {
-    const { data: latest, error: recentError } = await supabase
+    const { data: latest, error: recentError } = await portal
       .from(table)
       .select('created_at')
       .eq(column, profileId)

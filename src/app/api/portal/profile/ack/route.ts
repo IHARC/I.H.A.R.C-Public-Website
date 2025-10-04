@@ -6,6 +6,7 @@ import { hashValue } from '@/lib/hash';
 
 export async function POST(req: NextRequest) {
   const supabase = createSupabaseServerClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
     error: userError,
@@ -18,8 +19,8 @@ export async function POST(req: NextRequest) {
   const profile = await ensurePortalProfile(user.id);
 
   if (!profile.rules_acknowledged_at) {
-    const { error: updateError } = await supabase
-      .from('portal.profiles')
+    const { error: updateError } = await portal
+      .from('profiles')
       .update({ rules_acknowledged_at: new Date().toISOString() })
       .eq('id', profile.id);
 

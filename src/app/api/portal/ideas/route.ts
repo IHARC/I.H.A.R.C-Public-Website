@@ -40,6 +40,7 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   const supabase = createSupabaseServerClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
     error: userError,
@@ -200,8 +201,8 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .join('\n\n');
 
-  const { error: insertError } = await supabase
-    .from('portal.ideas')
+  const { error: insertError } = await portal
+    .from('ideas')
     .insert({
       id: ideaId,
       author_profile_id: profile.id,
@@ -227,7 +228,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unable to save idea' }, { status: 500 });
   }
 
-  const { error: editError } = await supabase.from('portal.idea_edits').insert({
+  const { error: editError } = await portal.from('idea_edits').insert({
     idea_id: ideaId,
     editor_profile_id: profile.id,
     body: JSON.stringify({
@@ -245,8 +246,8 @@ export async function POST(req: NextRequest) {
   }
 
   if (acknowledged && !profile.rules_acknowledged_at) {
-    const { error: ackError } = await supabase
-      .from('portal.profiles')
+    const { error: ackError } = await portal
+      .from('profiles')
       .update({ rules_acknowledged_at: new Date().toISOString() })
       .eq('id', profile.id);
     if (ackError) {

@@ -78,10 +78,12 @@ const SECTION_CONFIG = [
 
 export default async function IdeaDetailPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
   const service = createSupabaseServiceClient();
+  const servicePortal = service.schema('portal');
 
-  const { data: idea, error: ideaError } = await service
-    .from('portal.ideas')
+  const { data: idea, error: ideaError } = await servicePortal
+    .from('ideas')
     .select(
       `*,
       author:author_profile_id(
@@ -108,8 +110,8 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
 
   const attachments = await resolveAttachments(service, (idea.attachments as Array<{ path: string; name?: string }>) ?? []);
 
-  const { data: commentRows } = await service
-    .from('portal.comments')
+  const { data: commentRows } = await servicePortal
+    .from('comments')
     .select(
       `id, body, created_at, comment_type, is_official,
        author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
@@ -118,8 +120,8 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
     .order('created_at', { ascending: true })
     .returns<CommentRow[]>();
 
-  const { data: decisionsData } = await service
-    .from('portal.idea_decisions')
+  const { data: decisionsData } = await servicePortal
+    .from('idea_decisions')
     .select(
       `id, summary, visibility, created_at,
        author:author_profile_id(id, display_name, organization:organization_id(name, verified))`
@@ -128,8 +130,8 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
     .order('created_at', { ascending: true })
     .returns<DecisionRow[]>();
 
-  const { data: auditEntries } = await service
-    .from('portal.audit_log')
+  const { data: auditEntries } = await servicePortal
+    .from('audit_log')
     .select(
       `id, action, meta, created_at,
        actor:actor_profile_id(id, display_name, organization:organization_id(name, verified))`
@@ -153,8 +155,8 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
 
   let hasVoted = false;
   if (voterProfileId) {
-    const { data: voteRow } = await supabase
-      .from('portal.votes')
+    const { data: voteRow } = await portal
+      .from('votes')
       .select('idea_id')
       .eq('idea_id', idea.id)
       .eq('voter_profile_id', voterProfileId)
@@ -236,7 +238,8 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
 
         <section className="space-y-4">
           {SECTION_CONFIG.map((section) => {
-            const content = (idea as Record<string, unknown>)[section.key];
+            const key = section.key as keyof IdeaRecord;
+            const content = idea[key];
             if (!content) return null;
             return (
               <article

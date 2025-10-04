@@ -13,10 +13,11 @@ export type QueueNotificationArgs = {
 
 export async function queuePortalNotification(args: QueueNotificationArgs) {
   const supabase = createSupabaseServiceClient();
+  const portal = supabase.schema('portal');
   const { profileId = null, email, subject, bodyText, bodyHtml, ideaId, type, payload } = args;
 
-  const { data, error } = await supabase
-    .from('portal.notifications')
+  const { data, error } = await portal
+    .from('notifications')
     .insert({
       profile_id: profileId,
       recipient_email: email,

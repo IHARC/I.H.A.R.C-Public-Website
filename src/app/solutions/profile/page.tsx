@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default async function PortalProfilePage() {
   const supabase = createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -19,8 +20,8 @@ export default async function PortalProfilePage() {
   }
 
   const profile = await ensurePortalProfile(user.id);
-  const { data: organizations } = await supabase
-    .from('portal.organizations')
+  const { data: organizations } = await portal
+    .from('organizations')
     .select('id, name, verified')
     .order('name', { ascending: true });
 
@@ -28,6 +29,7 @@ export default async function PortalProfilePage() {
     'use server';
 
     const supa = createSupabaseServiceClient();
+    const portalClient = supa.schema('portal');
     const displayName = formData.get('display_name') as string;
     const organizationId = (formData.get('organization_id') as string) || null;
 
@@ -35,8 +37,8 @@ export default async function PortalProfilePage() {
       throw new Error('Display name is required');
     }
 
-    await supa
-      .from('portal.profiles')
+    await portalClient
+      .from('profiles')
       .update({ display_name: displayName, organization_id: organizationId })
       .eq('id', profile.id);
 

@@ -10,9 +10,10 @@ export async function logAuditEvent(params: {
   meta?: Record<string, unknown>;
 }) {
   const supabase = createSupabaseServiceClient();
+  const portal = supabase.schema('portal');
   const { actorProfileId, actorUserId, action, entityType, entityId, meta } = params;
 
-  await supabase.from('portal.audit_log').insert({
+  await portal.from('audit_log').insert({
     actor_profile_id: actorProfileId,
     actor_user_id: actorUserId,
     action,

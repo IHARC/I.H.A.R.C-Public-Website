@@ -11,6 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const supabase = createSupabaseServerClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
     error: userError,
@@ -22,8 +23,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const profile = await ensurePortalProfile(user.id);
 
-  const { data: idea, error: ideaError } = await supabase
-    .from('portal.ideas')
+  const { data: idea, error: ideaError } = await portal
+    .from('ideas')
     .select('id, vote_count, status')
     .eq('id', ideaId)
     .maybeSingle();
@@ -41,8 +42,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Voting is disabled for archived ideas' }, { status: 400 });
   }
 
-  const { data: existingVote } = await supabase
-    .from('portal.votes')
+  const { data: existingVote } = await portal
+    .from('votes')
     .select('idea_id')
     .eq('idea_id', ideaId)
     .eq('voter_profile_id', profile.id)
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   let voteAction: 'idea_voted' | 'idea_unvoted';
 
   if (existingVote) {
-    const { error: deleteError } = await supabase
-      .from('portal.votes')
+    const { error: deleteError } = await portal
+      .from('votes')
       .delete()
       .eq('idea_id', ideaId)
       .eq('voter_profile_id', profile.id);
@@ -63,8 +64,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
     voteAction = 'idea_unvoted';
   } else {
-    const { error: insertError } = await supabase
-      .from('portal.votes')
+    const { error: insertError } = await portal
+      .from('votes')
       .insert({ idea_id: ideaId, voter_profile_id: profile.id });
     if (insertError) {
       console.error('Failed to insert vote', insertError);
@@ -74,8 +75,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     voteAction = 'idea_voted';
   }
 
-  const { data: updatedIdea } = await supabase
-    .from('portal.ideas')
+  const { data: updatedIdea } = await portal
+    .from('ideas')
     .select('vote_count')
     .eq('id', ideaId)
     .maybeSingle();

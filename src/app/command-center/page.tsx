@@ -15,10 +15,11 @@ const METRIC_LABELS: Record<string, string> = {
 export default async function CommandCenterPage({ searchParams }: { searchParams: { range?: string } }) {
   const range = searchParams.range === '30d' ? 30 : 7;
   const supabase = createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
   const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const { data, error } = await supabase
-    .from('portal.metric_daily')
+  const { data, error } = await portal
+    .from('metric_daily')
     .select('*')
     .gte('metric_date', since)
     .order('metric_date', { ascending: true });
@@ -80,7 +81,7 @@ function buildCardData(grouped: ReturnType<typeof groupMetrics>) {
     const latest = series[series.length - 1];
     const first = series[0];
     const delta = (latest?.value ?? 0) - (first?.value ?? 0);
-    const trend = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    const trend: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
 
     return {
       key,

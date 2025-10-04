@@ -25,9 +25,10 @@ export async function POST() {
   }
 
   const service = createSupabaseServiceClient();
+  const portal = service.schema('portal');
 
-  const { error: updateError } = await service
-    .from('portal.profiles')
+  const { error: updateError } = await portal
+    .from('profiles')
     .update({ display_name_confirmed_at: new Date().toISOString() })
     .eq('id', profile.id);
 

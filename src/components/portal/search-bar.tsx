@@ -7,13 +7,14 @@ import { Input } from '@/components/ui/input';
 export function SearchBar({ placeholder }: { placeholder?: string }) {
   const router = useRouter();
   const params = useSearchParams();
-  const [value, setValue] = useState(params.get('q') ?? '');
+  const [value, setValue] = useState<string>(() => params?.get('q') ?? '');
 
   useEffect(() => {
-    setValue(params.get('q') ?? '');
+    setValue(params?.get('q') ?? '');
   }, [params]);
 
   useEffect(() => {
+    if (!params) return;
     const handler = setTimeout(() => {
       const next = new URLSearchParams(params.toString());
       if (value) {
@@ -27,6 +28,17 @@ export function SearchBar({ placeholder }: { placeholder?: string }) {
 
     return () => clearTimeout(handler);
   }, [value, params, router]);
+
+  if (!params) {
+    return (
+      <Input
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder={placeholder ?? 'Search community solutions'}
+        aria-label="Search ideas"
+      />
+    );
+  }
 
   return (
     <Input

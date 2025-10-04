@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createSupabaseServerClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
     error: userError,
@@ -87,8 +88,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { data: idea, error: ideaError } = await supabase
-    .from('portal.ideas')
+  const { data: idea, error: ideaError } = await portal
+    .from('ideas')
     .select('id, status')
     .eq('id', ideaId)
     .maybeSingle();
@@ -108,8 +109,8 @@ export async function POST(req: NextRequest) {
 
   let parentDepth = 0;
   if (parentId) {
-    const { data: parent, error: parentError } = await supabase
-      .from('portal.comments')
+    const { data: parent, error: parentError } = await portal
+      .from('comments')
       .select('id, idea_id, depth')
       .eq('id', parentId)
       .maybeSingle();
@@ -147,8 +148,8 @@ export async function POST(req: NextRequest) {
       : 'suggestion';
   }
 
-  const { data: insertedComment, error: insertError } = await supabase
-    .from('portal.comments')
+  const { data: insertedComment, error: insertError } = await portal
+    .from('comments')
     .insert({
       idea_id: ideaId,
       author_profile_id: profile.id,

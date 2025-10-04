@@ -19,6 +19,7 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
   const q = (searchParams.q as string) ?? null;
 
   const supabase = createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,8 +29,8 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
     viewerProfile = await ensurePortalProfile(user.id);
   }
 
-  let query = supabase
-    .from('portal.ideas')
+  let query = portal
+    .from('ideas')
     .select('*', { count: 'exact' })
     .range(0, 199);
 
@@ -59,14 +60,14 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
   const ideaList = ideas ?? [];
   const profileIds = Array.from(new Set(ideaList.map((idea) => idea.author_profile_id)));
 
-  const { data: profiles } = await supabase
-    .from('portal.profiles')
+  const { data: profiles } = await portal
+    .from('profiles')
     .select('id, display_name, organization_id')
     .in('id', profileIds.length ? profileIds : ['00000000-0000-0000-0000-000000000000']);
 
   const organizationIds = Array.from(new Set((profiles ?? []).map((profile) => profile.organization_id).filter(Boolean))) as string[];
-  const { data: organizations } = await supabase
-    .from('portal.organizations')
+  const { data: organizations } = await portal
+    .from('organizations')
     .select('id, name, verified')
     .in('id', organizationIds.length ? organizationIds : ['00000000-0000-0000-0000-000000000000']);
 

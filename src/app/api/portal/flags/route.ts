@@ -11,6 +11,7 @@ const ENTITY_TYPES = new Set(['idea', 'comment']);
 
 export async function POST(req: NextRequest) {
   const supabase = createSupabaseServerClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
     error: userError,
@@ -69,8 +70,8 @@ export async function POST(req: NextRequest) {
   }
 
   if (entityType === 'idea') {
-    const { data: idea, error: ideaError } = await supabase
-      .from('portal.ideas')
+    const { data: idea, error: ideaError } = await portal
+      .from('ideas')
       .select('id')
       .eq('id', entityId)
       .maybeSingle();
@@ -82,8 +83,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
     }
   } else {
-    const { data: comment, error: commentError } = await supabase
-      .from('portal.comments')
+    const { data: comment, error: commentError } = await portal
+      .from('comments')
       .select('id')
       .eq('id', entityId)
       .maybeSingle();
@@ -96,8 +97,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { data: insertedFlag, error: insertError } = await supabase
-    .from('portal.flags')
+  const { data: insertedFlag, error: insertError } = await portal
+    .from('flags')
     .insert({
       entity_type: entityType,
       entity_id: entityId,

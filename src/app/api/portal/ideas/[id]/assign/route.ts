@@ -52,9 +52,10 @@ export async function POST(req: NextRequest) {
   }
 
   const service = createSupabaseServiceClient();
+  const portal = service.schema('portal');
 
-  const { error: updateError } = await service
-    .from('portal.ideas')
+  const { error: updateError } = await portal
+    .from('ideas')
     .update({ assignee_profile_id: assigneeProfileId })
     .eq('id', ideaId);
 
@@ -67,8 +68,8 @@ export async function POST(req: NextRequest) {
   let assigneeDisplayName: string | null = null;
 
   if (assigneeProfileId) {
-    const { data: assigneeProfile, error: profileError } = await service
-      .from('portal.profiles')
+    const { data: assigneeProfile, error: profileError } = await portal
+      .from('profiles')
       .select('display_name')
       .eq('id', assigneeProfileId)
       .maybeSingle();

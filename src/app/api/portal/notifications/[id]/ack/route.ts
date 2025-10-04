@@ -21,9 +21,10 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
 
   const profile = await ensurePortalProfile(user.id);
   const service = createSupabaseServiceClient();
+  const portal = service.schema('portal');
 
-  const { data, error: updateError } = await service
-    .from('portal.notifications')
+  const { data, error: updateError } = await portal
+    .from('notifications')
     .update({ acknowledged_at: new Date().toISOString(), status: 'acknowledged' })
     .eq('id', notificationId)
     .eq('profile_id', profile.id)

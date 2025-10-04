@@ -22,6 +22,7 @@ const METRIC_OPTIONS = [
 
 export default async function CommandCenterAdminPage() {
   const supabase = createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -35,14 +36,14 @@ export default async function CommandCenterAdminPage() {
     redirect('/command-center');
   }
 
-  const { data: recentMetrics } = await supabase
-    .from('portal.metric_daily')
+  const { data: recentMetrics } = await portal
+    .from('metric_daily')
     .select('*')
     .order('metric_date', { ascending: false })
     .limit(12);
 
-  const { data: organizations } = await supabase
-    .from('portal.organizations')
+  const { data: organizations } = await portal
+    .from('organizations')
     .select('id, name, verified, website')
     .order('created_at', { ascending: false })
     .limit(10);
@@ -51,6 +52,7 @@ export default async function CommandCenterAdminPage() {
     'use server';
 
     const supa = createSupabaseServiceClient();
+    const portalClient = supa.schema('portal');
     const metric_date = formData.get('metric_date') as string;
     const metric_key = formData.get('metric_key') as string;
     const value = Number(formData.get('value'));
@@ -63,7 +65,7 @@ export default async function CommandCenterAdminPage() {
       throw new Error('Missing required fields');
     }
 
-    await supa.from('portal.metric_daily').upsert({
+    await portalClient.from('metric_daily').upsert({
       metric_date,
       metric_key,
       value,
@@ -87,6 +89,7 @@ export default async function CommandCenterAdminPage() {
     'use server';
 
     const supa = createSupabaseServiceClient();
+    const portalClient = supa.schema('portal');
     const name = (formData.get('org_name') as string | null)?.trim();
     const website = (formData.get('org_website') as string | null)?.trim() || null;
     const verified = formData.get('org_verified') === 'on';
@@ -97,8 +100,8 @@ export default async function CommandCenterAdminPage() {
       throw new Error('Organization name is required');
     }
 
-    const { data: inserted, error } = await supa
-      .from('portal.organizations')
+    const { data: inserted, error } = await portalClient
+      .from('organizations')
       .insert({
         name,
         website,

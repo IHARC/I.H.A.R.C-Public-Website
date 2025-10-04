@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
   const sinceDate = since.toISOString().slice(0, 10);
 
   const supabase = createSupabaseServiceClient();
-  const { data, error } = await supabase
-    .from('portal.metric_daily')
+  const portal = supabase.schema('portal');
+  const { data, error } = await portal
+    .from('metric_daily')
     .select('metric_date, metric_key, value, source')
     .gte('metric_date', sinceDate)
     .order('metric_date', { ascending: true });
