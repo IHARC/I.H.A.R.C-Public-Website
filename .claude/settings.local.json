@@ -10,9 +10,18 @@
       "Bash(npm test)",
       "Bash(npm run lint)",
       "Bash(tree:*)",
+<<<<<<< HEAD
+<<<<<<< HEAD
       "Bash(rg:*)",
       "Bash(npm run check:*)",
       "Bash(cp:*)"
+=======
+      "Bash(rg:*)"
+>>>>>>> 287c492c (updates)
+=======
+      "Bash(rg:*)",
+      "Bash(npm run check:*)"
+>>>>>>> 0beb5814 (more improvements)
     ],
     "deny": []
   },
@@ -22,3 +31,5 @@
     "padding": 0
   }
 }
+
+
