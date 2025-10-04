@@ -76,7 +76,17 @@ const SECTION_CONFIG = [
   { key: 'success_metrics', title: 'Success metrics' },
 ] as const;
 
-export default async function IdeaDetailPage({ params }: { params: { id: string } }) {
+export default async function IdeaDetailPage({
+  params,
+}: {
+  params: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedParams = await params;
+  const idParam = resolvedParams.id;
+  const ideaId = Array.isArray(idParam) ? idParam[0] : idParam;
+  if (!ideaId) {
+    notFound();
+  }
   const supabase = createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const service = createSupabaseServiceClient();
@@ -97,7 +107,7 @@ export default async function IdeaDetailPage({ params }: { params: { id: string 
         organization:organization_id(name, verified)
       )`
     )
-    .eq('id', params.id)
+    .eq('id', ideaId)
     .maybeSingle<IdeaRecord>();
 
   if (ideaError) {
