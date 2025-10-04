@@ -11,13 +11,13 @@ html {
 }
 
 body {
-  @apply min-h-screen bg-slate-50 text-slate-900 antialiased;
+  @apply min-h-screen bg-background text-on-background antialiased;
 }
 
 .dark body {
-  @apply bg-slate-950 text-slate-100;
+  @apply bg-neutral-black text-neutral-white;
 }
 
 .focus-outline {
-  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-red focus-visible:outline-offset-2;
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2;
 }

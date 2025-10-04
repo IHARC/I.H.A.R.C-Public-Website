@@ -12,13 +12,13 @@ const iconMap: Record<string, string> = {
 };
 ---
 
-<section class="py-16 bg-white">
+<section class="py-16 bg-surface">
   <div class="container">
     <div class="text-center mb-12">
-      <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-4">
+      <h2 class="text-3xl lg:text-4xl font-heading font-bold text-on-surface mb-4">
         Programs & Services
       </h2>
-      <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+      <p class="text-lg text-on-surface-variant max-w-3xl mx-auto">
         Comprehensive support across multiple areas of community need, from crisis intervention to long-term recovery and safety initiatives.
       </p>
     </div>
@@ -34,7 +34,7 @@ const iconMap: Record<string, string> = {
               href: program.href, 
               'aria-label': `Learn more about ${program.title} - ${program.description}` 
             })}
-            class={`group card transition-all duration-250 ease-out border-t-4 border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 ${
+            class={`group card transition-all duration-250 ease-out border-t-4 border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
               isClickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : ''
             }`}
             data-fade-in
@@ -42,23 +42,23 @@ const iconMap: Record<string, string> = {
           >
             <div class="flex items-start space-x-4">
               <!-- Icon -->
-              <div class="flex-shrink-0 w-12 h-12 bg-brand-red bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-brand-red group-hover:text-white transition-all duration-250">
-                <svg class="w-6 h-6 text-brand-red group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-250">
+                <svg class="w-6 h-6 text-primary group-hover:text-on-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconMap[program.icon] || iconMap.users} />
                 </svg>
               </div>
 
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <h3 class="text-xl font-heading font-semibold text-gray-900 mb-2 group-hover:text-brand-red transition-colors">
+                <h3 class="text-xl font-heading font-semibold text-on-surface mb-2 group-hover:text-primary transition-colors">
                   {program.title}
                 </h3>
-                <p class="text-gray-600 leading-relaxed max-w-prose">
+                <p class="text-on-surface-variant leading-relaxed max-w-prose">
                   {program.description}
                 </p>
 
                 {isClickable && (
-                  <div class="mt-4 flex items-center text-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-250">
+                  <div class="mt-4 flex items-center text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-250">
                     <span class="text-sm font-medium mr-2">Learn more</span>
                     <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

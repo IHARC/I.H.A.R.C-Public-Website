@@ -7,23 +7,23 @@ const { type = 'subtle' } = Astro.props;
 ---
 
 {type === 'red-line' && (
-  <div class="bg-white py-4" aria-hidden="true">
+  <div class="bg-surface py-4" aria-hidden="true">
     <div class="container">
-      <div class="h-0.5 bg-gradient-to-r from-transparent via-brand-red to-transparent max-w-2xl mx-auto opacity-30"></div>
+      <div class="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent max-w-2xl mx-auto opacity-30"></div>
     </div>
   </div>
 )}
 
 {type === 'angled' && (
-  <div class="relative h-16 bg-gray-50 overflow-hidden" aria-hidden="true">
+  <div class="relative h-16 bg-surface-container-low overflow-hidden" aria-hidden="true">
     <div class="absolute inset-0">
       <svg class="absolute h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 16" fill="none">
-        <polygon points="0,16 100,0 100,16" fill="white"/>
+        <polygon points="0,16 100,0 100,16" fill="currentColor" class="text-surface"/>
       </svg>
     </div>
   </div>
 )}
 
 {type === 'subtle' && (
-  <div class="bg-gradient-to-b from-transparent to-gray-50/50 h-8" aria-hidden="true"></div>
+  <div class="bg-gradient-to-b from-transparent to-surface-container-low/50 h-8" aria-hidden="true"></div>
 )}
