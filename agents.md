@@ -42,7 +42,7 @@
 - Docs for deployment/architecture are under `docs/portal`; keep them updated when workflows change.
 
 ## Integrations & Environment Variables
-- Required env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`, plus optional analytics/chat keys. Never commit secrets.
+- Required env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`, plus optional analytics/chat keys. Never commit secrets.
 - Supabase auth uses JWT claims; ensure role checks run via `auth.jwt()` claims, Postgres policies, or `getSession()` helpers.
 - Edge functions (`portal-ingest-metrics`, `portal-moderate`, etc.) rely on secrets defined in Supabase project settings; sync updates after changes.
 

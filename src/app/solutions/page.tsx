@@ -5,7 +5,7 @@ import { type IdeaSummary } from '@/components/portal/idea-card';
 import { SearchBar } from '@/components/portal/search-bar';
 import { Filters } from '@/components/portal/filters';
 import { EmptyState } from '@/components/portal/empty-state';
-import { KanbanBoard, type ColumnKey } from '@/components/portal/kanban-board';
+import { KanbanBoard, STATUS_COLUMNS, type ColumnKey } from '@/components/portal/kanban-board';
 
 export const metadata: Metadata = {
   title: 'Community Solutions',
@@ -115,7 +115,12 @@ export default async function SolutionsPage({ searchParams }: { searchParams: Re
         />
       ) : (
         <KanbanBoard
-          ideas={ideaSummaries.map((idea) => ({ ...idea, status: idea.status as ColumnKey }))}
+          ideas={ideaSummaries.map((idea) => {
+            const statusKey = STATUS_COLUMNS.some((column) => column.key === (idea.status as ColumnKey))
+              ? (idea.status as ColumnKey)
+              : 'new';
+            return { ...idea, status: statusKey };
+          })}
           viewerRole={viewerProfile?.role ?? null}
         />
       )}
