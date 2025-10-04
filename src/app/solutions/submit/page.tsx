@@ -23,7 +23,7 @@ export default async function SubmitIdeaPage() {
           Share solution-focused ideas for housing, health, harm reduction, and safety. No personal identifying information allowed.
         </p>
       </div>
-      <IdeaSubmissionForm profileId={profile.id} rulesAcknowledged={Boolean(profile.rules_acknowledged_at)} />
+      <IdeaSubmissionForm rulesAcknowledged={Boolean(profile.rules_acknowledged_at)} />
     </div>
   );
 }

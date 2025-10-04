@@ -27,7 +27,7 @@ export async function ensurePortalProfile(userId: string, defaults?: Partial<Por
     .from('portal.profiles')
     .insert({
       user_id: userId,
-      display_name,
+      display_name: displayName,
       role,
       organization_id: defaults?.organization_id ?? null,
       rules_acknowledged_at: defaults?.rules_acknowledged_at ?? null,

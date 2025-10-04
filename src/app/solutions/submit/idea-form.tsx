@@ -16,10 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const CATEGORIES = ['Housing', 'Health', 'Policing', 'Community', 'Prevention', 'Other'];
 
 export function IdeaSubmissionForm({
-  profileId,
   rulesAcknowledged,
 }: {
-  profileId: string;
   rulesAcknowledged: boolean;
 }) {
   const [attachments, setAttachments] = useState<AttachmentDraft[]>([]);
