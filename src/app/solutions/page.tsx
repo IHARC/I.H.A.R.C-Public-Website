@@ -9,7 +9,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function SolutionsPage({ searchParams }: { searchParams: SearchParams }) {
   const resolved = await searchParams;
   const serialized = buildQuery(resolved);
-  const target = serialized ? `/command-center?${serialized}` : '/command-center';
+  const target = serialized ? `/ideas?${serialized}` : '/ideas';
   redirect(target);
 }
 

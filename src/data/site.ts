@@ -80,7 +80,7 @@ export const quickAccess: QuickAccessItem[] = [
     icon: 'bike',
   },
   {
-    title: 'Project Red Team',
+    title: 'Red Team Collaboration',
     description: 'Security assessments for local businesses',
     href: '/red-team',
     icon: 'shield',
@@ -113,10 +113,10 @@ export const programs: ProgramItem[] = [
     href: '/programs/community-safety',
   },
   {
-    title: 'Special Projects',
+    title: 'Special Collaborations',
     description: 'Innovative pilots and research initiatives addressing emerging community needs.',
     icon: 'lightbulb',
-    href: '/programs/special-projects',
+    href: '/programs/special-collaborations',
   },
   {
     title: 'Resources & Info',

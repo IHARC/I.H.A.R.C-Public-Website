@@ -275,7 +275,25 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      plan_updates_v: {
+        Row: {
+          id: string;
+          plan_id: string;
+          author_profile_id: string;
+          problem: string;
+          evidence: string;
+          proposed_change: string;
+          impact: string;
+          risks: string;
+          measurement: string;
+          status: Database["portal"]["Enums"]["plan_update_status"];
+          opened_at: string | null;
+          decided_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       add_audit_trigger: {
@@ -1068,6 +1086,276 @@ export type Database = {
           }?,
         ];
       };
+      plans: {
+        Row: {
+          id: string;
+          idea_id: string;
+          slug: string;
+          title: string;
+          canonical_summary: string;
+          status: Database["portal"]["Enums"]["idea_status"];
+          created_by_profile_id: string | null;
+          promoted_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          idea_id: string;
+          slug: string;
+          title: string;
+          canonical_summary: string;
+          status?: Database["portal"]["Enums"]["idea_status"];
+          created_by_profile_id?: string | null;
+          promoted_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          idea_id?: string;
+          slug?: string;
+          title?: string;
+          canonical_summary?: string;
+          status?: Database["portal"]["Enums"]["idea_status"];
+          created_by_profile_id?: string | null;
+          promoted_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plans_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plans_idea_id_fkey";
+            columns: ["idea_id"];
+            referencedRelation: "ideas";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      plan_focus_areas: {
+        Row: {
+          id: string;
+          plan_id: string;
+          name: string;
+          summary: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          name: string;
+          summary?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          name?: string;
+          summary?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_focus_areas_plan_id_fkey";
+            columns: ["plan_id"];
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      plan_key_dates: {
+        Row: {
+          id: string;
+          plan_id: string;
+          title: string;
+          scheduled_for: string;
+          notes: string | null;
+          created_by_profile_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          title: string;
+          scheduled_for: string;
+          notes?: string | null;
+          created_by_profile_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          title?: string;
+          scheduled_for?: string;
+          notes?: string | null;
+          created_by_profile_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_key_dates_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plan_key_dates_plan_id_fkey";
+            columns: ["plan_id"];
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      plan_updates: {
+        Row: {
+          id: string;
+          plan_id: string;
+          author_profile_id: string;
+          problem: string;
+          evidence: string;
+          proposed_change: string;
+          impact: string;
+          risks: string;
+          measurement: string;
+          status: Database["portal"]["Enums"]["plan_update_status"];
+          opened_at: string | null;
+          decided_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          author_profile_id: string;
+          problem: string;
+          evidence: string;
+          proposed_change: string;
+          impact: string;
+          risks: string;
+          measurement: string;
+          status?: Database["portal"]["Enums"]["plan_update_status"];
+          opened_at?: string | null;
+          decided_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          author_profile_id?: string;
+          problem?: string;
+          evidence?: string;
+          proposed_change?: string;
+          impact?: string;
+          risks?: string;
+          measurement?: string;
+          status?: Database["portal"]["Enums"]["plan_update_status"];
+          opened_at?: string | null;
+          decided_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_updates_author_profile_id_fkey";
+            columns: ["author_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plan_updates_plan_id_fkey";
+            columns: ["plan_id"];
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      plan_decision_notes: {
+        Row: {
+          id: string;
+          plan_id: string;
+          plan_update_id: string | null;
+          author_profile_id: string | null;
+          decision: string;
+          summary: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          plan_update_id?: string | null;
+          author_profile_id?: string | null;
+          decision: string;
+          summary: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          plan_update_id?: string | null;
+          author_profile_id?: string | null;
+          decision?: string;
+          summary?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_decision_notes_author_profile_id_fkey";
+            columns: ["author_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plan_decision_notes_plan_id_fkey";
+            columns: ["plan_id"];
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plan_decision_notes_plan_update_id_fkey";
+            columns: ["plan_update_id"];
+            referencedRelation: "plan_updates";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      plan_update_votes: {
+        Row: {
+          plan_update_id: string;
+          voter_profile_id: string;
+          created_at: string;
+        };
+        Insert: {
+          plan_update_id: string;
+          voter_profile_id: string;
+          created_at?: string;
+        };
+        Update: {
+          plan_update_id?: string;
+          voter_profile_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_update_votes_plan_update_id_fkey";
+            columns: ["plan_update_id"];
+            referencedRelation: "plan_updates";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "plan_update_votes_voter_profile_id_fkey";
+            columns: ["voter_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       comments: {
         Row: {
           id: string;
@@ -1451,6 +1739,12 @@ export type Database = {
         | "narcan_distributed"
         | "encampment_count"
         | "warming_beds_available";
+      plan_update_status:
+        | "draft"
+        | "open"
+        | "accepted"
+        | "not_moving_forward"
+        | "added_to_plan";
     };
     CompositeTypes: {
       [_ in never]: never;
