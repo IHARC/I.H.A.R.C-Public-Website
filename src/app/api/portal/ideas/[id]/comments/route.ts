@@ -9,8 +9,11 @@ import { hashValue } from '@/lib/hash';
 const OFFICIAL_ROLES = new Set(['org_rep', 'moderator', 'admin']);
 const COMMENT_COOLDOWN_MS = 30 * 1000;
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const ideaId = params.id;
+export async function POST(req: NextRequest) {
+  const url = new URL(req.url);
+  const segments = url.pathname.split('/');
+  const ideaIndex = segments.findIndex((segment) => segment === 'ideas');
+  const ideaId = ideaIndex >= 0 ? segments[ideaIndex + 1] : null;
   if (!ideaId) {
     return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
   }
