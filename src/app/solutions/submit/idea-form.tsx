@@ -28,6 +28,28 @@ export function IdeaSubmissionForm({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
+  const handleRulesAcknowledge = async () => {
+    try {
+      const response = await fetch('/api/portal/profile/ack', { method: 'POST' });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Unable to record acknowledgement');
+      }
+      setAcknowledged(true);
+      toast({
+        title: 'Thank you',
+        description: 'Community participation rules acknowledged.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Unable to acknowledge rules',
+        description: error instanceof Error ? error.message : 'Try again shortly.',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -66,6 +88,14 @@ export function IdeaSubmissionForm({
           body: formData,
         });
         if (!response.ok) {
+          if (response.status === 412) {
+            toast({
+              title: 'Review your profile',
+              description: 'Please acknowledge the community rules before posting an idea.',
+              variant: 'destructive',
+            });
+            return;
+          }
           const payload = await response.json().catch(() => ({}));
           throw new Error(payload.error || 'Idea submission failed');
         }
@@ -84,12 +114,7 @@ export function IdeaSubmissionForm({
 
   return (
     <>
-      <RulesModal
-        open={!acknowledged}
-        onAcknowledge={async () => {
-          setAcknowledged(true);
-        }}
-      />
+      <RulesModal open={!acknowledged} onAcknowledge={handleRulesAcknowledge} />
       <form onSubmit={handleSubmit} className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="title">Idea title</Label>

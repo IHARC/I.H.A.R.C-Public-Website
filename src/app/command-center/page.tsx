@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { TrendChart } from '@/components/portal/trend-chart';
@@ -30,24 +31,38 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
   const grouped = groupMetrics(data ?? []);
   const cards = buildCardData(grouped);
 
+  const groupedEntries = Object.entries(grouped);
+  const hasMetrics = cards.length > 0;
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Command Center</h2>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Command Center</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            High-level indicators for IHARC’s public safety sprint. Metrics will expand as partners publish daily data.
+          </p>
+        </div>
         <RangeSelector active={range} />
       </div>
-      <DashboardCards items={cards} />
-      <section className="grid gap-6 lg:grid-cols-2">
-        {Object.entries(grouped).map(([key, series]) => (
-          <TrendChart
-            key={key}
-            title={METRIC_LABELS[key] ?? key}
-            description={`${range}-day trend`}
-            data={series.map((item) => ({ date: item.metric_date, value: item.value ?? 0 }))}
-            rangeLabel={`${range}-day range`}
-          />
-        ))}
-      </section>
+      {hasMetrics ? (
+        <>
+          <DashboardCards items={cards} />
+          <section className="grid gap-6 lg:grid-cols-2">
+            {groupedEntries.map(([key, series]) => (
+              <TrendChart
+                key={key}
+                title={METRIC_LABELS[key] ?? key}
+                description={`${range}-day trend`}
+                data={series.map((item) => ({ date: item.metric_date, value: item.value ?? 0 }))}
+                rangeLabel={`${range}-day range`}
+              />
+            ))}
+          </section>
+        </>
+      ) : (
+        <DashboardPlaceholder />
+      )}
     </div>
   );
 }
@@ -110,5 +125,46 @@ function LinkRange({ target, active }: { target: number; active: boolean }) {
     >
       {target}-day
     </a>
+  );
+}
+
+function DashboardPlaceholder() {
+  return (
+    <div className="grid gap-6">
+      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Live metrics arriving soon</h3>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          We are onboarding data partners for shelter availability, overdose response, and community outreach counts. Check back soon for live charts tracking the current sprint.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3 text-sm">
+          <Link
+            href="/solutions?sort=active"
+            className="inline-flex items-center rounded-full bg-brand px-4 py-2 font-medium text-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            Explore active ideas
+          </Link>
+          <Link
+            href="/solutions?status=under_review"
+            className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            See sprint candidates
+          </Link>
+        </div>
+      </section>
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">Current focus</h4>
+          <p className="mt-2 text-slate-600 dark:text-slate-300">
+            We are co-designing rapid-response ideas with partners in housing, health, and harm reduction. Join the discussion to shape the next sprint board.
+          </p>
+        </div>
+        <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">How to contribute</h4>
+          <p className="mt-2 text-slate-600 dark:text-slate-300">
+            Post solution ideas, upvote promising approaches, and flag content that needs moderator attention. Official agency responses will be highlighted for clarity.
+          </p>
+        </div>
+      </section>
+    </div>
   );
 }

@@ -26,6 +26,14 @@ export function InteractiveCommentThread({
           body: JSON.stringify({ body, parent_id: parentId, is_official: false }),
         });
         if (!response.ok) {
+          if (response.status === 412) {
+            toast({
+              title: 'Acknowledge the community rules',
+              description: 'Visit your portal profile to confirm the participation guidelines before replying.',
+              variant: 'destructive',
+            });
+            return;
+          }
           const payload = await response.json().catch(() => ({}));
           throw new Error(payload.error || 'Unable to post comment');
         }

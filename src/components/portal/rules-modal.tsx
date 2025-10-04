@@ -36,9 +36,14 @@ export function RulesModal({
 
   const handleConfirm = async () => {
     setPending(true);
-    await onAcknowledge();
-    setPending(false);
-    setIsOpen(false);
+    try {
+      await onAcknowledge();
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Failed to acknowledge rules', error);
+    } finally {
+      setPending(false);
+    }
   };
 
   return (

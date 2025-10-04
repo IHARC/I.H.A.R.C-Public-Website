@@ -32,6 +32,14 @@ export function CommentComposer({ ideaId }: { ideaId: string }) {
           body: JSON.stringify({ body: value }),
         });
         if (!response.ok) {
+          if (response.status === 412) {
+            toast({
+              title: 'Acknowledge the community rules',
+              description: 'Visit your portal profile to confirm the participation guidelines before commenting.',
+              variant: 'destructive',
+            });
+            return;
+          }
           const payload = await response.json().catch(() => ({}));
           throw new Error(payload.error || 'Failed to post comment');
         }

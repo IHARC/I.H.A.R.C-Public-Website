@@ -41,6 +41,12 @@ export default async function CommandCenterAdminPage() {
     .order('metric_date', { ascending: false })
     .limit(12);
 
+  const { data: organizations } = await supabase
+    .from('portal.organizations')
+    .select('id, name, verified, website')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
   async function uploadMetric(formData: FormData) {
     'use server';
 
@@ -75,6 +81,48 @@ export default async function CommandCenterAdminPage() {
     });
 
     revalidatePath('/command-center');
+  }
+
+  async function createOrganization(formData: FormData) {
+    'use server';
+
+    const supa = createSupabaseServiceClient();
+    const name = (formData.get('org_name') as string | null)?.trim();
+    const website = (formData.get('org_website') as string | null)?.trim() || null;
+    const verified = formData.get('org_verified') === 'on';
+    const actorProfileId = formData.get('actor_profile_id') as string;
+    const actorUserId = formData.get('actor_user_id') as string;
+
+    if (!name) {
+      throw new Error('Organization name is required');
+    }
+
+    const { data: inserted, error } = await supa
+      .from('portal.organizations')
+      .insert({
+        name,
+        website,
+        verified,
+        created_by: actorUserId,
+        updated_by: actorUserId,
+      })
+      .select('id, name, verified, website')
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    await logAuditEvent({
+      actorProfileId,
+      actorUserId,
+      action: 'organization_created',
+      entityType: 'organization',
+      entityId: inserted.id,
+      meta: { verified, website },
+    });
+
+    revalidatePath('/command-center/admin');
   }
 
   return (
@@ -122,6 +170,61 @@ export default async function CommandCenterAdminPage() {
               Save metric
             </Button>
           </form>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Register partner organization</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={createOrganization} className="grid gap-4">
+            <input type="hidden" name="actor_profile_id" value={profile.id} />
+            <input type="hidden" name="actor_user_id" value={user.id} />
+            <div className="grid gap-2">
+              <Label htmlFor="org_name">Organization name</Label>
+              <Input id="org_name" name="org_name" required maxLength={120} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="org_website">Website</Label>
+              <Input id="org_website" name="org_website" type="url" placeholder="https://" />
+            </div>
+            <div className="flex items-center gap-2">
+              <input id="org_verified" name="org_verified" type="checkbox" className="h-4 w-4 accent-brand" />
+              <Label htmlFor="org_verified" className="text-sm">
+                Mark as verified agency representative
+              </Label>
+            </div>
+            <Button type="submit" className="justify-self-start">
+              Add organization
+            </Button>
+          </form>
+          {organizations?.length ? (
+            <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              {organizations.map((org) => (
+                <div
+                  key={org.id}
+                  className="flex items-center justify-between rounded border border-slate-100 px-3 py-2 dark:border-slate-800"
+                >
+                  <div>
+                    <p className="font-medium">{org.name}</p>
+                    {org.website && (
+                      <a
+                        className="text-xs text-brand hover:underline"
+                        href={org.website}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {org.website}
+                      </a>
+                    )}
+                  </div>
+                  <span className="text-xs uppercase tracking-wide text-slate-500">
+                    {org.verified ? 'Verified' : 'Pending'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
       {recentMetrics?.length ? (

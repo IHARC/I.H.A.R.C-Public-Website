@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -19,6 +20,7 @@ export type ModerationFlag = {
 
 export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleAction = (flag: ModerationFlag, action: 'resolved' | 'rejected') => {
     startTransition(async () => {
@@ -36,7 +38,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
           const payload = await response.json().catch(() => ({}));
           throw new Error(payload.error || 'Moderation failed');
         }
-        window.location.reload();
+        router.refresh();
       } catch (error) {
         toast({
           title: 'Moderation error',
