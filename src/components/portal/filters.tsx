@@ -81,7 +81,14 @@ export function Filters() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.replace(`?`)}
+          onClick={() => {
+            const metricsRange = params?.get('metricsRange');
+            if (metricsRange) {
+              router.replace(`?metricsRange=${metricsRange}`);
+            } else {
+              router.replace(`?`);
+            }
+          }}
           className="text-slate-500 hover:text-slate-700 dark:text-slate-400"
         >
           Reset filters

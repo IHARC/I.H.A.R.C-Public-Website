@@ -53,9 +53,9 @@ Local development runs at `http://localhost:3000`.
 ### Primary Routes
 - `/` – Landing page highlighting the stats dashboard and community command center.
 - `/stats` – Community Status Dashboard with live metrics and accessible summaries.
-- `/command-center` – Collaboration hub featuring metric highlights and active solution ideas.
+- `/command-center` – Unified hub with live metrics and the community sprint board (legacy `/solutions` redirects here).
 - `/command-center/admin` – Moderator/admin portal for metrics ingestion and partner registry.
-- `/solutions` – Idea backlog with search, filters, and voting.
+- `/solutions` – Legacy entry point that now redirects to `/command-center` to keep older links working.
 - `/solutions/submit` – Authenticated idea submission with attachments.
 - `/solutions/[id]` – Idea detail, discussion thread, and official responses.
 - `/solutions/profile` – Participant profile setup (display name, affiliation).
@@ -105,10 +105,10 @@ These steps populate the minimum data set that Azure SWA will surface publicly o
 
 ## Key User Flows
 - `/stats` – Community Status Dashboard with real-time homelessness and harm reduction indicators.
-- `/command-center` – Collaboration hub surfacing metrics highlights and active solution ideas.
+- `/command-center` – Combined metrics + sprint board hub replacing the old `/solutions` listing.
 - `/register` / `/login` – Supabase-backed auth with automatic portal profile plus JWT claim sync.
 - `/command-center/admin` – Staff workspace to ingest metrics and register partner organizations.
-- `/solutions/*` – Idea submission, discussion, and moderation tooling for the community sprint board.
+- `/solutions/*` – Idea submission, detail pages, and moderation tooling (index redirects to `/command-center`).
 
 ## Accessibility Notes
 - Pages stay within IHARC's strengths-based language guidelines; headings and CTAs reinforce dignity-first storytelling.

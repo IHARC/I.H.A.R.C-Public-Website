@@ -18,7 +18,7 @@ export default async function ModerationPage() {
 
   const profile = await ensurePortalProfile(user.id);
   if (!['moderator', 'admin'].includes(profile.role)) {
-    redirect('/solutions');
+    redirect('/command-center');
   }
 
   const { data: flagRows } = await portal

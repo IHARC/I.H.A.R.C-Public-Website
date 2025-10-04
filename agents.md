@@ -3,6 +3,12 @@
 ## Mission & Audience Context
 - The portal is the public-facing MVP for the IHARC Command Center. It prioritizes compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
 - Content should emphasize collaboration, dignity, and community care. Avoid deficit-based language and maintain trust with service users, neighbours, and agency partners.
+- Two core intents drive every iteration: (1) surface real-time community statistics on homelessness and harm reduction, and (2) provide a collaborative "command center" where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
+
+## Product Intent & Current State
+- `/command-center` is the unified public hub combining live metrics, accessible summaries, and the community sprint board (search, filters, Kanban columns, idea spotlights) so neighbours can coordinate without switching routes.
+- Legacy `/solutions` links now redirect to `/command-center` while preserving filter/search query parameters. Detail, submission, profile, and moderation experiences remain under the `/solutions/*` namespace.
+- `/stats` continues to host the dedicated Community Status Dashboard with deeper trend charts; range selections triggered from the hub respect screen-reader summaries and shareable URLs.
 
 ## Current Tech & Architecture
 - **Framework:** Next.js 15 App Router with TypeScript.
@@ -13,7 +19,7 @@
 - **Testing:** Vitest (unit) and Playwright (e2e) are available but not wired into the default build workflow yet.
 
 ## Key Directories & Files
-- `src/app/` – App Router routes: command center dashboard (`command-center`), idea board (`solutions`), profile + moderation tools, and API routes under `portal/`.
+- `src/app/` – App Router routes: unified command center (`command-center`), stats dashboard (`stats`), legacy solutions routes (index redirects to the hub), profile + moderation tools, and API routes under `portal/`.
 - `src/components/portal/` – React components for dashboard cards, idea cards, charts, filters, moderation queue, etc.
 - `src/lib/` – Supabase clients (`supabase/`), audit helpers, accessibility utilities.
 - `src/styles/main.css` – Design system overrides and base typography.
@@ -31,6 +37,7 @@
 - Maintain accessible semantics: proper headings, labelled form inputs, focus-visible states, and high contrast.
 - When handling Supabase data, always normalize query params from `searchParams`/`params` (App Router now provides them as Promises).
 - Favor server actions and Supabase service clients for mutations; always log significant actions with `logAuditEvent` and revalidate affected paths.
+- Keep the unified command center cohesive: persist relevant URL params (metric ranges, filters, search) when linking between hub sections, stats dashboard, and legacy `/solutions/*` routes so collaborators can share consistent state.
 
 ## Content & Tone
 - Narratives should highlight community solutions, peer insights, and agency collaboration. Center first-person perspectives respectfully.
