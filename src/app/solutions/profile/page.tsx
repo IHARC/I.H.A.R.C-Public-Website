@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export const dynamic = 'force-dynamic';
 
 export default async function PortalProfilePage() {
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

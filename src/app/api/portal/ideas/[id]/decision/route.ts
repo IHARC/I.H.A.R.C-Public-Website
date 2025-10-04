@@ -16,7 +16,7 @@ export async function POST(
     return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
   }
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
     error: userError,

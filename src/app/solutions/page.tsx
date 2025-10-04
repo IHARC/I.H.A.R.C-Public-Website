@@ -31,7 +31,7 @@ export default async function SolutionsPage({
   const sort = sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : 'active';
   const q = queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null;
 
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

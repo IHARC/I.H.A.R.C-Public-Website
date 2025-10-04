@@ -5,7 +5,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { hashValue } from '@/lib/hash';
 
 export async function POST(req: NextRequest) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

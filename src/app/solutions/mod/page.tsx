@@ -6,7 +6,7 @@ import { ModerationQueue, type ModerationFlag } from '@/components/portal/modera
 export const dynamic = 'force-dynamic';
 
 export default async function ModerationPage() {
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

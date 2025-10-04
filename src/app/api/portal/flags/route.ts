@@ -10,7 +10,7 @@ const FLAG_REASONS = new Set(['privacy', 'abuse', 'hate', 'spam', 'wrong_cat', '
 const ENTITY_TYPES = new Set(['idea', 'comment']);
 
 export async function POST(req: NextRequest) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

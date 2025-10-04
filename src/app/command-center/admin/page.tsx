@@ -23,7 +23,7 @@ const METRIC_OPTIONS = [
 export const dynamic = 'force-dynamic';
 
 export default async function CommandCenterAdminPage() {
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

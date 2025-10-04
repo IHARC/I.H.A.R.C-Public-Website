@@ -89,7 +89,7 @@ export default async function IdeaDetailPage({
   if (!ideaId) {
     notFound();
   }
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const service = createSupabaseServiceClient();
   const servicePortal = service.schema('portal');

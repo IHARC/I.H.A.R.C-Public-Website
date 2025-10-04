@@ -39,7 +39,7 @@ const IDEA_COOLDOWN_MS = 2 * 60 * 1000;
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const portal = supabase.schema('portal');
   const {
     data: { user },

@@ -22,26 +22,37 @@ export default async function CommandCenterPage({
   const resolvedParams = await searchParams;
   const rangeParam = resolvedParams.range;
   const range = (Array.isArray(rangeParam) ? rangeParam[0] : rangeParam) === '30d' ? 30 : 7;
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const { data, error } = await portal
-    .from('metric_daily')
-    .select('*')
-    .gte('metric_date', since)
-    .order('metric_date', { ascending: true });
+  let metricRows: Array<{ metric_key: string; metric_date: string; value: number | null }> = [];
+  let metricsUnavailable = false;
 
-  if (error) {
-    console.error(error);
-    throw new Error('Failed to load metrics');
+  try {
+    const { data, error } = await portal
+      .from('metric_daily')
+      .select('*')
+      .gte('metric_date', since)
+      .order('metric_date', { ascending: true });
+
+    if (error) {
+      metricsUnavailable = true;
+      console.error('Failed to load command center metrics', error);
+    } else {
+      metricRows = data ?? [];
+    }
+  } catch (error) {
+    metricsUnavailable = true;
+    console.error('Failed to load command center metrics', error);
   }
 
-  const grouped = groupMetrics(data ?? []);
-  const cards = buildCardData(grouped);
+  const grouped = metricRows.length ? groupMetrics(metricRows) : {};
+  const cards = metricRows.length ? buildCardData(grouped) : [];
 
   const groupedEntries = Object.entries(grouped);
-  const hasMetrics = cards.length > 0;
+  const hasMetrics = cards.length > 0 && !metricsUnavailable;
+  const showPlaceholder = !hasMetrics;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
@@ -54,7 +65,9 @@ export default async function CommandCenterPage({
         </div>
         <RangeSelector active={range} />
       </div>
-      {hasMetrics ? (
+      {showPlaceholder ? (
+        <DashboardPlaceholder />
+      ) : (
         <>
           <DashboardCards items={cards} />
           <section className="grid gap-6 lg:grid-cols-2">
@@ -69,8 +82,6 @@ export default async function CommandCenterPage({
             ))}
           </section>
         </>
-      ) : (
-        <DashboardPlaceholder />
       )}
     </div>
   );
@@ -141,9 +152,9 @@ function DashboardPlaceholder() {
   return (
     <div className="grid gap-6">
       <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Live metrics arriving soon</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Command Center dashboards coming soon</h3>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          We are onboarding data partners for shelter availability, overdose response, and community outreach counts. Check back soon for live charts tracking the current sprint.
+          We are onboarding data partners for shelter availability, overdose response, and community outreach counts. Check back soon for live charts that help the community coordinate rapid responses.
         </p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link

@@ -6,7 +6,7 @@ import { IdeaSubmissionForm } from './idea-form';
 export const dynamic = 'force-dynamic';
 
 export default async function SubmitIdeaPage() {
-  const supabase = createSupabaseRSCClient();
+  const supabase = await createSupabaseRSCClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
