@@ -3,8 +3,13 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 
-export async function POST(_: NextRequest, { params }: { params: { id: string } }) {
-  const notificationId = params.id;
+export async function POST(
+  _: NextRequest,
+  { params }: { params: Promise<Record<string, string | string[] | undefined>> },
+) {
+  const resolvedParams = await params;
+  const notificationParam = resolvedParams.id;
+  const notificationId = Array.isArray(notificationParam) ? notificationParam[0] : notificationParam;
   if (!notificationId) {
     return NextResponse.json({ error: 'Notification id is required' }, { status: 400 });
   }

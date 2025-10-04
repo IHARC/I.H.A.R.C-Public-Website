@@ -5,8 +5,13 @@ import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const ideaId = params.id;
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<Record<string, string | string[] | undefined>> },
+) {
+  const resolvedParams = await params;
+  const ideaParam = resolvedParams.id;
+  const ideaId = Array.isArray(ideaParam) ? ideaParam[0] : ideaParam;
   if (!ideaId) {
     return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
   }
