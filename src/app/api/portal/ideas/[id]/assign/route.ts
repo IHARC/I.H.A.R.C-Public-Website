@@ -1,11 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+export async function POST(req: NextRequest, context: RouteContext) {
+  const params = await context.params;
   const ideaId = params.id;
   if (!ideaId) {
     return NextResponse.json({ error: 'Idea id is required' }, { status: 400 });
