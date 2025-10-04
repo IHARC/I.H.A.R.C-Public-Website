@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+
+/* Font display optimization */
+@font-face {
+  font-family: 'Inter-fallback';
+  size-adjust: 107%;
+  src: local('Arial');
+}
+
+@font-face {
+  font-family: 'Poppins-fallback';
+  size-adjust: 96%;
+  src: local('Arial');
+}
+
+@layer base {
+  html {
+    font-family: theme('fontFamily.body');
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme('fontFamily.heading');
+  }
+
+  /* Focus styles for better accessibility */
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.red');
+    outline-offset: 2px;
+  }
+
+  /* Remove outline for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Improve text rendering */
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reduce layout shift with aspect-ratio */
+  img, video {
+    height: auto;
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: theme('screens.2xl');
+  }
+
+  /* Button variants */
+  .btn-base {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg transition-all duration-250 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn-base bg-brand-red text-white hover:bg-brand-redDark focus:ring-brand-red;
+  }
+
+  .btn-secondary {
+    @apply btn-base border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white focus:ring-brand-red;
+  }
+
+  .btn-ghost {
+    @apply btn-base text-brand-red hover:bg-brand-red hover:bg-opacity-10 focus:ring-brand-red;
+  }
+
+  .btn-white {
+    @apply btn-base bg-white text-brand-red hover:bg-gray-50 focus:ring-brand-red;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-white rounded-lg shadow-subtle p-6 transition-all duration-250 ease-out;
+  }
+
+  .card-hover {
+    @apply hover:shadow-red-glow hover:scale-101 transform;
+  }
+
+  /* Skip link for accessibility */
+  .skip-link {
+    @apply fixed -top-10 left-4 bg-brand-red text-white px-4 py-2 rounded z-50 focus:top-4 transition-all duration-300;
+  }
+
+  /* Shadow utilities */
+  .shadow-subtle {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-red-glow {
+    box-shadow: 0 4px 14px rgba(206, 32, 41, 0.15), 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+}
+
+@layer utilities {
+  .visually-hidden {
+    @apply sr-only;
+  }
+
+  .scale-101 {
+    transform: scale(1.01);
+  }
+
+  /* Hover state utilities */
+  .hover\:scale-101:hover {
+    transform: scale(1.01);
+  }
+
+  .hover\:shadow-red-glow:hover {
+    box-shadow: 0 4px 14px rgba(206, 32, 41, 0.15), 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  /* Loading state utilities */
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    /* Disable hover transforms for reduced motion */
+    .hover\:scale-101:hover {
+      transform: none;
+    }
+    
+    .card-hover:hover {
+      transform: none;
+    }
+  }
+
+  /* High contrast for accessibility */
+  @media (prefers-contrast: high) {
+    .btn-primary {
+      @apply border-2 border-white;
+    }
+    
+    .btn-secondary {
+      @apply border-4;
+    }
+  }
+}

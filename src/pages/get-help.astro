@@ -1,0 +1,272 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout 
+  title="Get Help Now - IHARC" 
+  description="Immediate crisis support, shelter information, and community resources for Northumberland County residents."
+>
+  <Header />
+  
+  <main id="main" class="flex-1">
+    <!-- Hero Section -->
+    <section class="py-16 bg-gradient-to-br from-brand-red to-brand-redDark text-white">
+      <div class="container">
+        <div class="max-w-4xl mx-auto text-center">
+          <h1 class="text-4xl lg:text-5xl font-heading font-bold mb-6">
+            Get Help Now
+          </h1>
+          <p class="text-xl text-white/90 max-w-2xl mx-auto">
+            Immediate support is available 24/7. Find crisis resources, shelter information, and community services in Northumberland County.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Emergency Notice -->
+    <section class="py-8 bg-yellow-50 border-b-2 border-yellow-200">
+      <div class="container">
+        <div class="flex items-center justify-center">
+          <div class="flex items-center px-6 py-3 bg-yellow-100 rounded-lg border-l-4 border-yellow-500">
+            <svg class="w-6 h-6 text-yellow-600 mr-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            <div>
+              <p class="font-semibold text-yellow-800">Life-threatening Emergency?</p>
+              <p class="text-yellow-700">Call 911 immediately for police, fire, or medical emergencies</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Help Options -->
+    <section class="py-16 bg-white">
+      <div class="container">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Immediate Crisis -->
+          <div class="bg-red-50 border-2 border-red-200 rounded-xl p-8">
+            <div class="text-center mb-6">
+              <div class="w-16 h-16 bg-brand-red rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-heading font-bold text-gray-900 mb-2">
+                Immediate Crisis
+              </h2>
+              <p class="text-gray-600">
+                If you're in crisis right now, these resources are available 24/7
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-lg border border-red-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Crisis Line</h3>
+                <p class="text-2xl font-bold text-brand-red mb-2">
+                  <a href="tel:1-866-996-0991" class="hover:underline">1-866-996-0991</a>
+                </p>
+                <p class="text-sm text-gray-600">Ontario Mental Health Helpline - 24/7</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-red-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Text Support</h3>
+                <p class="text-lg font-bold text-brand-red mb-2">
+                  Text TALK to <a href="sms:741741" class="hover:underline">741741</a>
+                </p>
+                <p class="text-sm text-gray-600">Crisis Text Line Canada - Free, 24/7</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-red-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Suicide Prevention</h3>
+                <p class="text-lg font-bold text-brand-red mb-2">
+                  <a href="tel:9-8-8" class="hover:underline">9-8-8</a>
+                </p>
+                <p class="text-sm text-gray-600">Suicide & Crisis Helpline - 24/7</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tonight Options -->
+          <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-8">
+            <div class="text-center mb-6">
+              <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2v0" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-heading font-bold text-gray-900 mb-2">
+                Tonight Options
+              </h2>
+              <p class="text-gray-600">
+                Safe shelter and immediate accommodation resources
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Emergency Shelter</h3>
+                <p class="text-lg font-bold text-blue-600 mb-2">
+                  <a href="tel:905-555-BEDS" class="hover:underline">(905) 555-BEDS</a>
+                </p>
+                <p class="text-sm text-gray-600">Shelter intake and availability - Call before arriving</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Out of the Cold</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  <strong>Winter months only:</strong> November 1 - March 31
+                </p>
+                <p class="text-blue-600 font-medium">
+                  <a href="tel:905-555-COLD" class="hover:underline">(905) 555-COLD</a>
+                </p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Youth Shelter (Under 25)</h3>
+                <p class="text-lg font-bold text-blue-600 mb-2">
+                  <a href="tel:905-555-YOUTH" class="hover:underline">(905) 555-YOUTH</a>
+                </p>
+                <p class="text-sm text-gray-600">24/7 intake for youth experiencing homelessness</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Women & Families</h3>
+                <p class="text-lg font-bold text-blue-600 mb-2">
+                  <a href="tel:1-800-265-9178" class="hover:underline">1-800-265-9178</a>
+                </p>
+                <p class="text-sm text-gray-600">Assaulted Women's Helpline - 24/7</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Non-Emergency Support -->
+          <div class="bg-green-50 border-2 border-green-200 rounded-xl p-8">
+            <div class="text-center mb-6">
+              <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-heading font-bold text-gray-900 mb-2">
+                Non-Emergency Supports
+              </h2>
+              <p class="text-gray-600">
+                Ongoing resources and community connections
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-lg border border-green-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Contact IHARC</h3>
+                <p class="text-lg font-bold text-green-600 mb-2">
+                  <a href="tel:905-555-HELP" class="hover:underline">(905) 555-HELP</a>
+                </p>
+                <p class="text-sm text-gray-600 mb-2">
+                  <a href="mailto:info@iharc.ca" class="text-green-600 hover:underline">info@iharc.ca</a>
+                </p>
+                <p class="text-sm text-gray-600">Monday - Friday, 8:30 AM - 4:30 PM</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-green-200">
+                <h3 class="font-semibold text-gray-900 mb-2">211 Ontario</h3>
+                <p class="text-lg font-bold text-green-600 mb-2">
+                  <a href="tel:2-1-1" class="hover:underline">2-1-1</a>
+                </p>
+                <p class="text-sm text-gray-600">Comprehensive information about local services</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-green-200">
+                <h3 class="font-semibold text-gray-900 mb-2">ConnexOntario</h3>
+                <p class="text-lg font-bold text-green-600 mb-2">
+                  <a href="tel:1-866-531-2600" class="hover:underline">1-866-531-2600</a>
+                </p>
+                <p class="text-sm text-gray-600">Mental health & addiction services information</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-green-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Resource Directory</h3>
+                <p class="mb-2">
+                  <a href="/resources" class="text-green-600 font-medium hover:underline">
+                    Browse all local services →
+                  </a>
+                </p>
+                <p class="text-sm text-gray-600">Housing, healthcare, employment, and more</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Additional Resources -->
+    <section class="py-12 bg-gray-50">
+      <div class="container">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-heading font-bold text-gray-900 mb-4">
+            Additional Support
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            More specialized resources and community programs
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <a href="/programs/health-support" class="block p-6 bg-white rounded-lg border border-gray-200 hover:border-brand-red hover:shadow-md transition-all group">
+            <div class="text-center">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-brand-red group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-brand-red">Health Support Services</h3>
+              <p class="text-sm text-gray-600">Health and safety supplies and overdose response kits</p>
+            </div>
+          </a>
+
+          <a href="/programs/outreach" class="block p-6 bg-white rounded-lg border border-gray-200 hover:border-brand-red hover:shadow-md transition-all group">
+            <div class="text-center">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-brand-red group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-brand-red">Street Outreach</h3>
+              <p class="text-sm text-gray-600">Mobile support and connections</p>
+            </div>
+          </a>
+
+          <a href="/bike-safe" class="block p-6 bg-white rounded-lg border border-gray-200 hover:border-brand-red hover:shadow-md transition-all group">
+            <div class="text-center">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-brand-red group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-brand-red">Bike Safe</h3>
+              <p class="text-sm text-gray-600">Bicycle registration program</p>
+            </div>
+          </a>
+
+          <a href="/report" class="block p-6 bg-white rounded-lg border border-gray-200 hover:border-brand-red hover:shadow-md transition-all group">
+            <div class="text-center">
+              <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-brand-red group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-brand-red">Report Concern</h3>
+              <p class="text-sm text-gray-600">Community safety reporting</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>
