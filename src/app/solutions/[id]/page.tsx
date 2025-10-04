@@ -15,7 +15,9 @@ import { TagChips } from '@/components/portal/tag-chips';
 import { Button } from '@/components/ui/button';
 import type { Database } from '@/types/supabase';
 
-interface IdeaRecord extends Database['portal']['Tables']['ideas']['Row'] {
+type IdeaRow = Database['portal']['Tables']['ideas']['Row'];
+
+interface IdeaRecord extends IdeaRow {
   author: {
     id: string;
     display_name: string;
