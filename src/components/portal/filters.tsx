@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
@@ -11,10 +11,11 @@ const STATUSES = ['new', 'under_review', 'in_progress', 'adopted', 'not_feasible
 export function Filters() {
   const router = useRouter();
   const params = useSearchParams();
+  const safeParams = useMemo(() => params ?? new URLSearchParams(), [params]);
 
   const updateParam = useCallback(
     (key: string, value: string | null) => {
-      const next = new URLSearchParams(params.toString());
+      const next = new URLSearchParams(safeParams.toString());
       if (value) {
         next.set(key, value);
       } else {
@@ -23,13 +24,19 @@ export function Filters() {
       next.set('page', '1');
       router.replace(`?${next.toString()}`);
     },
-    [params, router],
+    [safeParams, router],
   );
+
+  const category = params?.get('category') ?? '';
+  const status = params?.get('status') ?? '';
+  const sort = params?.get('sort') ?? 'active';
+  const hasSortParam = params?.has('sort') ?? false;
+  const hasFilters = Boolean(category || status || hasSortParam);
 
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Select
-        value={params.get('category') ?? ''}
+        value={category}
         onValueChange={(value) => updateParam('category', value || null)}
       >
         <SelectTrigger className="w-40">
@@ -45,7 +52,7 @@ export function Filters() {
         </SelectContent>
       </Select>
 
-      <Select value={params.get('status') ?? ''} onValueChange={(value) => updateParam('status', value || null)}>
+      <Select value={status} onValueChange={(value) => updateParam('status', value || null)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="All statuses" />
         </SelectTrigger>
@@ -59,7 +66,7 @@ export function Filters() {
         </SelectContent>
       </Select>
 
-      <Select value={params.get('sort') ?? 'active'} onValueChange={(value) => updateParam('sort', value)}>
+      <Select value={sort} onValueChange={(value) => updateParam('sort', value)}>
         <SelectTrigger className="w-44">
           <SelectValue />
         </SelectTrigger>
@@ -70,7 +77,7 @@ export function Filters() {
         </SelectContent>
       </Select>
 
-      {(params.get('category') || params.get('status') || params.get('sort')) && (
+      {hasFilters && (
         <Button
           variant="ghost"
           size="sm"
