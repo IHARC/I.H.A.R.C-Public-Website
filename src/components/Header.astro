@@ -4,12 +4,12 @@ import { nav, headerCTAs } from '../data/site';
 
 <a href="#main" class="skip-link">Skip to content</a>
 
-<header class="sticky top-0 z-40 bg-white border-b-2 border-brand-red shadow-sm">
+<header class="sticky top-0 z-40 bg-surface border-b-2 border-primary shadow-sm">
   <div class="container">
     <div class="flex items-center py-4">
       <!-- Logo (left) -->
       <div class="flex-shrink-0">
-        <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded-lg">
+        <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg">
           <img src="/logo.svg" alt="IHARC" class="h-8 w-auto" fetchpriority="high" decoding="async" />
         </a>
       </div>
@@ -20,7 +20,7 @@ import { nav, headerCTAs } from '../data/site';
           {nav.map((item) => (
             <a
               href={item.href}
-              class="text-gray-700 hover:text-brand-red font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2 py-1"
+              class="text-gray-700 hover:text-primary font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded px-2 py-1"
               {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
             >
               {item.label}
@@ -49,14 +49,14 @@ import { nav, headerCTAs } from '../data/site';
       <div class="lg:hidden flex-shrink-0 ml-auto">
         <button
           id="mobile-menu-button"
-          class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"
+          class="flex flex-col items-center justify-center w-10 h-10 space-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           aria-label="Toggle mobile menu"
           aria-expanded="false"
           aria-controls="mobile-menu"
         >
-          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
-          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300" aria-hidden="true"></span>
-          <span class="w-6 h-0.5 bg-brand-red transition-all duration-300 transform origin-center" aria-hidden="true"></span>
+          <span class="w-6 h-0.5 bg-primary transition-all duration-300 transform origin-center" aria-hidden="true"></span>
+          <span class="w-6 h-0.5 bg-primary transition-all duration-300" aria-hidden="true"></span>
+          <span class="w-6 h-0.5 bg-primary transition-all duration-300 transform origin-center" aria-hidden="true"></span>
         </button>
       </div>
     </div>
@@ -65,7 +65,7 @@ import { nav, headerCTAs } from '../data/site';
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="lg:hidden hidden bg-white border-t border-gray-200"
+    class="lg:hidden hidden bg-surface border-t border-outline-variant"
     aria-label="Mobile navigation"
   >
     <div class="container py-6">
@@ -73,7 +73,7 @@ import { nav, headerCTAs } from '../data/site';
         {nav.map((item) => (
           <a
             href={item.href}
-            class="block text-gray-700 hover:text-brand-red font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded px-2"
+            class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded px-2"
             {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
           >
             {item.label}
@@ -84,7 +84,7 @@ import { nav, headerCTAs } from '../data/site';
         ))}
       </nav>
       
-      <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200">
+      <div class="flex flex-col space-y-3 mt-6 pt-6 border-t border-outline-variant">
         {headerCTAs.map((cta) => (
           <a
             href={cta.href}

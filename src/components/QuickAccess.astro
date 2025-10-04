@@ -10,13 +10,13 @@ const iconMap: Record<string, string> = {
 };
 ---
 
-<section class="py-16 bg-gray-50">
+<section class="py-16 bg-surface-container-low">
   <div class="container">
     <div class="text-center mb-12">
-      <h2 class="text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-4">
+      <h2 class="text-3xl lg:text-4xl font-heading font-bold text-on-surface mb-4">
         Quick Access
       </h2>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+      <p class="text-lg text-on-surface-variant max-w-2xl mx-auto">
         Get immediate help or report community concerns. Available 24/7 for urgent situations.
       </p>
     </div>
@@ -25,8 +25,8 @@ const iconMap: Record<string, string> = {
       {quickAccess.map((item, index) => (
         <a
           href={item.href}
-          class={`group card card-hover block transition-all duration-250 ease-out hover:scale-101 hover:shadow-red-glow focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 ${
-            item.urgent ? 'ring-2 ring-brand-red ring-opacity-50' : ''
+          class={`group card card-hover block transition-all duration-250 ease-out hover:scale-101 hover:shadow-red-glow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+            item.urgent ? 'ring-2 ring-primary/50' : ''
           }`}
           data-fade-in
           data-delay={index * 100}
@@ -35,9 +35,9 @@ const iconMap: Record<string, string> = {
           <div class="text-center">
             <!-- Icon -->
             <div class={`mx-auto w-12 h-12 mb-4 rounded-full flex items-center justify-center transition-all duration-250 ${
-              item.urgent 
-                ? 'bg-brand-red text-white group-hover:bg-brand-redDark' 
-                : 'bg-brand-red bg-opacity-10 text-brand-red group-hover:bg-brand-red group-hover:text-white'
+              item.urgent
+                ? 'bg-primary text-on-primary group-hover:bg-primary-dark'
+                : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-on-primary'
             }`}>
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d={iconMap[item.icon] || iconMap.phone} clip-rule="evenodd" />
@@ -45,21 +45,21 @@ const iconMap: Record<string, string> = {
             </div>
 
             <!-- Content -->
-            <h3 class="text-lg font-heading font-semibold text-gray-900 mb-2 group-hover:text-brand-red transition-colors">
+            <h3 class="text-lg font-heading font-semibold text-on-surface mb-2 group-hover:text-primary transition-colors">
               {item.title}
               {item.urgent && (
-                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-brand-red text-white">
+                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary text-on-primary">
                   Urgent
                 </span>
               )}
             </h3>
-            <p class="text-gray-600 text-sm leading-relaxed">
+            <p class="text-on-surface-variant text-sm leading-relaxed">
               {item.description}
             </p>
           </div>
 
           <!-- Hover indicator -->
-          <div class="mt-4 flex items-center justify-center text-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-250">
+          <div class="mt-4 flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-250">
             <span class="text-sm font-medium mr-2">Access now</span>
             <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -71,7 +71,7 @@ const iconMap: Record<string, string> = {
 
     <!-- Emergency notice -->
     <div class="mt-12 text-center">
-      <div class="inline-flex items-center px-4 py-2 bg-brand-red text-white rounded-full text-sm font-medium" role="note" aria-label="Emergency information">
+      <div class="inline-flex items-center px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium" role="note" aria-label="Emergency information">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
           <path fill-rule="evenodd" d={iconMap.phone} clip-rule="evenodd" />
         </svg>

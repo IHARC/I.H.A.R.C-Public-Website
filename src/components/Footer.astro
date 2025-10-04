@@ -23,9 +23,9 @@ const socialIcons: Record<string, string> = {
 };
 ---
 
-<footer class="bg-white border-t border-gray-200">
+<footer class="bg-surface text-on-surface border-t border-outline-variant">
   <!-- CTA Band -->
-  <section class="bg-brand-red text-white">
+  <section class="bg-primary text-on-primary">
     <div class="container py-12">
       <div class="text-center">
         <h2 class="text-2xl lg:text-3xl font-heading font-bold mb-4">
@@ -35,7 +35,7 @@ const socialIcons: Record<string, string> = {
           <a href="/donate" class="btn-white">
             Donate Now
           </a>
-          <a href="/volunteer" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-red">
+          <a href="/volunteer" class="btn-base border-2 border-on-primary text-on-primary hover:bg-on-primary hover:text-primary focus:ring-on-primary">
             Volunteer
           </a>
         </div>
@@ -58,12 +58,12 @@ const socialIcons: Record<string, string> = {
               <p>{line}</p>
             ))}
             <p>
-              <a href={`tel:${footer.contact.phone}`} class="hover:text-brand-red transition-colors">
+              <a href={`tel:${footer.contact.phone}`} class="hover:text-primary transition-colors">
                 {footer.contact.phone}
               </a>
             </p>
             <p>
-              <a href={`mailto:${footer.contact.email}`} class="hover:text-brand-red transition-colors">
+              <a href={`mailto:${footer.contact.email}`} class="hover:text-primary transition-colors">
                 {footer.contact.email}
               </a>
             </p>
@@ -72,7 +72,7 @@ const socialIcons: Record<string, string> = {
           <div class="text-sm text-gray-500 italic">
             <p>Contact information will be updated soon.</p>
             <p class="mt-2">
-              <a href="/contact" class="text-brand-red hover:underline">
+              <a href="/contact" class="text-primary hover:underline">
                 Visit our contact page for current information
               </a>
             </p>
@@ -83,7 +83,7 @@ const socialIcons: Record<string, string> = {
       <!-- Footer Sections -->
       {footer.sections.map((section) => (
         <div>
-          <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4">
+          <h3 class="text-lg font-heading font-semibold text-on-surface mb-4">
             {section.title}
           </h3>
           <ul class="space-y-2">
@@ -91,7 +91,7 @@ const socialIcons: Record<string, string> = {
               <li>
                 <a
                   href={link.href}
-                  class="text-gray-600 hover:text-brand-red transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"
+                  class="text-gray-600 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                   {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                 >
                   {link.label}
@@ -108,13 +108,13 @@ const socialIcons: Record<string, string> = {
 
     <!-- Social Links -->
     {realSocialLinks.length > 0 && (
-      <div class="border-t border-gray-200 pt-8 mb-8">
-        <h3 class="text-lg font-heading font-semibold text-gray-900 mb-4">Follow Us</h3>
+      <div class="border-t border-outline-variant pt-8 mb-8">
+        <h3 class="text-lg font-heading font-semibold text-on-surface mb-4">Follow Us</h3>
         <div class="flex space-x-4">
           {realSocialLinks.map((social) => (
             <a
               href={social.href}
-              class="flex items-center justify-center w-10 h-10 bg-brand-red text-white rounded-full hover:bg-brand-redDark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
+              class="flex items-center justify-center w-10 h-10 bg-primary text-on-primary rounded-full hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Follow us on ${social.label}`}
@@ -129,7 +129,7 @@ const socialIcons: Record<string, string> = {
     )}
 
     {realSocialLinks.length === 0 && (
-      <div class="border-t border-gray-200 pt-8 mb-8 text-center">
+      <div class="border-t border-outline-variant pt-8 mb-8 text-center">
         <p class="text-sm text-gray-500 italic">
           Social media links will be available soon.
         </p>
@@ -137,16 +137,16 @@ const socialIcons: Record<string, string> = {
     )}
 
     <!-- Bottom Bar -->
-    <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+    <div class="border-t border-outline-variant pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
       <div class="text-gray-500 text-sm">
         © {new Date().getFullYear()} IHARC. All rights reserved.
       </div>
-      
+
       <nav class="flex space-x-6">
         {footer.legal.map((link) => (
           <a
             href={link.href}
-            class="text-gray-500 hover:text-brand-red text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 rounded"
+            class="text-gray-500 hover:text-primary text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
             {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
           >
             {link.label}
@@ -157,19 +157,19 @@ const socialIcons: Record<string, string> = {
   </div>
 
   <!-- Emergency Banner -->
-  <div class="bg-brand-charcoal text-white">
+  <div class="bg-inverse-surface text-inverse-on-surface">
     <div class="container py-4">
       <div class="flex flex-col sm:flex-row items-center justify-center text-center sm:text-left space-y-2 sm:space-y-0">
         <div class="flex items-center text-sm">
-          <svg class="w-4 h-4 mr-2 text-brand-red" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-4 h-4 mr-2 text-primary" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
           </svg>
           <span class="mr-4">24/7 Crisis Support:</span>
-          <a href="tel:905-555-HELP" class="font-semibold text-white hover:text-brand-red transition-colors">
+          <a href="tel:905-555-HELP" class="font-semibold text-inverse-on-surface hover:text-primary transition-colors">
             (905) 555-HELP
           </a>
         </div>
-        <div class="ml-0 sm:ml-6 text-sm text-gray-300">
+        <div class="ml-0 sm:ml-6 text-sm text-inverse-on-surface/80">
           For life-threatening emergencies, call 911
         </div>
       </div>

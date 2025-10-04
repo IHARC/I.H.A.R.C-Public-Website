@@ -3,13 +3,13 @@ import { impactCounters, contentFlags } from '../data/site';
 ---
 
 {contentFlags.showImpact && (
-<section class="py-16 bg-brand-charcoal text-white">
+<section class="py-16 bg-inverse-surface text-inverse-on-surface">
   <div class="container">
     <div class="text-center mb-12">
       <h2 class="text-3xl lg:text-4xl font-heading font-bold mb-4">
         Our Impact
       </h2>
-      <p class="text-lg text-white/80 max-w-2xl mx-auto">
+      <p class="text-lg text-inverse-on-surface/80 max-w-2xl mx-auto">
         Real results from our integrated approach to community health and safety.
       </p>
     </div>
@@ -22,8 +22,8 @@ import { impactCounters, contentFlags } from '../data/site';
           data-delay={index * 200}
         >
           <div class="mb-4">
-            <span 
-              class="block text-4xl lg:text-5xl xl:text-6xl font-heading font-bold text-white"
+            <span
+              class="block text-4xl lg:text-5xl xl:text-6xl font-heading font-bold text-inverse-on-surface"
               style="text-shadow: 0 0 20px rgba(206, 32, 41, 0.5)"
               data-counter={counter.value}
               data-duration="2000"
@@ -31,13 +31,13 @@ import { impactCounters, contentFlags } from '../data/site';
               {counter.value === null || counter.value === 0 ? 'Updating…' : counter.value}
             </span>
             {counter.suffix && (
-              <span class="block text-sm text-brand-red font-medium mt-1">
+              <span class="block text-sm text-primary font-medium mt-1">
                 {counter.suffix}
               </span>
             )}
           </div>
-          
-          <h3 class="text-lg font-medium text-white/90 leading-tight">
+
+          <h3 class="text-lg font-medium text-inverse-on-surface/90 leading-tight">
             {counter.label}
           </h3>
         </div>
@@ -45,10 +45,10 @@ import { impactCounters, contentFlags } from '../data/site';
     </div>
 
     <!-- Additional context -->
-    <div class="text-center mt-12 pt-8 border-t border-white/20">
-      <p class="text-white/70 max-w-3xl mx-auto">
-        These numbers represent real people whose lives have been positively impacted through our comprehensive approach to community health and safety. 
-        <a href="/impact" class="text-brand-red hover:text-white transition-colors font-medium ml-1">
+    <div class="text-center mt-12 pt-8 border-t border-inverse-on-surface/20">
+      <p class="text-inverse-on-surface/70 max-w-3xl mx-auto">
+        These numbers represent real people whose lives have been positively impacted through our comprehensive approach to community health and safety.
+        <a href="/impact" class="text-primary hover:text-inverse-on-surface transition-colors font-medium ml-1">
           See detailed impact report →
         </a>
       </p>
