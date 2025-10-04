@@ -12,10 +12,6 @@ export function Filters() {
   const router = useRouter();
   const params = useSearchParams();
 
-  if (!params) {
-    return null;
-  }
-
   const updateParam = useCallback(
     (key: string, value: string | null) => {
       const next = new URLSearchParams(params.toString());
