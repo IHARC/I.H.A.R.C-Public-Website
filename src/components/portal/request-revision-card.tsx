@@ -41,8 +41,8 @@ export function RequestRevisionCard({ ideaId }: { ideaId: string }) {
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <div>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Request revisions</h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Send the idea owner a note outlining what to update.</p>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Request revisions</h2>
+        <p className="text-xs text-muted">Send the idea owner a note outlining what to update.</p>
       </div>
       <Textarea
         rows={4}

@@ -89,7 +89,7 @@ export function Filters() {
               router.replace(`?`);
             }
           }}
-          className="text-slate-500 hover:text-slate-700 dark:text-slate-400"
+          className="text-muted hover:text-slate-700 dark:hover:text-slate-200"
         >
           Reset filters
         </Button>

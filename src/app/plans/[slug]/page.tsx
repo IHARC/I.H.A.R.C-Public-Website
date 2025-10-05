@@ -205,7 +205,7 @@ export default async function PlanDetailPage({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Focus areas will be added as collaborators shape the plan.</p>
+              <p className="text-sm text-muted">Focus areas will be added as collaborators shape the plan.</p>
             )}
           </section>
           <section className="space-y-4">
@@ -223,7 +223,7 @@ export default async function PlanDetailPage({
                   ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Key dates will appear once moderators set milestones with the team.</p>
+              <p className="text-sm text-muted">Key dates will appear once moderators set milestones with the team.</p>
             )}
           </section>
         </TabsContent>
@@ -252,7 +252,7 @@ export default async function PlanDetailPage({
                 .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
                 .map((update) => (
                   <li key={update.id} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-muted">
                       <span>Status: {update.status.replace(/_/g, ' ')}</span>
                       <span>Opened {formatDate(update.created_at)}</span>
                     </div>
@@ -284,7 +284,7 @@ export default async function PlanDetailPage({
                     <UpdateSection label="Risks" value={update.risks} />
                     <UpdateSection label="How we’ll measure success" value={update.measurement} />
                     {update.author ? (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-xs text-muted">
                         Submitted by {update.author.display_name}
                         {update.author.affiliation_status === 'approved' && update.author.position_title
                           ? ` · ${update.author.position_title}`
@@ -302,7 +302,7 @@ export default async function PlanDetailPage({
                 ))}
             </ul>
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400">No plan updates yet. Add one to suggest a change.</p>
+            <p className="text-sm text-muted">No plan updates yet. Add one to suggest a change.</p>
           )}
         </TabsContent>
 
@@ -314,13 +314,13 @@ export default async function PlanDetailPage({
                 .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
                 .map((decision) => (
                   <li key={decision.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-muted">
                       <span>{decision.decision.replace(/_/g, ' ')}</span>
                       <span>{formatDate(decision.created_at)}</span>
                     </div>
                     <p className="mt-2 text-slate-700 dark:text-slate-200">{decision.summary}</p>
                     {decision.author ? (
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      <p className="mt-2 text-xs text-muted">
                         Posted by {decision.author.display_name}
                         {decision.author.affiliation_status === 'approved' && decision.author.position_title
                           ? ` · ${decision.author.position_title}`
@@ -331,7 +331,7 @@ export default async function PlanDetailPage({
                 ))}
             </ul>
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Decision notes will appear here after moderators accept or decline updates.</p>
+            <p className="text-sm text-muted">Decision notes will appear here after moderators accept or decline updates.</p>
           )}
         </TabsContent>
 
@@ -380,7 +380,7 @@ function UpdateSection({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</p>
       <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{value}</p>
     </div>
   );

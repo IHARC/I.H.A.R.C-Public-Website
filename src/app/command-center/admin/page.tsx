@@ -440,7 +440,7 @@ export default async function CommandCenterAdminPage() {
             </Button>
           </form>
           {organizations?.length ? (
-            <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <div className="mt-4 space-y-2 text-sm text-muted">
               {organizations.map((org) => (
                 <div
                   key={org.id}
@@ -459,7 +459,7 @@ export default async function CommandCenterAdminPage() {
                       </a>
                     )}
                   </div>
-                  <span className="text-xs uppercase tracking-wide text-slate-500">
+                  <span className="text-xs uppercase tracking-wide text-muted">
                     {org.verified ? 'Verified' : 'Pending'}
                   </span>
                 </div>
@@ -494,7 +494,7 @@ export default async function CommandCenterAdminPage() {
                     placeholder="Public Health Nurse, Mayor, Outreach Supervisor, ..."
                     maxLength={120}
                   />
-                  <p className="text-xs text-slate-500">Used across the portal to highlight the invitee&rsquo;s role in community care.</p>
+                  <p className="text-xs text-muted">Used across the portal to highlight the invitee&rsquo;s role in community care.</p>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="invite_organization_id">Organization</Label>
@@ -539,7 +539,7 @@ export default async function CommandCenterAdminPage() {
                 </Button>
               </form>
               {recentInvites?.length ? (
-                <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                <div className="space-y-2 text-sm text-muted">
                   {recentInvites.map((invite) => {
                     const organizationName = Array.isArray(invite.organization)
                       ? invite.organization[0]?.name ?? null
@@ -553,15 +553,15 @@ export default async function CommandCenterAdminPage() {
                           <p className="font-semibold text-slate-700 dark:text-slate-200">
                             {invite.display_name ?? invite.email}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{invite.email}</p>
+                          <p className="text-xs text-muted">{invite.email}</p>
                           {invite.position_title ? (
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{invite.position_title}</p>
+                            <p className="text-xs text-muted">{invite.position_title}</p>
                           ) : null}
                           {organizationName ? (
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{organizationName}</p>
+                            <p className="text-xs text-muted">{organizationName}</p>
                           ) : null}
                         </div>
-                        <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        <div className="text-xs uppercase tracking-wide text-muted">
                           {invite.status === 'pending'
                             ? 'Pending'
                             : invite.status === 'accepted'
@@ -569,7 +569,7 @@ export default async function CommandCenterAdminPage() {
                               : invite.status === 'cancelled'
                                 ? 'Cancelled'
                                 : 'Expired'}
-                          <span className="ml-2 lowercase text-slate-400">
+                          <span className="ml-2 lowercase text-muted-subtle">
                             {new Date(invite.created_at).toLocaleDateString('en-CA')}
                           </span>
                         </div>
@@ -596,12 +596,12 @@ export default async function CommandCenterAdminPage() {
                     <div className="space-y-1">
                       <p className="font-semibold text-slate-700 dark:text-slate-200">{pending.display_name}</p>
                       {pending.position_title ? (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{pending.position_title}</p>
+                        <p className="text-sm text-muted">{pending.position_title}</p>
                       ) : null}
                       {organizationName ? (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{organizationName}</p>
+                        <p className="text-xs text-muted">{organizationName}</p>
                       ) : null}
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-subtle">
                         Requested {pending.affiliation_requested_at ? new Date(pending.affiliation_requested_at).toLocaleDateString('en-CA') : 'on registration'} ·{' '}
                         {pending.affiliation_type === 'agency_partner'
                           ? 'Agency partner'
@@ -633,8 +633,8 @@ export default async function CommandCenterAdminPage() {
               })}
             </div>
           ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">No pending affiliation approvals.</p>
-              )}
+                <p className="text-sm text-muted">No pending affiliation approvals.</p>
+          )}
             </CardContent>
           </Card>
         </>
@@ -650,11 +650,11 @@ export default async function CommandCenterAdminPage() {
                 <div key={`${item.metric_date}-${item.metric_key}`} className="flex items-center justify-between rounded border border-slate-100 p-2 dark:border-slate-800">
                   <div>
                     <p className="font-medium">{METRIC_OPTIONS.find((option) => option.key === item.metric_key)?.label ?? item.metric_key}</p>
-                    <p className="text-xs text-slate-500">{item.metric_date}</p>
+                    <p className="text-xs text-muted">{item.metric_date}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{item.value}</p>
-                    {item.source && <p className="text-xs text-slate-500">{item.source}</p>}
+                    {item.source && <p className="text-xs text-muted">{item.source}</p>}
                   </div>
                 </div>
               ))}

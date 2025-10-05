@@ -38,7 +38,9 @@ const ignoredDirectories = new Set([
 
 const ignoredFiles = new Set([
   path.join(repoRoot, 'scripts', 'check-copy.mjs'),
-  path.join(repoRoot, 'src', 'lib', 'copy', 'flagged-terms.json')
+  path.join(repoRoot, 'src', 'lib', 'copy', 'flagged-terms.json'),
+  path.join(repoRoot, 'AGENTS.md'),
+  path.join(repoRoot, 'agents.md')
 ]);
 
 const matches = [];

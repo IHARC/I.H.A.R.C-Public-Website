@@ -11,7 +11,7 @@ export function AuthDivider({ label = 'or continue with email' }: AuthDividerPro
     <div className="relative py-1">
       <Separator className="bg-slate-200 dark:bg-slate-700" />
       <span className="absolute inset-0 flex items-center justify-center">
-        <span className="bg-white px-3 text-xs font-medium text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+        <span className="bg-white px-3 text-xs font-medium text-muted dark:bg-slate-900">
           {label}
         </span>
       </span>

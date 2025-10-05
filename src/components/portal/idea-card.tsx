@@ -40,7 +40,7 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
           <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">
             <Link href={`/solutions/${idea.id}`} className="focus-outline inline-flex items-center gap-2">
               {idea.title}
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">{idea.category}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-subtle">{idea.category}</span>
             </Link>
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
         <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{preview}</p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
           <span>By {displayName}</span>
           {idea.positionTitle ? <span>· {idea.positionTitle}</span> : null}
           {idea.organizationName && (

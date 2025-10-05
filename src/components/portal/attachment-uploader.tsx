@@ -81,7 +81,7 @@ export function AttachmentUploader({
       <Button type="button" variant="outline" onClick={handlePick}>
         Add attachments
       </Button>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-muted">
         Allowed: png, jpg, jpeg, webp, pdf. Max size 8 MB.
       </p>
       {attachments.length > 0 && (

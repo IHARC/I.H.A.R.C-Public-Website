@@ -6,7 +6,7 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
   in_progress: { label: 'In Progress', className: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200' },
   adopted: { label: 'Adopted', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' },
   not_feasible: { label: 'Not Feasible', className: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
-  archived: { label: 'Archived', className: 'bg-slate-100 text-slate-500 dark:bg-slate-900/40 dark:text-slate-400' },
+  archived: { label: 'Archived', className: 'bg-slate-100 text-slate-600 dark:bg-slate-900/40 dark:text-slate-200' },
 };
 
 export function StatusBadge({ status }: { status: string }) {
