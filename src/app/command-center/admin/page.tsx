@@ -207,7 +207,6 @@ export default async function CommandCenterAdminPage() {
     const rawAffiliation = (formData.get('invite_affiliation_type') as string | null)?.trim() || 'agency_partner';
     const message = (formData.get('invite_message') as string | null)?.trim() || null;
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const actorUserId = formData.get('actor_user_id') as string;
 
     const allowedAffiliations: PortalProfile['affiliation_type'][] = ['community_member', 'agency_partner', 'government_partner'];
     const affiliationType = allowedAffiliations.includes(rawAffiliation as PortalProfile['affiliation_type'])
@@ -236,6 +235,7 @@ export default async function CommandCenterAdminPage() {
         affiliationType,
         organizationId,
         message,
+        actorProfileId,
       },
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
@@ -252,7 +252,6 @@ export default async function CommandCenterAdminPage() {
 
     const profileId = formData.get('profile_id') as string;
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const actorUserId = formData.get('actor_user_id') as string;
 
     if (!profileId) {
       throw new Error('Missing profile identifier.');
@@ -309,7 +308,6 @@ export default async function CommandCenterAdminPage() {
 
     const profileId = formData.get('profile_id') as string;
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const actorUserId = formData.get('actor_user_id') as string;
 
     if (!profileId) {
       throw new Error('Missing profile identifier.');

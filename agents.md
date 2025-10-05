@@ -15,7 +15,7 @@
 - **Framework:** Next.js 15 App Router with TypeScript.
 - **Rendering:** All routes remain dynamic (`export const dynamic = 'force-dynamic'`) to fetch fresh Supabase data per request.
 - **Styling:** Tailwind utilities with shared tokens in `src/styles/main.css` and design enforcement via Tailwind config.
-- **Data:** Supabase schema `portal` now includes Working Plan tables (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`). Existing idea/comment/vote tables unchanged. Fallback keys are baked into Supabase helpers for local dev without secrets.
+- **Data:** Supabase schema `portal` now includes Working Plan tables (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`). Existing idea/comment/vote tables unchanged. All reads and mutations rely on RLS + Supabase RPC/Edge Functions; no service-role fallback keys live in the app bundle.
 - **Build:** `npm run build` runs `build.js` (Next lint/build). Azure Static Web Apps deploys `.next`.
 - **Testing:** Vitest (unit) and Playwright (e2e) available; Vitest requires `jsdom` dev dependency. Default workflow still manual.
 
@@ -37,13 +37,15 @@
 - Keep TypeScript strict; prefer explicit types, avoid `any`, and reuse shared enums from generated Supabase types.
 - Use Tailwind utilities for styling; extend `main.css` only for shared tokens or cross-app patterns.
 - Maintain accessible semantics (landmarks, heading order, labelled inputs, focus-visible states, SR-only descriptions for metrics/timelines).
-- Normalize App Router params (`searchParams`/`params`) and perform mutations in server actions or API route handlers with Supabase service clients.
-- All mutations must log via `logAuditEvent` and respect RLS. Rate limiting should call `checkRateLimit` and surface `retry_in_ms` feedback in UI.
+- Normalize App Router params (`searchParams`/`params`) and perform mutations through the authenticated server client plus RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.). Never instantiate Supabase with a service-role key inside the app.
+- All mutations must log via `logAuditEvent` RPC and respect RLS. Rate limiting should call `checkRateLimit` (which wraps the `portal_check_rate_limit` RPC) and surface `retry_in_ms` feedback in UI.
 - Idea submit wizard: enforce evidence + ≥1 metric, display cooldown messaging, and keep comment composer type/evidence requirements.
 - Working Plan lifecycle: promotion requires verified sponsor or ≥ support threshold with full idea sections. Creating a plan inserts focus areas + first key date, sets idea status to `in_progress`, and logs `plan_promoted` + `key_date_set` events.
 - Plan updates must include all six fields and default to `open` state. Use audit events for `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, and `update` summary refresh (`added_to_plan`).
 - Persist URL params (filters, metric ranges, search) when linking across Ideas, Plans, and Stats. Legacy `/command-center` and `/solutions/*` should continue redirecting with params.
-- Moderation queue actions still route through `portal-moderate`. Working Plan moderation uses API endpoints directly; ensure notes are captured.
+- Moderation queue actions still route through the `portal-moderate` Edge Function. Working Plan moderation uses RLS-aware API routes; ensure notes are captured and surfaced.
+- Attachments are accessed via the `portal-attachments` Edge Function, which signs URLs server-side after verifying moderator/author/public permissions.
+- Administrative invites flow through the `portal-admin-invite` Edge Function so Supabase Auth + audit logging happen within Supabase infrastructure.
 
 ## Content & Tone
 - Narratives should highlight community solutions, peer insights, and agency collaboration. Center first-person perspectives respectfully.
@@ -51,7 +53,7 @@
 
 ## Deployment Notes
 - Azure deploy uses the `.next` artifact; ensure `npm run build` passes before pushing to `main`.
-- Configure Supabase secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, service role, alerts secret) in Azure SWA.
+- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA. Keep service-role keys exclusively in Supabase-managed environments (Edge Functions) and rotation tooling.
 - Use the Supabase CLI or Codex Supabase tool for migrations and seeds; avoid committing raw seed SQL files (see README for the current seeding block).
 - Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`) are deployed after schema changes.
 
