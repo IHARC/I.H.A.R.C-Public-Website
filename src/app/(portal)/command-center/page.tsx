@@ -19,6 +19,7 @@ export default async function CommandCenterPage({
     }
   }
 
-  const target = serialized.toString() ? `/ideas?${serialized.toString()}` : '/ideas';
+  const basePath = '/command-center/ideas';
+  const target = serialized.toString() ? `${basePath}?${serialized.toString()}` : basePath;
   redirect(target);
 }
