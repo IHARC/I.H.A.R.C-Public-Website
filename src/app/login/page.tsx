@@ -13,11 +13,11 @@ type FormState = {
 type SearchParams = Record<string, string | string[]>;
 
 type LoginPageProps = {
-  searchParams?: Promise<SearchParams> | SearchParams;
+  searchParams?: Promise<SearchParams>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? undefined;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
   const nextPath = resolveNextPath(resolvedSearchParams?.next);
   const authErrorCode = parseAuthErrorCode(resolvedSearchParams?.error);

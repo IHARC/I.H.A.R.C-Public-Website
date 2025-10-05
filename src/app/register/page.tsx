@@ -21,11 +21,11 @@ const ALLOWED_AFFILIATIONS: PortalProfile['affiliation_type'][] = [
 type SearchParams = Record<string, string | string[]>;
 
 type RegisterPageProps = {
-  searchParams?: Promise<SearchParams> | SearchParams;
+  searchParams?: Promise<SearchParams>;
 };
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
-  const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? undefined;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
   const nextPath = resolveNextPath(resolvedSearchParams?.next);
   const authErrorCode = parseAuthErrorCode(resolvedSearchParams?.error);
