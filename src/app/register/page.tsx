@@ -18,13 +18,17 @@ const ALLOWED_AFFILIATIONS: PortalProfile['affiliation_type'][] = [
   'government_partner',
 ];
 
+type SearchParams = Record<string, string | string[]>;
+
 type RegisterPageProps = {
-  searchParams?: Record<string, string | string[]>;
+  searchParams?: Promise<SearchParams> | SearchParams;
 };
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
-  const nextPath = resolveNextPath(searchParams?.next);
-  const authErrorCode = parseAuthErrorCode(searchParams?.error);
+  const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? undefined;
+
+  const nextPath = resolveNextPath(resolvedSearchParams?.next);
+  const authErrorCode = parseAuthErrorCode(resolvedSearchParams?.error);
   const initialError = authErrorCode ? getRegisterAuthErrorMessage(authErrorCode) : null;
 
   const supabase = await createSupabaseRSCClient();

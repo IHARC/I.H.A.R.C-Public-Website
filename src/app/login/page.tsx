@@ -10,13 +10,17 @@ type FormState = {
   error?: string;
 };
 
+type SearchParams = Record<string, string | string[]>;
+
 type LoginPageProps = {
-  searchParams?: Record<string, string | string[]>;
+  searchParams?: Promise<SearchParams> | SearchParams;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const nextPath = resolveNextPath(searchParams?.next);
-  const authErrorCode = parseAuthErrorCode(searchParams?.error);
+  const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? undefined;
+
+  const nextPath = resolveNextPath(resolvedSearchParams?.next);
+  const authErrorCode = parseAuthErrorCode(resolvedSearchParams?.error);
   const initialError = authErrorCode ? getAuthErrorMessage(authErrorCode) : null;
 
   const supabase = await createSupabaseRSCClient();
