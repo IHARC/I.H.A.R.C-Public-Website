@@ -14,11 +14,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { Database } from '@/types/supabase';
 
 const METRIC_LABELS: Record<string, string> = {
-  outdoor_count: 'Outdoor Individuals',
+  outdoor_count: 'Neighbours Outdoors',
   shelter_occupancy: 'Shelter Occupancy (%)',
-  overdoses_reported: 'Overdoses Reported',
-  narcan_distributed: 'Narcan Kits Distributed',
-  encampment_count: 'Encampments Observed',
+  overdoses_reported: 'Drug Poisoning Emergencies',
+  narcan_distributed: 'Naloxone Kits Shared',
+  encampment_count: 'Encampment Sites Documented',
   warming_beds_available: 'Warming Beds Available',
 };
 
@@ -76,6 +76,9 @@ export default async function IdeasPage({
             </div>
             <p className="text-base text-slate-700 dark:text-slate-300">
               <strong>How this works</strong> — 1) Share an idea. 2) Build support and answer questions. 3) If it meets the bar, it becomes a Working Plan everyone can help shape.
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Keep proposals centred on housing, health, and dignity. Punitive sweeps or suggestions that criminalize neighbours will not be promoted.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

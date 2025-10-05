@@ -11,8 +11,9 @@ export const dynamic = 'force-dynamic';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'IHARC Command Center — Community Solutions Portal',
-  description: 'View key metrics. Propose and refine solutions. Collaborate with neighbors, agencies, and the Town. No identifying details allowed.',
+  title: 'IHARC Command Center — Community Collaboration Portal',
+  description:
+    'View key metrics. Co-design humane responses. Collaborate with neighbours, agencies, and the Town. No identifying details allowed.',
   icons: {
     icon: '/favicon.svg',
   },
@@ -31,10 +32,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     IHARC Community Portal
                   </Link>
                   <h1 className="text-2xl font-bold leading-tight text-slate-900 dark:text-slate-50">
-                    Ideas, plans, and progress in plain language
+                    Ideas, plans, and progress rooted in dignity
                   </h1>
                   <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                    Follow real-time housing and public health indicators, see which ideas are moving forward, and learn how to help without sharing identifying details.
+                    Follow real-time housing and public health indicators, see which ideas are moving forward, and learn how to help in ways that support neighbours without sharing identifying details.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 lg:items-end">

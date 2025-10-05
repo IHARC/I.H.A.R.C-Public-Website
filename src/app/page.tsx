@@ -4,17 +4,17 @@ const sections = [
   {
     title: 'Community Status Dashboard',
     description:
-      'Track real-time metrics on homelessness, shelter capacity, overdoses, and health outreach supports reported by local partners.',
+      'Track real-time metrics on homelessness, shelter capacity, drug poisoning response, and health outreach supports reported by local partners.',
     href: '/stats',
     action: 'Open the stats dashboard',
     tone: 'bg-white text-slate-900',
   },
   {
-    title: 'Solutions Command Center',
+    title: 'Collaboration Workspace',
     description:
-      'Share ideas, up-vote promising pilots, and coordinate with agencies and Town staff using language that keeps dignity at the center.',
+      'Share ideas, up-vote promising pilots, and coordinate with agencies and Town staff using language that keeps dignity and humane responses at the center.',
     href: '/command-center',
-    action: 'Enter the command center',
+    action: 'Enter the collaboration hub',
     tone: 'bg-slate-900 text-slate-50',
   },
 ];
@@ -24,6 +24,7 @@ const commitments = [
   'Anonymous participation options that still protect neighbours.',
   'Open audit trail of decisions, commitments, and hand-offs.',
   'Rapid iteration inspired by sprints, explained in approachable terms.',
+  'Ideas must advance humane, evidence-informed supports over punitive quick fixes.',
 ];
 
 export default function IndexPage() {
@@ -35,10 +36,10 @@ export default function IndexPage() {
             IHARC public portal MVP
           </p>
           <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Community intelligence for housing stability and public health response.
+            Community intelligence for housing stability and compassionate public health.
           </h1>
           <p className="text-lg text-slate-700 dark:text-slate-300">
-            Northumberland neighbours, agencies, and the Town co-manage this space to surface urgent needs, highlight strengths, and act on solutions that prevent homelessness and overdoses. Data is refreshed continuously and every participant can see how ideas move forward.
+            Northumberland neighbours, agencies, and the Town co-manage this space to surface urgent needs, highlight strengths, and act on solutions that prevent homelessness and drug poisoning harms. Data is refreshed continuously and every participant can see how ideas move forward.
           </p>
           <div className="flex flex-wrap gap-3">
             <a
@@ -51,7 +52,7 @@ export default function IndexPage() {
               href="/command-center"
               className="inline-flex items-center rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              Visit the solutions hub
+              Visit the collaboration hub
             </a>
             <a
               href="/register"
@@ -64,13 +65,13 @@ export default function IndexPage() {
         <aside className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">What is IHARC?</h2>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            The Integrated Homelessness & Addictions Response Centre convenes neighbours, frontline teams, and government to coordinate rapid solutions. This portal keeps the work transparent and people-first.
+            The Integrated Homelessness & Addictions Response Centre convenes neighbours, frontline teams, and government to coordinate compassionate, evidence-informed solutions. This portal keeps the work transparent and people-first.
           </p>
           <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
             <li>
               <span className="font-semibold text-slate-900 dark:text-slate-50">Two goals:</span> real-time public stats and a community solutions workspace.
             </li>
-            <li>Moderators and administrators guide respectful collaboration.</li>
+            <li>Moderators and administrators guide respectful, humane collaboration.</li>
             <li>No identifying information about neighbours is stored or displayed.</li>
             <li>Contact <a className="text-brand underline" href="mailto:portal@iharc.ca">portal@iharc.ca</a> for onboarding support.</li>
           </ul>

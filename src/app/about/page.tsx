@@ -5,6 +5,7 @@ const commitments = [
   'Evidence-backed conversations anchored in shared data.',
   'Transparent audit trails for promotions, updates, and decisions.',
   'Support for anonymous participation with moderator guidance.',
+  'Moderation steers proposals away from punitive or stigmatizing responses.',
 ];
 
 export default function AboutPage() {
@@ -14,6 +15,9 @@ export default function AboutPage() {
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">About this portal</h1>
         <p className="text-base text-slate-700 dark:text-slate-300">
           The IHARC Command Center portal is a shared workspace for neighbours, agencies, and local government to address homelessness and the toxic drug crisis together. Every page is written in plain language so anyone can follow along, offer feedback, and hold partners accountable.
+        </p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          We surface ideas that expand housing, health, and social supports. Suggestions that criminalize or displace neighbours are documented for transparency but do not move forward.
         </p>
       </header>
 

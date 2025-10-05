@@ -14,11 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Database } from '@/types/supabase';
 
 const METRIC_OPTIONS = [
-  { key: 'outdoor_count', label: 'Outdoor Individuals' },
+  { key: 'outdoor_count', label: 'Neighbours Outdoors' },
   { key: 'shelter_occupancy', label: 'Shelter Occupancy (%)' },
-  { key: 'overdoses_reported', label: 'Overdoses Reported' },
-  { key: 'narcan_distributed', label: 'Narcan Kits Distributed' },
-  { key: 'encampment_count', label: 'Encampments Observed' },
+  { key: 'overdoses_reported', label: 'Drug Poisoning Emergencies' },
+  { key: 'narcan_distributed', label: 'Naloxone Kits Shared' },
+  { key: 'encampment_count', label: 'Encampment Sites Documented' },
   { key: 'warming_beds_available', label: 'Warming Beds Available' },
 ] as const;
 

@@ -4,11 +4,11 @@ import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { TrendChart } from '@/components/portal/trend-chart';
 
 const METRIC_LABELS: Record<string, string> = {
-  outdoor_count: 'Outdoor Individuals',
+  outdoor_count: 'Neighbours Outdoors',
   shelter_occupancy: 'Shelter Occupancy (%)',
-  overdoses_reported: 'Overdoses Reported',
-  narcan_distributed: 'Narcan Kits Distributed',
-  encampment_count: 'Encampments Observed',
+  overdoses_reported: 'Drug Poisoning Emergencies',
+  narcan_distributed: 'Naloxone Kits Shared',
+  encampment_count: 'Encampment Sites Documented',
   warming_beds_available: 'Warming Beds Available',
 };
 
@@ -61,7 +61,7 @@ export default async function StatsDashboardPage({
         <div>
           <h2 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Community Status Dashboard</h2>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Real-time indicators from partners focused on housing stability, overdose response, and outreach efforts.
+            Real-time indicators from partners focused on housing stability, drug poisoning response, and outreach efforts.
           </p>
         </div>
         <RangeSelector active={range} />
@@ -172,7 +172,7 @@ function DashboardPlaceholder() {
       <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Metric dashboards coming online</h3>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Data partners are connecting feeds for shelter availability, overdose response, and outreach counts. Once active, these charts will show live numbers and trends to coordinate rapid responses.
+          Data partners are connecting feeds for shelter availability, drug poisoning response, and outreach counts. Once active, these charts will show live numbers and trends to coordinate humane, rapid responses.
         </p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link
@@ -193,14 +193,14 @@ function DashboardPlaceholder() {
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">Current focus</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            We are co-designing rapid-response ideas with partners in housing, health, and overdose response so the dashboard reflects what matters on the ground.
+            We are co-designing rapid-response ideas with partners in housing, health, and drug poisoning response so the dashboard reflects what matters on the ground.
           </p>
         </div>
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">How to contribute</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Share solution ideas, up-vote promising approaches, and flag content needing moderator attention. Official agency responses are labelled for clarity.
-          </p>
+            Share solution ideas, up-vote promising approaches, and flag content needing moderator attention. Official agency responses are labelled for clarity, and proposals must align with humane, evidence-based care.
+        </p>
         </div>
       </section>
     </div>
