@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { SMTPClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
 
 type NotificationRecord = {
   id: string;
@@ -9,13 +10,19 @@ type NotificationRecord = {
   body_html: string | null;
   channels: string[];
   status: string;
+  profile_id: string | null;
+  notification_type: string;
 };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const PORTAL_ALERTS_SECRET = Deno.env.get('PORTAL_ALERTS_SECRET');
-const RESEND_API_KEY = Deno.env.get('PORTAL_RESEND_API_KEY');
 const EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM') ?? 'IHARC Command Center <notifications@iharc.example>';
+const SMTP_HOST = Deno.env.get('PORTAL_SMTP_HOST');
+const SMTP_PORT = Number(Deno.env.get('PORTAL_SMTP_PORT') ?? '587');
+const SMTP_USERNAME = Deno.env.get('PORTAL_SMTP_USERNAME');
+const SMTP_PASSWORD = Deno.env.get('PORTAL_SMTP_PASSWORD');
+const SMTP_SECURE = (Deno.env.get('PORTAL_SMTP_SECURE') ?? 'true').toLowerCase() === 'true';
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Supabase credentials are not configured for portal-alerts');
@@ -77,7 +84,7 @@ serve(async (req) => {
 
   const { data: notification, error } = await supabase
     .from('portal.notifications')
-    .select('id, recipient_email, subject, body_text, body_html, channels, status')
+    .select('id, recipient_email, subject, body_text, body_html, channels, status, profile_id, notification_type')
     .eq('id', notificationId)
     .maybeSingle();
 
@@ -108,40 +115,56 @@ serve(async (req) => {
   let newStatus = notification.status;
   let sentAt: string | null = null;
 
-  if (wantsEmail && RESEND_API_KEY) {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
+  if (wantsEmail) {
+    if (!SMTP_HOST) {
+      const errorMessage = 'SMTP host not configured for portal-alerts';
+      console.error(errorMessage);
+      newStatus = 'failed';
+      await logNotificationFailure(notification, errorMessage);
+    } else {
+      let client: SMTPClient | null = null;
+      try {
+        client = new SMTPClient({
+          connection: {
+            hostname: SMTP_HOST,
+            port: SMTP_PORT,
+            tls: SMTP_SECURE,
+            auth: SMTP_USERNAME && SMTP_PASSWORD
+              ? {
+                  username: SMTP_USERNAME,
+                  password: SMTP_PASSWORD,
+                }
+              : undefined,
+          },
+        });
+
+        await client.send({
           from: EMAIL_FROM,
           to: notification.recipient_email,
           subject: notification.subject,
-          text: notification.body_text,
+          content: notification.body_text,
           html: notification.body_html ?? `<p>${escapeHtml(notification.body_text)}</p>`,
-        }),
-      });
+        });
 
-      if (!res.ok) {
-        const errorBody = await res.text();
-        console.error('Resend email failure', res.status, errorBody);
-        newStatus = 'queued';
-      } else {
         newStatus = 'sent';
         sentAt = new Date().toISOString();
+      } catch (smtpError) {
+        console.error('Error sending notification email via SMTP', smtpError);
+        newStatus = 'failed';
+        await logNotificationFailure(notification, smtpError);
+      } finally {
+        if (client) {
+          try {
+            await client.close();
+          } catch (closeError) {
+            console.error('Failed to close SMTP client', closeError);
+          }
+        }
       }
-    } catch (sendError) {
-      console.error('Error sending notification email', sendError);
-      newStatus = 'queued';
     }
-  } else if (!wantsEmail) {
+  } else {
     newStatus = 'sent';
     sentAt = new Date().toISOString();
-  } else {
-    newStatus = 'queued';
   }
 
   await supabase
@@ -177,4 +200,28 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+async function logNotificationFailure(notification: NotificationRecord, error: unknown) {
+  const errorMessage = typeof error === 'string'
+    ? error
+    : error instanceof Error
+      ? error.message
+      : JSON.stringify(error);
+
+  try {
+    await supabase.rpc('portal_log_audit_event', {
+      p_action: 'notification_send_failed',
+      p_entity_type: 'notification',
+      p_entity_id: notification.id,
+      p_actor_profile_id: notification.profile_id,
+      p_meta: {
+        error: errorMessage,
+        notificationType: notification.notification_type,
+        recipient: notification.recipient_email,
+      },
+    });
+  } catch (auditError) {
+    console.error('Failed to log notification failure audit event', auditError);
+  }
 }
