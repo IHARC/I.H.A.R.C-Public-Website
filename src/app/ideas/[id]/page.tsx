@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { HandHeart } from 'lucide-react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
+import { copyDeck } from '@/lib/copy';
 import { UpvoteButton } from '@/components/portal/upvote-button';
 import { CommentComposer } from '@/components/portal/comment-composer';
 import { CommentThread, type CommentNode } from '@/components/portal/comment-thread';
@@ -15,6 +17,7 @@ import { TagChips } from '@/components/portal/tag-chips';
 import { IdeaMetricsList, type IdeaMetricDisplay } from '@/components/portal/idea-metrics';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DEFAULT_FOCUS_AREAS, PLAN_SUPPORT_THRESHOLD } from '@/lib/plans';
 import type { Database } from '@/types/supabase';
@@ -100,6 +103,9 @@ const SECTION_CONFIG = [
   { key: 'risks', title: 'Risks & supports' },
   { key: 'success_metrics', title: 'Success metrics' },
 ] as const;
+
+const supportCopy = copyDeck.ideas.support;
+const quickCopy = copyDeck.ideas.quick;
 
 
 export const dynamic = 'force-dynamic';
@@ -300,6 +306,10 @@ export default async function IdeaDetailPage({
   const hasVerifiedSponsor = Boolean(idea.assignee?.organization?.verified);
   const planSummarySeed = idea.proposal_summary || idea.problem_statement || idea.body || '';
 
+  const isDraft = idea.publication_status === 'draft';
+  const isAuthor = viewerProfile?.id === idea.author_profile_id;
+  const canCompleteDraft = isDraft && Boolean(isAuthor);
+
   const displayAuthor = idea.is_anonymous
     ? 'Anonymous'
     : idea.author?.display_name ?? 'Community member';
@@ -317,7 +327,12 @@ export default async function IdeaDetailPage({
         <header className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                {isDraft ? (
+                  <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-100">
+                    {quickCopy.draftBadge}
+                  </Badge>
+                ) : null}
                 <StatusBadge status={idea.status} />
                 <span className="uppercase tracking-wide">{idea.category}</span>
               </div>
@@ -341,16 +356,42 @@ export default async function IdeaDetailPage({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex" aria-disabled="true">
-                    <Button variant="outline" size="sm" disabled>
-                      Show your support
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      disabled
+                      aria-label={supportCopy.ariaLabel.replace('{{count}}', (idea.vote_count ?? 0).toString())}
+                      className="gap-2"
+                    >
+                      <HandHeart className="h-4 w-4" aria-hidden />
+                      <span className="font-semibold">{supportCopy.ctaLabel}</span>
+                      <span
+                        className="ml-1 rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold leading-none text-slate-600"
+                        aria-hidden
+                      >
+                        {idea.vote_count ?? 0}
+                      </span>
                     </Button>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>Sign in to take part.</TooltipContent>
+                <TooltipContent>{supportCopy.guestPrompt}</TooltipContent>
               </Tooltip>
             )}
           </div>
         </header>
+
+        {canCompleteDraft ? (
+          <Alert className="border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-100">
+            <AlertTitle>Finish your proposal</AlertTitle>
+            <AlertDescription className="mt-2 space-y-3 text-sm">
+              <p>{quickCopy.upgradePrompt}</p>
+              <Button asChild size="sm" variant="outline" className="border-amber-400 text-amber-900 dark:border-amber-500 dark:text-amber-100">
+                <Link href={`/ideas/${idea.id}/complete`}>Complete full proposal</Link>
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
         <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -450,6 +491,7 @@ export default async function IdeaDetailPage({
             infoComplete={infoComplete}
             hasVerifiedSponsor={hasVerifiedSponsor}
             defaultFocusAreas={DEFAULT_FOCUS_AREAS}
+            publicationStatus={idea.publication_status as 'draft' | 'published' | 'archived'}
           />
         ) : null}
 

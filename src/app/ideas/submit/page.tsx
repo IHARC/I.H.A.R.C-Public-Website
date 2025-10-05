@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { IdeaSubmissionForm } from './idea-form';
+import { IdeaSubmissionExperience } from './submission-experience';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export default async function SubmitIdeaPage() {
           Keep neighbours anonymous and include links sources whenever possible.
         </p>
       </div>
-      <IdeaSubmissionForm
+      <IdeaSubmissionExperience
         rulesAcknowledged={Boolean(profile.rules_acknowledged_at)}
         displayNameConfirmed={Boolean(profile.display_name_confirmed_at)}
       />

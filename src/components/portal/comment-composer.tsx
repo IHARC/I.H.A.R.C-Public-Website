@@ -211,7 +211,7 @@ export function CommentComposer({
           </p>
           {!evidenceTrimmed && (
             <p className="text-xs text-amber-600 dark:text-amber-300">
-              Evidence links keep the sprint focused on measurable progress.
+              Evidence links keep the project board focused on measurable progress.
             </p>
           )}
         </div>

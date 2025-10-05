@@ -1,8 +1,13 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
+import { HandHeart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { copyDeck } from '@/lib/copy';
+import { trackClientEvent } from '@/lib/telemetry';
+
+const supportCopy = copyDeck.ideas.support;
 
 export function UpvoteButton({
   ideaId,
@@ -17,7 +22,17 @@ export function UpvoteButton({
   const [voted, setVoted] = useState(initialVoted);
   const [isPending, startTransition] = useTransition();
 
+  const ariaLabel = useMemo(
+    () => supportCopy.ariaLabel.replace('{{count}}', votes.toString()),
+    [votes],
+  );
+
   const handleClick = () => {
+    trackClientEvent('idea_support_clicked', {
+      ideaId,
+      nextState: !voted,
+    });
+
     startTransition(async () => {
       try {
         const res = await fetch(`/api/portal/ideas/${ideaId}/vote`, {
@@ -25,7 +40,7 @@ export function UpvoteButton({
         });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
-          throw new Error(body.error || 'Unable to update vote');
+          throw new Error(body.error || 'Unable to update support');
         }
         const body = await res.json();
         setVotes(body.voteCount);
@@ -33,7 +48,7 @@ export function UpvoteButton({
       } catch (error) {
         console.error(error);
         toast({
-          title: 'Vote failed',
+          title: 'Support failed',
           description: error instanceof Error ? error.message : 'Try again shortly.',
           variant: 'destructive',
         });
@@ -41,17 +56,32 @@ export function UpvoteButton({
     });
   };
 
+  const countStyles = voted
+    ? 'bg-slate-200 text-slate-900 dark:bg-slate-200/90 dark:text-slate-900'
+    : 'bg-white/20 text-white';
+
   return (
     <Button
-      variant={voted ? 'secondary' : 'outline'}
+      type="button"
+      variant={voted ? 'secondary' : 'default'}
       size="sm"
       onClick={handleClick}
       disabled={isPending}
       aria-pressed={voted}
       aria-live="polite"
+      aria-label={ariaLabel}
+      className="gap-2"
     >
-      <span className="mr-2">{voted ? 'Upvoted' : 'Upvote'}</span>
-      <span className="font-semibold">{votes}</span>
+      <HandHeart className="h-4 w-4" aria-hidden />
+      <span className="font-semibold">
+        {voted ? 'Supported' : supportCopy.ctaLabel}
+      </span>
+      <span
+        className={`ml-1 rounded-full px-2 py-0.5 text-xs font-semibold leading-none transition ${countStyles}`}
+        aria-hidden
+      >
+        {votes}
+      </span>
     </Button>
   );
 }

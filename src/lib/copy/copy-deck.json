@@ -1,0 +1,73 @@
+{
+  "phrases": {
+    "compassionateSupports": "compassionate, evidence-informed supports",
+    "drugPoisoningResponse": "drug-poisoning response",
+    "housingStability": "housing stability",
+    "treatmentAccess": "treatment access",
+    "communityIndicators": "Community indicators"
+  },
+  "communityStandards": {
+    "title": "Community Standards",
+    "stance": "This portal prioritizes housing, health, and dignity. Enforcement-only proposals aren’t advanced to plans.",
+    "reminder": "By contributing, you agree to keep language respectful, anonymize neighbours unless they opt in, and focus on collaborative solutions.",
+    "values": [
+      "Lead with strengths and respect lived experience.",
+      "Offer solutions that improve safety, housing stability, and health access.",
+      "Share only anonymized information about neighbours and service users."
+    ]
+  },
+  "boards": {
+    "communityProject": {
+      "label": "Community project board",
+      "description": "Ideas in progress with neighbours, agencies, and Town staff.",
+      "helper": "See which ideas are moving forward and what support is needed next.",
+      "workflowLabel": "community project board workflow"
+    }
+  },
+  "ideas": {
+    "support": {
+      "ctaLabel": "Support this idea",
+      "tooltip": "One click shows support.",
+      "guestPrompt": "Sign in to show your support.",
+      "ariaLabel": "Support this idea. Current support count: {{count}}."
+    },
+    "quick": {
+      "name": "Quick Idea",
+      "description": "Share a headline and short blurb now. You can come back to add full details later.",
+      "draftBadge": "Draft",
+      "upgradePrompt": "Add evidence, steps, risks, and metrics to move this idea forward.",
+      "nudge": "Finish the full proposal when you’re ready so moderators can move it ahead."
+    },
+    "form": {
+      "examples": {
+        "problem": "Example: Overnight outreach teams can’t find people when shelters are full.",
+        "evidence": "Example: Shelter occupancy has exceeded 95% for 12 nights in a row.",
+        "proposedChange": "Example: Open a rotating warming space with trained volunteers.",
+        "steps": "Example: Recruit volunteers, confirm venue, publish schedule.",
+        "risks": "Example: Volunteers may need de-escalation support.",
+        "metrics": "Example: Overnight check-ins completed per week.",
+        "metricsFallback": "Not sure yet? Choose “I don’t know yet” and we’ll help find the right metric."
+      },
+      "links": {
+        "evidence": {
+          "label": "See related indicator",
+          "href": "/stats"
+        },
+        "metrics": {
+          "label": "Browse community indicators",
+          "href": "/stats#community-indicators"
+        }
+      },
+      "placeholders": {
+        "problem": "Placeholder — I need help detailing the community problem, who is impacted, and why it matters.",
+        "evidence": "Placeholder — moderators will help locate supporting data or stories for this idea.",
+        "proposal": "Placeholder — I will work with moderators and partners to describe the solution in detail.",
+        "steps": "Placeholder — steps to move this forward will be developed with community partners.",
+        "metrics": {
+          "label": "To be confirmed with moderators",
+          "definition": "Placeholder — moderators will work with the author to define success measures and targets."
+        }
+      }
+    }
+  }
+}

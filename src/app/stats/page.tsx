@@ -185,7 +185,7 @@ function DashboardPlaceholder() {
             href="/command-center?status=under_review"
             className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Review sprint candidates
+            Review project board candidates
           </Link>
         </div>
       </section>

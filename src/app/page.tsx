@@ -1,10 +1,16 @@
+import { copyDeck } from '@/lib/copy';
+
 export const dynamic = 'force-dynamic';
+
+const {
+  phrases,
+} = copyDeck;
 
 const sections = [
   {
-    title: 'Community Status Dashboard',
+    title: phrases.communityIndicators,
     description:
-      'Track real-time metrics on homelessness, shelter capacity, drug poisoning response, and health outreach supports reported by local partners.',
+      `Track real-time metrics on homelessness, shelter capacity, ${phrases.drugPoisoningResponse}, and health outreach supports reported by local partners.`,
     href: '/stats',
     action: 'Open the stats dashboard',
     tone: 'bg-white text-slate-900',
@@ -12,7 +18,7 @@ const sections = [
   {
     title: 'Collaboration Workspace',
     description:
-      'Share ideas, up-vote promising pilots, and coordinate with agencies and Town staff using language that keeps dignity and humane responses at the center.',
+      `Share ideas, up-vote promising pilots, and coordinate with agencies and Town staff using language that keeps dignity and ${phrases.compassionateSupports} at the center.`,
     href: '/command-center',
     action: 'Enter the collaboration hub',
     tone: 'bg-slate-900 text-slate-50',
@@ -23,8 +29,8 @@ const commitments = [
   'Plain, strengths-based language. No deficit framing.',
   'Anonymous participation options that still protect neighbours.',
   'Open audit trail of decisions, commitments, and hand-offs.',
-  'Rapid iteration inspired by sprints, explained in approachable terms.',
-  'Ideas must advance humane, evidence-informed supports over punitive quick fixes.',
+  'Plain-language coordination so every neighbour can follow along.',
+  `Ideas must advance ${phrases.compassionateSupports} over punitive quick fixes.`,
 ];
 
 export default function IndexPage() {

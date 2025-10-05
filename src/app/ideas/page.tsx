@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { Info } from 'lucide-react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { copyDeck } from '@/lib/copy';
 import type { IdeaSummary } from '@/components/portal/idea-card';
 import { IdeaCard } from '@/components/portal/idea-card';
 import { DashboardCards } from '@/components/portal/dashboard-cards';
@@ -23,6 +24,8 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 export const dynamic = 'force-dynamic';
+
+const { communityStandards, boards } = copyDeck;
 
 export default async function IdeasPage({
   searchParams,
@@ -77,9 +80,8 @@ export default async function IdeasPage({
             <p className="text-base text-slate-700 dark:text-slate-300">
               <strong>How this works</strong> — 1) Share an idea. 2) Build support and answer questions. 3) If it meets the bar, it becomes a Working Plan everyone can help shape.
             </p>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Keep proposals centred on housing, health, and dignity. Punitive sweeps or suggestions that criminalize neighbours will not be promoted.
-            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">{communityStandards.stance}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">{communityStandards.reminder}</p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/ideas/submit"
@@ -128,7 +130,9 @@ export default async function IdeasPage({
                       Review the moderation queue
                     </Link>
                   ) : (
-                    <span>Need moderator support? Email portal@iharc.ca.</span>
+                    <span>
+                      Need moderator support? Email portal@iharc.ca.
+                    </span>
                   )}
                 </li>
               </ul>
@@ -180,10 +184,10 @@ export default async function IdeasPage({
       <section className="space-y-6" id="ideas">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Community sprint board</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Search, filter, and collaborate on ideas in flight. Columns reflect the current sprint pipeline.
-            </p>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+              {boards.communityProject.label}
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300">{boards.communityProject.description}</p>
           </div>
           <SearchBar placeholder="Search ideas by keyword" />
         </div>
@@ -240,7 +244,8 @@ export default async function IdeasPage({
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Need onboarding or facilitation?</h2>
           <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
             Email <a className="font-semibold text-brand underline" href="mailto:portal@iharc.ca">portal@iharc.ca</a> for
-            help connecting data feeds, learning the sprint workflow, or supporting anonymous participation.
+            help connecting data feeds, learning the {boards.communityProject.workflowLabel}, or supporting anonymous
+            participation.
           </p>
         </article>
       </section>
@@ -357,6 +362,7 @@ async function loadIdeaBoard({
       proposalSummary: idea.proposal_summary ?? null,
       category: idea.category,
       status: idea.status,
+      publicationStatus: idea.publication_status,
       tags: idea.tags ?? [],
       voteCount: idea.vote_count ?? 0,
       commentCount: idea.comment_count ?? 0,

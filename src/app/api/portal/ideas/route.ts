@@ -72,12 +72,13 @@ export async function POST(req: NextRequest) {
   const proposalSummary = (formData.get('proposal_summary') as string | null)?.trim();
   const implementationSteps = (formData.get('implementation_steps') as string | null)?.trim();
   const risks = (formData.get('risks') as string | null)?.trim();
-  const metricsRaw = (formData.get('metrics') as string | null) ?? '[]';
   const category = (formData.get('category') as string | null)?.trim();
   const tagsRaw = (formData.get('tags') as string | null) ?? '';
   const isAnonymous = (formData.get('is_anonymous') as string) === 'true';
   const acknowledged = (formData.get('acknowledged') as string) === 'true';
   const attachments = formData.getAll('attachments') as File[];
+  const submissionTypeRaw = (formData.get('submission_type') as string | null)?.toLowerCase();
+  const submissionType = submissionTypeRaw === 'quick' ? 'quick' : 'full';
 
   let metricsPayload: MetricDraft[] = [];
   try {
@@ -202,8 +203,142 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabaseService = createSupabaseServiceClient();
+  const tags = tagsRaw
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
   const ideaId = randomUUID();
+
+  if (submissionType === 'quick') {
+    const quickSummary = (formData.get('quick_summary') as string | null)?.trim() ?? '';
+
+    if (!title || title.length > 120) {
+      return NextResponse.json({ error: 'Add a concise title under 120 characters.' }, { status: 422 });
+    }
+
+    if (!category) {
+      return NextResponse.json({ error: 'Choose a focus area for your idea.' }, { status: 422 });
+    }
+
+    if (!quickSummary) {
+      return NextResponse.json({ error: 'Share a short description so neighbours understand the idea.' }, { status: 422 });
+    }
+
+    if (attachments.length) {
+      return NextResponse.json({ error: 'Quick Ideas do not support attachments. Switch to the full form to upload files.' }, { status: 422 });
+    }
+
+    const quickAggregate = [title, quickSummary].join('\n');
+    const quickSafety = scanContentForSafety(quickAggregate);
+    if (quickSafety.hasPii || quickSafety.hasProfanity) {
+      return NextResponse.json(
+        { error: 'Remove personal information or flagged language before submitting.' },
+        { status: 400 },
+      );
+    }
+
+    const quickBody = [`Summary:\n${quickSummary}`].join('\n\n');
+
+    const { error: insertQuickError } = await portal
+      .from('ideas')
+      .insert({
+        id: ideaId,
+        author_profile_id: profile.id,
+        title,
+        body: quickBody,
+        problem_statement: null,
+        evidence: null,
+        proposal_summary: quickSummary,
+        implementation_steps: null,
+        risks: null,
+        success_metrics: null,
+        category,
+        tags,
+        is_anonymous: isAnonymous,
+        attachments: [],
+        publication_status: 'draft',
+      });
+
+    if (insertQuickError) {
+      console.error('Failed to insert quick idea', insertQuickError);
+      return NextResponse.json({ error: 'Unable to save quick idea' }, { status: 500 });
+    }
+
+    const { error: quickEditError } = await portal.from('idea_edits').insert({
+      idea_id: ideaId,
+      editor_profile_id: profile.id,
+      body: JSON.stringify({
+        proposal_summary: quickSummary,
+      }),
+    });
+
+    if (quickEditError) {
+      console.error('Failed to insert quick idea history', quickEditError);
+    }
+
+    if (acknowledged && !profile.rules_acknowledged_at) {
+      const { error: ackError } = await portal
+        .from('profiles')
+        .update({ rules_acknowledged_at: new Date().toISOString() })
+        .eq('id', profile.id);
+      if (ackError) {
+        console.error('Failed to persist rules acknowledgement', ackError);
+      }
+    }
+
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null;
+    const userAgent = req.headers.get('user-agent');
+    const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
+
+    await logAuditEvent({
+      actorProfileId: profile.id,
+      actorUserId: user.id,
+      action: 'idea_created',
+      entityType: 'idea',
+      entityId: ideaId,
+      meta: {
+        category,
+        tags,
+        is_anonymous: isAnonymous,
+        submission_type: 'quick',
+        ip_hash: ipHash,
+        user_agent: userAgent ?? null,
+      },
+    });
+
+    return NextResponse.json({ id: ideaId, draft: true });
+  }
+
+  const supabaseService = createSupabaseServiceClient();
+  const metricsRaw = (formData.get('metrics') as string | null) ?? '[]';
+  let metricsPayload: MetricDraft[] = [];
+  try {
+    const parsed = JSON.parse(metricsRaw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('Metrics payload must be an array');
+    }
+    metricsPayload = parsed
+      .slice(0, MAX_METRICS)
+      .map((metric) => {
+        const label = typeof metric?.label === 'string' ? metric.label.trim() : '';
+        const definition = typeof metric?.definition === 'string' ? metric.definition.trim() : '';
+        const baseline = typeof metric?.baseline === 'string' ? metric.baseline.trim() : '';
+        const target = typeof metric?.target === 'string' ? metric.target.trim() : '';
+        return {
+          label,
+          definition: definition || null,
+          baseline: baseline || null,
+          target: target || null,
+        } satisfies MetricDraft;
+      })
+      .filter((metric) => metric.label);
+  } catch (error) {
+    console.error('Invalid metrics payload', error);
+    return NextResponse.json({ error: 'Unable to parse metrics input.' }, { status: 400 });
+  }
+
   const attachmentMeta: Array<{ path: string; name: string; content_type: string; size: number }> = [];
   const uploadedPaths: string[] = [];
 
@@ -248,12 +383,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Attachment upload failed. Please try again.' }, { status: 500 });
   }
 
-  const tags = tagsRaw
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .slice(0, 8);
-
   const metricsSummary = metricsPayload
     .map((metric) => {
       const qualifier = metric.definition ? ` — ${metric.definition}` : '';
@@ -295,6 +424,7 @@ export async function POST(req: NextRequest) {
       tags,
       is_anonymous: isAnonymous,
       attachments: attachmentMeta,
+      publication_status: 'published',
     });
 
   if (insertError) {

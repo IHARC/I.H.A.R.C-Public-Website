@@ -1047,6 +1047,7 @@ export type Database = {
           category: Database["portal"]["Enums"]["idea_category"];
           tags: string[];
           status: Database["portal"]["Enums"]["idea_status"];
+          publication_status: Database["portal"]["Enums"]["idea_publication_status"];
           is_anonymous: boolean;
           attachments: Json;
           vote_count: number;
@@ -1072,6 +1073,7 @@ export type Database = {
           category?: Database["portal"]["Enums"]["idea_category"];
           tags?: string[];
           status?: Database["portal"]["Enums"]["idea_status"];
+          publication_status?: Database["portal"]["Enums"]["idea_publication_status"];
           is_anonymous?: boolean;
           attachments?: Json;
           vote_count?: number;
@@ -1096,6 +1098,7 @@ export type Database = {
           category?: Database["portal"]["Enums"]["idea_category"];
           tags?: string[];
           status?: Database["portal"]["Enums"]["idea_status"];
+          publication_status?: Database["portal"]["Enums"]["idea_publication_status"];
           is_anonymous?: boolean;
           attachments?: Json;
           vote_count?: number;
@@ -2098,6 +2101,7 @@ export const Constants = {
       invite_status: ["pending", "accepted", "cancelled", "expired"] as const,
       idea_category: ["Housing", "Health", "Policing", "Community", "Prevention", "Other"] as const,
       idea_status: ["new", "under_review", "in_progress", "adopted", "not_feasible", "archived"] as const,
+      idea_publication_status: ["draft", "published", "archived"] as const,
       flag_entity_type: ["idea", "comment"] as const,
       flag_reason: ["privacy", "abuse", "hate", "spam", "wrong_cat", "other"] as const,
       flag_status: ["open", "reviewing", "resolved", "rejected"] as const,

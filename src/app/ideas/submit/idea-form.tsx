@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { AttachmentDraft, AttachmentUploader } from '@/components/portal/attachment-uploader';
-import { RulesModal } from '@/components/portal/rules-modal';
+import { CommunityStandardsCallout } from '@/components/portal/community-standards';
 import { toast } from '@/components/ui/use-toast';
 import { scanContentForSafety } from '@/lib/safety';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle2, ShieldAlert } from 'lucide-react';
+import { copyDeck } from '@/lib/copy';
 
-const CATEGORIES = ['Housing', 'Health', 'Policing', 'Community', 'Prevention', 'Other'];
+export const IDEA_CATEGORIES = ['Housing', 'Health', 'Policing', 'Community', 'Prevention', 'Other'] as const;
+const formCopy = copyDeck.ideas.form;
 
 const STEPS: Array<{ key: string; title: string; description: string }> = [
   { key: 'problem', title: 'Problem', description: 'Describe the challenge you see on the ground.' },
@@ -48,6 +51,29 @@ type FormState = {
   tags: string;
 };
 
+type ExistingMetric = {
+  id?: string;
+  label: string;
+  definition: string | null;
+  baseline: string | null;
+  target: string | null;
+};
+
+type IdeaSubmissionMode = 'create' | 'update';
+
+type IdeaInitialData = {
+  title: string;
+  category: string;
+  problemStatement?: string | null;
+  evidence?: string | null;
+  proposalSummary?: string | null;
+  implementationSteps?: string | null;
+  risks?: string | null;
+  tags: string[];
+  isAnonymous: boolean;
+  metrics: ExistingMetric[];
+};
+
 const INITIAL_STATE: FormState = {
   title: '',
   category: 'Community',
@@ -70,20 +96,49 @@ const createMetricDraft = (): MetricDraft => ({
 export function IdeaSubmissionForm({
   rulesAcknowledged,
   displayNameConfirmed,
+  ideaId,
+  initialIdea,
+  mode = 'create',
 }: {
   rulesAcknowledged: boolean;
   displayNameConfirmed: boolean;
+  ideaId?: string;
+  initialIdea?: IdeaInitialData;
+  mode?: IdeaSubmissionMode;
 }) {
   const router = useRouter();
   const [attachments, setAttachments] = useState<AttachmentDraft[]>([]);
   const [acknowledged, setAcknowledged] = useState(rulesAcknowledged);
   const [displayConfirmed, setDisplayConfirmed] = useState(displayNameConfirmed);
   const [confirmingDisplay, setConfirmingDisplay] = useState(false);
-  const [isAnon, setIsAnon] = useState(false);
+  const [isAnon, setIsAnon] = useState(initialIdea?.isAnonymous ?? false);
   const [pending, startTransition] = useTransition();
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormState>(INITIAL_STATE);
-  const [metrics, setMetrics] = useState<MetricDraft[]>([createMetricDraft()]);
+  const [form, setForm] = useState<FormState>(() => ({
+    title: initialIdea?.title ?? INITIAL_STATE.title,
+    category: initialIdea?.category ?? INITIAL_STATE.category,
+    problemStatement: initialIdea?.problemStatement ?? '',
+    evidence: initialIdea?.evidence ?? '',
+    proposalSummary: initialIdea?.proposalSummary ?? '',
+    implementationSteps: initialIdea?.implementationSteps ?? '',
+    risks: initialIdea?.risks ?? '',
+    tags: initialIdea?.tags?.join(', ') ?? '',
+  }));
+  const [metrics, setMetrics] = useState<MetricDraft[]>(() =>
+    initialIdea?.metrics?.length
+      ? initialIdea.metrics.map((metric) => {
+          const base = createMetricDraft();
+          return {
+            ...base,
+            id: metric.id ?? base.id,
+            label: metric.label,
+            definition: metric.definition ?? '',
+            baseline: metric.baseline ?? '',
+            target: metric.target ?? '',
+          };
+        })
+      : [createMetricDraft()],
+  );
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   useEffect(() => {
@@ -106,7 +161,9 @@ export function IdeaSubmissionForm({
 
   const currentStep = STEPS[step];
   const isFinalStep = step === STEPS.length - 1;
-  const isCoolingDown = typeof cooldown === 'number' && cooldown > 0;
+  const isCoolingDown = mode === 'create' && typeof cooldown === 'number' && cooldown > 0;
+  const submitLabel = mode === 'update' ? 'Publish full proposal' : 'Submit idea';
+  const pendingLabel = mode === 'update' ? 'Publishing…' : 'Submitting…';
 
   const handleRulesAcknowledge = async () => {
     try {
@@ -126,7 +183,6 @@ export function IdeaSubmissionForm({
         description: error instanceof Error ? error.message : 'Try again shortly.',
         variant: 'destructive',
       });
-      throw error;
     }
   };
 
@@ -158,10 +214,27 @@ export function IdeaSubmissionForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const applyPlaceholder = (field: keyof FormState, placeholder: string) => {
+    setForm((prev) => ({ ...prev, [field]: placeholder }));
+  };
+
   const updateMetric = <K extends keyof Omit<MetricDraft, 'id'>>(metricId: string, key: K, value: MetricDraft[K]) => {
     setMetrics((prev) =>
       prev.map((metric) => (metric.id === metricId ? { ...metric, [key]: value } : metric)),
     );
+  };
+
+  const applyMetricPlaceholder = () => {
+    const base = createMetricDraft();
+    setMetrics([
+      {
+        ...base,
+        label: formCopy.placeholders.metrics.label,
+        definition: formCopy.placeholders.metrics.definition,
+        baseline: '',
+        target: '',
+      },
+    ]);
   };
 
   const addMetric = () => {
@@ -287,39 +360,65 @@ export function IdeaSubmissionForm({
     formData.set('is_anonymous', isAnon ? 'true' : 'false');
     formData.set('acknowledged', acknowledged ? 'true' : 'false');
     formData.set('metrics', JSON.stringify(normalizedMetrics));
+    formData.set('submission_type', 'full');
 
-    attachments.forEach((attachment) => {
-      formData.append('attachments', attachment.file, attachment.file.name);
-    });
+    if (mode === 'create') {
+      attachments.forEach((attachment) => {
+        formData.append('attachments', attachment.file, attachment.file.name);
+      });
+    }
+
+    if (mode === 'update' && !ideaId) {
+      toast({
+        title: 'Unable to update idea',
+        description: 'Missing idea identifier. Reload the page and try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const endpoint = mode === 'update' ? `/api/portal/ideas/${ideaId}` : '/api/portal/ideas';
+    const method = mode === 'update' ? 'PATCH' : 'POST';
 
     startTransition(async () => {
       try {
-        const response = await fetch('/api/portal/ideas', {
-          method: 'POST',
+        const response = await fetch(endpoint, {
+          method,
           body: formData,
         });
         if (!response.ok) {
           const payload = await response.json().catch(() => ({}));
           if (response.status === 429 && typeof payload.retry_in_ms === 'number') {
-            setCooldown(Math.ceil(payload.retry_in_ms / 1000));
-            toast({
-              title: 'Cooldown in effect',
-              description: 'Please wait before submitting another idea.',
-              variant: 'destructive',
-            });
+            if (mode === 'create') {
+              setCooldown(Math.ceil(payload.retry_in_ms / 1000));
+              toast({
+                title: 'Cooldown in effect',
+                description: 'Please wait before submitting another idea.',
+                variant: 'destructive',
+              });
+            } else {
+              toast({
+                title: 'Rate limited',
+                description: 'Please wait a moment and try saving again.',
+                variant: 'destructive',
+              });
+            }
             return;
           }
-          throw new Error(payload.error || 'Idea submission failed');
+          throw new Error(payload.error || (mode === 'update' ? 'Idea update failed' : 'Idea submission failed'));
         }
         const payload = await response.json();
         toast({
-          title: 'Idea submitted',
-          description: 'Thank you for contributing a community solution.',
+          title: mode === 'update' ? 'Idea updated' : 'Idea submitted',
+          description:
+            mode === 'update'
+              ? 'Full details saved. Neighbours can now review the complete proposal.'
+              : 'Thank you for contributing a community solution.',
         });
         router.push(`/solutions/${payload.id}`);
       } catch (error) {
         toast({
-          title: 'Unable to submit idea',
+          title: mode === 'update' ? 'Unable to update idea' : 'Unable to submit idea',
           description: error instanceof Error ? error.message : 'Try again shortly.',
           variant: 'destructive',
         });
@@ -329,8 +428,8 @@ export function IdeaSubmissionForm({
 
   return (
     <>
-      <RulesModal open={!acknowledged} onAcknowledge={handleRulesAcknowledge} />
-      {typeof cooldown === 'number' && cooldown > 0 && (
+      <CommunityStandardsCallout acknowledged={acknowledged} onAcknowledge={handleRulesAcknowledge} />
+      {mode === 'create' && typeof cooldown === 'number' && cooldown > 0 && (
         <Alert className="mb-4 border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Cooling down</AlertTitle>
@@ -403,7 +502,7 @@ export function IdeaSubmissionForm({
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((category) => (
+                    {IDEA_CATEGORIES.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -422,6 +521,16 @@ export function IdeaSubmissionForm({
                   placeholder="Describe what is happening in community right now, who is impacted, and why it matters."
                 />
                 <p className="text-xs text-slate-500">At least {MIN_SECTION_LENGTH} characters.</p>
+                <div className="flex flex-col gap-1 text-xs text-slate-500">
+                  <span>{formCopy.examples.problem}</span>
+                  <button
+                    type="button"
+                    className="self-start text-brand underline transition hover:text-brand/80"
+                    onClick={() => applyPlaceholder('problemStatement', formCopy.placeholders.problem)}
+                  >
+                    I need help capturing this
+                  </button>
+                </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
@@ -455,6 +564,23 @@ export function IdeaSubmissionForm({
                   Cite a statistic, observation, or peer insight so moderators can validate quickly.
                 </p>
               )}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <span>{formCopy.examples.evidence}</span>
+                <Link
+                  href={formCopy.links.evidence.href}
+                  className="text-brand underline transition hover:text-brand/80"
+                  target="_blank"
+                >
+                  {formCopy.links.evidence.label}
+                </Link>
+                <button
+                  type="button"
+                  className="text-brand underline transition hover:text-brand/80"
+                  onClick={() => applyPlaceholder('evidence', formCopy.placeholders.evidence)}
+                >
+                  I need help sourcing evidence
+                </button>
+              </div>
             </div>
           )}
           {step === 2 && (
@@ -468,6 +594,16 @@ export function IdeaSubmissionForm({
                 maxLength={2500}
                 placeholder="Describe the community solution, supports required, and the difference it will make."
               />
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <span>{formCopy.examples.proposedChange}</span>
+                <button
+                  type="button"
+                  className="text-brand underline transition hover:text-brand/80"
+                  onClick={() => applyPlaceholder('proposalSummary', formCopy.placeholders.proposal)}
+                >
+                  Draft placeholder
+                </button>
+              </div>
             </div>
           )}
           {step === 3 && (
@@ -481,6 +617,16 @@ export function IdeaSubmissionForm({
                 maxLength={2500}
                 placeholder="List practical steps, timelines, or partner agencies needed to pilot or test the idea."
               />
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <span>{formCopy.examples.steps}</span>
+                <button
+                  type="button"
+                  className="text-brand underline transition hover:text-brand/80"
+                  onClick={() => applyPlaceholder('implementationSteps', formCopy.placeholders.steps)}
+                >
+                  I need help mapping steps
+                </button>
+              </div>
             </div>
           )}
           {step === 4 && (
@@ -495,30 +641,49 @@ export function IdeaSubmissionForm({
                 placeholder="Flag any risks, dependencies, or supports required so the team can plan mitigations."
               />
               <p className="text-xs text-slate-500">Optional but helps the review team prepare.</p>
+              <span className="text-xs text-slate-500">{formCopy.examples.risks}</span>
             </div>
           )}
           {step === 5 && (
             <div className="space-y-5">
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Success metrics</Label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Define how neighbours will know the idea is working. Include targets or key dates.
-                    </p>
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Success metrics</Label>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Define how neighbours will know the idea is working. Include targets or key dates.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addMetric}
+                      disabled={metrics.length >= MAX_METRICS}
+                    >
+                      Add metric
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={addMetric}
-                    disabled={metrics.length >= MAX_METRICS}
-                  >
-                    Add metric
-                  </Button>
-                </div>
-                <div className="space-y-4">
-                  {metrics.map((metric, index) => {
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span>{formCopy.examples.metrics}</span>
+                    <Link
+                      href={formCopy.links.metrics.href}
+                      className="text-brand underline transition hover:text-brand/80"
+                      target="_blank"
+                    >
+                      {formCopy.links.metrics.label}
+                    </Link>
+                    <button
+                      type="button"
+                      className="text-brand underline transition hover:text-brand/80"
+                      onClick={applyMetricPlaceholder}
+                    >
+                      I don&apos;t know yet
+                    </button>
+                  </div>
+                  <span className="text-xs text-slate-500">{formCopy.examples.metricsFallback}</span>
+                  <div className="space-y-4">
+                    {metrics.map((metric, index) => {
                     const metricLabelId = `metric-${metric.id}-label`;
                     const metricDefinitionId = `metric-${metric.id}-definition`;
                     const baselineId = `metric-${metric.id}-baseline`;
@@ -597,11 +762,15 @@ export function IdeaSubmissionForm({
                   </p>
                 )}
               </div>
-              <div className="grid gap-2">
-                <Label>Attachments</Label>
-                <AttachmentUploader attachments={attachments} onChange={setAttachments} />
-                <p className="text-xs text-slate-500">Add supporting documents like PDFs, photos, or briefing notes (max 4 files).</p>
-              </div>
+              {mode === 'create' ? (
+                <div className="grid gap-2">
+                  <Label>Attachments</Label>
+                  <AttachmentUploader attachments={attachments} onChange={setAttachments} />
+                  <p className="text-xs text-slate-500">
+                    Add supporting documents like PDFs, photos, or briefing notes (max 4 files).
+                  </p>
+                </div>
+              ) : null}
             </div>
           )}
         </div>
@@ -620,7 +789,7 @@ export function IdeaSubmissionForm({
             )}
             {isFinalStep && (
               <Button type="button" onClick={handleSubmit} disabled={!stepIsValid || pending || isCoolingDown}>
-                {pending ? 'Submitting…' : 'Submit idea'}
+                {pending ? pendingLabel : submitLabel}
               </Button>
             )}
           </div>

@@ -53,7 +53,7 @@ Local development runs at `http://localhost:3000`.
 ### Primary Routes
 - `/` – Landing page highlighting the stats dashboard and community command center.
 - `/stats` – Community Status Dashboard with live metrics and accessible summaries.
-- `/command-center` – Unified hub with live metrics and the community sprint board (legacy `/solutions` redirects here).
+- `/command-center` – Unified hub with live metrics and the community project board (legacy `/solutions` redirects here).
 - `/command-center/admin` – Moderator/admin portal for metrics ingestion and partner registry.
 - `/solutions` – Legacy entry point that now redirects to `/command-center` to keep older links working.
 - `/solutions/submit` – Authenticated idea submission with attachments.
@@ -110,9 +110,9 @@ insert into portal.ideas (
   '44444444-4444-4444-8444-444444444444',
   '22222222-2222-4222-8222-222222222222',
   'Expand Winter Overnight Outreach',
-  'Problem:\nEncampment residents lose contact with outreach teams during extreme cold.\n\nEvidence:\nCounty harm reduction logs show a 40% drop in overnight check-ins when temperatures fall below -10°C.\n\nProposal:\nPilot a coordinated overnight outreach schedule with peer navigators and a warming bus on standby.\n\nSteps:\n1. Map encampment clusters.\n2. Assign paired outreach teams including peers.\n3. Stage warming bus at rotating locations.\n\nRisks:\nRequires additional EMS standby and volunteer rotation planning.\n\nSuccess metrics:\n• Overnight welfare checks completed (Baseline: 6 per night • Target: 12 per night)\n• Unused warming bus capacity (Goal: under 10%)',
+'Problem:\nEncampment residents lose contact with outreach teams during extreme cold.\n\nEvidence:\nCounty drug-poisoning response logs show a 40% drop in overnight check-ins when temperatures fall below -10°C.\n\nProposal:\nPilot a coordinated overnight outreach schedule with peer navigators and a warming bus on standby.\n\nSteps:\n1. Map encampment clusters.\n2. Assign paired outreach teams including peers.\n3. Stage warming bus at rotating locations.\n\nRisks:\nRequires additional EMS standby and volunteer rotation planning.\n\nSuccess metrics:\n• Overnight welfare checks completed (Baseline: 6 per night • Target: 12 per night)\n• Unused warming bus capacity (Goal: under 10%)',
   'Encampment residents lose contact with outreach teams during extreme cold snaps when crews suspend nightly rounds.',
-  'County harm reduction logs show a 40% drop in overnight check-ins below -10°C. Hospital discharge planners report repeat presentations from the same encampments.',
+'County drug-poisoning response logs show a 40% drop in overnight check-ins below -10°C. Hospital discharge planners report repeat presentations from the same encampments.',
   'Pilot a coordinated overnight outreach schedule with peer navigators and a warming bus on standby.',
   'Map encampment clusters, assign paired outreach teams including peers, and stage the warming bus at rotating locations aligned to shift hand-offs.',
   'Requires additional EMS standby and volunteer rotation planning.',
@@ -168,12 +168,12 @@ Sign in with the seeded community account (`demo-submit@iharc.example`) or the v
 
 ## Additional References
 - `docs/portal/architecture.md` – deep-dive into schema, RLS policies, and edge function contracts
-- `docs/portal/mvp-plan.md` – sprint-oriented implementation checklist and backlog
+- `docs/portal/mvp-plan.md` – community project board implementation checklist and backlog
 - `AGENTS.md` – contributor guidance, conventions, and current TODOs
 
 ## Key User Flows
-- `/stats` – Community Status Dashboard with real-time homelessness and harm reduction indicators.
-- `/command-center` – Combined metrics + sprint board hub replacing the old `/solutions` listing.
+- `/stats` – Community Status Dashboard with real-time homelessness and drug-poisoning response indicators.
+- `/command-center` – Combined metrics + community project board hub replacing the old `/solutions` listing.
 - `/register` / `/login` – Supabase-backed auth with automatic portal profile plus JWT claim sync.
 - `/command-center/admin` – Staff workspace to ingest metrics and register partner organizations.
 - `/solutions/*` – Idea submission, detail pages, and moderation tooling (index redirects to `/command-center`).

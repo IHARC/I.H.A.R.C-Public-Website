@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { AttachmentDraft, AttachmentUploader } from '@/components/portal/attachment-uploader';
-import { RulesModal } from '@/components/portal/rules-modal';
+import { CommunityStandardsCallout } from '@/components/portal/community-standards';
 import { toast } from '@/components/ui/use-toast';
 import { scanContentForSafety } from '@/lib/safety';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -126,7 +126,6 @@ export function IdeaSubmissionForm({
         description: error instanceof Error ? error.message : 'Try again shortly.',
         variant: 'destructive',
       });
-      throw error;
     }
   };
 
@@ -329,7 +328,7 @@ export function IdeaSubmissionForm({
 
   return (
     <>
-      <RulesModal open={!acknowledged} onAcknowledge={handleRulesAcknowledge} />
+      <CommunityStandardsCallout acknowledged={acknowledged} onAcknowledge={handleRulesAcknowledge} />
       {typeof cooldown === 'number' && cooldown > 0 && (
         <Alert className="mb-4 border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
           <ShieldAlert className="h-5 w-5" />

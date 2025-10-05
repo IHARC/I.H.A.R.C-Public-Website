@@ -21,6 +21,7 @@ interface PromoteIdeaCardProps {
   infoComplete: boolean;
   hasVerifiedSponsor: boolean;
   defaultFocusAreas: string[];
+  publicationStatus: 'draft' | 'published' | 'archived';
 }
 
 export function PromoteIdeaCard({
@@ -32,6 +33,7 @@ export function PromoteIdeaCard({
   infoComplete,
   hasVerifiedSponsor,
   defaultFocusAreas,
+  publicationStatus,
 }: PromoteIdeaCardProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -45,7 +47,8 @@ export function PromoteIdeaCard({
   const [isPending, startTransition] = useTransition();
 
   const supportSatisfied = voteCount >= supportThreshold;
-  const criteriaMet = hasVerifiedSponsor || (supportSatisfied && infoComplete);
+  const isDraft = publicationStatus === 'draft';
+  const criteriaMet = !isDraft && (hasVerifiedSponsor || (supportSatisfied && infoComplete));
 
   const focusAreaCount = useMemo(() => focusText.split('\n').map((line) => line.trim()).filter(Boolean).length, [focusText]);
 
@@ -128,6 +131,14 @@ export function PromoteIdeaCard({
       </div>
 
       <ul className="space-y-2 text-sm">
+        <li className="flex items-center gap-2">
+          {!isDraft ? (
+            <CheckCircle2 className="h-4 w-4 text-brand" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+          )}
+          <span>Idea published (not marked as draft)</span>
+        </li>
         <li className="flex items-center gap-2">
           {supportSatisfied ? (
             <CheckCircle2 className="h-4 w-4 text-brand" />

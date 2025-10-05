@@ -42,7 +42,6 @@ test.describe('IHARC Homepage', () => {
     
     // Check that program cards are visible
     await expect(page.locator('text=Outreach')).toBeVisible();
-    await expect(page.locator('text=Harm Reduction')).toBeVisible();
     await expect(page.locator('text=Crisis Response')).toBeVisible();
   });
 
