@@ -17,6 +17,17 @@ export async function createSupabaseRSCClient() {
       getAll() {
         return cookieStore.getAll();
       },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          try {
+            cookieStore.set(name, value, options);
+          } catch (error) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn('Failed to set Supabase cookie in RSC client', error);
+            }
+          }
+        });
+      },
     },
   });
 }

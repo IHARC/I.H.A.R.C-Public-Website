@@ -158,15 +158,15 @@ export default async function CommandCenterAdminPage() {
     }
 
     const {
-      data: { session },
-      error: sessionError,
-    } = await supa.auth.getSession();
+      data: { user },
+      error: userError,
+    } = await supa.auth.getUser();
 
-    if (sessionError || !session?.user) {
-      throw sessionError ?? new Error('Unable to resolve moderator session');
+    if (userError || !user) {
+      throw userError ?? new Error('Unable to resolve moderator session');
     }
 
-    const actorUserId = session.user.id;
+    const actorUserId = user.id;
 
     const { data: inserted, error } = await portalClient
       .from('organizations')
@@ -220,11 +220,21 @@ export default async function CommandCenterAdminPage() {
     const supa = await createSupabaseServerClient();
 
     const {
-      data: { session },
+      data: { user },
+      error: userError,
+    } = await supa.auth.getUser();
+
+    if (userError || !user) {
+      throw userError ?? new Error('Moderator session required');
+    }
+
+    const {
+      data: sessionData,
+      error: sessionError,
     } = await supa.auth.getSession();
 
-    if (!session?.access_token) {
-      throw new Error('Moderator session required');
+    if (sessionError || !sessionData.session?.access_token) {
+      throw sessionError ?? new Error('Moderator session required');
     }
 
     const response = await supa.functions.invoke('portal-admin-invite', {
@@ -237,7 +247,7 @@ export default async function CommandCenterAdminPage() {
         message,
         actorProfileId,
       },
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
     });
 
     if (response.error) {
