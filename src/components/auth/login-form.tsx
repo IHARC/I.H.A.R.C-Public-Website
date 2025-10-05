@@ -20,7 +20,7 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ action, nextPath, initialError }: LoginFormProps) {
-  const [state, formAction] = useFormState(action, { error: initialError });
+  const [state, formAction] = useFormState(action, { error: initialError ?? undefined });
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">

@@ -31,7 +31,7 @@ type RegisterFormProps = {
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
 export function RegisterForm({ organizations, action, nextPath, initialError }: RegisterFormProps) {
-  const [state, formAction] = useFormState(action, { error: initialError });
+  const [state, formAction] = useFormState(action, { error: initialError ?? undefined });
   const [selectedOrg, setSelectedOrg] = useState('');
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
 
