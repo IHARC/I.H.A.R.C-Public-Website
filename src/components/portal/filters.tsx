@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 
 const CATEGORIES = ['Housing', 'Health', 'Policing', 'Community', 'Prevention', 'Other'] as const;
 const STATUSES = ['new', 'under_review', 'in_progress', 'adopted', 'not_feasible', 'archived'] as const;
+const ALL_CATEGORIES_VALUE = 'all';
+const ALL_STATUSES_VALUE = 'all';
 
 export function Filters() {
   const router = useRouter();
@@ -27,23 +29,22 @@ export function Filters() {
     [safeParams, router],
   );
 
-  const category = params?.get('category') ?? '';
-  const status = params?.get('status') ?? '';
+  const categoryParam = params?.get('category') ?? null;
+  const statusParam = params?.get('status') ?? null;
+  const category = categoryParam ?? ALL_CATEGORIES_VALUE;
+  const status = statusParam ?? ALL_STATUSES_VALUE;
   const sort = params?.get('sort') ?? 'active';
   const hasSortParam = params?.has('sort') ?? false;
-  const hasFilters = Boolean(category || status || hasSortParam);
+  const hasFilters = Boolean(categoryParam || statusParam || hasSortParam);
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Select
-        value={category}
-        onValueChange={(value) => updateParam('category', value || null)}
-      >
+      <Select value={category} onValueChange={(value) => updateParam('category', value === ALL_CATEGORIES_VALUE ? null : value)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="All categories" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All categories</SelectItem>
+          <SelectItem value={ALL_CATEGORIES_VALUE}>All categories</SelectItem>
           {CATEGORIES.map((category) => (
             <SelectItem key={category} value={category}>
               {category}
@@ -52,12 +53,12 @@ export function Filters() {
         </SelectContent>
       </Select>
 
-      <Select value={status} onValueChange={(value) => updateParam('status', value || null)}>
+      <Select value={status} onValueChange={(value) => updateParam('status', value === ALL_STATUSES_VALUE ? null : value)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="All statuses" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All statuses</SelectItem>
+          <SelectItem value={ALL_STATUSES_VALUE}>All statuses</SelectItem>
           {STATUSES.map((status) => (
             <SelectItem key={status} value={status}>
               {status.replace('_', ' ')}

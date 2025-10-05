@@ -5,6 +5,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { RegisterForm } from '@/components/auth/register-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
+import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     const email = (formData.get('email') as string | null)?.trim().toLowerCase();
     const password = (formData.get('password') as string | null) ?? '';
     const displayName = (formData.get('display_name') as string | null)?.trim();
-    const organizationId = (formData.get('organization_id') as string | null)?.trim() || null;
+    const rawOrganizationId = (formData.get('organization_id') as string | null)?.trim();
+    const organizationId = rawOrganizationId && rawOrganizationId !== NO_ORGANIZATION_VALUE ? rawOrganizationId : null;
     const positionTitle = (formData.get('position_title') as string | null)?.trim() || null;
     const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() || 'community_member';
     const affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as PortalProfile['affiliation_type'])

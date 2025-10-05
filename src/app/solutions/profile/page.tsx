@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,8 @@ export default async function PortalProfilePage() {
     const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
     const displayName = formData.get('display_name') as string;
-    const organizationId = (formData.get('organization_id') as string) || null;
+    const rawOrganizationId = (formData.get('organization_id') as string | null)?.trim();
+    const organizationId = rawOrganizationId && rawOrganizationId !== NO_ORGANIZATION_VALUE ? rawOrganizationId : null;
     const positionTitle = (formData.get('position_title') as string | null)?.trim() || null;
 
     if (!displayName || displayName.length < 2) {
@@ -91,12 +93,12 @@ export default async function PortalProfilePage() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="organization_id">Organization affiliation</Label>
-          <Select name="organization_id" defaultValue={profile.organization_id ?? ''}>
+          <Select name="organization_id" defaultValue={profile.organization_id ?? NO_ORGANIZATION_VALUE}>
             <SelectTrigger id="organization_id">
               <SelectValue placeholder="Community member" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Independent community member</SelectItem>
+              <SelectItem value={NO_ORGANIZATION_VALUE}>Independent community member</SelectItem>
               {(organizations ?? []).map((org) => (
                 <SelectItem key={org.id} value={org.id}>
                   {org.name}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Database } from '@/types/supabase';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 import { AuthDivider } from '@/components/auth/auth-divider';
+import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 
 type FormState = {
   error?: string;
@@ -31,8 +32,8 @@ type RegisterFormProps = {
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
 export function RegisterForm({ organizations, action, nextPath, initialError }: RegisterFormProps) {
-  const [state, formAction] = useFormState(action, { error: initialError ?? undefined });
-  const [selectedOrg, setSelectedOrg] = useState('');
+  const [state, formAction] = useActionState(action, { error: initialError ?? undefined });
+  const [selectedOrg, setSelectedOrg] = useState(NO_ORGANIZATION_VALUE);
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
 
   return (
@@ -95,7 +96,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
             <SelectValue placeholder="Independent community member" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Independent community member</SelectItem>
+            <SelectItem value={NO_ORGANIZATION_VALUE}>Independent community member</SelectItem>
             {organizations.map((org) => (
               <SelectItem key={org.id} value={org.id}>
                 {org.name}

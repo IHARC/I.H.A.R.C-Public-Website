@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +21,7 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ action, nextPath, initialError }: LoginFormProps) {
-  const [state, formAction] = useFormState(action, { error: initialError ?? undefined });
+  const [state, formAction] = useActionState(action, { error: initialError ?? undefined });
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">

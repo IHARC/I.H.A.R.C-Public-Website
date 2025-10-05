@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
 
 const METRIC_OPTIONS = [
@@ -203,7 +204,8 @@ export default async function CommandCenterAdminPage() {
     const email = (formData.get('invite_email') as string | null)?.trim().toLowerCase();
     const displayNameInput = (formData.get('invite_display_name') as string | null)?.trim() || null;
     const positionTitle = (formData.get('invite_position_title') as string | null)?.trim() || null;
-    const organizationId = (formData.get('invite_organization_id') as string | null)?.trim() || null;
+    const rawOrganizationId = (formData.get('invite_organization_id') as string | null)?.trim();
+    const organizationId = rawOrganizationId && rawOrganizationId !== NO_ORGANIZATION_VALUE ? rawOrganizationId : null;
     const rawAffiliation = (formData.get('invite_affiliation_type') as string | null)?.trim() || 'agency_partner';
     const message = (formData.get('invite_message') as string | null)?.trim() || null;
     const actorProfileId = formData.get('actor_profile_id') as string;
@@ -498,12 +500,12 @@ export default async function CommandCenterAdminPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="invite_organization_id">Organization</Label>
-                  <Select name="invite_organization_id" defaultValue="">
+                  <Select name="invite_organization_id" defaultValue={NO_ORGANIZATION_VALUE}>
                     <SelectTrigger id="invite_organization_id">
                       <SelectValue placeholder="Select organization" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No linked organization yet</SelectItem>
+                      <SelectItem value={NO_ORGANIZATION_VALUE}>No linked organization yet</SelectItem>
                       {(organizations ?? []).map((org) => (
                         <SelectItem key={org.id} value={org.id}>
                           {org.name}

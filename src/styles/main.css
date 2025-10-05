@@ -159,9 +159,11 @@
     outline: none;
   }
 
-  img,
+  img:not([data-nimg]),
   video {
     height: auto;
+    width: auto;
+    max-width: 100%;
   }
 }
 
