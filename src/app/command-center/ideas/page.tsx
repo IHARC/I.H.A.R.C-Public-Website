@@ -1,6 +1,6 @@
-import IdeasPage, { dynamic as ideasDynamic } from '@/app/ideas/page';
+import IdeasPage from '@/app/ideas/page';
 
-export const dynamic = ideasDynamic;
+export const dynamic = 'force-dynamic';
 
 export default function CommandCenterIdeasPage(props: Parameters<typeof IdeasPage>[0]) {
   return IdeasPage(props);

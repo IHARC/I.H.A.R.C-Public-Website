@@ -1,6 +1,6 @@
-import PlanDetailPage, { dynamic as planDynamic } from '@/app/plans/[slug]/page';
+import PlanDetailPage from '@/app/plans/[slug]/page';
 
-export const dynamic = planDynamic;
+export const dynamic = 'force-dynamic';
 
 export default function CommandCenterRoadmapDetailPage(props: Parameters<typeof PlanDetailPage>[0]) {
   return PlanDetailPage(props);

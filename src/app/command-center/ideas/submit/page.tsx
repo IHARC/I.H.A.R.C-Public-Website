@@ -1,6 +1,6 @@
-import IdeaSubmitPage, { dynamic as submitDynamic } from '@/app/ideas/submit/page';
+import IdeaSubmitPage from '@/app/ideas/submit/page';
 
-export const dynamic = submitDynamic;
+export const dynamic = 'force-dynamic';
 
 export default function CommandCenterIdeaSubmitPage() {
   return IdeaSubmitPage();
