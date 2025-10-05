@@ -8,12 +8,12 @@ A Next.js 15 portal that powers the public “Solutions Command Center” for th
 - Supabase project with the `portal.*` schema and edge functions deployed (see `docs/portal/architecture.md`)
 
 ## Environment Variables
-Create a `.env.local` (for local development) and configure the corresponding secrets in Azure Static Web Apps:
+Create a `.env.local` (for local development) and configure the corresponding secrets in Azure Static Web Apps **and** the GitHub repository secrets:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://vfavknkfiiclzgpjpntj.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_DpKb92A7lPsPjK0Q3DHw0A_RtkRomXp
-SUPABASE_SERVICE_ROLE_KEY=...
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 PORTAL_INGEST_SECRET=...
 PORTAL_ALERTS_SECRET=...
 PORTAL_RESEND_API_KEY=...
@@ -21,6 +21,8 @@ PORTAL_EMAIL_FROM=...
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY`, `PORTAL_INGEST_SECRET`, and `PORTAL_ALERTS_SECRET` are required only on the server/edge function side. Never expose them to the client. `PORTAL_RESEND_API_KEY` and `PORTAL_EMAIL_FROM` configure outbound notification delivery.
+
+GitHub Actions expects `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` repository secrets so CI builds can initialize Supabase clients without a checked-in `.env` file.
 
 ## Getting Started
 ```bash
