@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GoogleAuthButton } from '@/components/auth/google-auth-button';
+import { AuthDivider } from '@/components/auth/auth-divider';
 import Link from 'next/link';
 
 type FormState = {
@@ -13,13 +15,19 @@ type FormState = {
 
 type LoginFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
+  nextPath: string;
+  initialError?: string | null;
 };
 
-export function LoginForm({ action }: LoginFormProps) {
-  const [state, formAction] = useFormState(action, { error: undefined });
+export function LoginForm({ action, nextPath, initialError }: LoginFormProps) {
+  const [state, formAction] = useFormState(action, { error: initialError });
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="space-y-3">
+        <GoogleAuthButton intent="login" nextPath={nextPath} />
+        <AuthDivider />
+      </div>
       <div className="grid gap-2">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />

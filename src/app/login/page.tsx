@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LoginForm } from '@/components/auth/login-form';
+import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +10,22 @@ type FormState = {
   error?: string;
 };
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Record<string, string | string[]>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const nextPath = resolveNextPath(searchParams?.next);
+  const authErrorCode = parseAuthErrorCode(searchParams?.error);
+  const initialError = authErrorCode ? getAuthErrorMessage(authErrorCode) : null;
+
   const supabase = await createSupabaseRSCClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect('/command-center');
+    redirect(nextPath);
   }
 
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
@@ -45,7 +54,7 @@ export default async function LoginPage() {
       return { error: 'Unable to sign you in right now.' };
     }
 
-    redirect('/command-center');
+    redirect(nextPath);
   }
 
   return (
@@ -56,7 +65,17 @@ export default async function LoginPage() {
           Sign in to up-vote ideas, leave respectful comments, and manage community project board commitments.
         </p>
       </div>
-      <LoginForm action={loginUser} />
+      <LoginForm action={loginUser} nextPath={nextPath} initialError={initialError} />
     </div>
   );
+}
+
+function getAuthErrorMessage(code: AuthErrorCode): string {
+  switch (code) {
+    case 'google_auth_cancelled':
+      return 'Google sign-in was cancelled. Try again when you are ready.';
+    case 'google_auth_error':
+    default:
+      return 'We could not connect to Google right now. Please try again.';
+  }
 }

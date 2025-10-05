@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { RegisterForm } from '@/components/auth/register-form';
+import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,15 @@ const ALLOWED_AFFILIATIONS: PortalProfile['affiliation_type'][] = [
   'government_partner',
 ];
 
-export default async function RegisterPage() {
+type RegisterPageProps = {
+  searchParams?: Record<string, string | string[]>;
+};
+
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  const nextPath = resolveNextPath(searchParams?.next);
+  const authErrorCode = parseAuthErrorCode(searchParams?.error);
+  const initialError = authErrorCode ? getRegisterAuthErrorMessage(authErrorCode) : null;
+
   const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
@@ -25,7 +34,7 @@ export default async function RegisterPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect('/command-center');
+    redirect(nextPath);
   }
 
   const { data: organizations } = await portal
@@ -155,7 +164,7 @@ export default async function RegisterPage() {
       return { error: 'Unable to complete registration right now.' };
     }
 
-    redirect('/command-center');
+    redirect(nextPath);
   }
 
   return (
@@ -166,7 +175,17 @@ export default async function RegisterPage() {
           You will be able to adjust your profile and community participation rules after signing in.
         </p>
       </div>
-      <RegisterForm organizations={organizations ?? []} action={registerUser} />
+      <RegisterForm organizations={organizations ?? []} action={registerUser} nextPath={nextPath} initialError={initialError} />
     </div>
   );
+}
+
+function getRegisterAuthErrorMessage(code: AuthErrorCode): string {
+  switch (code) {
+    case 'google_auth_cancelled':
+      return 'Google sign-up was cancelled. You can continue at any time.';
+    case 'google_auth_error':
+    default:
+      return 'We could not finish sign-up with Google right now. Please try again.';
+  }
 }

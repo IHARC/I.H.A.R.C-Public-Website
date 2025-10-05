@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Database } from '@/types/supabase';
+import { GoogleAuthButton } from '@/components/auth/google-auth-button';
+import { AuthDivider } from '@/components/auth/auth-divider';
 
 type FormState = {
   error?: string;
@@ -22,17 +24,23 @@ type Organization = {
 type RegisterFormProps = {
   organizations: Organization[];
   action: (state: FormState, formData: FormData) => Promise<FormState>;
+  nextPath: string;
+  initialError?: string | null;
 };
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
-export function RegisterForm({ organizations, action }: RegisterFormProps) {
-  const [state, formAction] = useFormState(action, { error: undefined });
+export function RegisterForm({ organizations, action, nextPath, initialError }: RegisterFormProps) {
+  const [state, formAction] = useFormState(action, { error: initialError });
   const [selectedOrg, setSelectedOrg] = useState('');
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="space-y-3">
+        <GoogleAuthButton intent="register" nextPath={nextPath} />
+        <AuthDivider label="or continue by sharing details" />
+      </div>
       <div className="grid gap-2">
         <Label htmlFor="display_name">Display name</Label>
         <Input id="display_name" name="display_name" required maxLength={80} autoComplete="nickname" placeholder="Name neighbours will see" />
