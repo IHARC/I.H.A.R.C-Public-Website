@@ -63,7 +63,7 @@ export default async function ProgressPage() {
       <header className="space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Progress snapshot</h1>
         <p className="text-base text-slate-700 dark:text-slate-300">
-          Follow key housing and harm reduction indicators alongside Working Plan activity. Use this view as a quick check; open the full stats dashboard for complete charts and context.
+          Follow key housing and public health indicators alongside Working Plan activity. Use this view as a quick check; open the full stats dashboard for complete charts and context.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link

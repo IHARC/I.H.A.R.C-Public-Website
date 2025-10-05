@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     Ideas, plans, and progress in plain language
                   </h1>
                   <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                    Follow real-time housing and harm reduction indicators, see which ideas are moving forward, and learn how to help without sharing identifying details.
+                    Follow real-time housing and public health indicators, see which ideas are moving forward, and learn how to help without sharing identifying details.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 lg:items-end">

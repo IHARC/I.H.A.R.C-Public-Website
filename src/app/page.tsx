@@ -4,7 +4,7 @@ const sections = [
   {
     title: 'Community Status Dashboard',
     description:
-      'Track real-time metrics on homelessness, shelter capacity, overdoses, and harm reduction supports reported by local partners.',
+      'Track real-time metrics on homelessness, shelter capacity, overdoses, and health outreach supports reported by local partners.',
     href: '/stats',
     action: 'Open the stats dashboard',
     tone: 'bg-white text-slate-900',
@@ -35,7 +35,7 @@ export default function IndexPage() {
             IHARC public portal MVP
           </p>
           <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Community intelligence for housing stability and harm reduction.
+            Community intelligence for housing stability and public health response.
           </h1>
           <p className="text-lg text-slate-700 dark:text-slate-300">
             Northumberland neighbours, agencies, and the Town co-manage this space to surface urgent needs, highlight strengths, and act on solutions that prevent homelessness and overdoses. Data is refreshed continuously and every participant can see how ideas move forward.
