@@ -1,7 +1,7 @@
 ## Mission & Audience Context
 - The portal is the public-facing MVP for the IHARC Command Center. It prioritizes compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
 - Content should emphasize collaboration, dignity, and community care. Avoid deficit-based language and maintain trust with service users, neighbours, and agency partners.
-- Two core intents drive every iteration: (1) surface real-time community statistics on homelessness and harm reduction, and (2) provide a collaborative "command center" where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
+- Two core intents drive every iteration: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative "command center" where neighbours, agencies, and government co-design rapid solutions in plain, accessible language. 
 
 ## Product Intent & Current State
 - `/ideas` is the public proposal queue. Banner copy explains the 1-2-3 idea workflow. Guests see tooltips on locked actions; auth users get type-enforced comments, single-vote support, and the six-step idea form at `/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submission still blocks without evidence and ≥1 metric." 

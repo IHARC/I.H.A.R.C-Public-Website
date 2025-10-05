@@ -4,7 +4,7 @@ const WINDOW_MS = 5 * 60 * 1000;
 
 type RateLimitParams = {
   profileId: string;
-  type: 'idea' | 'comment' | 'flag';
+  type: 'idea' | 'comment' | 'flag' | 'idea_update';
   limit: number;
   cooldownMs?: number;
 };
@@ -19,7 +19,7 @@ export async function checkRateLimit(params: RateLimitParams): Promise<RateLimit
   const portal = supabase.schema('portal');
   const since = new Date(Date.now() - WINDOW_MS).toISOString();
 
-  let table: 'ideas' | 'comments' | 'flags';
+  let table: 'ideas' | 'comments' | 'flags' | 'idea_edits';
   let column: string;
 
   if (type === 'idea') {
@@ -28,6 +28,9 @@ export async function checkRateLimit(params: RateLimitParams): Promise<RateLimit
   } else if (type === 'comment') {
     table = 'comments';
     column = 'author_profile_id';
+  } else if (type === 'idea_update') {
+    table = 'idea_edits';
+    column = 'editor_profile_id';
   } else {
     table = 'flags';
     column = 'reporter_profile_id';

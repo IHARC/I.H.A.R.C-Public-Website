@@ -1846,6 +1846,7 @@ export type Database = {
         | "adopted"
         | "not_feasible"
         | "archived";
+      idea_publication_status: "draft" | "published" | "archived";
       comment_type: "question" | "suggestion" | "response" | "official_note";
       flag_entity_type: "idea" | "comment";
       flag_reason: "privacy" | "abuse" | "hate" | "spam" | "wrong_cat" | "other";

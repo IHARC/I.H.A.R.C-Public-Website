@@ -79,72 +79,11 @@ export async function POST(req: NextRequest) {
   const attachments = formData.getAll('attachments') as File[];
   const submissionTypeRaw = (formData.get('submission_type') as string | null)?.toLowerCase();
   const submissionType = submissionTypeRaw === 'quick' ? 'quick' : 'full';
-
+  const metricsRaw = (formData.get('metrics') as string | null) ?? '[]';
   let metricsPayload: MetricDraft[] = [];
-  try {
-    const parsed = JSON.parse(metricsRaw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('Metrics payload must be an array');
-    }
-    metricsPayload = parsed
-      .slice(0, MAX_METRICS)
-      .map((metric) => {
-        const label = typeof metric?.label === 'string' ? metric.label.trim() : '';
-        const definition = typeof metric?.definition === 'string' ? metric.definition.trim() : '';
-        const baseline = typeof metric?.baseline === 'string' ? metric.baseline.trim() : '';
-        const target = typeof metric?.target === 'string' ? metric.target.trim() : '';
-        return {
-          label,
-          definition: definition || null,
-          baseline: baseline || null,
-          target: target || null,
-        } satisfies MetricDraft;
-      })
-      .filter((metric) => metric.label);
-  } catch (error) {
-    console.error('Invalid metrics payload', error);
-    return NextResponse.json({ error: 'Unable to parse metrics input.' }, { status: 400 });
-  }
 
   if (!title || !category) {
     return NextResponse.json({ error: 'Title and category are required' }, { status: 422 });
-  }
-
-  if (!problemStatement || !proposalSummary || !implementationSteps) {
-    return NextResponse.json(
-      { error: 'Problem, proposal, and steps are required sections.' },
-      { status: 422 },
-    );
-  }
-
-  if (!evidence) {
-    return NextResponse.json(
-      { error: 'Evidence is required before submitting.' },
-      { status: 422 },
-    );
-  }
-
-  if (!metricsPayload.length) {
-    return NextResponse.json(
-      { error: 'Add at least one success metric before submitting.' },
-      { status: 422 },
-    );
-  }
-
-  const invalidMetric = metricsPayload.find((metric) => {
-    if (metric.label.length < 3 || metric.label.length > 160) {
-      return true;
-    }
-    if (metric.definition && metric.definition.length > 500) {
-      return true;
-    }
-    return false;
-  });
-  if (invalidMetric) {
-    return NextResponse.json(
-      { error: 'Each metric needs a concise title (3-160 chars) and optional notes up to 500 chars.' },
-      { status: 422 },
-    );
   }
 
   if (!ALLOWED_CATEGORIES.has(category)) {
@@ -153,22 +92,6 @@ export async function POST(req: NextRequest) {
 
   if (title.length > 120) {
     return NextResponse.json({ error: 'Content exceeds length limits' }, { status: 422 });
-  }
-
-  const metricsAggregate = metricsPayload
-    .map((metric) => [metric.label, metric.definition, metric.baseline, metric.target].filter(Boolean).join(' '))
-    .join('\n');
-
-  const safety = scanContentForSafety(
-    [title, problemStatement, evidence, proposalSummary, implementationSteps, risks, metricsAggregate]
-      .filter(Boolean)
-      .join('\n'),
-  );
-  if (safety.hasPii || safety.hasProfanity) {
-    return NextResponse.json(
-      { error: 'Remove personal information or flagged language before submitting.' },
-      { status: 400 },
-    );
   }
 
   const profile = await ensurePortalProfile(user.id);
@@ -213,14 +136,6 @@ export async function POST(req: NextRequest) {
 
   if (submissionType === 'quick') {
     const quickSummary = (formData.get('quick_summary') as string | null)?.trim() ?? '';
-
-    if (!title || title.length > 120) {
-      return NextResponse.json({ error: 'Add a concise title under 120 characters.' }, { status: 422 });
-    }
-
-    if (!category) {
-      return NextResponse.json({ error: 'Choose a focus area for your idea.' }, { status: 422 });
-    }
 
     if (!quickSummary) {
       return NextResponse.json({ error: 'Share a short description so neighbours understand the idea.' }, { status: 422 });
@@ -311,9 +226,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: ideaId, draft: true });
   }
 
-  const supabaseService = createSupabaseServiceClient();
-  const metricsRaw = (formData.get('metrics') as string | null) ?? '[]';
-  let metricsPayload: MetricDraft[] = [];
+  if (!problemStatement || !proposalSummary || !implementationSteps) {
+    return NextResponse.json(
+      { error: 'Problem, proposal, and steps are required sections.' },
+      { status: 422 },
+    );
+  }
+
+  if (!evidence) {
+    return NextResponse.json(
+      { error: 'Evidence is required before submitting.' },
+      { status: 422 },
+    );
+  }
+
   try {
     const parsed = JSON.parse(metricsRaw);
     if (!Array.isArray(parsed)) {
@@ -338,6 +264,47 @@ export async function POST(req: NextRequest) {
     console.error('Invalid metrics payload', error);
     return NextResponse.json({ error: 'Unable to parse metrics input.' }, { status: 400 });
   }
+
+  if (!metricsPayload.length) {
+    return NextResponse.json(
+      { error: 'Add at least one success metric before submitting.' },
+      { status: 422 },
+    );
+  }
+
+  const invalidMetric = metricsPayload.find((metric) => {
+    if (metric.label.length < 3 || metric.label.length > 160) {
+      return true;
+    }
+    if (metric.definition && metric.definition.length > 500) {
+      return true;
+    }
+    return false;
+  });
+  if (invalidMetric) {
+    return NextResponse.json(
+      { error: 'Each metric needs a concise title (3-160 chars) and optional notes up to 500 chars.' },
+      { status: 422 },
+    );
+  }
+
+  const metricsAggregate = metricsPayload
+    .map((metric) => [metric.label, metric.definition, metric.baseline, metric.target].filter(Boolean).join(' '))
+    .join('\n');
+
+  const safety = scanContentForSafety(
+    [title, problemStatement, evidence, proposalSummary, implementationSteps, risks, metricsAggregate]
+      .filter(Boolean)
+      .join('\n'),
+  );
+  if (safety.hasPii || safety.hasProfanity) {
+    return NextResponse.json(
+      { error: 'Remove personal information or flagged language before submitting.' },
+      { status: 400 },
+    );
+  }
+
+  const supabaseService = createSupabaseServiceClient();
 
   const attachmentMeta: Array<{ path: string; name: string; content_type: string; size: number }> = [];
   const uploadedPaths: string[] = [];

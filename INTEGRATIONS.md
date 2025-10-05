@@ -66,15 +66,29 @@ The website uses a centralized Logo component that supports multiple variants an
    ```
 
 #### Logo Usage Examples
-```astro
-<!-- Default logo -->
-<Logo />
+```tsx
+import Image from 'next/image';
 
-<!-- White logo for dark background -->
-<Logo variant="white" size="lg" />
+export function LogoExamples() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      {/* Default logo */}
+      <Image src="/logo.svg" alt="IHARC" width={120} height={48} />
 
-<!-- Custom size with additional classes -->
-<Logo size="xl" class="mx-auto" />
+      {/* White logo for dark backgrounds */}
+      <Image src="/logo-white.svg" alt="IHARC" width={120} height={48} />
+
+      {/* Custom sizing with Tailwind utilities */}
+      <Image
+        src="/logo.svg"
+        alt="IHARC"
+        width={160}
+        height={64}
+        className="mx-auto"
+      />
+    </div>
+  );
+}
 ```
 
 #### Available Sizes
@@ -188,14 +202,25 @@ window.chatWidget.setUser({
 
 ### Disable Chat on Specific Pages
 
-```astro
----
-// Disable chat on privacy policy page
----
-<BaseLayout title="Privacy Policy">
-  <ChatWidget disabled={true} />
-  <!-- page content -->
-</BaseLayout>
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+export default function PrivacyPolicyPage() {
+  useEffect(() => {
+    window.chatWidget?.setEnabled?.(false);
+    return () => window.chatWidget?.setEnabled?.(true);
+  }, []);
+
+  return (
+    <main className="prose mx-auto px-6 py-12">
+      <h1>Privacy Policy</h1>
+      <p>Chat is disabled on this page to respect sensitive content.</p>
+      {/* rest of the page content */}
+    </main>
+  );
+}
 ```
 
 ## 🛠️ Configuration Management
@@ -289,12 +314,23 @@ Available chat configurations:
 
 Enable verbose logging:
 
-```astro
----
-// In any page component
----
-<Analytics disabled={false} />
-<ChatWidget provider="crisp" config={{ debug: true }} />
+```tsx
+'use client';
+
+import { Analytics } from '@vercel/analytics/react';
+
+export function DebugIntegrations() {
+  return (
+    <>
+      <Analytics debug />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.chatWidget?.configure?.({ debug: true });`
+        }}
+      />
+    </>
+  );
+}
 ```
 
 ## 📋 Deployment Checklist
