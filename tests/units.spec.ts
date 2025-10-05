@@ -10,11 +10,19 @@ describe('Accessibility Utilities', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
-    container.innerHTML = `
-      <button id="first">First</button>
-      <input id="second" />
-      <a href="#" id="third">Third</a>
-    `;
+    const first = document.createElement('button');
+    first.setAttribute('id', 'first');
+    container.appendChild(first);
+
+    const input = document.createElement('input');
+    input.setAttribute('id', 'second');
+    container.appendChild(input);
+
+    const third = document.createElement('a');
+    third.setAttribute('id', 'third');
+    third.setAttribute('href', '#');
+    container.appendChild(third);
+
     document.body.appendChild(container);
   });
 

@@ -15,6 +15,27 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.svg',
   },
+  openGraph: {
+    type: 'website',
+    title: 'IHARC — Northumberland Housing & Health Collaboration',
+    description:
+      'IHARC is the community front door for housing stability and overdose response collaboration across Northumberland County.',
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'IHARC Command Center — Community collaboration for housing and health',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'IHARC — Northumberland Housing & Health Collaboration',
+    description:
+      'Neighbours, agencies, and local government co-design rapid housing and overdose solutions together.',
+    images: ['/og-default.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
