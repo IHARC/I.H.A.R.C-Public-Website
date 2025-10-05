@@ -13,7 +13,7 @@ export function TagChips({ tags }: { tags: string[] }) {
         </Badge>
       ))}
       {tags.length > 6 && (
-        <Badge variant="outline" className="text-xs text-slate-400">
+        <Badge variant="outline" className="text-xs text-muted-subtle">
           +{tags.length - 6} more
         </Badge>
       )}

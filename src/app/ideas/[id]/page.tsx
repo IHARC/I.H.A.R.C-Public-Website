@@ -327,7 +327,7 @@ export default async function IdeaDetailPage({
         <header className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
                 {isDraft ? (
                   <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-100">
                     {quickCopy.draftBadge}
@@ -496,8 +496,8 @@ export default async function IdeaDetailPage({
         ) : null}
 
         <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">How to help</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">How to help</h2>
+          <p className="text-sm text-muted">
             Ask a question • Suggest an improvement • Show your support (vote).
           </p>
         </section>
@@ -506,8 +506,8 @@ export default async function IdeaDetailPage({
 
         {officialResponses.length ? (
           <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Official responses</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Official responses</h2>
+            <p className="text-xs text-muted">
               Updates shared by verified partners and moderators are pinned here for easy reference.
             </p>
             <CommentThread
@@ -533,7 +533,7 @@ export default async function IdeaDetailPage({
         ) : null}
 
         <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Timeline</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Timeline</h2>
           <IdeaTimeline events={timelineEvents} />
         </section>
       </aside>

@@ -32,10 +32,10 @@ export function IdeaMetricsList({ metrics }: { metrics: IdeaMetricDisplay[] }) {
               ) : null}
             </div>
             {metric.definition ? (
-              <p className="text-sm text-slate-600 dark:text-slate-300">{metric.definition}</p>
+              <p className="text-sm text-muted">{metric.definition}</p>
             ) : null}
             {(hasBaseline || hasTarget) && (
-              <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap gap-4 text-xs text-muted">
                 {hasBaseline ? <span>Baseline: {metric.baseline}</span> : null}
                 {hasTarget ? <span>Goal: {metric.target}</span> : null}
               </div>

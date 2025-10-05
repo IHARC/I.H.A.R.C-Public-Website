@@ -206,7 +206,7 @@ export function CommentComposer({
             placeholder="https://example.org/report.pdf"
             maxLength={600}
           />
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-muted">
             Link to data, news updates, or partner documentation so moderators can verify quickly.
           </p>
           {!evidenceTrimmed && (

@@ -146,7 +146,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
   ];
 
   if (!flags.length) {
-    return <p className="text-sm text-slate-500">No active flags 🎉</p>;
+    return <p className="text-sm text-muted">No active flags 🎉</p>;
   }
 
   return (
@@ -166,7 +166,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
               }`}
             >
               <span className="font-semibold">{tab.label}</span>
-              <Badge variant="secondary" className="bg-transparent text-xs text-slate-500 dark:text-slate-300">
+              <Badge variant="secondary" className="bg-transparent text-xs text-muted">
                 {tab.count}
               </Badge>
             </button>
@@ -184,7 +184,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
                     ? 'Clear selection'
                     : 'Select visible'}
                 </Button>
-                <span className="text-xs text-slate-500 dark:text-slate-400">{visibleSelected.length} selected</span>
+                <span className="text-xs text-muted">{visibleSelected.length} selected</span>
               </div>
               <Textarea
                 value={note}
@@ -222,7 +222,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
                         aria-label={`Select flag ${flag.id}`}
                         disabled={isPending || activeStatus === 'actioned'}
                       />
-                      <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <div className="text-xs uppercase tracking-wide text-muted">
                         {flag.reason.replace('_', ' ')} • {flag.entity_type}
                       </div>
                     </div>
@@ -230,16 +230,16 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
                       <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
                         {flag.status.replace('_', ' ')}
                       </Badge>
-                      <time className="text-xs text-slate-400" dateTime={flag.created_at}>
+                      <time className="text-xs text-muted-subtle" dateTime={flag.created_at}>
                         {new Date(flag.created_at).toLocaleString('en-CA')}
                       </time>
                     </div>
                   </div>
-                  <div className="space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                  <div className="space-y-2 text-sm text-muted-strong">
                     {flag.entity_type === 'idea' && (
                       <div>
                         <p className="font-semibold">{flag.idea?.title ?? 'Idea'}</p>
-                        <p className="text-xs text-slate-500">Current status: {flag.idea?.status ?? 'unknown'}</p>
+                        <p className="text-xs text-muted">Current status: {flag.idea?.status ?? 'unknown'}</p>
                       </div>
                     )}
                     {flag.entity_type === 'comment' && (
@@ -247,8 +247,8 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
                         {flag.comment?.body}
                       </div>
                     )}
-                    {flag.details && <p className="text-xs text-slate-500">Reporter note: {flag.details}</p>}
-                    <p className="text-xs text-slate-400">Reported by {flag.reporter?.display_name ?? 'Community member'}</p>
+                    {flag.details && <p className="text-xs text-muted">Reporter note: {flag.details}</p>}
+                    <p className="text-xs text-muted-subtle">Reported by {flag.reporter?.display_name ?? 'Community member'}</p>
                   </div>
                 </div>
               );
@@ -256,7 +256,7 @@ export function ModerationQueue({ flags }: { flags: ModerationFlag[] }) {
           </div>
         </div>
       ) : (
-        <p className="rounded-lg border border-dashed border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <p className="rounded-lg border border-dashed border-slate-200 bg-white p-6 text-sm text-muted shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
           No items in this bucket right now.
         </p>
       )}

@@ -22,12 +22,12 @@ export function DashboardCards({ items }: { items: DashboardCardItem[] }) {
               <span>{item.label}</span>
               {item.trend && <TrendIndicator trend={item.trend} />}
             </CardTitle>
-            {item.caption && <p className="text-xs text-slate-500 dark:text-slate-400">{item.caption}</p>}
+            {item.caption && <p className="text-xs text-muted">{item.caption}</p>}
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{item.value}</p>
             {item.description && (
-              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{item.description}</p>
+              <p className="mt-3 text-sm text-muted">{item.description}</p>
             )}
           </CardContent>
         </Card>

@@ -186,7 +186,7 @@ export function KanbanBoard({
                 {statusLabel(column.status)}
                 <Badge variant="secondary">{limitLabel}</Badge>
               </div>
-              {pending && <span className="text-xs text-slate-400">Saving…</span>}
+              {pending && <span className="text-xs text-muted-subtle">Saving…</span>}
             </header>
             <div className="flex flex-1 flex-col gap-3">
               {column.items.map((idea) => (
@@ -200,7 +200,7 @@ export function KanbanBoard({
                 />
               ))}
               {!column.items.length && (
-                <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400 dark:border-slate-700 dark:text-slate-500">
+                <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-muted-subtle dark:border-slate-700 dark:text-slate-300">
                   {canDrag ? 'Drop ideas here' : 'No ideas yet'}
                 </div>
               )}
@@ -237,7 +237,7 @@ function KanbanCard({
         canDrag ? 'cursor-move hover:shadow-md' : 'cursor-default'
       } ${isDragging ? 'opacity-60' : ''}`}
     >
-      <div className="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-between gap-2 text-xs text-muted">
         <StatusBadge status={idea.status} />
         <span>👍 {idea.voteCount}</span>
       </div>
@@ -245,7 +245,7 @@ function KanbanCard({
       <p className="mt-1 line-clamp-3 text-xs text-slate-600 dark:text-slate-300">
         {idea.proposalSummary || idea.problemStatement || idea.body}
       </p>
-      <div className="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+      <div className="mt-3 flex items-center justify-between text-xs text-muted">
         <span>{idea.isAnonymous ? 'Anonymous' : idea.authorDisplayName}</span>
         <span>💬 {idea.commentCount}</span>
       </div>
