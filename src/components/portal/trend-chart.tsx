@@ -32,11 +32,11 @@ export function TrendChart({
     <Card className="border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        {description && <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>}
+        {description && <p className="text-sm text-muted">{description}</p>}
         <span className="sr-only">{summary}</span>
       </CardHeader>
       <CardContent>
-        <p className="mb-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{rangeLabel}</p>
+        <p className="mb-2 text-xs uppercase tracking-wide text-muted-subtle">{rangeLabel}</p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
@@ -46,8 +46,8 @@ export function TrendChart({
                   <stop offset="95%" stopColor="#2563eb" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} width={60} />
+              <XAxis dataKey="date" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} width={60} />
               <Tooltip
                 contentStyle={{ backgroundColor: 'rgb(15 23 42 / 0.9)', borderRadius: '0.5rem', border: 'none' }}
                 labelStyle={{ color: 'white' }}

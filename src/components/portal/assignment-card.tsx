@@ -74,7 +74,7 @@ export function IdeaAssignmentCard({
   return (
     <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Owner</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">Owner</h3>
         {localAssignee ? (
           <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
             {localAssignee.displayName}
@@ -82,7 +82,7 @@ export function IdeaAssignmentCard({
             {localAssignee.positionTitle ? ` · ${localAssignee.positionTitle}` : ''}
           </p>
         ) : (
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">No one is assigned yet.</p>
+          <p className="mt-1 text-sm text-muted">No one is assigned yet.</p>
         )}
       </div>
       {canAssign && (

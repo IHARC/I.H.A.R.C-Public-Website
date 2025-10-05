@@ -111,7 +111,7 @@ export function PromoteIdeaCard({
     <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
             Working Plan promotion
           </h2>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
@@ -120,7 +120,7 @@ export function PromoteIdeaCard({
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="text-slate-400">
+            <span className="text-muted-subtle">
               <Info className="h-4 w-4" aria-hidden />
             </span>
           </TooltipTrigger>

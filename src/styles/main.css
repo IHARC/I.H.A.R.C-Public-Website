@@ -21,7 +21,14 @@
   html {
     font-family: theme('fontFamily.body');
   }
-  
+
+  body {
+    color: theme('colors.on-surface');
+    background-color: theme('colors.background');
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: theme('fontFamily.heading');
   }
@@ -110,6 +117,18 @@
 @layer utilities {
   .visually-hidden {
     @apply sr-only;
+  }
+
+  .text-muted {
+    @apply text-slate-600 dark:text-slate-300;
+  }
+
+  .text-muted-strong {
+    @apply text-slate-700 dark:text-slate-200;
+  }
+
+  .text-muted-subtle {
+    @apply text-slate-500 dark:text-slate-300;
   }
 
   .scale-101 {

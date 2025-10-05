@@ -44,7 +44,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
       <div className="grid gap-2">
         <Label htmlFor="display_name">Display name</Label>
         <Input id="display_name" name="display_name" required maxLength={80} autoComplete="nickname" placeholder="Name neighbours will see" />
-        <p className="text-xs text-slate-500">Use first names or community roles. No identifying neighbour information.</p>
+        <p className="text-xs text-muted">Use first names or community roles. No identifying neighbour information.</p>
       </div>
 
       <div className="grid gap-3">
@@ -54,7 +54,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
             <RadioGroupItem id="affiliation-community" value="community_member" className="mt-1" />
             <span>
               Community member
-              <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-slate-400">
+              <span className="mt-1 block text-xs font-normal text-muted">
                 Share ideas, support plans, and collaborate as a neighbour.
               </span>
             </span>
@@ -63,7 +63,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
             <RadioGroupItem id="affiliation-agency" value="agency_partner" className="mt-1" />
             <span>
               Agency / organization
-              <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-slate-400">
+              <span className="mt-1 block text-xs font-normal text-muted">
                 Request verified posting on behalf of a partner organization.
               </span>
             </span>
@@ -72,7 +72,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
             <RadioGroupItem id="affiliation-government" value="government_partner" className="mt-1" />
             <span>
               Government representative
-              <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-slate-400">
+              <span className="mt-1 block text-xs font-normal text-muted">
                 Join as municipal, regional, or provincial staff or elected leadership.
               </span>
             </span>
@@ -103,7 +103,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-slate-500">Link an agency if you post on behalf of a partner organization.</p>
+        <p className="text-xs text-muted">Link an agency if you post on behalf of a partner organization.</p>
       </div>
 
       <div className="grid gap-2">
@@ -115,7 +115,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
           placeholder="Public Health Nurse, Mayor, Outreach Coordinator, ..."
           required={affiliationType !== 'community_member'}
         />
-        <p className="text-xs text-slate-500">Helps neighbours understand how you collaborate in the Command Center.</p>
+        <p className="text-xs text-muted">Helps neighbours understand how you collaborate in the Command Center.</p>
       </div>
 
       <div className="grid gap-2">

@@ -338,7 +338,7 @@ export function IdeaSubmissionForm({
           </AlertDescription>
         </Alert>
       )}
-      <div className="mb-6 flex flex-wrap gap-2 text-sm text-slate-500">
+      <div className="mb-6 flex flex-wrap gap-2 text-sm text-muted">
         {STEPS.map((item, index) => {
           const active = index === step;
           const completed = index < step;
@@ -351,7 +351,7 @@ export function IdeaSubmissionForm({
                   ? 'border-brand/70 bg-brand/5 text-brand'
                   : completed
                     ? 'border-emerald-500/60 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400',
+                    : 'border-slate-200 text-muted dark:border-slate-800',
               ].join(' ')}
             >
               {completed ? <CheckCircle2 className="h-4 w-4" /> : <span className="text-xs font-medium">{index + 1}</span>}
@@ -380,7 +380,7 @@ export function IdeaSubmissionForm({
           <h2 id="wizard-step" className="text-xl font-semibold text-slate-900 dark:text-slate-50">
             {currentStep.title}
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300">{currentStep.description}</p>
+          <p className="text-sm text-muted">{currentStep.description}</p>
         </div>
         <div className="space-y-5">
           {step === 0 && (
@@ -420,7 +420,7 @@ export function IdeaSubmissionForm({
                   maxLength={2000}
                   placeholder="Describe what is happening in community right now, who is impacted, and why it matters."
                 />
-                <p className="text-xs text-slate-500">At least {MIN_SECTION_LENGTH} characters.</p>
+                <p className="text-xs text-muted">At least {MIN_SECTION_LENGTH} characters.</p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
@@ -448,7 +448,7 @@ export function IdeaSubmissionForm({
                 maxLength={2500}
                 placeholder="Share data, lived experience, or observations that show this problem needs action."
               />
-              <p className="text-xs text-slate-500">Evidence is required before you can continue.</p>
+              <p className="text-xs text-muted">Evidence is required before you can continue.</p>
               {form.evidence.trim().length < MIN_SECTION_LENGTH && (
                 <p className="text-xs text-amber-600 dark:text-amber-300">
                   Cite a statistic, observation, or peer insight so moderators can validate quickly.
@@ -493,7 +493,7 @@ export function IdeaSubmissionForm({
                 maxLength={2000}
                 placeholder="Flag any risks, dependencies, or supports required so the team can plan mitigations."
               />
-              <p className="text-xs text-slate-500">Optional but helps the review team prepare.</p>
+              <p className="text-xs text-muted">Optional but helps the review team prepare.</p>
             </div>
           )}
           {step === 5 && (
@@ -502,7 +502,7 @@ export function IdeaSubmissionForm({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Success metrics</Label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-muted">
                       Define how neighbours will know the idea is working. Include targets or milestones.
                     </p>
                   </div>
@@ -529,7 +529,7 @@ export function IdeaSubmissionForm({
                         className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                             Metric {index + 1}
                           </span>
                           {showRemove && (
@@ -599,13 +599,13 @@ export function IdeaSubmissionForm({
               <div className="grid gap-2">
                 <Label>Attachments</Label>
                 <AttachmentUploader attachments={attachments} onChange={setAttachments} />
-                <p className="text-xs text-slate-500">Add supporting documents like PDFs, photos, or briefing notes (max 4 files).</p>
+                <p className="text-xs text-muted">Add supporting documents like PDFs, photos, or briefing notes (max 4 files).</p>
               </div>
             </div>
           )}
         </div>
         <footer className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
-          <div className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-muted">
             Step {step + 1} of {STEPS.length}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

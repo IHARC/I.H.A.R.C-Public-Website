@@ -27,7 +27,7 @@ const TYPE_BADGE: Record<IdeaTimelineEvent['type'], { label: string; variant: 'd
 
 export function IdeaTimeline({ events }: { events: IdeaTimelineEvent[] }) {
   if (!events.length) {
-    return <p className="text-sm text-slate-500 dark:text-slate-400">No recorded activity just yet.</p>;
+    return <p className="text-sm text-muted">No recorded activity just yet.</p>;
   }
 
   return (
@@ -49,12 +49,12 @@ export function IdeaTimeline({ events }: { events: IdeaTimelineEvent[] }) {
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                   <p className="font-medium text-slate-900 dark:text-slate-100">{event.title}</p>
                 </div>
-                <time className="text-xs text-slate-500 dark:text-slate-400" dateTime={event.timestamp}>
+                <time className="text-xs text-muted" dateTime={event.timestamp}>
                   {new Date(event.timestamp).toLocaleString('en-CA')}
                 </time>
               </div>
               {event.actor ? (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted">
                   by {event.actor.displayName}
                   {event.actor.positionTitle ? ` · ${event.actor.positionTitle}` : ''}
                   {event.actor.organizationName ? ` · ${event.actor.organizationName}` : ''}
@@ -64,7 +64,7 @@ export function IdeaTimeline({ events }: { events: IdeaTimelineEvent[] }) {
                 <p className="whitespace-pre-line text-slate-700 dark:text-slate-200">{event.description}</p>
               ) : null}
               {event.type === 'status' && event.status ? (
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">New status: {event.status}</p>
+                <p className="text-xs uppercase tracking-wide text-muted">New status: {event.status}</p>
               ) : null}
             </div>
           </li>

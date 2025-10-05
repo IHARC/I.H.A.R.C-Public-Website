@@ -91,7 +91,7 @@ export default async function PlansPage() {
             {plans.map((plan) => (
               <li key={plan.id} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-within:ring-2 focus-within:ring-brand dark:border-slate-800 dark:bg-slate-900">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-wide text-muted">
                     <span>Last updated {new Date(plan.updated_at ?? plan.created_at).toLocaleDateString('en-CA')}</span>
                     {plan.nextKeyDate ? (
                       <span className="font-semibold text-brand">
@@ -106,7 +106,7 @@ export default async function PlansPage() {
                   </h2>
                   <p className="text-sm text-slate-600 dark:text-slate-300">{plan.canonical_summary}</p>
                 </div>
-                <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   {plan.focus_areas.slice(0, 4).map((focus) => (
                     <span key={focus.id} className="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-700">
                       {focus.name}
@@ -121,7 +121,7 @@ export default async function PlansPage() {
                     Open plan overview
                   </Link>
                   {plan.nextKeyDate ? (
-                    <Link href={`/plans/${plan.slug}#timeline`} className="text-sm text-slate-500 hover:text-brand dark:text-slate-400">
+                  <Link href={`/plans/${plan.slug}#timeline`} className="text-sm text-muted hover:text-brand">
                       See timeline
                     </Link>
                   ) : null}
