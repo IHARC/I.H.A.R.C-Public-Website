@@ -77,7 +77,7 @@ export default async function PlanDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const viewerProfile = user ? await ensurePortalProfile(user.id) : null;
+  const viewerProfile = user ? await ensurePortalProfile(supabase, user.id) : null;
   const viewerRole = viewerProfile?.role ?? null;
 
   const { data: plan, error } = await portal

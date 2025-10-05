@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   let viewerOrganization: { name: string | null; verified: boolean } | null = null;
   if (profile.organization_id) {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rateLimit = await checkRateLimit({
-    profileId: profile.id,
+    supabase,
     type: 'comment',
     limit: 20,
     cooldownMs: COMMENT_COOLDOWN_MS,
@@ -236,9 +236,8 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get('user-agent');
   const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: isOfficial ? 'comment_official_posted' : 'comment_posted',
     entityType: 'comment',
     entityId: insertedComment.id,

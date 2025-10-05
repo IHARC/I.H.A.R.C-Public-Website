@@ -41,7 +41,7 @@ export default async function IdeasPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const viewerProfile = user ? await ensurePortalProfile(user.id) : null;
+  const viewerProfile = user ? await ensurePortalProfile(supabase, user.id) : null;
 
   const metricCards = await loadMetricHighlights(supabase, metricRange);
   const metricSummary = metricCards.length

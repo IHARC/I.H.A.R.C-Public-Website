@@ -16,7 +16,7 @@ export default async function ModerationPage() {
     redirect('/login');
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role)) {
     redirect('/command-center');
   }

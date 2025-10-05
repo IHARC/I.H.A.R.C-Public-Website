@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   if (!profile.rules_acknowledged_at) {
     const { error: updateError } = await portal
@@ -33,9 +33,8 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent');
     const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'rules_acknowledged',
       entityType: 'profile',
       entityId: profile.id,
@@ -46,7 +45,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const refreshedProfile = await ensurePortalProfile(user.id);
+  const refreshedProfile = await ensurePortalProfile(supabase, user.id);
 
   return NextResponse.json({
     acknowledgedAt: refreshedProfile.rules_acknowledged_at,

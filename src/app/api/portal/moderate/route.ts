@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { queuePortalNotification } from '@/lib/notifications';
 
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin', 'org_rep'].includes(profile.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -41,12 +40,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Moderation failed' }, { status: 500 });
   }
 
-  await handleFollowUps(payload, profile.id);
+  await handleFollowUps(supabase, payload, profile.id);
 
   return NextResponse.json({ status: 'ok' });
 }
 
-async function handleFollowUps(payload: Record<string, unknown> | null | undefined, actorProfileId: string) {
+async function handleFollowUps(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  payload: Record<string, unknown> | null | undefined,
+  actorProfileId: string,
+) {
   if (!payload) {
     return;
   }
@@ -65,8 +68,7 @@ async function handleFollowUps(payload: Record<string, unknown> | null | undefin
     return;
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
   const { data: idea } = await portal
     .from('ideas')
     .select('id, title, author_profile_id')
@@ -78,10 +80,10 @@ async function handleFollowUps(payload: Record<string, unknown> | null | undefin
   }
 
   try {
-    const email = await getUserEmailForProfile(idea.author_profile_id);
+    const email = await getUserEmailForProfile(supabase, idea.author_profile_id);
     if (!email) return;
 
-    await queuePortalNotification({
+    await queuePortalNotification(supabase, {
       profileId: idea.author_profile_id,
       email,
       subject: 'Idea status updated',

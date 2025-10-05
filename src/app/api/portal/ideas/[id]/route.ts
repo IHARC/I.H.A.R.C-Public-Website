@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { scanContentForSafety } from '@/lib/safety';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -68,7 +67,7 @@ export async function PATCH(
     );
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   const { data: existingIdea, error: ideaError } = await portal
     .from('ideas')
@@ -90,7 +89,7 @@ export async function PATCH(
   }
 
   const rateLimit = await checkRateLimit({
-    profileId: profile.id,
+    supabase,
     type: 'idea_update',
     limit: 20,
     cooldownMs: IDEA_COOLDOWN_MS,
@@ -221,8 +220,6 @@ export async function PATCH(
     .filter(Boolean)
     .join('\n\n');
 
-  const supabaseService = createSupabaseServiceClient();
-
   const { error: updateError } = await portal
     .from('ideas')
     .update({
@@ -263,7 +260,7 @@ export async function PATCH(
     console.error('Failed to insert idea history', editError);
   }
 
-  const { error: deleteMetricsError } = await supabaseService
+  const { error: deleteMetricsError } = await supabase
     .schema('portal')
     .from('idea_metrics')
     .delete()
@@ -283,7 +280,7 @@ export async function PATCH(
     target: metric.target,
   }));
 
-  const { error: metricInsertError } = await supabaseService
+  const { error: metricInsertError } = await supabase
     .schema('portal')
     .from('idea_metrics')
     .insert(metricRows);
@@ -307,9 +304,8 @@ export async function PATCH(
   const userAgent = req.headers.get('user-agent');
   const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'idea_updated',
     entityType: 'idea',
     entityId: ideaId,

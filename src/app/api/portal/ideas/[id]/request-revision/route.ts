@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
@@ -26,7 +25,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role ?? '')) {
     return NextResponse.json({ error: 'Only moderators can request revisions.' }, { status: 403 });
   }
@@ -49,8 +48,7 @@ export async function POST(
     return NextResponse.json({ error: 'Revision messages are limited to 2000 characters' }, { status: 422 });
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { data: idea, error: ideaError } = await portal
     .from('ideas')
@@ -89,9 +87,8 @@ export async function POST(
     return NextResponse.json({ error: 'Unable to request revision' }, { status: 500 });
   }
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'idea_revision_requested',
     entityType: 'idea',
     entityId: ideaId,
@@ -100,9 +97,8 @@ export async function POST(
     },
   });
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'idea_status_new',
     entityType: 'idea',
     entityId: ideaId,
@@ -113,9 +109,9 @@ export async function POST(
 
   if (idea.author_profile_id) {
     try {
-      const email = await getUserEmailForProfile(idea.author_profile_id);
+      const email = await getUserEmailForProfile(supabase, idea.author_profile_id);
       if (email) {
-        await queuePortalNotification({
+        await queuePortalNotification(supabase, {
           profileId: idea.author_profile_id,
           email,
           subject: 'Updates requested for your community idea',

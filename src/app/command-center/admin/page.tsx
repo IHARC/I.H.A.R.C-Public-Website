@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { logAuditEvent } from '@/lib/audit';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,7 +61,7 @@ export default async function CommandCenterAdminPage() {
     redirect('/login');
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role)) {
     redirect('/command-center');
   }
@@ -110,7 +110,7 @@ export default async function CommandCenterAdminPage() {
   async function uploadMetric(formData: FormData) {
     'use server';
 
-    const supa = createSupabaseServiceClient();
+    const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
     const metric_date = formData.get('metric_date') as string;
     const metric_key = formData.get('metric_key') as string;
@@ -118,7 +118,6 @@ export default async function CommandCenterAdminPage() {
     const source = (formData.get('source') as string) || null;
     const notes = (formData.get('notes') as string) || null;
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const actorUserId = formData.get('actor_user_id') as string;
 
     if (!metric_date || !metric_key || Number.isNaN(value)) {
       throw new Error('Missing required fields');
@@ -132,9 +131,8 @@ export default async function CommandCenterAdminPage() {
       notes,
     });
 
-    await logAuditEvent({
+    await logAuditEvent(supa, {
       actorProfileId,
-      actorUserId,
       action: 'metric_upsert',
       entityType: 'metric_daily',
       entityId: `${metric_date}:${metric_key}`,
@@ -148,17 +146,27 @@ export default async function CommandCenterAdminPage() {
   async function createOrganization(formData: FormData) {
     'use server';
 
-    const supa = createSupabaseServiceClient();
+    const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
     const name = (formData.get('org_name') as string | null)?.trim();
     const website = (formData.get('org_website') as string | null)?.trim() || null;
     const verified = formData.get('org_verified') === 'on';
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const actorUserId = formData.get('actor_user_id') as string;
 
     if (!name) {
       throw new Error('Organization name is required');
     }
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supa.auth.getSession();
+
+    if (sessionError || !session?.user) {
+      throw sessionError ?? new Error('Unable to resolve moderator session');
+    }
+
+    const actorUserId = session.user.id;
 
     const { data: inserted, error } = await portalClient
       .from('organizations')
@@ -176,9 +184,8 @@ export default async function CommandCenterAdminPage() {
       throw error;
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supa, {
       actorProfileId,
-      actorUserId,
       action: 'organization_created',
       entityType: 'organization',
       entityId: inserted.id,
@@ -211,47 +218,31 @@ export default async function CommandCenterAdminPage() {
       throw new Error('Invite requires a valid email address.');
     }
 
-    const supa = createSupabaseServiceClient();
-    const portalClient = supa.schema('portal');
+    const supa = await createSupabaseServerClient();
 
-    const { error: authInviteError } = await supa.auth.admin.inviteUserByEmail(email, {
-      data: {
-        invited_via_portal: true,
-        invitation_affiliation_type: affiliationType,
+    const {
+      data: { session },
+    } = await supa.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error('Moderator session required');
+    }
+
+    const response = await supa.functions.invoke('portal-admin-invite', {
+      body: {
+        email,
+        displayName: displayNameInput,
+        positionTitle,
+        affiliationType,
+        organizationId,
+        message,
       },
+      headers: { Authorization: `Bearer ${session.access_token}` },
     });
 
-    if (authInviteError && !authInviteError.message?.toLowerCase().includes('already registered')) {
-      throw authInviteError;
+    if (response.error) {
+      throw new Error(response.error.message || 'Failed to send invitation');
     }
-
-    if (authInviteError) {
-      console.warn('User already registered, skipping auth invite email');
-    }
-
-    const { error: insertError } = await portalClient.from('profile_invites').insert({
-      email,
-      display_name: displayNameInput,
-      position_title: positionTitle,
-      affiliation_type: affiliationType,
-      organization_id: organizationId,
-      message,
-      invited_by_profile_id: actorProfileId,
-      invited_by_user_id: actorUserId,
-    });
-
-    if (insertError) {
-      throw insertError;
-    }
-
-    await logAuditEvent({
-      actorProfileId,
-      actorUserId,
-      action: 'profile_invite_sent',
-      entityType: 'profile_invite',
-      entityId: email,
-      meta: { affiliationType, organizationId },
-    });
 
     revalidatePath('/command-center/admin');
   }
@@ -267,7 +258,7 @@ export default async function CommandCenterAdminPage() {
       throw new Error('Missing profile identifier.');
     }
 
-    const supa = createSupabaseServiceClient();
+    const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
 
     const { data: profileRow, error: profileError } = await portalClient
@@ -298,9 +289,8 @@ export default async function CommandCenterAdminPage() {
       throw updateError;
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supa, {
       actorProfileId,
-      actorUserId,
       action: 'profile_affiliation_approved',
       entityType: 'profile',
       entityId: profileId,
@@ -308,7 +298,7 @@ export default async function CommandCenterAdminPage() {
     });
 
     if (profileRow.user_id) {
-      await ensurePortalProfile(profileRow.user_id);
+      await ensurePortalProfile(supa, profileRow.user_id);
     }
 
     revalidatePath('/command-center/admin');
@@ -325,7 +315,7 @@ export default async function CommandCenterAdminPage() {
       throw new Error('Missing profile identifier.');
     }
 
-    const supa = createSupabaseServiceClient();
+    const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
 
     const { data: profileRow, error: profileError } = await portalClient
@@ -353,9 +343,8 @@ export default async function CommandCenterAdminPage() {
       throw updateError;
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supa, {
       actorProfileId,
-      actorUserId,
       action: 'profile_affiliation_declined',
       entityType: 'profile',
       entityId: profileId,
@@ -363,7 +352,7 @@ export default async function CommandCenterAdminPage() {
     });
 
     if (profileRow.user_id) {
-      await ensurePortalProfile(profileRow.user_id);
+      await ensurePortalProfile(supa, profileRow.user_id);
     }
 
     revalidatePath('/command-center/admin');

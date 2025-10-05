@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const RANGE_OPTIONS: Record<string, number> = {
   '7d': 7,
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const sinceDate = since.toISOString().slice(0, 10);
 
-  const supabase = createSupabaseServiceClient();
+  const supabase = await createSupabaseServerClient();
   const portal = supabase.schema('portal');
   const { data, error } = await portal
     .from('metric_daily')

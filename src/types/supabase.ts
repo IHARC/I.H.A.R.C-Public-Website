@@ -331,6 +331,45 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      portal_accept_invite: {
+        Args: { p_invite_id: string; p_profile_id: string };
+        Returns: undefined;
+      };
+      portal_check_rate_limit: {
+        Args: { p_event: string; p_limit: number; p_cooldown_ms?: number | null };
+        Returns: { allowed: boolean; retry_in_ms: number }[];
+      };
+      portal_get_pending_invite: {
+        Args: { p_email: string };
+        Returns: Database["portal"]["Tables"]["profile_invites"]["Row"] | null;
+      };
+      portal_get_user_email: {
+        Args: { p_profile_id?: string | null };
+        Returns: string | null;
+      };
+      portal_log_audit_event: {
+        Args: {
+          p_action: string;
+          p_entity_type: string;
+          p_entity_id?: string | null;
+          p_meta?: Json | null;
+          p_actor_profile_id?: string | null;
+        };
+        Returns: undefined;
+      };
+      portal_queue_notification: {
+        Args: {
+          p_subject: string;
+          p_body_text: string;
+          p_profile_id?: string | null;
+          p_body_html?: string | null;
+          p_idea_id?: string | null;
+          p_type?: string | null;
+          p_payload?: Json | null;
+          p_recipient_email?: string | null;
+        };
+        Returns: string | null;
+      };
       cleanup_expired_ai_cache: {
         Args: Record<PropertyKey, never>;
         Returns: number;

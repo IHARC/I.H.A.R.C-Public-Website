@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 
@@ -36,7 +35,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!profile) {
     return NextResponse.json({ error: 'Profile is required to submit updates.' }, { status: 403 });
   }
@@ -71,8 +70,7 @@ export async function POST(
     return NextResponse.json({ error: `${missingField.label} is required.` }, { status: 422 });
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { data: plan, error: planError } = await portal
     .from('plans')
@@ -113,9 +111,8 @@ export async function POST(
     return NextResponse.json({ error: 'Unable to submit update.' }, { status: 500 });
   }
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'update_opened',
     entityType: 'plan',
     entityId: planId,

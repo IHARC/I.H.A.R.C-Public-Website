@@ -26,7 +26,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   const { data: idea, error: ideaError } = await portal
     .from('ideas')
@@ -92,9 +92,8 @@ export async function POST(
   const userAgent = req.headers.get('user-agent');
   const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: voteAction,
     entityType: 'idea',
     entityId: ideaId,

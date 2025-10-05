@@ -16,7 +16,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   const resolvedParams = await params;
   const updateParam = resolvedParams.updateId;

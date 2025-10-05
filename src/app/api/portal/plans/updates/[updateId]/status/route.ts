@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 
@@ -21,7 +20,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!MODERATOR_ROLES.has(profile.role ?? '')) {
     return NextResponse.json({ error: 'Only moderators can change plan update status.' }, { status: 403 });
   }
@@ -55,8 +54,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unsupported status transition.' }, { status: 422 });
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { data: update, error: updateError } = await portal
     .from('plan_updates')
@@ -88,9 +86,8 @@ export async function POST(
       return NextResponse.json({ error: 'Unable to reopen plan update.' }, { status: 500 });
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'update_opened',
       entityType: 'plan',
       entityId: update.plan_id,
@@ -128,18 +125,16 @@ export async function POST(
       return NextResponse.json({ error: 'Unable to record decision note.' }, { status: 500 });
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: status === 'accepted' ? 'update_accepted' : 'update_declined',
       entityType: 'plan',
       entityId: update.plan_id,
       meta: { plan_update_id: updateId },
     });
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'decision_posted',
       entityType: 'plan',
       entityId: update.plan_id,
@@ -174,18 +169,16 @@ export async function POST(
       return NextResponse.json({ error: 'Unable to refresh plan overview.' }, { status: 500 });
     }
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'update_accepted',
       entityType: 'plan',
       entityId: update.plan_id,
       meta: { plan_update_id: updateId, added_to_plan: true },
     });
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'decision_posted',
       entityType: 'plan',
       entityId: update.plan_id,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { PLAN_SUPPORT_THRESHOLD, slugifyPlanSlug } from '@/lib/plans';
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role ?? '')) {
     return NextResponse.json({ error: 'Only moderators can promote ideas.' }, { status: 403 });
   }
@@ -94,8 +93,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Provide the first key date title and calendar date.' }, { status: 422 });
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { data: idea, error: ideaError } = await portal
     .from('ideas')
@@ -226,9 +224,8 @@ export async function POST(req: NextRequest) {
     console.error('Failed to update idea status after promotion', ideaUpdateError);
   }
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'plan_promoted',
     entityType: 'plan',
     entityId: plan.id,
@@ -238,9 +235,8 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'key_date_set',
     entityType: 'plan',
     entityId: plan.id,

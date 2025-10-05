@@ -15,7 +15,7 @@ export default async function SubmitIdeaPage() {
     redirect('/login');
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">

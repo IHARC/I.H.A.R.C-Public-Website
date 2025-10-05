@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { RegisterForm } from '@/components/auth/register-form';
@@ -88,7 +87,6 @@ export default async function RegisterPage() {
         return { error: 'Account created, but we could not establish a session. Try signing in.' };
       }
 
-      let portalServiceClient: ReturnType<typeof createSupabaseServiceClient> | null = null;
       type InviteRow = {
         id: string;
         affiliation_type: PortalProfile['affiliation_type'];
@@ -97,25 +95,16 @@ export default async function RegisterPage() {
         invited_by_profile_id: string | null;
         created_at: string;
       };
+
       let invite: InviteRow | null = null;
+      const { data: inviteData, error: inviteError } = await supa.rpc('portal_get_pending_invite', {
+        p_email: email,
+      });
 
-      try {
-        portalServiceClient = createSupabaseServiceClient();
-        const portalAdmin = portalServiceClient.schema('portal');
-        const { data: inviteRow, error: inviteError } = await portalAdmin
-          .from('profile_invites')
-          .select('id, affiliation_type, position_title, organization_id, invited_by_profile_id, created_at')
-          .eq('email', email)
-          .eq('status', 'pending')
-          .maybeSingle();
-
-        if (inviteError) {
-          console.error('Unable to load pending invite for registration', inviteError);
-        } else {
-          invite = inviteRow;
-        }
-      } catch (serviceError) {
-        console.error('Unable to initialize service client for invite lookup', serviceError);
+      if (inviteError) {
+        console.error('Unable to load pending invite for registration', inviteError);
+      } else if (inviteData) {
+        invite = inviteData as InviteRow;
       }
 
       let profileRole: PortalProfile['role'] = 'user';
@@ -138,7 +127,7 @@ export default async function RegisterPage() {
         affiliationReviewedBy = invite.invited_by_profile_id;
       }
 
-      const profile = await ensurePortalProfile(createdUser.id, {
+      const profile = await ensurePortalProfile(supa, createdUser.id, {
         display_name: displayName,
         organization_id: finalOrganizationId,
         position_title: finalPositionTitle,
@@ -150,20 +139,13 @@ export default async function RegisterPage() {
         affiliation_reviewed_by: affiliationReviewedBy,
       });
 
-      if (invite && portalServiceClient) {
-        try {
-          await portalServiceClient
-            .schema('portal')
-            .from('profile_invites')
-            .update({
-              status: 'accepted',
-              user_id: createdUser.id,
-              profile_id: profile.id,
-              responded_at: new Date().toISOString(),
-            })
-            .eq('id', invite.id);
-        } catch (updateError) {
-          console.error('Unable to mark invite as accepted', updateError);
+      if (invite) {
+        const { error: acceptError } = await supa.rpc('portal_accept_invite', {
+          p_invite_id: invite.id,
+          p_profile_id: profile.id,
+        });
+        if (acceptError) {
+          console.error('Unable to mark invite as accepted', acceptError);
         }
       }
     } catch (error) {

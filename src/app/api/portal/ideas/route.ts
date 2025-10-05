@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { Buffer } from 'node:buffer';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { scanContentForSafety } from '@/lib/safety';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -94,7 +93,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Content exceeds length limits' }, { status: 422 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   if (!profile.display_name_confirmed_at) {
     return NextResponse.json(
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rateLimit = await checkRateLimit({
-    profileId: profile.id,
+    supabase,
     type: 'idea',
     limit: 10,
     cooldownMs: IDEA_COOLDOWN_MS,
@@ -207,9 +206,8 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent');
     const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-    await logAuditEvent({
+    await logAuditEvent(supabase, {
       actorProfileId: profile.id,
-      actorUserId: user.id,
       action: 'idea_created',
       entityType: 'idea',
       entityId: ideaId,
@@ -304,8 +302,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabaseService = createSupabaseServiceClient();
-
   const attachmentMeta: Array<{ path: string; name: string; content_type: string; size: number }> = [];
   const uploadedPaths: string[] = [];
 
@@ -322,7 +318,7 @@ export async function POST(req: NextRequest) {
       const extension = MIME_EXTENSION[file.type] ?? 'bin';
       const objectPath = `idea/${ideaId}/${randomUUID()}.${extension}`;
 
-      const { error: uploadError } = await supabaseService.storage
+      const { error: uploadError } = await supabase.storage
         .from('portal-attachments')
         .upload(objectPath, buffer, {
           cacheControl: '3600',
@@ -345,7 +341,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Attachment upload failed', error);
     if (uploadedPaths.length) {
-      await supabaseService.storage.from('portal-attachments').remove(uploadedPaths);
+      await supabase.storage.from('portal-attachments').remove(uploadedPaths);
     }
     return NextResponse.json({ error: 'Attachment upload failed. Please try again.' }, { status: 500 });
   }
@@ -397,7 +393,7 @@ export async function POST(req: NextRequest) {
   if (insertError) {
     console.error('Failed to insert idea', insertError);
     if (uploadedPaths.length) {
-      await supabaseService.storage.from('portal-attachments').remove(uploadedPaths);
+      await supabase.storage.from('portal-attachments').remove(uploadedPaths);
     }
     return NextResponse.json({ error: 'Unable to save idea' }, { status: 500 });
   }
@@ -428,16 +424,16 @@ export async function POST(req: NextRequest) {
       target: metric.target,
     }));
 
-    const { error: metricError } = await supabaseService
+    const { error: metricError } = await supabase
       .schema('portal')
       .from('idea_metrics')
       .insert(metricRows);
 
     if (metricError) {
       console.error('Failed to insert idea metrics', metricError);
-      await supabaseService.schema('portal').from('ideas').delete().eq('id', ideaId);
+      await supabase.schema('portal').from('ideas').delete().eq('id', ideaId);
       if (uploadedPaths.length) {
-        await supabaseService.storage.from('portal-attachments').remove(uploadedPaths);
+        await supabase.storage.from('portal-attachments').remove(uploadedPaths);
       }
       return NextResponse.json({ error: 'Unable to save idea metrics. Please try again.' }, { status: 500 });
     }
@@ -457,9 +453,8 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get('user-agent');
   const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'idea_created',
     entityType: 'idea',
     entityId: ideaId,

@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
@@ -25,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role ?? '')) {
     return NextResponse.json({ error: 'Only moderators can assign ideas.' }, { status: 403 });
   }
@@ -51,8 +50,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid assignee id' }, { status: 422 });
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { error: updateError } = await portal
     .from('ideas')
@@ -81,15 +79,14 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      assigneeEmail = await getUserEmailForProfile(assigneeProfileId);
+      assigneeEmail = await getUserEmailForProfile(supabase, assigneeProfileId);
     } catch (emailError) {
       console.error('Failed to resolve assignee email', emailError);
     }
   }
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'idea_assigned',
     entityType: 'idea',
     entityId: ideaId,
@@ -101,7 +98,7 @@ export async function POST(req: NextRequest) {
 
   if (assigneeProfileId && assigneeEmail) {
     try {
-      await queuePortalNotification({
+      await queuePortalNotification(supabase, {
         profileId: assigneeProfileId,
         email: assigneeEmail,
         subject: 'You have been assigned a community idea',

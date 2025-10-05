@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { IdeaSubmissionForm } from '@/app/ideas/submit/idea-form';
 import type { Database } from '@/types/supabase';
@@ -35,7 +34,7 @@ export default async function CompleteIdeaPage({
     redirect('/login');
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   const resolvedParams = await params;
   const idParam = resolvedParams.id;
@@ -45,10 +44,9 @@ export default async function CompleteIdeaPage({
     notFound();
   }
 
-  const service = createSupabaseServiceClient();
-  const servicePortal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
-  const { data: idea, error: ideaError } = await servicePortal
+  const { data: idea, error: ideaError } = await portal
     .from('ideas')
     .select(
       'id, author_profile_id, title, category, problem_statement, evidence, proposal_summary, implementation_steps, risks, tags, is_anonymous, publication_status',
@@ -69,7 +67,7 @@ export default async function CompleteIdeaPage({
     redirect(`/solutions/${ideaId}`);
   }
 
-  const { data: metricsRows, error: metricsError } = await servicePortal
+  const { data: metricsRows, error: metricsError } = await portal
     .from('idea_metrics')
     .select('id, metric_label, success_definition, baseline, target')
     .eq('idea_id', ideaId)

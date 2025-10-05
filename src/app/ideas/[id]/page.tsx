@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { HandHeart } from 'lucide-react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 import { copyDeck } from '@/lib/copy';
 import { UpvoteButton } from '@/components/portal/upvote-button';
@@ -123,10 +122,8 @@ export default async function IdeaDetailPage({
   }
   const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
-  const service = createSupabaseServiceClient();
-  const servicePortal = service.schema('portal');
 
-  const { data: idea, error: ideaError } = await servicePortal
+  const { data: idea, error: ideaError } = await portal
     .from('ideas')
     .select(
       `*,
@@ -156,9 +153,12 @@ export default async function IdeaDetailPage({
     notFound();
   }
 
-  const attachments = await resolveAttachments(service, (idea.attachments as Array<{ path: string; name?: string }>) ?? []);
+  const attachments = await resolveAttachments(
+    supabase,
+    (idea.attachments as Array<{ path: string; name?: string }>) ?? [],
+  );
 
-  const { data: commentRows } = await servicePortal
+  const { data: commentRows } = await portal
     .from('comments')
     .select(
       `id, body, created_at, comment_type, is_official, evidence_url,
@@ -168,14 +168,14 @@ export default async function IdeaDetailPage({
     .order('created_at', { ascending: true })
     .returns<CommentRow[]>();
 
-  const { data: metricRows } = await servicePortal
+  const { data: metricRows } = await portal
     .from('idea_metrics')
     .select('id, metric_label, success_definition, baseline, target, created_at')
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
     .returns<MetricRow[]>();
 
-  const { data: decisionsData } = await servicePortal
+  const { data: decisionsData } = await portal
     .from('idea_decisions')
     .select(
       `id, summary, visibility, created_at,
@@ -185,7 +185,7 @@ export default async function IdeaDetailPage({
     .order('created_at', { ascending: true })
     .returns<DecisionRow[]>();
 
-  const { data: auditEntries } = await servicePortal
+  const { data: auditEntries } = await portal
     .from('audit_log')
     .select(
       `id, action, meta, created_at,
@@ -204,7 +204,7 @@ export default async function IdeaDetailPage({
   let voterProfileId: string | null = null;
 
   if (user) {
-    viewerProfile = await ensurePortalProfile(user.id);
+    viewerProfile = await ensurePortalProfile(supabase, user.id);
     voterProfileId = viewerProfile.id;
   }
 
@@ -212,7 +212,7 @@ export default async function IdeaDetailPage({
   let viewerOrgVerified = false;
 
   if (viewerProfile?.organization_id) {
-    const { data: viewerOrg, error: viewerOrgError } = await servicePortal
+    const { data: viewerOrg, error: viewerOrgError } = await portal
       .from('organizations')
       .select('name, verified')
       .eq('id', viewerProfile.organization_id)
@@ -237,7 +237,7 @@ export default async function IdeaDetailPage({
     hasVoted = Boolean(voteRow);
   }
 
-  const metrics: IdeaMetricDisplay[] = (metricRows ?? []).map((metric) => ({
+  const metrics: IdeaMetricDisplay[] = (metricRows ?? []).map((metric: MetricRow) => ({
     id: metric.id,
     label: metric.metric_label,
     definition: metric.success_definition,
@@ -245,10 +245,10 @@ export default async function IdeaDetailPage({
     target: metric.target,
   }));
 
-  const officialResponses = (commentRows ?? []).filter((comment) => comment.is_official);
+  const officialResponses = (commentRows ?? []).filter((comment: CommentRow) => comment.is_official);
   const communityComments: CommentNode[] = (commentRows ?? [])
-    .filter((comment) => !comment.is_official)
-    .map((comment) => ({
+    .filter((comment: CommentRow) => !comment.is_official)
+    .map((comment: CommentRow) => ({
       id: comment.id,
       body: comment.body,
       createdAt: comment.created_at,
@@ -511,7 +511,7 @@ export default async function IdeaDetailPage({
               Updates shared by verified partners and moderators are pinned here for easy reference.
             </p>
             <CommentThread
-              comments={officialResponses.map((comment) => ({
+              comments={officialResponses.map((comment: CommentRow) => ({
                 id: comment.id,
                 body: comment.body,
                 createdAt: comment.created_at,
@@ -543,27 +543,37 @@ export default async function IdeaDetailPage({
 }
 
 async function resolveAttachments(
-  supabase: ReturnType<typeof createSupabaseServiceClient>,
+  supabase: Awaited<ReturnType<typeof createSupabaseRSCClient>>,
   attachments: Array<{ path: string; name?: string }> | null,
 ) {
-  if (!attachments?.length) return [] as Array<{ path: string; signedUrl: string; name: string }>;
+  if (!attachments?.length) {
+    return [] as Array<{ path: string; signedUrl: string; name: string }>;
+  }
 
-  const results = await Promise.all(
-    attachments.map(async (attachment) => {
-      const { data, error } = await supabase.storage
-        .from('portal-attachments')
-        .createSignedUrl(attachment.path, 120);
-      if (error || !data) return null;
-      return {
-        path: attachment.path,
-        name: attachment.name ?? attachment.path.split('/').pop() ?? 'Attachment',
-        signedUrl: data.signedUrl,
-      };
-    }),
-  );
+  const requestPayload = attachments.map((attachment) => ({
+    path: attachment.path,
+    name: attachment.name ?? attachment.path.split('/').pop() ?? 'Attachment',
+  }));
 
-  return results.filter(Boolean) as Array<{ path: string; signedUrl: string; name: string }>;
+  const { data, error } = await supabase.functions.invoke('portal-attachments', {
+    body: { attachments: requestPayload },
+  });
+
+  if (error) {
+    console.error('Failed to fetch attachment URLs', error);
+    return [];
+  }
+
+  const signedList = Array.isArray((data as { attachments?: unknown })?.attachments)
+    ? ((data as { attachments: AttachmentResult[] }).attachments)
+    : [];
+
+  return signedList.filter((entry): entry is AttachmentResult => {
+    return Boolean(entry?.path && entry?.signedUrl && entry?.name);
+  });
 }
+
+type AttachmentResult = { path: string; signedUrl: string; name: string };
 
 type TimelineBuilderArgs = {
   idea: IdeaRecord;

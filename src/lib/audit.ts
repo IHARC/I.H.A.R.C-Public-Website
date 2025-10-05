@@ -1,24 +1,30 @@
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Json } from '@/types/supabase';
 import { sanitizeForAudit } from '@/lib/safety';
 
-export async function logAuditEvent(params: {
-  actorProfileId: string | null;
-  actorUserId: string | null;
+type AuditPayload = {
+  actorProfileId?: string | null;
   action: string;
   entityType: string;
   entityId: string | null;
   meta?: Record<string, unknown>;
-}) {
-  const supabase = createSupabaseServiceClient();
-  const portal = supabase.schema('portal');
-  const { actorProfileId, actorUserId, action, entityType, entityId, meta } = params;
+};
 
-  await portal.from('audit_log').insert({
-    actor_profile_id: actorProfileId,
-    actor_user_id: actorUserId,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    meta: meta ? sanitizeForAudit(meta) : {},
+export async function logAuditEvent(
+  supabase: SupabaseClient<Database>,
+  { actorProfileId = null, action, entityType, entityId, meta }: AuditPayload,
+) {
+  const sanitizedMeta = meta ? sanitizeForAudit(meta) : {};
+  const metaJson = sanitizedMeta as Json;
+  const { error } = await supabase.rpc('portal_log_audit_event', {
+    p_action: action,
+    p_entity_type: entityType,
+    p_entity_id: entityId,
+    p_meta: metaJson,
+    p_actor_profile_id: actorProfileId,
   });
+
+  if (error) {
+    throw error;
+  }
 }

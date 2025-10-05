@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
 
-  const rateLimit = await checkRateLimit({ profileId: profile.id, type: 'flag', limit: 10 });
+  const rateLimit = await checkRateLimit({ supabase, type: 'flag', limit: 10 });
   if (!rateLimit.allowed) {
     return NextResponse.json(
       {
@@ -121,9 +121,8 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get('user-agent');
   const ipHash = ip ? hashValue(ip).slice(0, 32) : null;
 
-  await logAuditEvent({
+  await logAuditEvent(supabase, {
     actorProfileId: profile.id,
-    actorUserId: user.id,
     action: 'content_flagged',
     entityType: entityType,
     entityId: entityId,

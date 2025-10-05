@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ensurePortalProfile } from '@/lib/profile';
 
 export async function POST() {
@@ -14,7 +13,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   const displayName = profile.display_name?.trim();
 
   if (!displayName || displayName.length < 2) {
@@ -24,8 +23,7 @@ export async function POST() {
     );
   }
 
-  const service = createSupabaseServiceClient();
-  const portal = service.schema('portal');
+  const portal = supabase.schema('portal');
 
   const { error: updateError } = await portal
     .from('profiles')

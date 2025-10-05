@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ export default async function PortalProfilePage() {
     redirect('/login');
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   const { data: organizations } = await portal
     .from('organizations')
     .select('id, name, verified')
@@ -31,7 +31,7 @@ export default async function PortalProfilePage() {
   async function updateProfile(formData: FormData) {
     'use server';
 
-    const supa = createSupabaseServiceClient();
+    const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
     const displayName = formData.get('display_name') as string;
     const organizationId = (formData.get('organization_id') as string) || null;
@@ -41,10 +41,14 @@ export default async function PortalProfilePage() {
       throw new Error('Display name is required');
     }
 
-    await portalClient
+    const { error } = await portalClient
       .from('profiles')
       .update({ display_name: displayName, organization_id: organizationId, position_title: positionTitle })
       .eq('id', profile.id);
+
+    if (error) {
+      throw error;
+    }
 
     revalidatePath('/solutions/profile');
   }

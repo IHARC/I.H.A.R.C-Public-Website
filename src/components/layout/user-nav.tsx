@@ -30,7 +30,7 @@ export async function UserNav() {
     );
   }
 
-  const profile = await ensurePortalProfile(user.id);
+  const profile = await ensurePortalProfile(supabase, user.id);
   const role = profile.role;
   const displayName = profile.display_name || 'Community member';
   const positionTitle = profile.position_title;
