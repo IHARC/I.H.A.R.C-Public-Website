@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light dark;
-}
+@import '../styles/main.css';
 
 html {
   scroll-behavior: smooth;
@@ -12,10 +10,6 @@ html {
 
 body {
   @apply min-h-screen bg-background text-on-background antialiased;
-}
-
-.dark body {
-  @apply bg-neutral-black text-neutral-white;
 }
 
 .focus-outline {

@@ -5,7 +5,7 @@ import { NavPortalLink } from '@/components/NavPortalLink';
 
 export function NavBar() {
   return (
-    <header className="border-b border-outline/40 bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/75 dark:border-outline/30 dark:bg-neutral-black/90">
+    <header className="border-b border-outline/50 bg-surface-container-high/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
           <Link
@@ -24,7 +24,10 @@ export function NavBar() {
           </p>
         </div>
         <div className="flex flex-col gap-3 lg:items-end">
-          <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-on-surface/80">
+          <nav
+            className="flex flex-wrap items-center gap-3 text-sm font-medium text-on-surface/80"
+            aria-label="Primary navigation"
+          >
             <NavPortalLink
               href="/ideas"
               className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"

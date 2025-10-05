@@ -35,7 +35,7 @@ export default function MarketingHomePage() {
           <div className="grid w-full max-w-xl gap-3 md:w-auto">
             <Link
               href="/command-center/ideas"
-              className="rounded-full bg-primary px-6 py-3 text-center text-sm font-semibold text-on-primary shadow transition hover:bg-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+              className="rounded-full bg-primary px-6 py-3 text-center text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
             >
               Propose a solution
             </Link>

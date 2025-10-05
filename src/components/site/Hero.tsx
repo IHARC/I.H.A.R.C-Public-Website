@@ -19,7 +19,7 @@ export function Hero() {
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link
             href="/#help"
-            className="rounded-full bg-primary px-6 py-3 text-on-primary shadow transition hover:bg-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="rounded-full bg-primary px-6 py-3 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={() => trackEvent('hero_click', { cta: 'help' })}
           >
             Get Help

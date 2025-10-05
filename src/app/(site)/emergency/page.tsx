@@ -75,7 +75,7 @@ export default function EmergencyBriefPage() {
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link
             href={siteConfig.emergency.supportHref}
-            className="rounded-full bg-primary px-6 py-3 text-on-primary shadow transition hover:bg-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="rounded-full bg-primary px-6 py-3 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Endorse the declaration
           </Link>
