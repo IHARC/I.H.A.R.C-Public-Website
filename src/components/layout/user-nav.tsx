@@ -13,11 +13,17 @@ export async function UserNav() {
 
   if (!user) {
     return (
-      <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-        <Link href="/login" className="rounded-full border border-slate-200 px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:hover:bg-slate-800">
+      <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-on-surface/80">
+        <Link
+          href="/login"
+          className="rounded-full border border-outline/40 bg-surface px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
           Sign in
         </Link>
-        <Link href="/register" className="rounded-full bg-brand px-3 py-1 text-white shadow transition hover:bg-brand/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+        <Link
+          href="/register"
+          className="rounded-full bg-primary px-3 py-1 text-on-primary shadow transition hover:bg-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
           Register
         </Link>
       </div>
@@ -34,31 +40,40 @@ export async function UserNav() {
   const showAdmin = role === 'admin';
 
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+    <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface/80">
       <div className="flex flex-col">
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+        <span className="rounded-full bg-surface-container px-3 py-1 text-on-surface">
           {displayName}
         </span>
         {positionTitle ? (
-          <span className="text-xs text-slate-500 dark:text-slate-400">{positionTitle}</span>
+          <span className="text-xs text-on-surface/60">{positionTitle}</span>
         ) : null}
         {awaitingVerification ? (
-          <span className="text-xs font-medium text-amber-600 dark:text-amber-300">Awaiting verification</span>
+          <span className="text-xs font-medium text-amber-600">Awaiting verification</span>
         ) : null}
         {affiliationRevoked ? (
-          <span className="text-xs font-medium text-rose-600 dark:text-rose-300">Verification declined</span>
+          <span className="text-xs font-medium text-rose-600">Verification declined</span>
         ) : null}
       </div>
-      <Link href="/solutions/profile" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+      <Link
+        href="/solutions/profile"
+        className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      >
         Profile
       </Link>
       {showModeration ? (
-        <Link href="/solutions/mod" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+        <Link
+          href="/solutions/mod"
+          className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
           Moderation
         </Link>
       ) : null}
       {showAdmin ? (
-        <Link href="/command-center/admin" className="rounded-full px-3 py-1 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:hover:bg-slate-800">
+        <Link
+          href="/command-center/admin"
+          className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
           Admin
         </Link>
       ) : null}

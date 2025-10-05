@@ -14,7 +14,7 @@ export function SignOutButton({ action }: SignOutButtonProps) {
     <Button
       type="button"
       variant="outline"
-      className="rounded-full border-slate-200 px-3 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+      className="rounded-full border border-outline/40 bg-surface px-3 py-1 text-sm font-medium text-on-surface/80 hover:bg-brand-soft hover:text-brand focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       disabled={pending}
       onClick={() => startTransition(action)}
     >
