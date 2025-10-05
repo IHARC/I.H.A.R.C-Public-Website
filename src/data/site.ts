@@ -96,7 +96,7 @@ export const programs: ProgramItem[] = [
   },
   {
     title: 'Health Support Services',
-    description: 'Health and safety supplies, safe disposal of used health supplies, and overdose response kits reducing health risks.',
+    description: 'Health and safety supplies, safe disposal of used health supplies, and drug poisoning response kits reducing health risks.',
     icon: 'heart',
     href: '/programs/health-support',
   },

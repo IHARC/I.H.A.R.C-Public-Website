@@ -429,7 +429,7 @@ export function IdeaSubmissionForm({
                   id="tags"
                   value={form.tags}
                   onChange={(event) => updateField('tags', event.target.value)}
-                  placeholder="ex: outreach, overdose response, winter"
+                  placeholder="ex: outreach, drug poisoning response, winter"
                 />
               </div>
               <div className="flex items-center gap-2">
