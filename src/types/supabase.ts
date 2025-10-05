@@ -919,6 +919,8 @@ export type Database = {
           affiliation_requested_at: string | null;
           affiliation_reviewed_at: string | null;
           affiliation_reviewed_by: string | null;
+          homelessness_experience: Database["portal"]["Enums"]["lived_experience_status"];
+          substance_use_experience: Database["portal"]["Enums"]["lived_experience_status"];
           created_at: string;
           updated_at: string;
         };
@@ -939,6 +941,8 @@ export type Database = {
           affiliation_requested_at?: string | null;
           affiliation_reviewed_at?: string | null;
           affiliation_reviewed_by?: string | null;
+          homelessness_experience?: Database["portal"]["Enums"]["lived_experience_status"];
+          substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           created_at?: string;
           updated_at?: string;
         };
@@ -959,6 +963,8 @@ export type Database = {
           affiliation_requested_at?: string | null;
           affiliation_reviewed_at?: string | null;
           affiliation_reviewed_by?: string | null;
+          homelessness_experience?: Database["portal"]["Enums"]["lived_experience_status"];
+          substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           created_at?: string;
           updated_at?: string;
         };
@@ -1876,6 +1882,7 @@ export type Database = {
       profile_role: "user" | "org_rep" | "moderator" | "admin";
       affiliation_type: "community_member" | "agency_partner" | "government_partner";
       affiliation_status: "approved" | "pending" | "revoked";
+      lived_experience_status: "none" | "current" | "former" | "prefer_not_to_share";
       invite_status: "pending" | "accepted" | "cancelled" | "expired";
       idea_category: "Housing" | "Health" | "Policing" | "Community" | "Prevention" | "Other";
       idea_status:
@@ -2138,6 +2145,7 @@ export const Constants = {
       profile_role: ["user", "org_rep", "moderator", "admin"] as const,
       affiliation_type: ["community_member", "agency_partner", "government_partner"] as const,
       affiliation_status: ["approved", "pending", "revoked"] as const,
+      lived_experience_status: ["none", "current", "former", "prefer_not_to_share"] as const,
       invite_status: ["pending", "accepted", "cancelled", "expired"] as const,
       idea_category: ["Housing", "Health", "Policing", "Community", "Prevention", "Other"] as const,
       idea_status: ["new", "under_review", "in_progress", "adopted", "not_feasible", "archived"] as const,

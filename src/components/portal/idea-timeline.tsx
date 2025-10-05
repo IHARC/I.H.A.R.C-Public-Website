@@ -1,9 +1,13 @@
 import { Badge } from '@/components/ui/badge';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import type { LivedExperienceStatus } from '@/lib/lived-experience';
 
 export type TimelineActor = {
   displayName: string;
   organizationName?: string | null;
   positionTitle?: string | null;
+  homelessnessExperience?: LivedExperienceStatus | null;
+  substanceUseExperience?: LivedExperienceStatus | null;
 };
 
 export type IdeaTimelineEvent = {
@@ -54,11 +58,17 @@ export function IdeaTimeline({ events }: { events: IdeaTimelineEvent[] }) {
                 </time>
               </div>
               {event.actor ? (
-                <p className="text-xs text-muted">
-                  by {event.actor.displayName}
-                  {event.actor.positionTitle ? ` · ${event.actor.positionTitle}` : ''}
-                  {event.actor.organizationName ? ` · ${event.actor.organizationName}` : ''}
-                </p>
+                <div className="space-y-1 text-xs text-muted">
+                  <p>
+                    by {event.actor.displayName}
+                    {event.actor.positionTitle ? ` · ${event.actor.positionTitle}` : ''}
+                    {event.actor.organizationName ? ` · ${event.actor.organizationName}` : ''}
+                  </p>
+                  <LivedExperienceBadges
+                    homelessness={event.actor.homelessnessExperience ?? null}
+                    substanceUse={event.actor.substanceUseExperience ?? null}
+                  />
+                </div>
               ) : null}
               {event.description ? (
                 <p className="whitespace-pre-line text-slate-700 dark:text-slate-200">{event.description}</p>

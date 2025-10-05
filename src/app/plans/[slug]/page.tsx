@@ -10,6 +10,7 @@ import { PlanUpdateComposer } from '@/components/portal/plan-update-composer';
 import { PlanUpdateSupportButton } from '@/components/portal/plan-update-support-button';
 import { PlanUpdateModeratorActions } from '@/components/portal/plan-update-moderation';
 import { Button } from '@/components/ui/button';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,8 @@ type PlanRecord = PlanRow & {
       display_name: string;
       position_title: string | null;
       affiliation_status: Database['portal']['Enums']['affiliation_status'];
+      homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+      substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     } | null;
   })[];
   decisions: (DecisionRow & {
@@ -36,6 +39,8 @@ type PlanRecord = PlanRow & {
       display_name: string;
       position_title: string | null;
       affiliation_status: Database['portal']['Enums']['affiliation_status'];
+      homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+      substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     } | null;
   })[];
 };
@@ -46,6 +51,8 @@ type PlanUpdateWithSupport = (UpdateRow & {
     display_name: string;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
   } | null;
 }) & {
   support_count: number;
@@ -86,8 +93,8 @@ export default async function PlanDetailPage({
       `*,
        focus_areas:plan_focus_areas(id, name, summary, created_at),
        key_dates:plan_key_dates(id, title, notes, scheduled_for, created_at),
-       updates:plan_updates(id, problem, evidence, proposed_change, impact, risks, measurement, status, opened_at, decided_at, created_at, updated_at, author:author_profile_id(id, display_name, position_title, affiliation_status)),
-       decisions:plan_decision_notes(id, decision, summary, created_at, author:author_profile_id(id, display_name, position_title, affiliation_status))`
+       updates:plan_updates(id, problem, evidence, proposed_change, impact, risks, measurement, status, opened_at, decided_at, created_at, updated_at, author:author_profile_id(id, display_name, position_title, affiliation_status, homelessness_experience, substance_use_experience)),
+       decisions:plan_decision_notes(id, decision, summary, created_at, author:author_profile_id(id, display_name, position_title, affiliation_status, homelessness_experience, substance_use_experience))`
     )
     .eq('slug', slug)
     .maybeSingle<PlanRecord>();
@@ -284,12 +291,18 @@ export default async function PlanDetailPage({
                     <UpdateSection label="Risks" value={update.risks} />
                     <UpdateSection label="How we’ll measure success" value={update.measurement} />
                     {update.author ? (
-                      <p className="text-xs text-muted">
-                        Submitted by {update.author.display_name}
-                        {update.author.affiliation_status === 'approved' && update.author.position_title
-                          ? ` · ${update.author.position_title}`
-                          : ''}
-                      </p>
+                      <div className="text-xs text-muted">
+                        <p>
+                          Submitted by {update.author.display_name}
+                          {update.author.affiliation_status === 'approved' && update.author.position_title
+                            ? ` · ${update.author.position_title}`
+                            : ''}
+                        </p>
+                        <LivedExperienceBadges
+                          homelessness={update.author.homelessness_experience ?? null}
+                          substanceUse={update.author.substance_use_experience ?? null}
+                        />
+                      </div>
                     ) : null}
                     {viewerRole === 'moderator' || viewerRole === 'admin' ? (
                       <PlanUpdateModeratorActions
@@ -320,12 +333,18 @@ export default async function PlanDetailPage({
                     </div>
                     <p className="mt-2 text-slate-700 dark:text-slate-200">{decision.summary}</p>
                     {decision.author ? (
-                      <p className="mt-2 text-xs text-muted">
-                        Posted by {decision.author.display_name}
-                        {decision.author.affiliation_status === 'approved' && decision.author.position_title
-                          ? ` · ${decision.author.position_title}`
-                          : ''}
-                      </p>
+                      <div className="mt-2 text-xs text-muted">
+                        <p>
+                          Posted by {decision.author.display_name}
+                          {decision.author.affiliation_status === 'approved' && decision.author.position_title
+                            ? ` · ${decision.author.position_title}`
+                            : ''}
+                        </p>
+                        <LivedExperienceBadges
+                          homelessness={decision.author.homelessness_experience ?? null}
+                          substanceUse={decision.author.substance_use_experience ?? null}
+                        />
+                      </div>
                     ) : null}
                   </li>
                 ))}

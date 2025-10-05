@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { DEFAULT_FOCUS_AREAS, PLAN_SUPPORT_THRESHOLD } from '@/lib/plans';
 import type { Database } from '@/types/supabase';
 import { PromoteIdeaCard } from '@/components/portal/promote-idea-card';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
 
 type IdeaRow = Database['portal']['Tables']['ideas']['Row'];
 
@@ -30,6 +31,8 @@ interface IdeaRecord extends IdeaRow {
     display_name: string;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
   assignee: {
@@ -37,6 +40,8 @@ interface IdeaRecord extends IdeaRow {
     display_name: string;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 }
@@ -53,6 +58,8 @@ type CommentRow = {
     display_name: string;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -76,6 +83,8 @@ type DecisionRow = {
     display_name: string;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'];
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'];
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'];
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -90,6 +99,8 @@ type AuditRow = {
     display_name: string | null;
     position_title: string | null;
     affiliation_status: Database['portal']['Enums']['affiliation_status'] | null;
+    homelessness_experience: Database['portal']['Enums']['lived_experience_status'] | null;
+    substance_use_experience: Database['portal']['Enums']['lived_experience_status'] | null;
     organization: { name: string; verified: boolean } | null;
   } | null;
 };
@@ -132,6 +143,8 @@ export default async function IdeaDetailPage({
         display_name,
         position_title,
         affiliation_status,
+        homelessness_experience,
+        substance_use_experience,
         organization:organization_id(name, verified)
       ),
       assignee:assignee_profile_id(
@@ -139,6 +152,8 @@ export default async function IdeaDetailPage({
         display_name,
         position_title,
         affiliation_status,
+        homelessness_experience,
+        substance_use_experience,
         organization:organization_id(name, verified)
       )`
     )
@@ -162,7 +177,7 @@ export default async function IdeaDetailPage({
     .from('comments')
     .select(
       `id, body, created_at, comment_type, is_official, evidence_url,
-       author:author_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
+       author:author_profile_id(id, display_name, position_title, affiliation_status, homelessness_experience, substance_use_experience, organization:organization_id(name, verified))`
     )
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
@@ -179,7 +194,7 @@ export default async function IdeaDetailPage({
     .from('idea_decisions')
     .select(
       `id, summary, visibility, created_at,
-       author:author_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
+       author:author_profile_id(id, display_name, position_title, affiliation_status, homelessness_experience, substance_use_experience, organization:organization_id(name, verified))`
     )
     .eq('idea_id', idea.id)
     .order('created_at', { ascending: true })
@@ -189,7 +204,7 @@ export default async function IdeaDetailPage({
     .from('audit_log')
     .select(
       `id, action, meta, created_at,
-       actor:actor_profile_id(id, display_name, position_title, affiliation_status, organization:organization_id(name, verified))`
+       actor:actor_profile_id(id, display_name, position_title, affiliation_status, homelessness_experience, substance_use_experience, organization:organization_id(name, verified))`
     )
     .eq('entity_id', idea.id)
     .eq('entity_type', 'idea')
@@ -263,6 +278,8 @@ export default async function IdeaDetailPage({
           comment.author?.affiliation_status === 'approved' && comment.author?.position_title
             ? comment.author.position_title
             : null,
+        homelessnessExperience: comment.author?.homelessness_experience ?? null,
+        substanceUseExperience: comment.author?.substance_use_experience ?? null,
       },
     }));
 
@@ -285,6 +302,8 @@ export default async function IdeaDetailPage({
         displayName: idea.assignee.display_name,
         organizationName: idea.assignee.organization?.name ?? null,
         positionTitle: assignmentPosition,
+        homelessnessExperience: idea.assignee.homelessness_experience ?? null,
+        substanceUseExperience: idea.assignee.substance_use_experience ?? null,
       }
     : null;
 
@@ -348,6 +367,13 @@ export default async function IdeaDetailPage({
                   {new Date(lastActivity).toLocaleDateString('en-CA')}
                 </span>
               </div>
+              {!idea.is_anonymous ? (
+                <LivedExperienceBadges
+                  homelessness={idea.author?.homelessness_experience ?? null}
+                  substanceUse={idea.author?.substance_use_experience ?? null}
+                  className="mt-1"
+                />
+              ) : null}
               <TagChips tags={idea.tags ?? []} />
             </div>
             {voterProfileId ? (
@@ -479,6 +505,8 @@ export default async function IdeaDetailPage({
           viewerRole={viewerRole}
           viewerDisplayName={viewerProfile?.display_name ?? null}
           viewerPositionTitle={viewerProfile?.position_title ?? null}
+          viewerHomelessnessExperience={viewerProfile?.homelessness_experience ?? null}
+          viewerSubstanceUseExperience={viewerProfile?.substance_use_experience ?? null}
         />
 
         {viewerRole === 'moderator' || viewerRole === 'admin' ? (
@@ -526,6 +554,8 @@ export default async function IdeaDetailPage({
                     comment.author?.affiliation_status === 'approved' && comment.author?.position_title
                       ? comment.author.position_title
                       : null,
+                  homelessnessExperience: comment.author?.homelessness_experience ?? null,
+                  substanceUseExperience: comment.author?.substance_use_experience ?? null,
                 },
               }))}
             />
@@ -601,6 +631,8 @@ function buildTimeline({ idea, officialResponses, decisions, audits, viewerProfi
       organizationName: profile.organization?.name ?? undefined,
       positionTitle:
         profile.affiliation_status === 'approved' && profile.position_title ? profile.position_title : undefined,
+      homelessnessExperience: profile.homelessness_experience ?? null,
+      substanceUseExperience: profile.substance_use_experience ?? null,
     };
   };
 

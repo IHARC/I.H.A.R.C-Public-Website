@@ -333,7 +333,7 @@ async function loadIdeaBoard({
 
   const { data: profiles } = await portal
     .from('profiles')
-    .select('id, display_name, organization_id, position_title, affiliation_status, role')
+    .select('id, display_name, organization_id, position_title, affiliation_status, role, homelessness_experience, substance_use_experience')
     .in('id', profileIds.length ? profileIds : ['00000000-0000-0000-0000-000000000000']);
 
   const organizationIds = Array.from(
@@ -374,6 +374,8 @@ async function loadIdeaBoard({
       organizationName: organization?.name ?? null,
       orgVerified: organization?.verified ?? false,
       officialCount: undefined,
+      homelessnessExperience: profile?.homelessness_experience ?? null,
+      substanceUseExperience: profile?.substance_use_experience ?? null,
     };
   });
 

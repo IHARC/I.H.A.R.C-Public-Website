@@ -5,7 +5,8 @@ import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { RegisterForm } from '@/components/auth/register-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
-import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
+import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import { normalizeLivedExperience } from '@/lib/lived-experience';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +56,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     const displayName = (formData.get('display_name') as string | null)?.trim();
     const rawOrganizationId = (formData.get('organization_id') as string | null)?.trim();
     const organizationId = rawOrganizationId && rawOrganizationId !== NO_ORGANIZATION_VALUE ? rawOrganizationId : null;
-    const positionTitle = (formData.get('position_title') as string | null)?.trim() || null;
+    const positionTitleInput = (formData.get('position_title') as string | null)?.trim();
+    const rawHomelessnessExperience = (formData.get('homelessness_experience') as string | null) ?? 'none';
+    const rawSubstanceUseExperience = (formData.get('substance_use_experience') as string | null) ?? 'none';
     const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() || 'community_member';
     const affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as PortalProfile['affiliation_type'])
       ? (rawAffiliation as PortalProfile['affiliation_type'])
@@ -64,10 +67,13 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       affiliationType === 'community_member' ? 'approved' : 'pending';
     const affiliationRequestedAt = affiliationStatus === 'pending' ? new Date().toISOString() : null;
 
+    const homelessnessExperience = normalizeLivedExperience(rawHomelessnessExperience);
+    const substanceUseExperience = normalizeLivedExperience(rawSubstanceUseExperience);
+
     if (!email || !email.includes('@')) {
       return { error: 'Enter a valid email address.' };
     }
-    if (affiliationType !== 'community_member' && !positionTitle) {
+    if (affiliationType !== 'community_member' && !positionTitleInput) {
       return { error: 'Share the position or role you hold with your agency or government team.' };
     }
     if (password.length < 8) {
@@ -126,8 +132,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       let finalAffiliationType = affiliationType;
       let finalAffiliationStatus = affiliationStatus;
       let finalOrganizationId = organizationId;
-      let finalPositionTitle = positionTitle;
+      let finalPositionTitle = affiliationType === 'community_member' ? PUBLIC_MEMBER_ROLE_LABEL : positionTitleInput || null;
       let finalAffiliationRequestedAt = affiliationRequestedAt;
+      const finalHomelessnessExperience = homelessnessExperience;
+      const finalSubstanceUseExperience = substanceUseExperience;
       let affiliationReviewedAt: string | null = null;
       let affiliationReviewedBy: string | null = null;
 
@@ -152,6 +160,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         affiliation_requested_at: finalAffiliationRequestedAt,
         affiliation_reviewed_at: affiliationReviewedAt,
         affiliation_reviewed_by: affiliationReviewedBy,
+        homelessness_experience: finalHomelessnessExperience,
+        substance_use_experience: finalSubstanceUseExperience,
       });
 
       if (invite) {

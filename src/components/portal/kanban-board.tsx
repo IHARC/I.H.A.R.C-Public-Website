@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/portal/status-badge';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
 import type { IdeaSummary } from '@/components/portal/idea-card';
 
 export const STATUS_COLUMNS = [
@@ -249,6 +250,11 @@ function KanbanCard({
         <span>{idea.isAnonymous ? 'Anonymous' : idea.authorDisplayName}</span>
         <span>💬 {idea.commentCount}</span>
       </div>
+      <LivedExperienceBadges
+        homelessness={idea.homelessnessExperience ?? null}
+        substanceUse={idea.substanceUseExperience ?? null}
+        className="mt-2"
+      />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/portal/status-badge';
 import { TagChips } from '@/components/portal/tag-chips';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import type { LivedExperienceStatus } from '@/lib/lived-experience';
 import { copyDeck } from '@/lib/copy';
 
 export type IdeaSummary = {
@@ -26,6 +28,8 @@ export type IdeaSummary = {
   organizationName?: string | null;
   orgVerified?: boolean;
   officialCount?: number;
+  homelessnessExperience?: LivedExperienceStatus | null;
+  substanceUseExperience?: LivedExperienceStatus | null;
 };
 
 export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React.ReactNode }) {
@@ -67,6 +71,10 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
             Updated {new Date(idea.lastActivityAt).toLocaleDateString('en-CA')}
           </span>
         </div>
+        <LivedExperienceBadges
+          homelessness={idea.homelessnessExperience ?? null}
+          substanceUse={idea.substanceUseExperience ?? null}
+        />
         <TagChips tags={idea.tags} />
       </CardContent>
       <CardFooter className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/40">

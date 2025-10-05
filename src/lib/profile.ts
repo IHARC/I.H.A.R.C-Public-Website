@@ -42,6 +42,8 @@ export async function ensurePortalProfile(
     affiliation_reviewed_by: defaults?.affiliation_reviewed_by ?? null,
     bio: defaults?.bio ?? null,
     avatar_url: defaults?.avatar_url ?? null,
+    homelessness_experience: defaults?.homelessness_experience ?? 'none',
+    substance_use_experience: defaults?.substance_use_experience ?? 'none',
   } satisfies Partial<PortalProfile> & { user_id: string };
 
   const { data: inserted, error: insertError } = await portal

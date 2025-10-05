@@ -1,6 +1,8 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import type { LivedExperienceStatus } from '@/lib/lived-experience';
 
 export type CommentNode = {
   id: string;
@@ -13,6 +15,8 @@ export type CommentNode = {
     organizationName?: string | null;
     orgVerified?: boolean;
     positionTitle?: string | null;
+    homelessnessExperience?: LivedExperienceStatus | null;
+    substanceUseExperience?: LivedExperienceStatus | null;
   };
   evidenceUrl?: string | null;
 };
@@ -43,6 +47,10 @@ export function CommentThread({ comments }: { comments: CommentNode[] }) {
               {comment.author.positionTitle ? (
                 <span className="text-xs text-muted">· {comment.author.positionTitle}</span>
               ) : null}
+              <LivedExperienceBadges
+                homelessness={comment.author.homelessnessExperience ?? null}
+                substanceUse={comment.author.substanceUseExperience ?? null}
+              />
               <Badge variant={comment.isOfficial ? 'default' : 'secondary'} className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 {TYPE_LABEL[comment.commentType]}
               </Badge>

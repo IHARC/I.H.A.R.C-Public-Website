@@ -11,7 +11,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Database } from '@/types/supabase';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 import { AuthDivider } from '@/components/auth/auth-divider';
-import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
+import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import { LIVED_EXPERIENCE_COPY, LIVED_EXPERIENCE_OPTIONS, type LivedExperienceStatus } from '@/lib/lived-experience';
 
 type FormState = {
   error?: string;
@@ -30,11 +31,14 @@ type RegisterFormProps = {
 };
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
-
 export function RegisterForm({ organizations, action, nextPath, initialError }: RegisterFormProps) {
   const [state, formAction] = useActionState(action, { error: initialError ?? undefined });
   const [selectedOrg, setSelectedOrg] = useState(NO_ORGANIZATION_VALUE);
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
+  const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>('none');
+  const [substanceUseExperience, setSubstanceUseExperience] = useState<LivedExperienceStatus>('none');
+
+  const hideRoleField = affiliationType === 'community_member';
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -86,7 +90,11 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
               An IHARC administrator will confirm your role before activating official posting privileges. You can still participate as a community member while we verify.
             </AlertDescription>
           </Alert>
-        ) : null}
+        ) : (
+          <p className="text-xs text-muted">
+            We’ll gently note your role as “Member of the public” so collaboration highlights neighbour-led insight.
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2">
@@ -107,16 +115,69 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
         <p className="text-xs text-muted">Link an agency if you post on behalf of a partner organization.</p>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="position_title">Position or role</Label>
-        <Input
-          id="position_title"
-          name="position_title"
-          maxLength={120}
-          placeholder="Public Health Nurse, Mayor, Outreach Coordinator, ..."
-          required={affiliationType !== 'community_member'}
-        />
-        <p className="text-xs text-muted">Helps neighbours understand how you collaborate in the Command Center.</p>
+      {hideRoleField ? (
+        <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
+      ) : (
+        <div className="grid gap-2">
+          <Label htmlFor="position_title">Position or role</Label>
+          <Input
+            id="position_title"
+            name="position_title"
+            maxLength={120}
+            placeholder="Public Health Nurse, Mayor, Outreach Coordinator, ..."
+            required
+          />
+          <p className="text-xs text-muted">Helps neighbours understand how you collaborate in the Command Center.</p>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="homelessness_experience">Housing lived experience badge</Label>
+          <Select
+            name="homelessness_experience"
+            value={homelessnessExperience}
+            onValueChange={(value) => setHomelessnessExperience(value as LivedExperienceStatus)}
+          >
+            <SelectTrigger id="homelessness_experience">
+              <SelectValue placeholder="Select housing lived experience" />
+            </SelectTrigger>
+            <SelectContent>
+              {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <ExperienceHelper selectedValue={homelessnessExperience} />
+          <p className="text-xs text-muted">
+            Share only what feels right. Badges appear beside your contributions to honour lived expertise with homelessness.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="substance_use_experience">Substance use lived experience badge</Label>
+          <Select
+            name="substance_use_experience"
+            value={substanceUseExperience}
+            onValueChange={(value) => setSubstanceUseExperience(value as LivedExperienceStatus)}
+          >
+            <SelectTrigger id="substance_use_experience">
+              <SelectValue placeholder="Select substance use lived experience" />
+            </SelectTrigger>
+            <SelectContent>
+              {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <ExperienceHelper selectedValue={substanceUseExperience} />
+          <p className="text-xs text-muted">
+            These badges help acknowledge peers and partners with lived experience around substance use and recovery.
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-2">
@@ -148,4 +209,14 @@ function SubmitButton() {
       {pending ? 'Creating account...' : 'Create account'}
     </Button>
   );
+}
+
+function ExperienceHelper({ selectedValue }: { selectedValue: LivedExperienceStatus }) {
+  const helperText = LIVED_EXPERIENCE_COPY[selectedValue]?.description;
+
+  if (!helperText) {
+    return null;
+  }
+
+  return <p className="text-xs text-muted">{helperText}</p>;
 }

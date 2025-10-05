@@ -3,12 +3,16 @@
 import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import type { LivedExperienceStatus } from '@/lib/lived-experience';
 
 export type AssignmentInfo = {
   id: string;
   displayName: string;
   organizationName?: string | null;
   positionTitle?: string | null;
+  homelessnessExperience?: LivedExperienceStatus | null;
+  substanceUseExperience?: LivedExperienceStatus | null;
 };
 
 export function IdeaAssignmentCard({
@@ -18,6 +22,8 @@ export function IdeaAssignmentCard({
   viewerRole,
   viewerDisplayName,
   viewerPositionTitle,
+  viewerHomelessnessExperience,
+  viewerSubstanceUseExperience,
 }: {
   ideaId: string;
   assignee: AssignmentInfo | null;
@@ -25,6 +31,8 @@ export function IdeaAssignmentCard({
   viewerRole: 'user' | 'org_rep' | 'moderator' | 'admin' | null;
   viewerDisplayName: string | null;
   viewerPositionTitle: string | null;
+  viewerHomelessnessExperience: LivedExperienceStatus | null;
+  viewerSubstanceUseExperience: LivedExperienceStatus | null;
 }) {
   const [pending, startTransition] = useTransition();
   const canAssign = viewerRole === 'moderator' || viewerRole === 'admin';
@@ -46,7 +54,7 @@ export function IdeaAssignmentCard({
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
-          throw new Error(payload.error || 'Assignment failed');
+          throw new Error((payload as { error?: string }).error || 'Assignment failed');
         }
         toast({
           title: target ? 'Assignment updated' : 'Assignment cleared',
@@ -57,6 +65,8 @@ export function IdeaAssignmentCard({
             id: viewerProfileId,
             displayName: viewerDisplayName ?? 'You',
             positionTitle: viewerPositionTitle,
+            homelessnessExperience: viewerHomelessnessExperience,
+            substanceUseExperience: viewerSubstanceUseExperience,
           });
         } else if (!target) {
           setLocalAssignee(null);
@@ -76,11 +86,17 @@ export function IdeaAssignmentCard({
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">Owner</h3>
         {localAssignee ? (
-          <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
-            {localAssignee.displayName}
-            {localAssignee.organizationName ? ` · ${localAssignee.organizationName}` : ''}
-            {localAssignee.positionTitle ? ` · ${localAssignee.positionTitle}` : ''}
-          </p>
+          <div className="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-200">
+            <p>
+              {localAssignee.displayName}
+              {localAssignee.organizationName ? ` · ${localAssignee.organizationName}` : ''}
+              {localAssignee.positionTitle ? ` · ${localAssignee.positionTitle}` : ''}
+            </p>
+            <LivedExperienceBadges
+              homelessness={localAssignee.homelessnessExperience ?? null}
+              substanceUse={localAssignee.substanceUseExperience ?? null}
+            />
+          </div>
         ) : (
           <p className="mt-1 text-sm text-muted">No one is assigned yet.</p>
         )}

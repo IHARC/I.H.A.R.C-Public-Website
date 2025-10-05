@@ -6,10 +6,21 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { NavBar } from '@/components/NavBar';
 import { SiteFooter } from '@/components/SiteFooter';
 
+const DEFAULT_APP_URL = 'https://iharc.ca';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
+const metadataBase = (() => {
+  try {
+    return new URL(appUrl);
+  } catch {
+    return new URL(DEFAULT_APP_URL);
+  }
+})();
+
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-body' });
 const robotoFlex = Roboto_Flex({ subsets: ['latin'], variable: '--font-heading' });
 
 export const metadata: Metadata = {
+  metadataBase,
   title: 'IHARC — Northumberland Housing & Health Collaboration',
   description:
     'IHARC is the community front door for housing stability and overdose response collaboration across Northumberland County.',
@@ -41,7 +52,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={cn(
           'min-h-screen bg-background text-on-background antialiased',
