@@ -193,7 +193,7 @@ function DashboardPlaceholder() {
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">Current focus</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            We are co-designing rapid-response ideas with partners in housing, health, and harm reduction so the dashboard reflects what matters on the ground.
+            We are co-designing rapid-response ideas with partners in housing, health, and overdose response so the dashboard reflects what matters on the ground.
           </p>
         </div>
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
