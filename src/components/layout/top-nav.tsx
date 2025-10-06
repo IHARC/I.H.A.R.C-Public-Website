@@ -38,15 +38,30 @@ export async function TopNav() {
         </div>
       ) : null}
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
           <Link
             href="/"
             className="inline-flex items-center gap-3 rounded-lg px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             aria-label="IHARC home"
           >
-            <Image src="/logos/logo-default.png" alt="IHARC" width={160} height={48} priority />
+            <Image
+              src="/logos/logo-default.png"
+              alt="IHARC"
+              width={160}
+              height={48}
+              priority
+              className="dark:hidden"
+            />
+            <Image
+              src="/logos/logoinverted.png"
+              alt="IHARC"
+              width={160}
+              height={48}
+              priority
+              className="hidden dark:block"
+            />
           </Link>
-          <nav aria-label="Marketing pages" className="flex flex-wrap items-center gap-2">
+          <nav aria-label="Marketing pages" className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
             {marketingLinks.map((link) => (
               <TopNavLink key={link.href} href={link.href}>
                 {link.label}
@@ -54,10 +69,10 @@ export async function TopNav() {
             ))}
           </nav>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 lg:flex-nowrap">
           <Link
             href="/portal/ideas"
-            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Open Collaboration Portal
           </Link>
