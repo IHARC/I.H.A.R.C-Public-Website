@@ -48,13 +48,13 @@ export default async function PetitionPage({
     notFound();
   }
 
-let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement'> | null = null;
+let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null = null;
   let viewerProfile: PortalProfile | null = null;
 
   if (user) {
     const { data: signature, error: signatureError } = await portal
       .from('petition_signatures')
-      .select('id, created_at, statement')
+      .select('id, created_at, statement, share_with_partners')
       .eq('petition_id', petition.id)
       .limit(1)
       .maybeSingle();
@@ -80,7 +80,7 @@ let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement'
 
 type PetitionPageContentProps = {
   petition: PetitionSummary;
-  existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement'> | null;
+  existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null;
   isAuthenticated: boolean;
   viewerProfile: PortalProfile | null;
 };
