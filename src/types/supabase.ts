@@ -370,6 +370,10 @@ export type Database = {
         };
         Returns: string | null;
       };
+      portal_refresh_profile_claims: {
+        Args: { p_profile_id: string };
+        Returns: Json;
+      };
       cleanup_expired_ai_cache: {
         Args: Record<PropertyKey, never>;
         Returns: number;
@@ -1037,6 +1041,205 @@ export type Database = {
             foreignKeyName: "profile_contacts_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      roles: {
+        Row: {
+          id: string;
+          name: string;
+          display_name: string;
+          description: string | null;
+          priority: number;
+          is_system: boolean;
+          created_at: string;
+          updated_at: string;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          display_name: string;
+          description?: string | null;
+          priority?: number;
+          is_system?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          display_name?: string;
+          description?: string | null;
+          priority?: number;
+          is_system?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roles_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "roles_updated_by_profile_id_fkey";
+            columns: ["updated_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      permissions: {
+        Row: {
+          id: string;
+          name: string;
+          display_name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          display_name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          display_name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "permissions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "permissions_updated_by_profile_id_fkey";
+            columns: ["updated_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      role_permissions: {
+        Row: {
+          role_id: string;
+          permission_id: string;
+          created_at: string;
+          created_by_profile_id: string | null;
+        };
+        Insert: {
+          role_id: string;
+          permission_id: string;
+          created_at?: string;
+          created_by_profile_id?: string | null;
+        };
+        Update: {
+          role_id?: string;
+          permission_id?: string;
+          created_at?: string;
+          created_by_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey";
+            columns: ["permission_id"];
+            referencedRelation: "permissions";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "role_permissions_role_id_fkey";
+            columns: ["role_id"];
+            referencedRelation: "roles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      profile_roles: {
+        Row: {
+          id: string;
+          profile_id: string;
+          role_id: string;
+          granted_by_profile_id: string | null;
+          granted_at: string;
+          revoked_at: string | null;
+          updated_at: string;
+          revoked_by_profile_id: string | null;
+          reason: string | null;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          role_id: string;
+          granted_by_profile_id?: string | null;
+          granted_at?: string;
+          revoked_at?: string | null;
+          updated_at?: string;
+          revoked_by_profile_id?: string | null;
+          reason?: string | null;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          role_id?: string;
+          granted_by_profile_id?: string | null;
+          granted_at?: string;
+          revoked_at?: string | null;
+          updated_at?: string;
+          revoked_by_profile_id?: string | null;
+          reason?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_roles_granted_by_profile_id_fkey";
+            columns: ["granted_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_roles_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_roles_revoked_by_profile_id_fkey";
+            columns: ["revoked_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_roles_role_id_fkey";
+            columns: ["role_id"];
+            referencedRelation: "roles";
             referencedColumns: ["id"];
           }?,
         ];

@@ -284,12 +284,10 @@ export default async function CommandCenterAdminPage() {
 
     const reviewedAt = new Date().toISOString();
     const elevateRole = profileRow.affiliation_type !== 'community_member';
-    const nextRole: PortalProfile['role'] = elevateRole ? 'org_rep' : 'user';
 
     const { error: updateError } = await portalClient
       .from('profiles')
       .update({
-        role: nextRole,
         affiliation_status: 'approved',
         affiliation_reviewed_at: reviewedAt,
         affiliation_reviewed_by: actorProfileId,
@@ -300,12 +298,87 @@ export default async function CommandCenterAdminPage() {
       throw updateError;
     }
 
+    if (elevateRole) {
+      const { data: roleRow, error: roleError } = await portalClient
+        .from('roles')
+        .select('id')
+        .eq('name', 'org_rep')
+        .maybeSingle();
+
+      if (roleError || !roleRow) {
+        throw roleError ?? new Error('Org representative role not configured.');
+      }
+
+      const { data: existingRole, error: existingRoleError } = await portalClient
+        .from('profile_roles')
+        .select('id, revoked_at')
+        .eq('profile_id', profileId)
+        .eq('role_id', roleRow.id)
+        .maybeSingle();
+
+      if (existingRoleError) {
+        throw existingRoleError;
+      }
+
+      if (!existingRole) {
+        const { error: insertRoleError } = await portalClient.from('profile_roles').insert({
+          profile_id: profileId,
+          role_id: roleRow.id,
+          granted_by_profile_id: actorProfileId,
+          granted_at: reviewedAt,
+        });
+
+        if (insertRoleError) {
+          throw insertRoleError;
+        }
+      } else if (existingRole.revoked_at) {
+        const { error: reinstateError } = await portalClient
+          .from('profile_roles')
+          .update({
+            revoked_at: null,
+            revoked_by_profile_id: null,
+            reason: null,
+            updated_at: reviewedAt,
+            granted_by_profile_id: actorProfileId,
+            granted_at: reviewedAt,
+          })
+          .eq('id', existingRole.id);
+
+        if (reinstateError) {
+          throw reinstateError;
+        }
+      }
+    } else {
+      const { data: orgRole } = await portalClient
+        .from('roles')
+        .select('id')
+        .eq('name', 'org_rep')
+        .maybeSingle();
+
+      if (orgRole) {
+        await portalClient
+          .from('profile_roles')
+          .update({
+            revoked_at: reviewedAt,
+            revoked_by_profile_id: actorProfileId,
+            updated_at: reviewedAt,
+          })
+          .eq('profile_id', profileId)
+          .eq('role_id', orgRole.id)
+          .is('revoked_at', null);
+      }
+    }
+
+    await supa.rpc('portal_refresh_profile_claims', {
+      p_profile_id: profileId,
+    });
+
     await logAuditEvent(supa, {
       actorProfileId,
       action: 'profile_affiliation_approved',
       entityType: 'profile',
       entityId: profileId,
-      meta: { nextRole, affiliationType: profileRow.affiliation_type },
+      meta: { affiliationType: profileRow.affiliation_type, elevated: elevateRole },
     });
 
     if (profileRow.user_id) {
@@ -352,6 +425,30 @@ export default async function CommandCenterAdminPage() {
     if (updateError) {
       throw updateError;
     }
+
+    const { data: roleRow } = await portalClient
+      .from('roles')
+      .select('id')
+      .eq('name', 'org_rep')
+      .maybeSingle();
+
+    if (roleRow) {
+      await portalClient
+        .from('profile_roles')
+        .update({
+          revoked_at: reviewedAt,
+          revoked_by_profile_id: actorProfileId,
+          updated_at: reviewedAt,
+          reason: 'affiliation_declined',
+        })
+        .eq('profile_id', profileId)
+        .eq('role_id', roleRow.id)
+        .is('revoked_at', null);
+    }
+
+    await supa.rpc('portal_refresh_profile_claims', {
+      p_profile_id: profileId,
+    });
 
     await logAuditEvent(supa, {
       actorProfileId,

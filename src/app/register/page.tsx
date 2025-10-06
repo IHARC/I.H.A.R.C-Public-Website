@@ -403,13 +403,19 @@ function buildProfileDefaults(input: ProfileFormValues, invite: null | {
   const acceptedAt = new Date().toISOString();
 
   defaults.affiliation_type = invite.affiliation_type;
-  defaults.affiliation_status = 'approved';
-  defaults.role = invite.affiliation_type === 'community_member' ? 'user' : 'org_rep';
   defaults.organization_id = defaults.organization_id ?? invite.organization_id ?? null;
   defaults.position_title = defaults.position_title ?? invite.position_title ?? null;
   defaults.affiliation_requested_at = invite.created_at ?? defaults.affiliation_requested_at;
-  defaults.affiliation_reviewed_at = acceptedAt;
-  defaults.affiliation_reviewed_by = invite.invited_by_profile_id;
+  if (invite.affiliation_type === 'community_member') {
+    defaults.affiliation_status = 'approved';
+    defaults.affiliation_reviewed_at = acceptedAt;
+    defaults.affiliation_reviewed_by = invite.invited_by_profile_id;
+  } else {
+    defaults.affiliation_status = 'pending';
+    defaults.affiliation_reviewed_at = null;
+    defaults.affiliation_reviewed_by = null;
+    defaults.role = 'user';
+  }
 
   return {
     defaults,
