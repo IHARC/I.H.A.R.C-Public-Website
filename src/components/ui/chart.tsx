@@ -43,17 +43,17 @@ const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, style, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
-  const cssVariables: React.CSSProperties = {
+  const cssVariables = {
     '--chart-axis-color': 'rgb(var(--md-sys-color-on-surface-variant) / 0.72)',
     '--chart-grid-color': 'rgb(var(--md-sys-color-outline-variant) / 0.52)',
     '--chart-cursor-color': 'rgb(var(--md-sys-color-primary) / 0.35)',
     '--chart-cursor-fill': 'rgb(var(--md-sys-color-primary) / 0.12)',
     '--chart-radial-bg-color': 'rgb(var(--md-sys-color-surface-container) / 1)',
-  }
-  const mergedStyle: React.CSSProperties = {
+  } as React.CSSProperties
+  const mergedStyle = {
     ...cssVariables,
     ...(style ?? {}),
-  }
+  } as React.CSSProperties
 
   return (
     <ChartContext.Provider value={{ config }}>
