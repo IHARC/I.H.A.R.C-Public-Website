@@ -127,6 +127,11 @@ export async function ensurePortalProfile(
     avatar_url: defaults?.avatar_url ?? null,
     homelessness_experience: homelessnessExperience,
     substance_use_experience: substanceUseExperience,
+    government_role_type: defaults?.government_role_type ?? null,
+    requested_organization_name: defaults?.requested_organization_name ?? null,
+    requested_government_name: defaults?.requested_government_name ?? null,
+    requested_government_level: defaults?.requested_government_level ?? null,
+    requested_government_role: defaults?.requested_government_role ?? null,
   } satisfies Partial<PortalProfile> & { user_id: string };
 
   const { data: inserted, error: insertError } = await portal

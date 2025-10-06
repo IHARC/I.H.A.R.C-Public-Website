@@ -869,6 +869,8 @@ export type Database = {
           updated_by: string | null;
           created_at: string;
           updated_at: string;
+          category: Database["portal"]["Enums"]["organization_category"];
+          government_level: Database["portal"]["Enums"]["government_level"] | null;
         };
         Insert: {
           id?: string;
@@ -879,6 +881,8 @@ export type Database = {
           updated_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          category?: Database["portal"]["Enums"]["organization_category"];
+          government_level?: Database["portal"]["Enums"]["government_level"] | null;
         };
         Update: {
           id?: string;
@@ -889,6 +893,8 @@ export type Database = {
           updated_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          category?: Database["portal"]["Enums"]["organization_category"];
+          government_level?: Database["portal"]["Enums"]["government_level"] | null;
         };
         Relationships: [
           {
@@ -927,6 +933,11 @@ export type Database = {
           substance_use_experience: Database["portal"]["Enums"]["lived_experience_status"];
           has_signed_petition: boolean;
           petition_signed_at: string | null;
+          government_role_type: Database["portal"]["Enums"]["government_role_type"] | null;
+          requested_organization_name: string | null;
+          requested_government_name: string | null;
+          requested_government_level: Database["portal"]["Enums"]["government_level"] | null;
+          requested_government_role: Database["portal"]["Enums"]["government_role_type"] | null;
           created_at: string;
           updated_at: string;
         };
@@ -951,6 +962,11 @@ export type Database = {
           substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           has_signed_petition?: boolean;
           petition_signed_at?: string | null;
+          government_role_type?: Database["portal"]["Enums"]["government_role_type"] | null;
+          requested_organization_name?: string | null;
+          requested_government_name?: string | null;
+          requested_government_level?: Database["portal"]["Enums"]["government_level"] | null;
+          requested_government_role?: Database["portal"]["Enums"]["government_role_type"] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -975,6 +991,11 @@ export type Database = {
           substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           has_signed_petition?: boolean;
           petition_signed_at?: string | null;
+          government_role_type?: Database["portal"]["Enums"]["government_role_type"] | null;
+          requested_organization_name?: string | null;
+          requested_government_name?: string | null;
+          requested_government_level?: Database["portal"]["Enums"]["government_level"] | null;
+          requested_government_role?: Database["portal"]["Enums"]["government_role_type"] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -2332,6 +2353,9 @@ export type Database = {
       lived_experience_status: "none" | "current" | "former" | "prefer_not_to_share";
       invite_status: "pending" | "accepted" | "cancelled" | "expired";
       contact_method: "email" | "phone";
+      organization_category: "community" | "government";
+      government_level: "municipal" | "county" | "provincial" | "federal" | "other";
+      government_role_type: "staff" | "politician";
       idea_category: "Housing" | "Health" | "Policing" | "Community" | "Prevention" | "Other";
       idea_status:
         | "new"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Database } from '@/types/supabase';
-import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import {
+  NEW_GOVERNMENT_VALUE,
+  NEW_ORGANIZATION_VALUE,
+  NO_ORGANIZATION_VALUE,
+  PUBLIC_MEMBER_ROLE_LABEL,
+} from '@/lib/constants';
 import { LIVED_EXPERIENCE_COPY, LIVED_EXPERIENCE_OPTIONS, type LivedExperienceStatus } from '@/lib/lived-experience';
 
 export type ProfileDetailsFormState = {
@@ -23,25 +28,54 @@ type Organization = {
   name: string;
 };
 
+type GovernmentBody = {
+  id: string;
+  name: string;
+  level: Database['portal']['Enums']['government_level'];
+};
+
+type GovernmentRoleType = Database['portal']['Enums']['government_role_type'];
+type GovernmentLevel = Database['portal']['Enums']['government_level'];
+type AffiliationStatus = Database['portal']['Enums']['affiliation_status'];
+
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
 type ProfileDetailsFormProps = {
   organizations: Organization[];
+  governmentBodies: GovernmentBody[];
   initialState: ProfileDetailsFormState;
   action: (state: ProfileDetailsFormState, formData: FormData) => Promise<ProfileDetailsFormState>;
   initialValues: {
     displayName: string;
     organizationId: string | null;
+    governmentBodyId: string | null;
     positionTitle: string | null;
     affiliationType: AffiliationType;
     homelessnessExperience: LivedExperienceStatus;
     substanceUseExperience: LivedExperienceStatus;
+    affiliationStatus: AffiliationStatus;
+    governmentRoleType: GovernmentRoleType | null;
+    requestedOrganizationName: string | null;
+    requestedGovernmentName: string | null;
+    requestedGovernmentLevel: GovernmentLevel | null;
+    requestedGovernmentRole: GovernmentRoleType | null;
   };
 };
 
-export function ProfileDetailsForm({ organizations, action, initialState, initialValues }: ProfileDetailsFormProps) {
+export function ProfileDetailsForm({ organizations, governmentBodies, action, initialState, initialValues }: ProfileDetailsFormProps) {
   const [state, formAction] = useActionState(action, initialState);
-  const [selectedOrg, setSelectedOrg] = useState(initialValues.organizationId ?? NO_ORGANIZATION_VALUE);
+  const initialOrgSelection = initialValues.organizationId
+    ? initialValues.organizationId
+    : initialValues.requestedOrganizationName
+      ? NEW_ORGANIZATION_VALUE
+      : NO_ORGANIZATION_VALUE;
+  const initialGovernmentSelection = initialValues.governmentBodyId
+    ? initialValues.governmentBodyId
+    : initialValues.requestedGovernmentName
+      ? NEW_GOVERNMENT_VALUE
+      : NO_ORGANIZATION_VALUE;
+  const [selectedOrg, setSelectedOrg] = useState(initialOrgSelection);
+  const [selectedGovernment, setSelectedGovernment] = useState(initialGovernmentSelection);
   const [affiliationType, setAffiliationType] = useState<AffiliationType>(initialValues.affiliationType);
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>(
     initialValues.homelessnessExperience,
@@ -49,8 +83,71 @@ export function ProfileDetailsForm({ organizations, action, initialState, initia
   const [substanceUseExperience, setSubstanceUseExperience] = useState<LivedExperienceStatus>(
     initialValues.substanceUseExperience,
   );
+  const [governmentRoleType, setGovernmentRoleType] = useState<GovernmentRoleType | null>(
+    initialValues.requestedGovernmentRole ?? initialValues.governmentRoleType,
+  );
+  const [governmentLevel, setGovernmentLevel] = useState<GovernmentLevel | null>(
+    initialValues.requestedGovernmentLevel,
+  );
 
   const hideRoleField = affiliationType === 'community_member';
+  const isAgencyPartner = affiliationType === 'agency_partner';
+  const isGovernmentPartner = affiliationType === 'government_partner';
+  const requestingNewOrganization = selectedOrg === NEW_ORGANIZATION_VALUE;
+  const requestingNewGovernment = selectedGovernment === NEW_GOVERNMENT_VALUE;
+  const organizationMap = new Map(organizations.map((org) => [org.id, org.name]));
+  const governmentMap = new Map(governmentBodies.map((body) => [body.id, body]));
+  const pendingSummary = (() => {
+    if (initialValues.affiliationStatus !== 'pending') {
+      return null;
+    }
+
+    if (initialValues.affiliationType === 'agency_partner') {
+      const label = initialValues.requestedOrganizationName
+        ? `"${initialValues.requestedOrganizationName}"`
+        : initialValues.organizationId
+          ? organizationMap.get(initialValues.organizationId) ?? 'your organization'
+          : 'your organization';
+      return `Pending moderator review for ${label}.`;
+    }
+
+    if (initialValues.affiliationType === 'government_partner') {
+      const bodyName = initialValues.requestedGovernmentName
+        ? `"${initialValues.requestedGovernmentName}"`
+        : initialValues.governmentBodyId
+          ? governmentMap.get(initialValues.governmentBodyId)?.name ?? 'your government team'
+          : 'your government team';
+      const levelLabel = initialValues.requestedGovernmentLevel
+        ? formatGovernmentLevel(initialValues.requestedGovernmentLevel)
+        : initialValues.governmentBodyId
+          ? formatGovernmentLevel(governmentMap.get(initialValues.governmentBodyId)?.level ?? 'other')
+          : null;
+      return `Pending moderator review for ${bodyName}${levelLabel ? ` (${levelLabel})` : ''}.`;
+    }
+
+    return null;
+  })();
+
+  useEffect(() => {
+    if (affiliationType === 'community_member') {
+      setSelectedOrg(NO_ORGANIZATION_VALUE);
+      setSelectedGovernment(NO_ORGANIZATION_VALUE);
+      setGovernmentRoleType(null);
+      setGovernmentLevel(null);
+    } else if (affiliationType === 'agency_partner') {
+      setSelectedGovernment(NO_ORGANIZATION_VALUE);
+      setGovernmentRoleType(null);
+      setGovernmentLevel(null);
+    } else if (affiliationType === 'government_partner') {
+      setSelectedOrg(NO_ORGANIZATION_VALUE);
+    }
+  }, [affiliationType]);
+
+  useEffect(() => {
+    if (selectedGovernment !== NEW_GOVERNMENT_VALUE) {
+      setGovernmentLevel(null);
+    }
+  }, [selectedGovernment]);
 
   return (
     <form
@@ -110,6 +207,9 @@ export function ProfileDetailsForm({ organizations, action, initialState, initia
             <AlertDescription>
               IHARC moderators confirm agency and government roles before enabling official responses. You can keep
               contributing as a community member while we verify.
+              {pendingSummary ? (
+                <span className="mt-2 block text-xs text-on-primary-container/80">{pendingSummary}</span>
+              ) : null}
             </AlertDescription>
           </Alert>
         ) : (
@@ -119,22 +219,137 @@ export function ProfileDetailsForm({ organizations, action, initialState, initia
         )}
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="organization_id">Organization (optional)</Label>
-        <Select name="organization_id" value={selectedOrg} onValueChange={setSelectedOrg}>
-          <SelectTrigger id="organization_id">
-            <SelectValue placeholder="Independent community member" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NO_ORGANIZATION_VALUE}>Independent community member</SelectItem>
-            {organizations.map((org) => (
-              <SelectItem key={org.id} value={org.id}>
-                {org.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {isAgencyPartner ? (
+        <div className="space-y-3 rounded-xl border border-outline/20 p-4">
+          <div className="grid gap-2">
+            <Label htmlFor="agency_organization_id">Partner organization</Label>
+            <Select name="agency_organization_id" value={selectedOrg} onValueChange={setSelectedOrg}>
+              <SelectTrigger id="agency_organization_id">
+                <SelectValue placeholder="Select your organization" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_ORGANIZATION_VALUE} disabled>
+                  Select your organization
+                </SelectItem>
+                {organizations.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>
+                    {org.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value={NEW_ORGANIZATION_VALUE}>Request a new organization</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {requestingNewOrganization ? (
+            <div className="grid gap-2">
+              <Label htmlFor="new_organization_name">Organization name</Label>
+              <Input
+                id="new_organization_name"
+                name="new_organization_name"
+                placeholder="Northumberland Community Living"
+                defaultValue={initialValues.requestedOrganizationName ?? ''}
+                required
+                maxLength={160}
+              />
+              <p className="text-xs text-muted">
+                Moderators verify new partners before enabling official responses.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-muted">
+              Link your organization to share updates once your affiliation is approved.
+            </p>
+          )}
+        </div>
+      ) : null}
+
+      {isGovernmentPartner ? (
+        <div className="space-y-4 rounded-xl border border-outline/20 p-4">
+          <div className="grid gap-2">
+            <Label htmlFor="government_body_id">Government team</Label>
+            <Select name="government_body_id" value={selectedGovernment} onValueChange={setSelectedGovernment}>
+              <SelectTrigger id="government_body_id">
+                <SelectValue placeholder="Select your government team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_ORGANIZATION_VALUE} disabled>
+                  Select your government team
+                </SelectItem>
+                {governmentBodies.map((body) => (
+                  <SelectItem key={body.id} value={body.id}>
+                    {body.name} · {formatGovernmentLevel(body.level)}
+                  </SelectItem>
+                ))}
+                <SelectItem value={NEW_GOVERNMENT_VALUE}>Request a new government listing</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <fieldset className="space-y-3 rounded-lg border border-outline/20 p-3">
+            <legend className="text-sm font-semibold text-on-surface">How do you serve neighbours?</legend>
+            <RadioGroup
+              name="government_role_type"
+              value={governmentRoleType ?? ''}
+              onValueChange={(value) => setGovernmentRoleType(value ? (value as GovernmentRoleType) : null)}
+              className="grid gap-2 md:grid-cols-2"
+            >
+              <GovernmentRoleOption
+                id="profile-government-role-staff"
+                value="staff"
+                title="Public servant / staff"
+                description="Administrative, public service, or operational role."
+              />
+              <GovernmentRoleOption
+                id="profile-government-role-politician"
+                value="politician"
+                title="Elected leadership"
+                description="Mayor, councillor, MP/MPP, or other elected official."
+              />
+            </RadioGroup>
+          </fieldset>
+
+          {requestingNewGovernment ? (
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="government_level">Government level</Label>
+                <Select
+                  name="government_level"
+                  value={governmentLevel ?? ''}
+                  onValueChange={(value) => setGovernmentLevel(value === '' ? null : (value as GovernmentLevel))}
+                >
+                  <SelectTrigger id="government_level">
+                    <SelectValue placeholder="Select a level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="" disabled>
+                      Select a government level
+                    </SelectItem>
+                    <SelectItem value="municipal">Municipal</SelectItem>
+                    <SelectItem value="county">County / regional</SelectItem>
+                    <SelectItem value="provincial">Provincial / territorial</SelectItem>
+                    <SelectItem value="federal">Federal</SelectItem>
+                    <SelectItem value="other">Other / multi-jurisdictional</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new_government_name">Government body name</Label>
+                <Input
+                  id="new_government_name"
+                  name="new_government_name"
+                  placeholder="Town of Cobourg Council"
+                  defaultValue={initialValues.requestedGovernmentName ?? ''}
+                  required
+                  maxLength={160}
+                />
+                <p className="text-xs text-muted">
+                  Moderators confirm new listings before enabling official government updates.
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {hideRoleField ? (
         <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
@@ -216,6 +431,43 @@ export function ProfileDetailsForm({ organizations, action, initialState, initia
 
       <SubmitButton />
     </form>
+  );
+}
+
+function formatGovernmentLevel(level: GovernmentLevel): string {
+  switch (level) {
+    case 'municipal':
+      return 'Municipal';
+    case 'county':
+      return 'County / regional';
+    case 'provincial':
+      return 'Provincial / territorial';
+    case 'federal':
+      return 'Federal';
+    default:
+      return 'Other';
+  }
+}
+
+type GovernmentRoleOptionProps = {
+  id: string;
+  value: GovernmentRoleType;
+  title: string;
+  description: string;
+};
+
+function GovernmentRoleOption({ id, value, title, description }: GovernmentRoleOptionProps) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-lg border border-outline/30 bg-surface p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <span>
+        {title}
+        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+      </span>
+    </label>
   );
 }
 

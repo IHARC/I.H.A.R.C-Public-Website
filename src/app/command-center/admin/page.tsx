@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
 
+const GOVERNMENT_ROLE_TYPES: Database['portal']['Enums']['government_role_type'][] = ['staff', 'politician'];
+const GOVERNMENT_LEVELS: Database['portal']['Enums']['government_level'][] = ['municipal', 'county', 'provincial', 'federal', 'other'];
+
 const METRIC_OPTIONS = [
   { key: 'outdoor_count', label: 'Neighbours Outdoors' },
   { key: 'shelter_occupancy', label: 'Shelter Occupancy (%)' },
@@ -34,11 +37,33 @@ type PendingAffiliationRow = {
   affiliation_requested_at: string | null;
   role: Database['portal']['Enums']['profile_role'];
   user_id: string | null;
+  requested_organization_name: string | null;
+  requested_government_name: string | null;
+  requested_government_level: Database['portal']['Enums']['government_level'] | null;
+  requested_government_role: Database['portal']['Enums']['government_role_type'] | null;
+  government_role_type: Database['portal']['Enums']['government_role_type'] | null;
   organization:
     | { id: string; name: string; verified: boolean }[]
     | { id: string; name: string; verified: boolean }
     | null;
 };
+
+function formatGovernmentLevel(level: Database['portal']['Enums']['government_level'] | null): string {
+  switch (level) {
+    case 'municipal':
+      return 'Municipal';
+    case 'county':
+      return 'County / regional';
+    case 'provincial':
+      return 'Provincial / territorial';
+    case 'federal':
+      return 'Federal';
+    case 'other':
+      return 'Other';
+    default:
+      return 'Unknown';
+  }
+}
 
 type ProfileInviteWithOrg = {
   id: string;
@@ -77,9 +102,13 @@ export default async function CommandCenterAdminPage() {
 
   const { data: organizations } = await portal
     .from('organizations')
-    .select('id, name, verified, website')
+    .select('id, name, verified, website, category, government_level')
     .order('created_at', { ascending: false })
     .limit(100);
+
+  const organizationsList = organizations ?? [];
+  const communityOrganizations = organizationsList.filter((org) => org.category === 'community');
+  const governmentOrganizations = organizationsList.filter((org) => org.category === 'government');
 
   const pendingAffiliations = isAdmin
     ? ((
@@ -87,6 +116,7 @@ export default async function CommandCenterAdminPage() {
           .from('profiles')
           .select(
             `id, display_name, position_title, affiliation_type, affiliation_status, affiliation_requested_at, role, user_id,
+             requested_organization_name, requested_government_name, requested_government_level, requested_government_role, government_role_type,
              organization:organization_id(id, name, verified)`,
           )
           .eq('affiliation_status', 'pending')
@@ -152,10 +182,27 @@ export default async function CommandCenterAdminPage() {
     const name = (formData.get('org_name') as string | null)?.trim();
     const website = (formData.get('org_website') as string | null)?.trim() || null;
     const verified = formData.get('org_verified') === 'on';
+    const categoryInput = (formData.get('org_category') as string | null)?.trim() ?? 'community';
+    const isGovernmentCategory = categoryInput === 'government';
+    const governmentLevelInput = (formData.get('org_government_level') as string | null)?.trim() ?? null;
     const actorProfileId = formData.get('actor_profile_id') as string;
 
     if (!name) {
       throw new Error('Organization name is required');
+    }
+
+    if (!['community', 'government'].includes(categoryInput)) {
+      throw new Error('Select a valid organization category.');
+    }
+
+    const governmentLevel = isGovernmentCategory && governmentLevelInput
+      ? (GOVERNMENT_LEVELS.includes(governmentLevelInput as Database['portal']['Enums']['government_level'])
+          ? (governmentLevelInput as Database['portal']['Enums']['government_level'])
+          : null)
+      : null;
+
+    if (isGovernmentCategory && !governmentLevel) {
+      throw new Error('Select the government level for this organization.');
     }
 
     const {
@@ -175,6 +222,8 @@ export default async function CommandCenterAdminPage() {
         name,
         website,
         verified,
+        category: categoryInput as Database['portal']['Enums']['organization_category'],
+        government_level: governmentLevel,
         created_by: actorUserId,
         updated_by: actorUserId,
       })
@@ -264,7 +313,8 @@ export default async function CommandCenterAdminPage() {
 
     const profileId = formData.get('profile_id') as string;
     const actorProfileId = formData.get('actor_profile_id') as string;
-
+    const approvedOrganizationIdRaw = (formData.get('approved_organization_id') as string | null)?.trim() ?? null;
+    const approvedGovernmentRoleRaw = (formData.get('approved_government_role') as string | null)?.trim() ?? null;
     if (!profileId) {
       throw new Error('Missing profile identifier.');
     }
@@ -274,7 +324,7 @@ export default async function CommandCenterAdminPage() {
 
     const { data: profileRow, error: profileError } = await portalClient
       .from('profiles')
-      .select('user_id, affiliation_type, affiliation_requested_at')
+      .select('user_id, affiliation_type, affiliation_requested_at, organization_id')
       .eq('id', profileId)
       .maybeSingle();
 
@@ -285,13 +335,47 @@ export default async function CommandCenterAdminPage() {
     const reviewedAt = new Date().toISOString();
     const elevateRole = profileRow.affiliation_type !== 'community_member';
 
+    let organizationIdToAssign: string | null = null;
+    let governmentRoleToAssign: Database['portal']['Enums']['government_role_type'] | null = null;
+
+    if (profileRow.affiliation_type === 'agency_partner') {
+      if (!approvedOrganizationIdRaw) {
+        throw new Error('Select an organization before approving.');
+      }
+      organizationIdToAssign = approvedOrganizationIdRaw;
+    } else if (profileRow.affiliation_type === 'government_partner') {
+      if (!approvedOrganizationIdRaw) {
+        throw new Error('Select a government team before approving.');
+      }
+      if (!approvedGovernmentRoleRaw) {
+        throw new Error('Select a government role type.');
+      }
+      const parsedGovernmentRole = approvedGovernmentRoleRaw as Database['portal']['Enums']['government_role_type'];
+      if (!GOVERNMENT_ROLE_TYPES.includes(parsedGovernmentRole)) {
+        throw new Error('Select a government role type.');
+      }
+      organizationIdToAssign = approvedOrganizationIdRaw;
+      governmentRoleToAssign = parsedGovernmentRole;
+    } else {
+      organizationIdToAssign = null;
+      governmentRoleToAssign = null;
+    }
+
+    const profileUpdate: Partial<PortalProfile> = {
+      organization_id: organizationIdToAssign,
+      affiliation_status: 'approved',
+      affiliation_reviewed_at: reviewedAt,
+      affiliation_reviewed_by: actorProfileId,
+      requested_organization_name: null,
+      requested_government_name: null,
+      requested_government_level: null,
+      requested_government_role: null,
+      government_role_type: governmentRoleToAssign,
+    };
+
     const { error: updateError } = await portalClient
       .from('profiles')
-      .update({
-        affiliation_status: 'approved',
-        affiliation_reviewed_at: reviewedAt,
-        affiliation_reviewed_by: actorProfileId,
-      })
+      .update(profileUpdate)
       .eq('id', profileId);
 
     if (updateError) {
@@ -393,7 +477,8 @@ export default async function CommandCenterAdminPage() {
 
     const profileId = formData.get('profile_id') as string;
     const actorProfileId = formData.get('actor_profile_id') as string;
-
+    const approvedOrganizationIdRaw = (formData.get('approved_organization_id') as string | null)?.trim() ?? null;
+    const approvedGovernmentRoleRaw = (formData.get('approved_government_role') as string | null)?.trim() ?? null;
     if (!profileId) {
       throw new Error('Missing profile identifier.');
     }
@@ -403,7 +488,7 @@ export default async function CommandCenterAdminPage() {
 
     const { data: profileRow, error: profileError } = await portalClient
       .from('profiles')
-      .select('user_id, affiliation_type, affiliation_requested_at')
+      .select('user_id, affiliation_type, affiliation_requested_at, organization_id')
       .eq('id', profileId)
       .maybeSingle();
 
@@ -413,13 +498,24 @@ export default async function CommandCenterAdminPage() {
 
     const reviewedAt = new Date().toISOString();
 
+    const declineUpdate: Partial<PortalProfile> = {
+      affiliation_status: 'revoked',
+      affiliation_reviewed_at: reviewedAt,
+      affiliation_reviewed_by: actorProfileId,
+      requested_organization_name: null,
+      requested_government_name: null,
+      requested_government_level: null,
+      requested_government_role: null,
+    };
+
+    if (profileRow.affiliation_type !== 'community_member') {
+      declineUpdate.organization_id = null;
+      declineUpdate.government_role_type = null;
+    }
+
     const { error: updateError } = await portalClient
       .from('profiles')
-      .update({
-        affiliation_status: 'revoked',
-        affiliation_reviewed_at: reviewedAt,
-        affiliation_reviewed_by: actorProfileId,
-      })
+      .update(declineUpdate)
       .eq('id', profileId);
 
     if (updateError) {
@@ -528,6 +624,36 @@ export default async function CommandCenterAdminPage() {
               <Label htmlFor="org_website">Website</Label>
               <Input id="org_website" name="org_website" type="url" placeholder="https://" />
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="org_category">Category</Label>
+              <select
+                id="org_category"
+                name="org_category"
+                defaultValue="community"
+                className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              >
+                <option value="community">Community / agency partner</option>
+                <option value="government">Government team</option>
+              </select>
+              <p className="text-xs text-muted">Government teams require a level selection below.</p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="org_government_level">Government level</Label>
+              <select
+                id="org_government_level"
+                name="org_government_level"
+                defaultValue=""
+                className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              >
+                <option value="">Select level (required for government)</option>
+                <option value="municipal">Municipal</option>
+                <option value="county">County / regional</option>
+                <option value="provincial">Provincial / territorial</option>
+                <option value="federal">Federal</option>
+                <option value="other">Other / multi-jurisdictional</option>
+              </select>
+              <p className="text-xs text-muted">Leave blank for community organizations.</p>
+            </div>
             <div className="flex items-center gap-2">
               <input id="org_verified" name="org_verified" type="checkbox" className="h-4 w-4 accent-brand" />
               <Label htmlFor="org_verified" className="text-sm">
@@ -538,9 +664,9 @@ export default async function CommandCenterAdminPage() {
               Add organization
             </Button>
           </form>
-          {organizations?.length ? (
+          {organizationsList.length ? (
             <div className="mt-4 space-y-2 text-sm text-muted">
-              {organizations.map((org) => (
+              {organizationsList.map((org) => (
                 <div
                   key={org.id}
                   className="flex items-center justify-between rounded border border-slate-100 px-3 py-2 dark:border-slate-800"
@@ -603,7 +729,7 @@ export default async function CommandCenterAdminPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={NO_ORGANIZATION_VALUE}>No linked organization yet</SelectItem>
-                      {(organizations ?? []).map((org) => (
+                      {organizationsList.map((org) => (
                         <SelectItem key={org.id} value={org.id}>
                           {org.name}
                         </SelectItem>
@@ -685,55 +811,139 @@ export default async function CommandCenterAdminPage() {
             </CardHeader>
             <CardContent>
               {pendingAffiliations?.length ? (
-            <div className="space-y-3">
-              {pendingAffiliations.map((pending) => {
-                const organizationName = Array.isArray(pending.organization)
-                  ? pending.organization[0]?.name ?? null
-                  : pending.organization?.name ?? null;
-                return (
-                  <div key={pending.id} className="flex flex-col gap-3 rounded border border-slate-100 p-3 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
-                    <div className="space-y-1">
-                      <p className="font-semibold text-slate-700 dark:text-slate-200">{pending.display_name}</p>
-                      {pending.position_title ? (
-                        <p className="text-sm text-muted">{pending.position_title}</p>
-                      ) : null}
-                      {organizationName ? (
-                        <p className="text-xs text-muted">{organizationName}</p>
-                      ) : null}
-                      <p className="text-xs text-muted-subtle">
-                        Requested {pending.affiliation_requested_at ? new Date(pending.affiliation_requested_at).toLocaleDateString('en-CA') : 'on registration'} ·{' '}
-                        {pending.affiliation_type === 'agency_partner'
-                          ? 'Agency partner'
-                          : pending.affiliation_type === 'government_partner'
-                            ? 'Government partner'
-                            : 'Community member'}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <form action={approveAffiliation}>
-                        <input type="hidden" name="actor_profile_id" value={profile.id} />
-                        <input type="hidden" name="actor_user_id" value={user.id} />
-                        <input type="hidden" name="profile_id" value={pending.id} />
-                        <Button type="submit" size="sm">
-                          Approve
-                        </Button>
-                      </form>
-                      <form action={declineAffiliation}>
-                        <input type="hidden" name="actor_profile_id" value={profile.id} />
-                        <input type="hidden" name="actor_user_id" value={user.id} />
-                        <input type="hidden" name="profile_id" value={pending.id} />
-                        <Button type="submit" size="sm" variant="outline">
-                          Decline
-                        </Button>
-                      </form>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
+                <div className="space-y-4">
+                  {pendingAffiliations.map((pending) => {
+                    const organizationRelation = Array.isArray(pending.organization)
+                      ? pending.organization[0] ?? null
+                      : pending.organization ?? null;
+                    const organizationId = organizationRelation?.id ?? null;
+                    const organizationName = organizationRelation?.name ?? null;
+                    const requestedOrgName = pending.requested_organization_name;
+                    const requestedGovName = pending.requested_government_name;
+                    const requestedGovLevel = pending.requested_government_level;
+                    const defaultGovRole = pending.requested_government_role ?? pending.government_role_type ?? 'staff';
+                    return (
+                      <div key={pending.id} className="space-y-3 rounded border border-slate-100 p-3 dark:border-slate-800">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-slate-700 dark:text-slate-200">{pending.display_name}</p>
+                          {pending.position_title ? (
+                            <p className="text-sm text-muted">{pending.position_title}</p>
+                          ) : null}
+                          {organizationName ? (
+                            <p className="text-xs text-muted">Current: {organizationName}</p>
+                          ) : null}
+                          {pending.affiliation_requested_at ? (
+                            <p className="text-xs text-muted-subtle">
+                              Requested {new Date(pending.affiliation_requested_at).toLocaleDateString('en-CA')} ·{' '}
+                              {pending.affiliation_type === 'agency_partner'
+                                ? 'Agency partner'
+                                : pending.affiliation_type === 'government_partner'
+                                  ? 'Government partner'
+                                  : 'Community member'}
+                            </p>
+                          ) : null}
+                          {pending.affiliation_type === 'agency_partner' && requestedOrgName ? (
+                            <p className="text-xs text-muted">Pending org: {requestedOrgName}</p>
+                          ) : null}
+                          {pending.affiliation_type === 'government_partner' && requestedGovName ? (
+                            <p className="text-xs text-muted">
+                              Pending government: {requestedGovName}
+                              {requestedGovLevel ? ` · ${formatGovernmentLevel(requestedGovLevel)}` : ''}
+                            </p>
+                          ) : null}
+                          {pending.affiliation_type === 'government_partner' && pending.requested_government_role ? (
+                            <p className="text-xs text-muted">Requested role: {pending.requested_government_role === 'politician' ? 'Elected leadership' : 'Public servant / staff'}</p>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                          <form action={approveAffiliation} className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+                            <input type="hidden" name="actor_profile_id" value={profile.id} />
+                            <input type="hidden" name="actor_user_id" value={user.id} />
+                            <input type="hidden" name="profile_id" value={pending.id} />
+                            {pending.affiliation_type === 'agency_partner' ? (
+                              <div className="flex flex-col">
+                                <Label htmlFor={`approved-org-${pending.id}`} className="text-xs font-medium text-muted">
+                                  Assign organization
+                                </Label>
+                                <select
+                                  id={`approved-org-${pending.id}`}
+                                  name="approved_organization_id"
+                                  defaultValue={organizationId ?? ''}
+                                  required
+                                  className="min-w-[200px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                                >
+                                  <option value="">Select organization</option>
+                                  {communityOrganizations.map((org) => (
+                                    <option key={org.id} value={org.id}>
+                                      {org.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                {requestedOrgName ? (
+                                  <span className="mt-1 text-xs text-muted">Neighbour requested: {requestedOrgName}</span>
+                                ) : null}
+                              </div>
+                            ) : null}
+                            {pending.affiliation_type === 'government_partner' ? (
+                              <div className="flex flex-col gap-3 md:flex-row md:items-end">
+                                <div className="flex flex-col">
+                                  <Label htmlFor={`approved-gov-${pending.id}`} className="text-xs font-medium text-muted">
+                                    Assign government team
+                                  </Label>
+                                  <select
+                                    id={`approved-gov-${pending.id}`}
+                                    name="approved_organization_id"
+                                    defaultValue={organizationId ?? ''}
+                                    required
+                                    className="min-w-[220px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                                  >
+                                    <option value="">Select government team</option>
+                                    {governmentOrganizations.map((org) => (
+                                      <option key={org.id} value={org.id}>
+                                        {org.name} • {formatGovernmentLevel(org.government_level)}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {requestedGovName ? (
+                                    <span className="mt-1 text-xs text-muted">
+                                      Requested: {requestedGovName}
+                                      {requestedGovLevel ? ` · ${formatGovernmentLevel(requestedGovLevel)}` : ''}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col">
+                                  <Label htmlFor={`approved-role-${pending.id}`} className="text-xs font-medium text-muted">
+                                    Role type
+                                  </Label>
+                                  <select
+                                    id={`approved-role-${pending.id}`}
+                                    name="approved_government_role"
+                                    defaultValue={defaultGovRole}
+                                    required
+                                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                                  >
+                                    <option value="staff">Public servant / staff</option>
+                                    <option value="politician">Elected leadership</option>
+                                  </select>
+                                </div>
+                              </div>
+                            ) : null}
+                            <Button type="submit" size="sm">Approve</Button>
+                          </form>
+                          <form action={declineAffiliation} className="flex flex-row items-end gap-2">
+                            <input type="hidden" name="actor_profile_id" value={profile.id} />
+                            <input type="hidden" name="actor_user_id" value={user.id} />
+                            <input type="hidden" name="profile_id" value={pending.id} />
+                            <Button type="submit" size="sm" variant="outline">Decline</Button>
+                          </form>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
                 <p className="text-sm text-muted">No pending affiliation approvals.</p>
-          )}
+              )}
             </CardContent>
           </Card>
         </>
