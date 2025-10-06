@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
+import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
 
 const GOVERNMENT_ROLE_TYPES: Database['portal']['Enums']['government_role_type'][] = ['staff', 'politician'];
@@ -45,6 +45,21 @@ type PendingAffiliationRow = {
   organization:
     | { id: string; name: string; verified: boolean }[]
     | { id: string; name: string; verified: boolean }
+    | null;
+};
+
+type ManageableProfileRow = {
+  id: string;
+  display_name: string;
+  position_title: string | null;
+  affiliation_type: Database['portal']['Enums']['affiliation_type'];
+  affiliation_status: Database['portal']['Enums']['affiliation_status'];
+  organization_id: string | null;
+  government_role_type: Database['portal']['Enums']['government_role_type'] | null;
+  user_id: string | null;
+  organization:
+    | { id: string; name: string; category: Database['portal']['Enums']['organization_category']; government_level: Database['portal']['Enums']['government_level'] | null }[]
+    | { id: string; name: string; category: Database['portal']['Enums']['organization_category']; government_level: Database['portal']['Enums']['government_level'] | null }
     | null;
 };
 
@@ -136,6 +151,20 @@ export default async function CommandCenterAdminPage() {
           .order('created_at', { ascending: false })
           .limit(12)
       ).data as ProfileInviteWithOrg[] | null) ?? null
+    : null;
+
+  const manageableProfiles = isAdmin
+    ? ((
+        await portal
+          .from('profiles')
+          .select(
+            `id, display_name, position_title, affiliation_type, affiliation_status, organization_id, user_id, government_role_type,
+             organization:organization_id(id, name, category, government_level)`,
+          )
+          .neq('affiliation_status', 'pending')
+          .order('display_name', { ascending: true })
+          .limit(100)
+      ).data as ManageableProfileRow[] | null) ?? null
     : null;
 
   async function uploadMetric(formData: FormData) {
@@ -561,6 +590,256 @@ export default async function CommandCenterAdminPage() {
     revalidatePath('/command-center/admin');
   }
 
+  async function updateMemberAffiliation(formData: FormData) {
+    'use server';
+
+    const profileId = (formData.get('profile_id') as string | null)?.trim();
+    if (!profileId) {
+      throw new Error('Select a member profile to update.');
+    }
+
+    const rawAffiliationType = (formData.get('affiliation_type') as string | null)?.trim() ?? '';
+    const rawAffiliationStatus = (formData.get('affiliation_status') as string | null)?.trim() ?? '';
+    const rawOrganizationId = (formData.get('organization_id') as string | null)?.trim() ?? '';
+    const rawGovernmentRoleType = (formData.get('government_role_type') as string | null)?.trim() ?? '';
+    const positionTitleInput = (formData.get('position_title') as string | null)?.trim() ?? '';
+
+    const supa = await createSupabaseServerClient();
+    const {
+      data: { user: actorUser },
+      error: actorError,
+    } = await supa.auth.getUser();
+
+    if (actorError || !actorUser) {
+      throw actorError ?? new Error('Moderator session required');
+    }
+
+    const actorProfile = await ensurePortalProfile(supa, actorUser.id);
+    if (actorProfile.role !== 'admin') {
+      throw new Error('Administrator access required to update member affiliations.');
+    }
+
+    const portalClient = supa.schema('portal');
+
+    const { data: profileRow, error: profileError } = await portalClient
+      .from('profiles')
+      .select(
+        'user_id, affiliation_type, affiliation_status, affiliation_requested_at, affiliation_reviewed_at, affiliation_reviewed_by, organization_id, government_role_type',
+      )
+      .eq('id', profileId)
+      .maybeSingle();
+
+    if (profileError || !profileRow) {
+      throw profileError ?? new Error('Profile not found.');
+    }
+
+    const allowedAffiliations: PortalProfile['affiliation_type'][] = [
+      'community_member',
+      'agency_partner',
+      'government_partner',
+    ];
+    const allowedStatuses: PortalProfile['affiliation_status'][] = ['approved', 'pending', 'revoked'];
+
+    const affiliationType = allowedAffiliations.includes(rawAffiliationType as PortalProfile['affiliation_type'])
+      ? (rawAffiliationType as PortalProfile['affiliation_type'])
+      : profileRow.affiliation_type;
+    let affiliationStatus = allowedStatuses.includes(rawAffiliationStatus as PortalProfile['affiliation_status'])
+      ? (rawAffiliationStatus as PortalProfile['affiliation_status'])
+      : profileRow.affiliation_status;
+
+    const organizationIdInput =
+      rawOrganizationId && rawOrganizationId !== NO_ORGANIZATION_VALUE ? rawOrganizationId : null;
+    let organizationId = organizationIdInput;
+
+    let governmentRoleType: Database['portal']['Enums']['government_role_type'] | null = null;
+    const nowIso = new Date().toISOString();
+    let affiliationRequestedAt = profileRow.affiliation_requested_at;
+    let affiliationReviewedAt = profileRow.affiliation_reviewed_at;
+    let affiliationReviewedBy = profileRow.affiliation_reviewed_by;
+    let positionTitle: string | null = positionTitleInput || null;
+
+    if (affiliationType === 'community_member') {
+      organizationId = null;
+      affiliationStatus = 'approved';
+      governmentRoleType = null;
+      affiliationRequestedAt = null;
+      affiliationReviewedAt = null;
+      affiliationReviewedBy = null;
+      positionTitle = PUBLIC_MEMBER_ROLE_LABEL;
+    } else {
+      if (!positionTitle || positionTitle.length < 2) {
+        throw new Error("Enter the member's position or role (minimum 2 characters).");
+      }
+
+      if (affiliationType === 'agency_partner') {
+        if (!organizationId) {
+          throw new Error('Select an organization for this agency representative.');
+        }
+
+        const { data: organization, error: organizationError } = await portalClient
+          .from('organizations')
+          .select('category')
+          .eq('id', organizationId)
+          .maybeSingle();
+
+        if (organizationError || !organization) {
+          throw organizationError ?? new Error('Organization not found.');
+        }
+
+        if (organization.category !== 'community') {
+          throw new Error('Agency representatives must link to a community organization.');
+        }
+      } else if (affiliationType === 'government_partner') {
+        if (!organizationId) {
+          throw new Error('Select a government team for this member.');
+        }
+
+        const { data: organization, error: organizationError } = await portalClient
+          .from('organizations')
+          .select('category')
+          .eq('id', organizationId)
+          .maybeSingle();
+
+        if (organizationError || !organization) {
+          throw organizationError ?? new Error('Government listing not found.');
+        }
+
+        if (organization.category !== 'government') {
+          throw new Error('Government representatives must link to a government listing.');
+        }
+
+        const parsedRole = GOVERNMENT_ROLE_TYPES.includes(
+          rawGovernmentRoleType as Database['portal']['Enums']['government_role_type'],
+        )
+          ? (rawGovernmentRoleType as Database['portal']['Enums']['government_role_type'])
+          : null;
+
+        if (!parsedRole) {
+          throw new Error('Select whether this member is staff or elected leadership.');
+        }
+
+        governmentRoleType = parsedRole;
+      }
+    }
+
+    if (affiliationStatus === 'approved') {
+      affiliationReviewedAt = nowIso;
+      affiliationReviewedBy = actorProfile.id;
+      if (!affiliationRequestedAt) {
+        affiliationRequestedAt = nowIso;
+      }
+    } else if (affiliationStatus === 'pending') {
+      affiliationRequestedAt = nowIso;
+      affiliationReviewedAt = null;
+      affiliationReviewedBy = null;
+    } else if (affiliationStatus === 'revoked') {
+      affiliationReviewedAt = nowIso;
+      affiliationReviewedBy = actorProfile.id;
+    }
+
+    if (affiliationType !== 'government_partner') {
+      governmentRoleType = null;
+    }
+
+    const updatePayload: Partial<PortalProfile> = {
+      affiliation_type: affiliationType,
+      affiliation_status: affiliationStatus,
+      affiliation_requested_at: affiliationRequestedAt,
+      affiliation_reviewed_at: affiliationReviewedAt,
+      affiliation_reviewed_by: affiliationReviewedBy,
+      organization_id: organizationId,
+      government_role_type: governmentRoleType,
+      position_title: positionTitle,
+      requested_organization_name: null,
+      requested_government_name: null,
+      requested_government_level: null,
+      requested_government_role: null,
+    };
+
+    const { error: updateError } = await portalClient.from('profiles').update(updatePayload).eq('id', profileId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data: roleRow } = await portalClient.from('roles').select('id').eq('name', 'org_rep').maybeSingle();
+
+    if (roleRow) {
+      if (affiliationType !== 'community_member' && affiliationStatus === 'approved') {
+        const { data: existingRole, error: existingRoleError } = await portalClient
+          .from('profile_roles')
+          .select('id, revoked_at')
+          .eq('profile_id', profileId)
+          .eq('role_id', roleRow.id)
+          .maybeSingle();
+
+        if (existingRoleError) {
+          throw existingRoleError;
+        }
+
+        if (!existingRole) {
+          const { error: insertRoleError } = await portalClient.from('profile_roles').insert({
+            profile_id: profileId,
+            role_id: roleRow.id,
+            granted_by_profile_id: actorProfile.id,
+            granted_at: nowIso,
+          });
+
+          if (insertRoleError) {
+            throw insertRoleError;
+          }
+        } else if (existingRole.revoked_at) {
+          const { error: reinstateError } = await portalClient
+            .from('profile_roles')
+            .update({
+              revoked_at: null,
+              revoked_by_profile_id: null,
+              updated_at: nowIso,
+              granted_by_profile_id: actorProfile.id,
+              granted_at: nowIso,
+            })
+            .eq('id', existingRole.id);
+
+          if (reinstateError) {
+            throw reinstateError;
+          }
+        }
+      } else {
+        await portalClient
+          .from('profile_roles')
+          .update({
+            revoked_at: nowIso,
+            revoked_by_profile_id: actorProfile.id,
+            updated_at: nowIso,
+          })
+          .eq('profile_id', profileId)
+          .eq('role_id', roleRow.id)
+          .is('revoked_at', null);
+      }
+    }
+
+    await supa.rpc('portal_refresh_profile_claims', {
+      p_profile_id: profileId,
+    });
+
+    await logAuditEvent(supa, {
+      actorProfileId: actorProfile.id,
+      action: 'profile_affiliation_updated',
+      entityType: 'profile',
+      entityId: profileId,
+      meta: { affiliationType, affiliationStatus },
+    });
+
+    if (profileRow.user_id) {
+      await ensurePortalProfile(supa, profileRow.user_id);
+    }
+
+    revalidatePath('/command-center/admin');
+    revalidatePath('/portal/profile');
+    revalidatePath('/portal/ideas');
+    revalidatePath('/portal/plans');
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
       <Card>
@@ -947,6 +1226,165 @@ export default async function CommandCenterAdminPage() {
             </CardContent>
           </Card>
         </>
+      ) : null}
+      {isAdmin && manageableProfiles?.length ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage member affiliations</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted">
+              Update a member&rsquo;s affiliation type, status, and linked organization. Changes refresh permissions
+              immediately.
+            </p>
+            {manageableProfiles.map((member) => {
+              const organizationRelation = Array.isArray(member.organization)
+                ? member.organization[0] ?? null
+                : member.organization ?? null;
+              const organizationName = organizationRelation?.name ?? null;
+              const organizationCategory = organizationRelation?.category ?? null;
+              const organizationLevel = organizationRelation?.government_level ?? null;
+
+              return (
+                <form
+                  key={member.id}
+                  action={updateMemberAffiliation}
+                  className="grid gap-3 rounded border border-slate-100 p-3 shadow-subtle dark:border-slate-800"
+                >
+                  <input type="hidden" name="profile_id" value={member.id} />
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-700 dark:text-slate-200">{member.display_name}</p>
+                      {member.position_title ? (
+                        <p className="text-xs text-muted">{member.position_title}</p>
+                      ) : (
+                        <p className="text-xs text-muted">No public role listed</p>
+                      )}
+                      {organizationName ? (
+                        <p className="text-xs text-muted">
+                          Linked to {organizationName}
+                          {organizationCategory === 'government' && organizationLevel
+                            ? ` · ${formatGovernmentLevel(organizationLevel)}`
+                            : ''}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted">No linked organization</p>
+                      )}
+                    </div>
+                    <span className="text-xs uppercase tracking-wide text-muted">
+                      {member.affiliation_status === 'approved'
+                        ? 'Approved'
+                        : member.affiliation_status === 'pending'
+                          ? 'Pending'
+                          : 'Revoked'}
+                    </span>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-1">
+                      <Label htmlFor={`manage-affiliation-${member.id}`} className="text-xs font-medium text-muted">
+                        Affiliation type
+                      </Label>
+                      <select
+                        id={`manage-affiliation-${member.id}`}
+                        name="affiliation_type"
+                        defaultValue={member.affiliation_type}
+                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      >
+                        <option value="community_member">Community member</option>
+                        <option value="agency_partner">Agency / organization</option>
+                        <option value="government_partner">Government representative</option>
+                      </select>
+                    </div>
+                    <div className="grid gap-1">
+                      <Label htmlFor={`manage-status-${member.id}`} className="text-xs font-medium text-muted">
+                        Affiliation status
+                      </Label>
+                      <select
+                        id={`manage-status-${member.id}`}
+                        name="affiliation_status"
+                        defaultValue={member.affiliation_status}
+                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      >
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="revoked">Revoked</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor={`manage-organization-${member.id}`} className="text-xs font-medium text-muted">
+                      Linked organization
+                    </Label>
+                    <select
+                      id={`manage-organization-${member.id}`}
+                      name="organization_id"
+                      defaultValue={member.organization_id ?? ''}
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    >
+                      <option value="">No linked organization</option>
+                      {communityOrganizations.length ? (
+                        <optgroup label="Community partners">
+                          {communityOrganizations.map((org) => (
+                            <option key={org.id} value={org.id}>
+                              {org.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ) : null}
+                      {governmentOrganizations.length ? (
+                        <optgroup label="Government teams">
+                          {governmentOrganizations.map((org) => (
+                            <option key={org.id} value={org.id}>
+                              {org.name} · {formatGovernmentLevel(org.government_level)}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ) : null}
+                    </select>
+                    <p className="text-xs text-muted">
+                      Community members ignore this field. Government partners must link to a government listing.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-1">
+                      <Label htmlFor={`manage-gov-role-${member.id}`} className="text-xs font-medium text-muted">
+                        Government role classification
+                      </Label>
+                      <select
+                        id={`manage-gov-role-${member.id}`}
+                        name="government_role_type"
+                        defaultValue={member.government_role_type ?? ''}
+                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      >
+                        <option value="">Select classification</option>
+                        <option value="staff">Public servant / staff</option>
+                        <option value="politician">Elected leadership</option>
+                      </select>
+                      <p className="text-xs text-muted">
+                        Required when approving government representatives. Leave blank for community or agency members.
+                      </p>
+                    </div>
+                    <div className="grid gap-1">
+                      <Label htmlFor={`manage-position-${member.id}`} className="text-xs font-medium text-muted">
+                        Position or role
+                      </Label>
+                      <Input
+                        id={`manage-position-${member.id}`}
+                        name="position_title"
+                        defaultValue={member.position_title ?? ''}
+                        maxLength={120}
+                        placeholder="Coordinator, Councillor, Outreach Nurse, ..."
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" size="sm" className="justify-self-start">
+                    Save changes
+                  </Button>
+                </form>
+              );
+            })}
+          </CardContent>
+        </Card>
       ) : null}
       {recentMetrics?.length ? (
         <Card>

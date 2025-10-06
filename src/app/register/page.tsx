@@ -264,8 +264,6 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         };
       }
 
-      requestedGovernmentRole = selectedGovernmentRole;
-
       if (rawGovernmentBodyId === NEW_GOVERNMENT_VALUE) {
         if (!newGovernmentName || newGovernmentName.length < 3) {
           return {
@@ -291,8 +289,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
         requestedGovernmentName = newGovernmentName;
         requestedGovernmentLevel = selectedLevel;
+        requestedGovernmentRole = selectedGovernmentRole;
       } else if (rawGovernmentBodyId && rawGovernmentBodyId !== NO_ORGANIZATION_VALUE) {
-      organizationId = rawGovernmentBodyId;
+        organizationId = rawGovernmentBodyId;
+        governmentRoleType = selectedGovernmentRole;
       } else {
         return {
           status: 'idle',
