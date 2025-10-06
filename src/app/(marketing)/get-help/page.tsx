@@ -17,7 +17,7 @@ const urgentSupports = [
   {
     title: 'Mental health crisis support',
     description:
-      'Community counsellors and harm reduction workers respond together. Supports can be anonymous; follow-up is coordinated only with consent.',
+      'Community counsellors and health outreach workers respond together. Supports can be anonymous; follow-up is coordinated only with consent.',
     contact: 'Call 905-372-1280 ext. 2410 (24/7)',
   },
 ];
