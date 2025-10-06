@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/portal/empty-state';
 import { KanbanBoard, STATUS_COLUMNS, type ColumnKey } from '@/components/portal/kanban-board';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Database } from '@/types/supabase';
+import { createReactionTally, type ReactionSummary, type PortalReactionType } from '@/lib/reactions';
 
 const METRIC_LABELS: Record<string, string> = {
   outdoor_count: 'Neighbours Outdoors',
@@ -329,6 +330,31 @@ async function loadIdeaBoard({
     return [];
   }
 
+  const ideaIds = ideaList.map((idea) => idea.id);
+  const reactionMap = new Map<string, ReactionSummary>();
+
+  if (ideaIds.length) {
+    const { data: reactionRows, error: reactionError } = await portal
+      .from('idea_reaction_totals')
+      .select('idea_id, reaction, reaction_count')
+      .in('idea_id', ideaIds)
+      .returns<{ idea_id: string; reaction: PortalReactionType; reaction_count: number }[]>();
+
+    if (reactionError) {
+      console.error('Failed to load idea reaction totals', reactionError);
+    } else {
+      for (const row of reactionRows ?? []) {
+        let summary = reactionMap.get(row.idea_id);
+        if (!summary) {
+          summary = createReactionTally();
+          reactionMap.set(row.idea_id, summary);
+        }
+        const count = Number(row.reaction_count ?? 0);
+        summary[row.reaction] = Number.isFinite(count) ? count : 0;
+      }
+    }
+  }
+
   const profileIds = Array.from(new Set(ideaList.map((idea) => idea.author_profile_id)));
 
   const { data: profiles } = await portal
@@ -364,7 +390,7 @@ async function loadIdeaBoard({
       status: idea.status,
       publicationStatus: idea.publication_status,
       tags: idea.tags ?? [],
-      voteCount: idea.vote_count ?? 0,
+      reactions: reactionMap.get(idea.id) ?? createReactionTally(),
       commentCount: idea.comment_count ?? 0,
       lastActivityAt: idea.last_activity_at,
       createdAt: idea.created_at,

@@ -9,7 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
-import { LIVED_EXPERIENCE_COPY, normalizeLivedExperience, type LivedExperienceStatus } from '@/lib/lived-experience';
+import {
+  LIVED_EXPERIENCE_COPY,
+  LIVED_EXPERIENCE_OPTIONS,
+  normalizeLivedExperience,
+  type LivedExperienceStatus,
+} from '@/lib/lived-experience';
 
 export const dynamic = 'force-dynamic';
 

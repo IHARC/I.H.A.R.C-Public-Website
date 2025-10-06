@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { HandHeart } from 'lucide-react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { copyDeck } from '@/lib/copy';
-import { UpvoteButton } from '@/components/portal/upvote-button';
 import { CommentComposer } from '@/components/portal/comment-composer';
 import { CommentThread, type CommentNode } from '@/components/portal/comment-thread';
 import { IdeaTimeline, type IdeaTimelineEvent } from '@/components/portal/idea-timeline';
@@ -22,6 +20,13 @@ import { DEFAULT_FOCUS_AREAS, PLAN_SUPPORT_THRESHOLD } from '@/lib/plans';
 import type { Database } from '@/types/supabase';
 import { PromoteIdeaCard } from '@/components/portal/promote-idea-card';
 import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import { ReactionBar } from '@/components/portal/reaction-bar';
+import {
+  countSupportReactions,
+  createReactionTally,
+  type PortalReactionType,
+  type ReactionSummary,
+} from '@/lib/reactions';
 
 type IdeaRow = Database['portal']['Tables']['ideas']['Row'];
 
@@ -241,16 +246,39 @@ export default async function IdeaDetailPage({
     }
   }
 
-  let hasVoted = false;
+  let viewerReaction: PortalReactionType | null = null;
   if (voterProfileId) {
-    const { data: voteRow } = await portal
+    const { data: voteRow, error: voteError } = await portal
       .from('votes')
-      .select('idea_id')
+      .select('reaction')
       .eq('idea_id', idea.id)
       .eq('voter_profile_id', voterProfileId)
-      .maybeSingle();
-    hasVoted = Boolean(voteRow);
+      .maybeSingle<{ reaction: PortalReactionType }>();
+
+    if (voteError) {
+      console.error('Failed to load viewer reaction', voteError);
+    } else {
+      viewerReaction = voteRow?.reaction ?? null;
+    }
   }
+
+  const { data: reactionRows, error: reactionError } = await portal
+    .from('idea_reaction_totals')
+    .select('reaction, reaction_count')
+    .eq('idea_id', idea.id)
+    .returns<{ reaction: PortalReactionType; reaction_count: number }[]>();
+
+  if (reactionError) {
+    console.error('Failed to load idea reactions', reactionError);
+  }
+
+  const reactionTotals: ReactionSummary = createReactionTally();
+  for (const row of reactionRows ?? []) {
+    const count = Number(row.reaction_count ?? 0);
+    reactionTotals[row.reaction] = Number.isFinite(count) ? count : 0;
+  }
+
+  const supportCount = countSupportReactions(reactionTotals);
 
   const metrics: IdeaMetricDisplay[] = (metricRows ?? []).map((metric: MetricRow) => ({
     id: metric.id,
@@ -376,34 +404,16 @@ export default async function IdeaDetailPage({
               ) : null}
               <TagChips tags={idea.tags ?? []} />
             </div>
-            {voterProfileId ? (
-              <UpvoteButton ideaId={idea.id} initialVotes={idea.vote_count ?? 0} initialVoted={hasVoted} />
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex" aria-disabled="true">
-                    <Button
-                      type="button"
-                      variant="default"
-                      size="sm"
-                      disabled
-                      aria-label={supportCopy.ariaLabel.replace('{{count}}', (idea.vote_count ?? 0).toString())}
-                      className="gap-2"
-                    >
-                      <HandHeart className="h-4 w-4" aria-hidden />
-                      <span className="font-semibold">{supportCopy.ctaLabel}</span>
-                      <span
-                        className="ml-1 rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold leading-none text-slate-600"
-                        aria-hidden
-                      >
-                        {idea.vote_count ?? 0}
-                      </span>
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{supportCopy.guestPrompt}</TooltipContent>
-              </Tooltip>
-            )}
+            <ReactionBar
+              endpoint={`/api/portal/ideas/${idea.id}/vote`}
+              initialActiveReaction={viewerReaction}
+              initialTotals={reactionTotals}
+              ariaLabel={`Community reactions for this idea`}
+              disabledReason={viewerProfile ? undefined : supportCopy.guestPrompt}
+              supportSummaryLabel={supportCopy.summaryLabel ?? 'Supporters'}
+              telemetryEvent={viewerProfile ? 'idea_reaction_selected' : undefined}
+              telemetryContext={{ ideaId: idea.id, location: 'idea_detail_header' }}
+            />
           </div>
         </header>
 
@@ -514,7 +524,7 @@ export default async function IdeaDetailPage({
             ideaId={idea.id}
             ideaTitle={idea.title}
             defaultSummary={planSummarySeed}
-            voteCount={idea.vote_count ?? 0}
+            voteCount={supportCount}
             supportThreshold={PLAN_SUPPORT_THRESHOLD}
             infoComplete={infoComplete}
             hasVerifiedSponsor={hasVerifiedSponsor}
@@ -526,7 +536,7 @@ export default async function IdeaDetailPage({
         <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">How to help</h2>
           <p className="text-sm text-muted">
-            Ask a question • Suggest an improvement • Show your support (vote).
+            Ask a question • Suggest an improvement • Add a reaction so neighbours see what resonates.
           </p>
         </section>
 

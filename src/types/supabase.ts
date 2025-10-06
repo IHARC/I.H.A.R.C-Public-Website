@@ -1489,16 +1489,19 @@ export type Database = {
         Row: {
           plan_update_id: string;
           voter_profile_id: string;
+          reaction: Database["portal"]["Enums"]["reaction_type"];
           created_at: string;
         };
         Insert: {
           plan_update_id: string;
           voter_profile_id: string;
+          reaction?: Database["portal"]["Enums"]["reaction_type"];
           created_at?: string;
         };
         Update: {
           plan_update_id?: string;
           voter_profile_id?: string;
+          reaction?: Database["portal"]["Enums"]["reaction_type"];
           created_at?: string;
         };
         Relationships: [
@@ -1581,16 +1584,19 @@ export type Database = {
         Row: {
           idea_id: string;
           voter_profile_id: string;
+          reaction: Database["portal"]["Enums"]["reaction_type"];
           created_at: string;
         };
         Insert: {
           idea_id: string;
           voter_profile_id: string;
+          reaction?: Database["portal"]["Enums"]["reaction_type"];
           created_at?: string;
         };
         Update: {
           idea_id?: string;
           voter_profile_id?: string;
+          reaction?: Database["portal"]["Enums"]["reaction_type"];
           created_at?: string;
         };
         Relationships: [
@@ -1862,7 +1868,22 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      idea_reaction_totals: {
+        Row: {
+          idea_id: string;
+          reaction: Database["portal"]["Enums"]["reaction_type"];
+          reaction_count: number;
+        };
+        Relationships: [];
+      };
+      plan_update_reaction_totals: {
+        Row: {
+          plan_update_id: string;
+          reaction: Database["portal"]["Enums"]["reaction_type"];
+          reaction_count: number;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       current_profile_id: {
@@ -1910,6 +1931,17 @@ export type Database = {
         | "accepted"
         | "not_moving_forward"
         | "added_to_plan";
+      reaction_type:
+        | "like"
+        | "love"
+        | "hooray"
+        | "rocket"
+        | "eyes"
+        | "laugh"
+        | "confused"
+        | "sad"
+        | "angry"
+        | "minus_one";
     };
     CompositeTypes: {
       [_ in never]: never;

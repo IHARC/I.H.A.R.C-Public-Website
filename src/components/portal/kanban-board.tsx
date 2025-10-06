@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/portal/status-badge';
 import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
 import type { IdeaSummary } from '@/components/portal/idea-card';
+import { countSupportReactions, REACTION_DEFINITIONS } from '@/lib/reactions';
 
 export const STATUS_COLUMNS = [
   { key: 'new', label: 'New', limit: Infinity },
@@ -226,6 +227,14 @@ function KanbanCard({
   onDragStart: () => void;
   onDragEnd: () => void;
 }) {
+  const supportCount = countSupportReactions(idea.reactions);
+  const leadingReaction = REACTION_DEFINITIONS.map((definition) => ({
+    definition,
+    count: idea.reactions[definition.type] ?? 0,
+  }))
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.count - a.count)[0] ?? null;
+
   return (
     <div
       draggable={canDrag}
@@ -240,7 +249,10 @@ function KanbanCard({
     >
       <div className="flex items-center justify-between gap-2 text-xs text-muted">
         <StatusBadge status={idea.status} />
-        <span>👍 {idea.voteCount}</span>
+        <span className="inline-flex items-center gap-1" aria-label="Positive reactions">
+          <span aria-hidden>{leadingReaction ? leadingReaction.definition.emoji : '👍'}</span>
+          <span>{supportCount}</span>
+        </span>
       </div>
       <h3 className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{idea.title}</h3>
       <p className="mt-1 line-clamp-3 text-xs text-slate-600 dark:text-slate-300">

@@ -199,8 +199,8 @@ function DashboardPlaceholder() {
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">How to contribute</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Share solution ideas, up-vote promising approaches, and flag content needing moderator attention. Official agency responses are labelled for clarity, and proposals must align with humane, evidence-based care.
-        </p>
+            Share solution ideas, react to promising approaches, and flag content needing moderator attention. Official agency responses are labelled for clarity, and proposals must align with humane, evidence-based care.
+          </p>
         </div>
       </section>
     </div>

@@ -7,10 +7,16 @@ import type { Database } from '@/types/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlanUpdateComposer } from '@/components/portal/plan-update-composer';
-import { PlanUpdateSupportButton } from '@/components/portal/plan-update-support-button';
 import { PlanUpdateModeratorActions } from '@/components/portal/plan-update-moderation';
 import { Button } from '@/components/ui/button';
 import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
+import { ReactionBar } from '@/components/portal/reaction-bar';
+import {
+  countSupportReactions,
+  createReactionTally,
+  type PortalReactionType,
+  type ReactionSummary,
+} from '@/lib/reactions';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +62,8 @@ type PlanUpdateWithSupport = (UpdateRow & {
   } | null;
 }) & {
   support_count: number;
-  viewer_supported: boolean;
+  reaction_totals: ReactionSummary;
+  viewer_reaction: PortalReactionType | null;
 };
 
 function formatDate(value: string) {
@@ -113,32 +120,57 @@ export default async function PlanDetailPage({
     .sort((a, b) => a.parsed - b.parsed)[0] ?? null;
 
   const updateIds = plan.updates.map((update) => update.id);
-  const supportCountMap = new Map<string, number>();
-  const viewerSupportSet = new Set<string>();
+  const reactionTotalsMap = new Map<string, ReactionSummary>();
+  const viewerReactionMap = new Map<string, PortalReactionType>();
 
   if (updateIds.length) {
-    const { data: voteRows, error: voteError } = await portal
-      .from('plan_update_votes')
-      .select('plan_update_id, voter_profile_id')
-      .in('plan_update_id', updateIds);
+    const { data: reactionRows, error: reactionError } = await portal
+      .from('plan_update_reaction_totals')
+      .select('plan_update_id, reaction, reaction_count')
+      .in('plan_update_id', updateIds)
+      .returns<{ plan_update_id: string; reaction: PortalReactionType; reaction_count: number }[]>();
 
-    if (voteError) {
-      console.error('Failed to load plan update votes', voteError);
+    if (reactionError) {
+      console.error('Failed to load plan update reactions', reactionError);
+    } else {
+      for (const row of reactionRows ?? []) {
+        let summary = reactionTotalsMap.get(row.plan_update_id);
+        if (!summary) {
+          summary = createReactionTally();
+          reactionTotalsMap.set(row.plan_update_id, summary);
+        }
+        const count = Number(row.reaction_count ?? 0);
+        summary[row.reaction] = Number.isFinite(count) ? count : 0;
+      }
     }
 
-    for (const vote of voteRows ?? []) {
-      supportCountMap.set(vote.plan_update_id, (supportCountMap.get(vote.plan_update_id) ?? 0) + 1);
-      if (viewerProfile && vote.voter_profile_id === viewerProfile.id) {
-        viewerSupportSet.add(vote.plan_update_id);
+    if (viewerProfile) {
+      const { data: viewerRows, error: viewerError } = await portal
+        .from('plan_update_votes')
+        .select('plan_update_id, reaction')
+        .eq('voter_profile_id', viewerProfile.id)
+        .in('plan_update_id', updateIds)
+        .returns<{ plan_update_id: string; reaction: PortalReactionType }[]>();
+
+      if (viewerError) {
+        console.error('Failed to load viewer plan update reactions', viewerError);
+      } else {
+        for (const row of viewerRows ?? []) {
+          viewerReactionMap.set(row.plan_update_id, row.reaction);
+        }
       }
     }
   }
 
-  const planUpdates: PlanUpdateWithSupport[] = plan.updates.map((update) => ({
-    ...update,
-    support_count: supportCountMap.get(update.id) ?? 0,
-    viewer_supported: viewerProfile ? viewerSupportSet.has(update.id) : false,
-  }));
+  const planUpdates: PlanUpdateWithSupport[] = plan.updates.map((update) => {
+    const totals = reactionTotalsMap.get(update.id) ?? createReactionTally();
+    return {
+      ...update,
+      reaction_totals: totals,
+      support_count: countSupportReactions(totals),
+      viewer_reaction: viewerProfile ? viewerReactionMap.get(update.id) ?? null : null,
+    };
+  });
   const openUpdateCount = planUpdates.filter((update) => update.status === 'open').length;
 
   return (
@@ -265,25 +297,17 @@ export default async function PlanDetailPage({
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">{update.proposed_change}</h3>
-                      {viewerProfile ? (
-                        <PlanUpdateSupportButton
-                          updateId={update.id}
-                          initialSupported={update.viewer_supported}
-                          initialSupportCount={update.support_count}
-                        />
-                      ) : (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="inline-flex" aria-disabled="true">
-                              <Button size="sm" variant="outline" disabled>
-                                <span className="mr-2">Support update</span>
-                                <span className="font-semibold">{update.support_count}</span>
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>Sign in to take part.</TooltipContent>
-                        </Tooltip>
-                      )}
+                      <ReactionBar
+                        endpoint={`/api/portal/plans/updates/${update.id}/vote`}
+                        initialActiveReaction={update.viewer_reaction}
+                        initialTotals={update.reaction_totals}
+                        ariaLabel={`Reactions for ${update.proposed_change}`}
+                        disabledReason={viewerProfile ? undefined : 'Sign in to react to plan updates.'}
+                        size="sm"
+                        supportSummaryLabel="Supporters"
+                        telemetryEvent={viewerProfile ? 'plan_update_reaction_selected' : undefined}
+                        telemetryContext={{ planId: plan.id, updateId: update.id }}
+                      />
                     </div>
                     <UpdateSection label="Problem" value={update.problem} />
                     <UpdateSection label="Evidence" value={update.evidence} />

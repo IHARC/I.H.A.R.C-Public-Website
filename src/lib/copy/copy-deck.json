@@ -26,10 +26,11 @@
   },
   "ideas": {
     "support": {
-      "ctaLabel": "Support this idea",
-      "tooltip": "One click shows support.",
-      "guestPrompt": "Sign in to show your support.",
-      "ariaLabel": "Support this idea. Current support count: {{count}}."
+      "ctaLabel": "React to this idea",
+      "tooltip": "Choose an emoji to show how this idea lands for you.",
+      "guestPrompt": "Sign in to add a reaction.",
+      "ariaLabel": "Community reactions. Current supporter count: {{count}}.",
+      "summaryLabel": "Supporters"
     },
     "quick": {
       "name": "Quick Idea",

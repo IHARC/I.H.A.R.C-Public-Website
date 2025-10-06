@@ -43,7 +43,7 @@ export default function MarketingHomePage() {
               href="/command-center/ideas?sort=top"
               className="rounded-full border border-outline/30 px-6 py-3 text-center text-sm font-semibold text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
             >
-              Comment and up-vote ideas
+              Comment and react to ideas
             </Link>
             <Link
               href="/command-center/roadmap"

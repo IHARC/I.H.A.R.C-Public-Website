@@ -115,7 +115,7 @@ export function PromoteIdeaCard({
             Working Plan promotion
           </h2>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-            Needs {supportThreshold}+ supports and every section completed, or a verified partner sponsor.
+            Needs {supportThreshold}+ positive reactions and every section completed, or a verified partner sponsor.
           </p>
         </div>
         <Tooltip>
@@ -145,7 +145,7 @@ export function PromoteIdeaCard({
           ) : (
             <AlertCircle className="h-4 w-4 text-amber-500" />
           )}
-          <span>{voteCount} supports (needs {supportThreshold})</span>
+          <span>{voteCount} positive reactions (needs {supportThreshold})</span>
         </li>
         <li className="flex items-center gap-2">
           {infoComplete ? (
