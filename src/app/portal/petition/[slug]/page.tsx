@@ -181,7 +181,9 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
 
       <section className="rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm text-sm text-on-surface/70">
         <p>
-          After signing you will receive a confirmation email. Moderators may contact petition signers about upcoming collaboration sessions only if you opt in. Your name is stored securely and only visible to portal moderators.
+          After signing you will receive a confirmation message using the email or phone number you share. Moderators may
+          contact petition signers about upcoming collaboration sessions only if you opt in. Your name is stored securely
+          and only visible to portal moderators.
         </p>
         {(() => {
           const signedAt = existingSignature?.created_at ?? viewerProfile?.petition_signed_at;
@@ -283,7 +285,8 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
     <div className="space-y-5 rounded-2xl border border-primary/15 bg-surface-container p-5">
       <PetitionSignForm action={handleSign} petitionId={petition.id} defaults={signerDefaults} />
       <p className="text-xs text-on-surface/60">
-        After signing you will receive a confirmation email. Moderators may follow up only if you opt in to additional contact.
+        After signing you will receive a confirmation message using the email or phone number you share. Moderators may
+        follow up only if you opt in to additional contact.
       </p>
     </div>
   );

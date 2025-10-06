@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useId } from 'react';
+import type { InputHTMLAttributes } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -76,23 +77,37 @@ export function PetitionSignForm({ action, petitionId, defaults }: PetitionSignF
           required
           defaultValue={defaults?.lastName}
         />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
         <TextField
           type="email"
           name="email"
           label="Email"
           autoComplete="email"
-          className="md:col-span-2"
-          required
           defaultValue={defaults?.email}
         />
         <TextField
-          name="postal_code"
-          label="Postal code"
-          autoComplete="postal-code"
-          className="md:col-span-2"
-          required
+          type="tel"
+          name="phone"
+          label="Phone number"
+          autoComplete="tel"
+          inputMode="tel"
+          placeholder="+16475551234"
+          defaultValue={defaults?.phone}
         />
       </div>
+      <p className="text-xs text-on-surface/60">
+        Share an email, phone number, or both so moderators can confirm petition delivery details if needed.
+      </p>
+
+      <TextField
+        name="postal_code"
+        label="Postal code"
+        autoComplete="postal-code"
+        className="md:max-w-xs"
+        required
+      />
 
       <fieldset aria-labelledby={displayFieldsetId} className="space-y-3 rounded-xl border border-outline/20 p-4">
         <legend id={displayFieldsetId} className="text-sm font-semibold text-on-surface">
@@ -135,7 +150,7 @@ export function PetitionSignForm({ action, petitionId, defaults }: PetitionSignF
         <Checkbox id={updatesId} name="petition_updates" className="mt-1" />
         <div className="space-y-1">
           <Label htmlFor={updatesId} className="text-sm font-medium text-on-surface">
-            Email me petition updates and Council outcomes
+            Send me petition updates and Council outcomes
           </Label>
           <p className="text-xs text-on-surface/60">
             Moderators will only reach out about declaration milestones or collaboration sessions you opt into.
@@ -161,9 +176,21 @@ type TextFieldProps = {
   autoComplete?: string;
   required?: boolean;
   defaultValue?: string;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  placeholder?: string;
 };
 
-function TextField({ name, label, type = 'text', className, autoComplete, required, defaultValue }: TextFieldProps) {
+function TextField({
+  name,
+  label,
+  type = 'text',
+  className,
+  autoComplete,
+  required,
+  defaultValue,
+  inputMode,
+  placeholder,
+}: TextFieldProps) {
   const id = useId();
   return (
     <div className={className}>
@@ -178,6 +205,8 @@ function TextField({ name, label, type = 'text', className, autoComplete, requir
         required={required}
         defaultValue={defaultValue}
         className="mt-2"
+        inputMode={inputMode}
+        placeholder={placeholder}
       />
     </div>
   );

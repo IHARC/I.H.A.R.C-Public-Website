@@ -998,7 +998,8 @@ export type Database = {
       profile_invites: {
         Row: {
           id: string;
-          email: string;
+          email?: string | null;
+          phone?: string | null;
           display_name: string | null;
           position_title: string | null;
           affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
@@ -1034,7 +1035,8 @@ export type Database = {
         };
         Update: {
           id?: string;
-          email?: string;
+          email?: string | null;
+          phone?: string | null;
           display_name?: string | null;
           position_title?: string | null;
           affiliation_type?: Database["portal"]["Enums"]["affiliation_type"];
@@ -1140,7 +1142,8 @@ export type Database = {
           withdrawn_at: string | null;
           first_name: string;
           last_name: string;
-          email: string;
+          email: string | null;
+          phone: string | null;
           postal_code: string;
           display_preference: Database["portal"]["Enums"]["petition_display_preference"];
         };
@@ -1155,7 +1158,8 @@ export type Database = {
           withdrawn_at?: string | null;
           first_name: string;
           last_name: string;
-          email: string;
+          email?: string | null;
+          phone?: string | null;
           postal_code: string;
           display_preference: Database["portal"]["Enums"]["petition_display_preference"];
         };
@@ -1170,7 +1174,8 @@ export type Database = {
           withdrawn_at?: string | null;
           first_name?: string;
           last_name?: string;
-          email?: string;
+          email?: string | null;
+          phone?: string | null;
           postal_code?: string;
           display_preference?: Database["portal"]["Enums"]["petition_display_preference"];
         };

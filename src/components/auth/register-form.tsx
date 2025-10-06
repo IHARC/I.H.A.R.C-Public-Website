@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,9 +14,16 @@ import { AuthDivider } from '@/components/auth/auth-divider';
 import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 import { LIVED_EXPERIENCE_COPY, LIVED_EXPERIENCE_OPTIONS, type LivedExperienceStatus } from '@/lib/lived-experience';
 
-type FormState = {
+export type FormState = {
+  status: 'idle' | 'otp_pending';
+  contactMethod?: ContactMethod;
   error?: string;
+  phone?: string;
+  maskedPhone?: string;
+  message?: string;
 };
+
+type ContactMethod = 'email' | 'phone';
 
 type Organization = {
   id: string;
@@ -27,67 +34,213 @@ type RegisterFormProps = {
   organizations: Organization[];
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   nextPath: string;
-  initialError?: string | null;
+  initialState: FormState;
 };
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
-export function RegisterForm({ organizations, action, nextPath, initialError }: RegisterFormProps) {
-  const [state, formAction] = useActionState(action, { error: initialError ?? undefined });
+
+export function RegisterForm({ organizations, action, nextPath, initialState }: RegisterFormProps) {
+  const [state, formAction] = useActionState(action, initialState);
   const [selectedOrg, setSelectedOrg] = useState(NO_ORGANIZATION_VALUE);
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>('none');
   const [substanceUseExperience, setSubstanceUseExperience] = useState<LivedExperienceStatus>('none');
+  const [contactMethod, setContactMethod] = useState<ContactMethod>(initialState.contactMethod ?? 'email');
+
+  useEffect(() => {
+    if (state.contactMethod && state.contactMethod !== contactMethod) {
+      setContactMethod(state.contactMethod);
+    }
+  }, [state.contactMethod, contactMethod]);
 
   const hideRoleField = affiliationType === 'community_member';
+  const otpPending = state.status === 'otp_pending';
 
   return (
     <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-outline/40 bg-surface p-8 shadow-subtle">
+      {otpPending ? (
+        <OtpVerificationStep state={state} />
+      ) : (
+        <RegistrationFields
+          organizations={organizations}
+          selectedOrg={selectedOrg}
+          onSelectOrg={setSelectedOrg}
+          affiliationType={affiliationType}
+          onAffiliationChange={(value) => setAffiliationType(value as AffiliationType)}
+          hideRoleField={hideRoleField}
+          homelessnessExperience={homelessnessExperience}
+          onHomelessnessChange={(value) => setHomelessnessExperience(value as LivedExperienceStatus)}
+          substanceUseExperience={substanceUseExperience}
+          onSubstanceUseChange={(value) => setSubstanceUseExperience(value as LivedExperienceStatus)}
+          contactMethod={contactMethod}
+          onContactMethodChange={(value) => setContactMethod(value as ContactMethod)}
+          nextPath={nextPath}
+        />
+      )}
+
+      {state.error ? (
+        <Alert variant="destructive">
+          <AlertTitle>{otpPending ? 'We could not verify that code' : 'We could not finish registration'}</AlertTitle>
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!state.error && state.message ? (
+        <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
+          <AlertDescription>{state.message}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {otpPending ? (
+        <>
+          <input type="hidden" name="contact_method" value="phone" />
+          <input type="hidden" name="otp_phone" value={state.phone ?? ''} />
+        </>
+      ) : null}
+
+      <SubmitButton otpPending={otpPending} />
+    </form>
+  );
+}
+
+function OtpVerificationStep({ state }: { state: FormState }) {
+  const codeFieldId = useId();
+  const phoneHint = state.maskedPhone ?? state.phone ?? 'your phone number';
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold text-on-surface">Confirm your phone number</h2>
+        <p className="text-sm text-muted">
+          We texted a 6-digit code to {phoneHint}. Enter the code below to finish creating your account. Codes expire
+          after 5 minutes.
+        </p>
+        <p className="text-xs text-muted">
+          Need to switch numbers? Reload this page to start again with a different phone number.
+        </p>
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor={codeFieldId}>Verification code</Label>
+        <Input
+          id={codeFieldId}
+          name="otp_code"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="one-time-code"
+          placeholder="123456"
+          required
+          maxLength={6}
+        />
+        <p className="text-xs text-muted">Enter numbers only. We will verify instantly after submission.</p>
+      </div>
+    </div>
+  );
+}
+
+type RegistrationFieldsProps = {
+  organizations: Organization[];
+  selectedOrg: string;
+  onSelectOrg: (value: string) => void;
+  affiliationType: AffiliationType;
+  onAffiliationChange: (value: string) => void;
+  hideRoleField: boolean;
+  homelessnessExperience: LivedExperienceStatus;
+  onHomelessnessChange: (value: string) => void;
+  substanceUseExperience: LivedExperienceStatus;
+  onSubstanceUseChange: (value: string) => void;
+  contactMethod: ContactMethod;
+  onContactMethodChange: (value: string) => void;
+  nextPath: string;
+};
+
+function RegistrationFields(props: RegistrationFieldsProps) {
+  const {
+    organizations,
+    selectedOrg,
+    onSelectOrg,
+    affiliationType,
+    onAffiliationChange,
+    hideRoleField,
+    homelessnessExperience,
+    onHomelessnessChange,
+    substanceUseExperience,
+    onSubstanceUseChange,
+    contactMethod,
+    onContactMethodChange,
+    nextPath,
+  } = props;
+
+  return (
+    <div className="grid gap-6">
       <div className="space-y-3">
         <GoogleAuthButton intent="register" nextPath={nextPath} />
         <AuthDivider label="or continue by sharing details" />
       </div>
+
+      <fieldset className="space-y-3 rounded-xl border border-outline/30 p-4">
+        <legend className="text-sm font-semibold text-on-surface">How should we reach you about your account?</legend>
+        <RadioGroup name="contact_method" value={contactMethod} onValueChange={onContactMethodChange} className="grid gap-3 md:grid-cols-2">
+          <ContactMethodOption
+            id="contact-email"
+            value="email"
+            title="Email"
+            description="Receive confirmation links and updates at your inbox."
+          />
+          <ContactMethodOption
+            id="contact-phone"
+            value="phone"
+            title="Phone"
+            description="We will text a 6-digit verification code to sign you in."
+          />
+        </RadioGroup>
+      </fieldset>
+
       <div className="grid gap-2">
         <Label htmlFor="display_name">Display name</Label>
-        <Input id="display_name" name="display_name" required maxLength={80} autoComplete="nickname" placeholder="Name neighbours will see" />
+        <Input
+          id="display_name"
+          name="display_name"
+          required
+          maxLength={80}
+          autoComplete="nickname"
+          placeholder="Name neighbours will see"
+        />
         <p className="text-xs text-muted">Use first names or community roles. No identifying neighbour information.</p>
       </div>
 
       <div className="grid gap-3">
         <Label>How are you joining the Command Center?</Label>
-        <RadioGroup name="affiliation_type" value={affiliationType} onValueChange={(value) => setAffiliationType(value as AffiliationType)} className="grid gap-3 md:grid-cols-3">
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
-            <RadioGroupItem id="affiliation-community" value="community_member" className="mt-1" />
-            <span>
-              Community member
-              <span className="mt-1 block text-xs font-normal text-muted">
-                Share ideas, support plans, and collaborate as a neighbour.
-              </span>
-            </span>
-          </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
-            <RadioGroupItem id="affiliation-agency" value="agency_partner" className="mt-1" />
-            <span>
-              Agency / organization
-              <span className="mt-1 block text-xs font-normal text-muted">
-                Request verified posting on behalf of a partner organization.
-              </span>
-            </span>
-          </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
-            <RadioGroupItem id="affiliation-government" value="government_partner" className="mt-1" />
-            <span>
-              Government representative
-              <span className="mt-1 block text-xs font-normal text-muted">
-                Join as municipal, regional, or provincial staff or elected leadership.
-              </span>
-            </span>
-          </label>
+        <RadioGroup
+          name="affiliation_type"
+          value={affiliationType}
+          onValueChange={onAffiliationChange}
+          className="grid gap-3 md:grid-cols-3"
+        >
+          <AffiliationOption
+            id="affiliation-community"
+            value="community_member"
+            title="Community member"
+            description="Share ideas, support plans, and collaborate as a neighbour."
+          />
+          <AffiliationOption
+            id="affiliation-agency"
+            value="agency_partner"
+            title="Agency / organization"
+            description="Request verified posting on behalf of a partner organization."
+          />
+          <AffiliationOption
+            id="affiliation-government"
+            value="government_partner"
+            title="Government representative"
+            description="Join as municipal, regional, or provincial staff or elected leadership."
+          />
         </RadioGroup>
         {affiliationType !== 'community_member' ? (
           <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
             <AlertTitle>Pending verification</AlertTitle>
             <AlertDescription>
-              An IHARC administrator will confirm your role before activating official posting privileges. You can still participate as a community member while we verify.
+              An IHARC administrator will confirm your role before activating official posting privileges. You can still
+              participate as a community member while we verify.
             </AlertDescription>
           </Alert>
         ) : (
@@ -99,7 +252,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
 
       <div className="grid gap-2">
         <Label htmlFor="organization_id">Organization (optional)</Label>
-        <Select name="organization_id" value={selectedOrg} onValueChange={setSelectedOrg}>
+        <Select name="organization_id" value={selectedOrg} onValueChange={onSelectOrg}>
           <SelectTrigger id="organization_id">
             <SelectValue placeholder="Independent community member" />
           </SelectTrigger>
@@ -134,11 +287,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
       <div className="grid gap-4">
         <div className="space-y-2">
           <Label htmlFor="homelessness_experience">Housing lived experience badge</Label>
-          <Select
-            name="homelessness_experience"
-            value={homelessnessExperience}
-            onValueChange={(value) => setHomelessnessExperience(value as LivedExperienceStatus)}
-          >
+          <Select name="homelessness_experience" value={homelessnessExperience} onValueChange={onHomelessnessChange}>
             <SelectTrigger id="homelessness_experience">
               <SelectValue placeholder="Select housing lived experience" />
             </SelectTrigger>
@@ -152,16 +301,13 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
           </Select>
           <ExperienceHelper selectedValue={homelessnessExperience} />
           <p className="text-xs text-muted">
-            Share only what feels right. Badges appear beside your contributions to honour lived expertise with homelessness.
+            Share only what feels right. Badges appear beside your contributions to honour lived expertise with
+            homelessness.
           </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="substance_use_experience">Substance use lived experience badge</Label>
-          <Select
-            name="substance_use_experience"
-            value={substanceUseExperience}
-            onValueChange={(value) => setSubstanceUseExperience(value as LivedExperienceStatus)}
-          >
+          <Select name="substance_use_experience" value={substanceUseExperience} onValueChange={onSubstanceUseChange}>
             <SelectTrigger id="substance_use_experience">
               <SelectValue placeholder="Select substance use lived experience" />
             </SelectTrigger>
@@ -180,33 +326,108 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
-      </div>
+      {contactMethod === 'email' ? (
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
+        </div>
+      ) : (
+        <div className="grid gap-2">
+          <Label htmlFor="phone">Phone number</Label>
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            required
+            placeholder="+16475551234"
+          />
+          <p className="text-xs text-muted">Include your country code so we can text the verification code.</p>
+        </div>
+      )}
 
       <div className="grid gap-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" autoComplete="new-password" required minLength={8} placeholder="Minimum 8 characters" />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          placeholder="Minimum 8 characters"
+        />
       </div>
 
-      {state.error ? (
-        <Alert variant="destructive">
-          <AlertTitle>We could not finish registration</AlertTitle>
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <SubmitButton />
-    </form>
+      <div className="grid gap-2">
+        <Label htmlFor="confirm_password">Confirm password</Label>
+        <Input
+          id="confirm_password"
+          name="confirm_password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          placeholder="Re-enter your password"
+        />
+      </div>
+    </div>
   );
 }
 
-function SubmitButton() {
+type ContactMethodOptionProps = {
+  id: string;
+  value: ContactMethod;
+  title: string;
+  description: string;
+};
+
+function ContactMethodOption({ id, value, title, description }: ContactMethodOptionProps) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <span>
+        {title}
+        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+      </span>
+    </label>
+  );
+}
+
+type AffiliationOptionProps = {
+  id: string;
+  value: AffiliationType;
+  title: string;
+  description: string;
+};
+
+function AffiliationOption({ id, value, title, description }: AffiliationOptionProps) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <span>
+        {title}
+        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+      </span>
+    </label>
+  );
+}
+
+function SubmitButton({ otpPending }: { otpPending: boolean }) {
   const { pending } = useFormStatus();
+  const label = otpPending ? 'Verify code' : 'Create account';
+  const pendingLabel = otpPending ? 'Verifying code...' : 'Creating account...';
+
   return (
     <Button type="submit" disabled={pending} className="w-full justify-center">
-      {pending ? 'Creating account...' : 'Create account'}
+      {pending ? pendingLabel : label}
     </Button>
   );
 }

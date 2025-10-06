@@ -6,7 +6,9 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { scanContentForSafety } from '@/lib/safety';
 import { logAuditEvent } from '@/lib/audit';
 import { normalizeNamePart } from '@/lib/names';
-import { deriveSignerDefaults, normalizeEmail } from '@/lib/petition/signature';
+import { deriveSignerDefaults } from '@/lib/petition/signature';
+import { normalizeEmail } from '@/lib/email';
+import { normalizePhoneNumber } from '@/lib/phone';
 import type { Database } from '@/types/supabase';
 
 export type PetitionActionResult = {
@@ -50,6 +52,7 @@ export async function signPetition(
   const firstNameFromForm = normalizeNamePart(formData.get('first_name'));
   const lastNameFromForm = normalizeNamePart(formData.get('last_name'));
   const emailFromForm = normalizeEmail(formData.get('email'));
+  const phoneFromForm = normalizePhoneNumber(formData.get('phone'));
   const postalCodeRaw = (formData.get('postal_code') as string | null)?.trim();
   const displayPreferenceRaw = (formData.get('display_preference') as string | null) ?? '';
   const statementInput = (formData.get('statement') as string | null) ?? '';
@@ -89,11 +92,13 @@ export async function signPetition(
       firstName: defaultFirstName,
       lastName: defaultLastName,
       email: defaultEmail,
+      phone: defaultPhone,
     } = deriveSignerDefaults(user, profile) ?? {};
 
     const firstName = firstNameFromForm ?? defaultFirstName;
     const lastName = lastNameFromForm ?? defaultLastName;
     const email = emailFromForm ?? defaultEmail;
+    const phone = phoneFromForm ?? defaultPhone;
 
     if (!firstName) {
       return { status: 'error', message: 'Enter your first name to continue.' };
@@ -101,7 +106,10 @@ export async function signPetition(
     if (!lastName) {
       return { status: 'error', message: 'Enter your last name to continue.' };
     }
-    if (!email || !validateEmail(email)) {
+    if (!email && !phone) {
+      return { status: 'error', message: 'Share an email or phone number so we can confirm delivery with you.' };
+    }
+    if (email && !validateEmail(email)) {
       return { status: 'error', message: 'Enter a valid email address.' };
     }
 
@@ -116,6 +124,7 @@ export async function signPetition(
       first_name: firstName,
       last_name: lastName,
       email,
+      phone,
       postal_code: postalCode,
       display_preference: displayPreferenceRaw as DisplayPreference,
     });

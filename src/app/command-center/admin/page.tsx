@@ -194,7 +194,7 @@ export default async function CommandCenterAdminPage() {
     });
 
     revalidatePath('/command-center/admin');
-    revalidatePath('/solutions/profile');
+    revalidatePath('/portal/profile');
     revalidatePath('/register');
   }
 

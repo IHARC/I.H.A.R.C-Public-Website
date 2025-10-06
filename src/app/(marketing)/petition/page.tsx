@@ -120,7 +120,8 @@ export default async function PetitionPage() {
         <div className="space-y-5 rounded-2xl border border-primary/20 bg-surface-container p-5">
           <PetitionSignForm action={handleSign} petitionId={petition.id} defaults={signerDefaults} />
           <p className="text-xs text-on-surface/60">
-            After signing you will receive a confirmation email. Moderators only follow up if you opt into petition updates.
+            After signing you will receive a confirmation message using the email or phone number you share. Moderators
+            only follow up if you opt into petition updates.
           </p>
         </div>
       ) : (

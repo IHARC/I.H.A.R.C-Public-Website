@@ -26,7 +26,7 @@ export async function UserNav() {
 
   const menuItems: Array<{ href: string; label: string }> = [
     { href: '/portal/ideas', label: 'Portal' },
-    { href: '/solutions/profile', label: 'Account' },
+    { href: '/portal/profile', label: 'Profile' },
     ...(showModeration ? [{ href: '/solutions/mod', label: 'Moderation' }] : []),
     ...(showAdmin ? [{ href: '/command-center/admin', label: 'Admin' }] : []),
   ];

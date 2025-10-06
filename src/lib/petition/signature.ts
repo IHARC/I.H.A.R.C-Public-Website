@@ -1,11 +1,14 @@
 import type { User } from '@supabase/supabase-js';
 import type { PortalProfile } from '@/lib/profile';
 import { resolveNameParts, type NameParts } from '@/lib/names';
+import { normalizeEmail } from '@/lib/email';
+import { normalizePhoneNumber } from '@/lib/phone';
 
 export type PetitionSignerDefaults = {
   firstName?: string;
   lastName?: string;
   email?: string;
+  phone?: string;
 };
 
 type Metadata = Record<string, unknown>;
@@ -26,15 +29,6 @@ function pickFirstNonEmptyString(...values: Array<unknown>): string | undefined 
   }
 
   return undefined;
-}
-
-export function normalizeEmail(value: unknown): string | undefined {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed.toLowerCase() : undefined;
 }
 
 function deriveNamePartsFromSources(metadata: Metadata, profile: PortalProfile | null): NameParts {
@@ -60,10 +54,12 @@ export function deriveSignerDefaults(user: User | null, profile: PortalProfile |
   const metadata = getMetadata(user);
   const { firstName, lastName } = deriveNamePartsFromSources(metadata, profile);
   const email = normalizeEmail(metadata.email) ?? normalizeEmail(user.email);
+  const phone = normalizePhoneNumber(metadata.phone) ?? normalizePhoneNumber(metadata.phone_number) ?? normalizePhoneNumber(user.phone);
 
   return {
     firstName,
     lastName,
     email,
+    phone,
   };
 }

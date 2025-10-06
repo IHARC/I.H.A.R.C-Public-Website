@@ -3,17 +3,25 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LoginForm } from '@/components/auth/login-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
+import { normalizePhoneNumber } from '@/lib/phone';
 
 export const dynamic = 'force-dynamic';
 
+type ContactMethod = 'email' | 'phone';
+
 type FormState = {
   error?: string;
+  contactMethod?: ContactMethod;
 };
 
 type SearchParams = Record<string, string | string[]>;
 
 type LoginPageProps = {
   searchParams?: Promise<SearchParams>;
+};
+
+const INITIAL_FORM_STATE: FormState = {
+  contactMethod: 'email',
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -32,30 +40,62 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(nextPath);
   }
 
+  const initialState: FormState = initialError
+    ? { ...INITIAL_FORM_STATE, error: initialError }
+    : INITIAL_FORM_STATE;
+
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
     'use server';
 
-    const email = (formData.get('email') as string | null)?.trim().toLowerCase();
+    const contactMethod = normalizeContactMethod(formData.get('contact_method'));
     const password = (formData.get('password') as string | null) ?? '';
 
-    if (!email) {
-      return { error: 'Enter the email you used to register.' };
-    }
     if (!password) {
-      return { error: 'Enter your password to continue.' };
+      return { error: 'Enter your password to continue.', contactMethod };
+    }
+
+    if (contactMethod === 'email') {
+      const email = (formData.get('email') as string | null)?.trim().toLowerCase();
+      if (!email) {
+        return { error: 'Enter the email you used to register.', contactMethod: 'email' };
+      }
+
+      try {
+        const supa = await createSupabaseServerClient();
+        const { error } = await supa.auth.signInWithPassword({ email, password });
+        if (error) {
+          return { error: error.message, contactMethod: 'email' };
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          return { error: error.message, contactMethod: 'email' };
+        }
+        return { error: 'Unable to sign you in right now.', contactMethod: 'email' };
+      }
+
+      redirect(nextPath);
+    }
+
+    const rawPhone = (formData.get('phone') as string | null) ?? '';
+    const normalizedPhone = normalizePhoneNumber(rawPhone);
+    if (!normalizedPhone) {
+      return {
+        error: 'Enter the phone number you used to register (include country code).',
+        contactMethod: 'phone',
+      };
     }
 
     try {
       const supa = await createSupabaseServerClient();
-      const { error } = await supa.auth.signInWithPassword({ email, password });
+      const { error } = await supa.auth.signInWithPassword({ phone: normalizedPhone, password });
       if (error) {
-        return { error: error.message };
+        return { error: error.message, contactMethod: 'phone' };
       }
     } catch (error) {
       if (error instanceof Error) {
-        return { error: error.message };
+        return { error: error.message, contactMethod: 'phone' };
       }
-      return { error: 'Unable to sign you in right now.' };
+      return { error: 'Unable to sign you in right now.', contactMethod: 'phone' };
     }
 
     redirect(nextPath);
@@ -69,7 +109,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           Sign in to add reactions to ideas, leave respectful comments, and manage community project board commitments.
         </p>
       </div>
-      <LoginForm action={loginUser} nextPath={nextPath} initialError={initialError} />
+      <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} />
     </div>
   );
 }
@@ -82,4 +122,11 @@ function getAuthErrorMessage(code: AuthErrorCode): string {
     default:
       return 'We could not connect to Google right now. Please try again.';
   }
+}
+
+function normalizeContactMethod(value: FormDataEntryValue | null): ContactMethod {
+  if (typeof value === 'string' && value.trim().toLowerCase() === 'phone') {
+    return 'phone';
+  }
+  return 'email';
 }
