@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import {
   Area,
   AreaChart,
@@ -26,34 +27,57 @@ export function TrendChart({
   data: TrendPoint[];
   rangeLabel: string;
 }) {
+  const gradientId = React.useId().replace(/:/g, '-');
   const summary = buildSummary(data);
+  const primaryColor = 'rgb(var(--md-sys-color-primary) / 1)';
+  const primaryTransparent = 'rgb(var(--md-sys-color-primary) / 0.08)';
+  const axisColor = 'rgb(var(--md-sys-color-on-surface-variant) / 0.72)';
+  const tooltipBackground = 'rgb(var(--md-sys-color-surface-container-highest) / 0.92)';
+  const tooltipBorder = 'rgb(var(--md-sys-color-outline-variant) / 0.6)';
+  const tooltipText = 'rgb(var(--md-sys-color-on-surface) / 0.94)';
 
   return (
-    <Card className="border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        {description && <p className="text-sm text-muted">{description}</p>}
+    <Card>
+      <CardHeader className="gap-2 pb-3">
+        <CardTitle className="text-base font-semibold leading-tight text-on-surface">{title}</CardTitle>
+        {description ? (
+          <p className="text-sm text-on-surface-variant">{description}</p>
+        ) : null}
         <span className="sr-only">{summary}</span>
       </CardHeader>
       <CardContent>
-        <p className="mb-2 text-xs uppercase tracking-wide text-muted-subtle">{rangeLabel}</p>
+        <p className="mb-2 text-xs uppercase tracking-wide text-on-surface-variant/80">{rangeLabel}</p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
               <defs>
-                <linearGradient id="trendArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.05} />
+                <linearGradient id={`trend-area-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={primaryColor} stopOpacity={0.24} />
+                  <stop offset="95%" stopColor={primaryColor} stopOpacity={0.04} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} width={60} />
+              <XAxis dataKey="date" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} width={60} />
               <Tooltip
-                contentStyle={{ backgroundColor: 'rgb(15 23 42 / 0.9)', borderRadius: '0.5rem', border: 'none' }}
-                labelStyle={{ color: 'white' }}
-                itemStyle={{ color: '#bfdbfe' }}
+                contentStyle={{
+                  backgroundColor: tooltipBackground,
+                  borderRadius: 'var(--md-sys-shape-corner-small)',
+                  border: `1px solid ${tooltipBorder}`,
+                  color: tooltipText,
+                  boxShadow: 'var(--shadow-level-1)',
+                }}
+                labelStyle={{ color: tooltipText }}
+                itemStyle={{ color: tooltipText }}
               />
-              <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2} fill="url(#trendArea)" />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={primaryColor}
+                strokeWidth={2}
+                fill={`url(#trend-area-${gradientId})`}
+                fillOpacity={1}
+                activeDot={{ r: 5, strokeWidth: 2, fill: primaryTransparent, stroke: primaryColor }}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>

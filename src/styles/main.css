@@ -453,4 +453,8 @@
   .dark .dark\:text-slate-200 {
     color: rgb(var(--md-sys-color-on-surface) / 0.82);
   }
+
+  .text-muted-subtle {
+    color: rgb(var(--md-sys-color-on-surface-variant) / 0.72);
+  }
 }

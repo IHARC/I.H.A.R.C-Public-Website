@@ -40,9 +40,20 @@ const ChartContainer = React.forwardRef<
       typeof RechartsPrimitive.ResponsiveContainer
     >["children"]
   }
->(({ id, className, children, config, ...props }, ref) => {
+>(({ id, className, children, config, style, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const cssVariables: React.CSSProperties = {
+    '--chart-axis-color': 'rgb(var(--md-sys-color-on-surface-variant) / 0.72)',
+    '--chart-grid-color': 'rgb(var(--md-sys-color-outline-variant) / 0.52)',
+    '--chart-cursor-color': 'rgb(var(--md-sys-color-primary) / 0.35)',
+    '--chart-cursor-fill': 'rgb(var(--md-sys-color-primary) / 0.12)',
+    '--chart-radial-bg-color': 'rgb(var(--md-sys-color-surface-container) / 1)',
+  }
+  const mergedStyle: React.CSSProperties = {
+    ...cssVariables,
+    ...(style ?? {}),
+  }
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -50,9 +61,10 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs text-on-surface [&_.recharts-cartesian-axis-tick_text]:fill-[var(--chart-axis-color)] [&_.recharts-cartesian-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[var(--chart-cursor-color)] [&_.recharts-dot]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-radial-bar-background-sector]:fill-[var(--chart-radial-bg-color)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[var(--chart-cursor-fill)] [&_.recharts-reference-line_line]:stroke-[var(--chart-grid-color)] [&_.recharts-sector]:outline-none [&_.recharts-sector]:stroke-transparent [&_.recharts-surface]:outline-none",
           className
         )}
+        style={mergedStyle}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
