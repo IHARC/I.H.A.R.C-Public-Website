@@ -4,42 +4,89 @@ import { PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 
 export type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
 
+type PostgrestErrorLike = {
+  code?: string;
+  details?: string | null;
+  hint?: string | null;
+  message: string;
+};
+
+function isPostgrestErrorLike(error: unknown): error is PostgrestErrorLike {
+  return Boolean(
+    error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof (error as Record<string, unknown>).message === 'string',
+  );
+}
+
+function isUniqueViolation(error: PostgrestErrorLike): boolean {
+  return error.code === '23505';
+}
+
+function makeProfileError(step: string, error: PostgrestErrorLike): Error {
+  if (process.env.NODE_ENV !== 'production') {
+    // Surface the original Supabase error in development for easier debugging.
+    console.error(`Supabase error while attempting to ${step}`, error);
+  }
+
+  if (error.code === '42501') {
+    return new Error('You do not have permission to modify this profile. Contact a moderator for support.');
+  }
+
+  return new Error('We could not load your profile right now. Please try again.');
+}
+
 export async function ensurePortalProfile(
   supabase: SupabaseClient<Database>,
   userId: string,
   defaults?: Partial<PortalProfile>,
 ) {
   const portal = supabase.schema('portal');
+  const fetchProfileByUserId = async (): Promise<PortalProfile | null> => {
+    const { data, error } = await portal
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
 
-  const { data, error } = await portal
-    .from('profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  if (data) {
-    if (!data.position_title && data.affiliation_type === 'community_member') {
-      const { data: updated, error: updateError } = await portal
-        .from('profiles')
-        .update({ position_title: PUBLIC_MEMBER_ROLE_LABEL })
-        .eq('id', data.id)
-        .select('*')
-        .maybeSingle();
-
-      if (updateError) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('Failed to backfill community member position title', updateError);
-        }
-      } else if (updated) {
-        return updated;
+    if (error) {
+      if (isPostgrestErrorLike(error)) {
+        throw makeProfileError('fetch your profile', error);
       }
+      throw error;
     }
 
-    return data;
+    return data ?? null;
+  };
+
+  const ensureCommunityMemberTitle = async (profile: PortalProfile): Promise<PortalProfile> => {
+    if (profile.position_title || profile.affiliation_type !== 'community_member') {
+      return profile;
+    }
+
+    const { data, error } = await portal
+      .from('profiles')
+      .update({ position_title: PUBLIC_MEMBER_ROLE_LABEL })
+      .eq('id', profile.id)
+      .select('*')
+      .maybeSingle();
+
+    if (error) {
+      if (process.env.NODE_ENV !== 'production' && isPostgrestErrorLike(error)) {
+        console.warn('Failed to backfill community member position title', error);
+      }
+      return profile;
+    }
+
+    return data ?? profile;
+  };
+
+  const existingProfile = await fetchProfileByUserId();
+
+  if (existingProfile) {
+    return ensureCommunityMemberTitle(existingProfile);
   }
 
   const affiliationType = defaults?.affiliation_type ?? 'community_member';
@@ -76,10 +123,21 @@ export async function ensurePortalProfile(
     .single();
 
   if (insertError) {
+    if (isPostgrestErrorLike(insertError) && isUniqueViolation(insertError)) {
+      const profile = await fetchProfileByUserId();
+      if (profile) {
+        return ensureCommunityMemberTitle(profile);
+      }
+    }
+
+    if (isPostgrestErrorLike(insertError)) {
+      throw makeProfileError('create your profile', insertError);
+    }
+
     throw insertError;
   }
 
-  return inserted;
+  return ensureCommunityMemberTitle(inserted);
 }
 
 export async function getUserEmailForProfile(
