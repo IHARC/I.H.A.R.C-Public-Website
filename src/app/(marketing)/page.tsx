@@ -27,14 +27,14 @@ export default function MarketingHomePage() {
       </section>
 
       <section className="bg-surface-container py-12">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 text-balance md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 text-balance md:flex-row md:items-center md:justify-between md:gap-12">
           <div>
             <h2 className="text-2xl font-semibold text-on-surface">Stay involved</h2>
             <p className="mt-2 max-w-xl text-on-surface/80">
               Join neighbours, agencies, and Town staff in shaping rapid responses. Every proposal includes evidence, community support, and clear accountability notes.
             </p>
           </div>
-          <div className="grid w-full max-w-xl gap-3 md:w-auto">
+          <div className="grid w-full gap-4 sm:max-w-2xl md:max-w-none md:grid-cols-2">
             <StayInvolvedLink href="/portal/ideas" label="Propose a solution">
               Document the problem, evidence, and metrics so moderators can advance it.
             </StayInvolvedLink>
@@ -99,10 +99,10 @@ function StayInvolvedLink({ href, label, children }: StayInvolvedLinkProps) {
   return (
     <Link
       href={href}
-      className="rounded-3xl border border-outline/30 bg-surface px-6 py-4 text-left text-sm transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+      className="group flex h-full w-full flex-col rounded-3xl border border-outline/30 bg-surface px-6 py-5 text-left text-sm transition hover:border-outline hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container sm:text-base md:px-7"
     >
       <span className="block font-semibold text-on-surface">{label}</span>
-      <span className="mt-1 block text-on-surface/70">{children}</span>
+      <span className="mt-2 block text-on-surface-variant">{children}</span>
     </Link>
   );
 }
