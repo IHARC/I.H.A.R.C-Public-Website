@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ContextCards } from '@/components/site/ContextCards';
+import { siteConfig } from '@/config/site';
 
 export const metadata: Metadata = {
   title: 'IHARC — Inclusive Housing & Health Collaboration',
@@ -33,24 +35,18 @@ export default function MarketingHomePage() {
             </p>
           </div>
           <div className="grid w-full max-w-xl gap-3 md:w-auto">
-            <Link
-              href="/portal/ideas"
-              className="rounded-full bg-primary px-6 py-3 text-center text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
-            >
-              Propose a solution
-            </Link>
-            <Link
-              href="/portal/ideas?sort=top"
-              className="rounded-full border border-outline/30 px-6 py-3 text-center text-sm font-semibold text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
-            >
-              Comment and react to ideas
-            </Link>
-            <Link
-              href="/portal/plans"
-              className="rounded-full border border-outline/30 px-6 py-3 text-center text-sm font-semibold text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
-            >
-              Track plan progress
-            </Link>
+            <StayInvolvedLink href="/portal/ideas" label="Propose a solution">
+              Document the problem, evidence, and metrics so moderators can advance it.
+            </StayInvolvedLink>
+            <StayInvolvedLink href="/portal/ideas?sort=top" label="Comment and react to ideas">
+              Share respectful feedback and support proposals that align with community care.
+            </StayInvolvedLink>
+            <StayInvolvedLink href="/portal/plans" label="Track plan progress">
+              Follow Working Plans, decision notes, and key dates in one place.
+            </StayInvolvedLink>
+            <StayInvolvedLink href={siteConfig.emergency.supportHref} label="Support the declaration">
+              Add your name to the community petition. It is a public show of support, not a legal referendum.
+            </StayInvolvedLink>
           </div>
         </div>
       </section>
@@ -58,29 +54,69 @@ export default function MarketingHomePage() {
       <section id="help" className="mx-auto w-full max-w-6xl space-y-6 px-4">
         <h2 className="text-3xl font-semibold text-on-surface">Need support right now?</h2>
         <p className="max-w-3xl text-on-surface/80">
-          Reach out to partners offering health and safety supplies, overdose response kits, and pathways to treatment. Moderators keep this list current.
+          Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. Moderators keep this list current.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-outline/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-on-surface">Shelter intake</h3>
-            <p className="mt-2 text-sm text-on-surface/80">
-              Call 2-1-1 or visit the County housing help centre for placement support.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-outline/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-on-surface">Health outreach</h3>
-            <p className="mt-2 text-sm text-on-surface/80">
-              Mobile teams share health and safety supplies, overdose response kits, and pathways to treatment.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-outline/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-on-surface">Community contacts</h3>
-            <p className="mt-2 text-sm text-on-surface/80">
-              Email <Link href="mailto:portal@iharc.ca" className="text-primary underline">portal@iharc.ca</Link> for portal orientation or to surface a new resource.
-            </p>
-          </div>
+          <HelpCard
+            title="Shelter placement and warming sites"
+            description={
+              <>
+                Call <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
+                <Link href="tel:19053723831" className="text-primary underline">905-372-3831</Link>.
+              </>
+            }
+          />
+          <HelpCard
+            title="Overdose response and essential health supplies"
+            description={
+              <>
+                Text <Link href="tel:19053769898" className="text-primary underline">905-376-9898</Link> or email{' '}
+                <Link href="mailto:outreach@iharc.ca" className="text-primary underline">outreach@iharc.ca</Link>.
+              </>
+            }
+          />
+          <HelpCard
+            title="Mental health crisis support"
+            description={
+              <>
+                Call <Link href="tel:19053721280" className="text-primary underline">905-372-1280 ext. 2410</Link> (24/7).
+              </>
+            }
+          />
         </div>
       </section>
+    </div>
+  );
+}
+
+type StayInvolvedLinkProps = {
+  href: string;
+  label: string;
+  children: ReactNode;
+};
+
+function StayInvolvedLink({ href, label, children }: StayInvolvedLinkProps) {
+  return (
+    <Link
+      href={href}
+      className="rounded-3xl border border-outline/30 bg-surface px-6 py-4 text-left text-sm transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+    >
+      <span className="block font-semibold text-on-surface">{label}</span>
+      <span className="mt-1 block text-on-surface/70">{children}</span>
+    </Link>
+  );
+}
+
+type HelpCardProps = {
+  title: string;
+  description: ReactNode;
+};
+
+function HelpCard({ title, description }: HelpCardProps) {
+  return (
+    <div className="rounded-3xl border border-outline/20 bg-surface p-6">
+      <h3 className="text-lg font-semibold text-on-surface">{title}</h3>
+      <p className="mt-2 text-sm text-on-surface/80">{description}</p>
     </div>
   );
 }

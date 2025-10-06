@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import { SupportDeclarationLink } from '@/components/site/support-declaration-link';
 
 export function Hero() {
   return (
@@ -24,32 +25,39 @@ export function Hero() {
           >
             Get Help Now
           </Link>
+          <SupportDeclarationLink
+            href="/petition"
+            source="home_hero"
+            className="rounded-full border border-outline/40 px-6 py-3 text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Support the declaration
+          </SupportDeclarationLink>
+        </div>
+        <div className="text-sm font-semibold">
           <Link
             href="/emergency"
-            className="rounded-full border border-outline/40 px-6 py-3 text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center gap-1 text-on-surface/80 underline-offset-4 transition hover:text-on-surface hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={() => trackEvent('hero_click', { cta: 'state_of_emergency' })}
           >
             Why a State of Emergency
+            <span aria-hidden>→</span>
           </Link>
         </div>
       </div>
       <div className="space-y-4 rounded-3xl border border-outline/20 bg-surface p-8 shadow-lg">
         <h2 className="text-xl font-semibold text-on-surface">What IHARC offers</h2>
-        <p className="text-sm text-on-surface/80">
-          Shared data, rapid response coordination, and space for community-led solutions. Every update stays transparent so neighbours can see change taking shape.
-        </p>
         <dl className="space-y-3 text-sm text-on-surface/80">
           <div className="rounded-xl bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Real-time stats</dt>
-            <dd>Homelessness, shelter capacity, and overdose response indicators updated by trusted partners.</dd>
+            <dt className="font-semibold text-on-surface">Shared data.</dt>
+            <dd>One public picture to guide action.</dd>
           </div>
           <div className="rounded-xl bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Collaboration portal</dt>
-            <dd>Co-design solutions, track plans, and contribute without sharing identifying details.</dd>
+            <dt className="font-semibold text-on-surface">Rapid response.</dt>
+            <dd>Coordinated tasks with tracked follow-through.</dd>
           </div>
           <div className="rounded-xl bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Community commitments</dt>
-            <dd>Respectful participation, transparent decisions, and support for frontline teams.</dd>
+            <dt className="font-semibold text-on-surface">Community solutions.</dt>
+            <dd>A public portal for ideas and plan tracking.</dd>
           </div>
         </dl>
       </div>

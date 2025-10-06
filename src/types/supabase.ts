@@ -921,6 +921,8 @@ export type Database = {
           affiliation_reviewed_by: string | null;
           homelessness_experience: Database["portal"]["Enums"]["lived_experience_status"];
           substance_use_experience: Database["portal"]["Enums"]["lived_experience_status"];
+          has_signed_petition: boolean;
+          petition_signed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -943,6 +945,8 @@ export type Database = {
           affiliation_reviewed_by?: string | null;
           homelessness_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
+          has_signed_petition?: boolean;
+          petition_signed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -965,6 +969,8 @@ export type Database = {
           affiliation_reviewed_by?: string | null;
           homelessness_experience?: Database["portal"]["Enums"]["lived_experience_status"];
           substance_use_experience?: Database["portal"]["Enums"]["lived_experience_status"];
+          has_signed_petition?: boolean;
+          petition_signed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1071,6 +1077,118 @@ export type Database = {
           }?,
           {
             foreignKeyName: "profile_invites_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+          referencedColumns: ["id"];
+        }?,
+      ];
+      };
+      petitions: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          lede: string;
+          description: string | null;
+          hero_statement: string | null;
+          pledge_statement: string;
+          cta_label: string;
+          target_signatures: number | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          title: string;
+          lede: string;
+          description?: string | null;
+          hero_statement?: string | null;
+          pledge_statement: string;
+          cta_label?: string;
+          target_signatures?: number | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          title?: string;
+          lede?: string;
+          description?: string | null;
+          hero_statement?: string | null;
+          pledge_statement?: string;
+          cta_label?: string;
+          target_signatures?: number | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      petition_signatures: {
+        Row: {
+          id: string;
+          petition_id: string;
+          profile_id: string;
+          user_id: string;
+          statement: string | null;
+          share_with_partners: boolean;
+          created_at: string;
+          withdrawn_at: string | null;
+          first_name: string;
+          last_name: string;
+          email: string;
+          postal_code: string;
+          display_preference: Database["portal"]["Enums"]["petition_display_preference"];
+        };
+        Insert: {
+          id?: string;
+          petition_id: string;
+          profile_id: string;
+          user_id: string;
+          statement?: string | null;
+          share_with_partners?: boolean;
+          created_at?: string;
+          withdrawn_at?: string | null;
+          first_name: string;
+          last_name: string;
+          email: string;
+          postal_code: string;
+          display_preference: Database["portal"]["Enums"]["petition_display_preference"];
+        };
+        Update: {
+          id?: string;
+          petition_id?: string;
+          profile_id?: string;
+          user_id?: string;
+          statement?: string | null;
+          share_with_partners?: boolean;
+          created_at?: string;
+          withdrawn_at?: string | null;
+          first_name?: string;
+          last_name?: string;
+          email?: string;
+          postal_code?: string;
+          display_preference?: Database["portal"]["Enums"]["petition_display_preference"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "petition_signatures_petition_id_fkey";
+            columns: ["petition_id"];
+            referencedRelation: "petitions";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "petition_signatures_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "petition_signatures_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];
@@ -1884,6 +2002,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      petition_public_summary: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          lede: string;
+          description: string | null;
+          hero_statement: string | null;
+          pledge_statement: string;
+          cta_label: string;
+          target_signatures: number | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+          signature_count: number;
+          first_signed_at: string | null;
+          last_signed_at: string | null;
+        };
+        Relationships: [];
+      };
+      petition_public_signers: {
+        Row: {
+          petition_id: string | null;
+          created_at: string | null;
+          display_name: string | null;
+          display_preference: Database["portal"]["Enums"]["petition_display_preference"] | null;
+        };
+        Relationships: [];
+      };
+      petition_signature_totals: {
+        Row: {
+          petition_id: string;
+          signature_count: number;
+          first_signed_at: string | null;
+          last_signed_at: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       current_profile_id: {
@@ -1942,6 +2098,10 @@ export type Database = {
         | "sad"
         | "angry"
         | "minus_one";
+      petition_display_preference:
+        | "anonymous"
+        | "first_name_last_initial"
+        | "full_name";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -2192,6 +2352,11 @@ export const Constants = {
         "narcan_distributed",
         "encampment_count",
         "warming_beds_available",
+      ] as const,
+      petition_display_preference: [
+        "anonymous",
+        "first_name_last_initial",
+        "full_name",
       ] as const,
     },
   },

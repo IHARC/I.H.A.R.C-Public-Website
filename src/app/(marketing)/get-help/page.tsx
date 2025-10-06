@@ -1,24 +1,45 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 
-const urgentSupports = [
+type UrgentSupport = {
+  title: string;
+  description: string;
+  contact: ReactNode;
+};
+
+const urgentSupports: UrgentSupport[] = [
   {
-    title: 'Shelter placement & warming sites',
+    title: 'Shelter placement and warming sites',
     description:
-      'Call 2-1-1 or the County housing help centre. Staff and outreach teams coordinate transportation, motel overflow, and on-call wellness checks.',
-    contact: 'Dial 2-1-1 or 905-372-3831',
+      'Call 2-1-1 or the County housing help centre. Staff coordinate transportation, motel overflow, and on-call wellness checks.',
+    contact: (
+      <>
+        Dial <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
+        <Link href="tel:19053723831" className="text-primary underline">905-372-3831</Link>
+      </>
+    ),
   },
   {
-    title: 'Overdose prevention & safer supply',
+    title: 'Overdose response and essential health supplies',
     description:
-      'Mobile teams and peer responders share naloxone, safer-use supplies, and connect people to primary care without police involvement.',
-    contact: 'Text 905-376-9898 or email outreach@iharc.ca',
+      'Mobile teams and peer responders share naloxone, health and safety supplies, and connect people to primary care without police involvement.',
+    contact: (
+      <>
+        Text <Link href="tel:19053769898" className="text-primary underline">905-376-9898</Link> or email{' '}
+        <Link href="mailto:outreach@iharc.ca" className="text-primary underline">outreach@iharc.ca</Link>
+      </>
+    ),
   },
   {
     title: 'Mental health crisis support',
     description:
       'Community counsellors and health outreach workers respond together. Supports can be anonymous; follow-up is coordinated only with consent.',
-    contact: 'Call 905-372-1280 ext. 2410 (24/7)',
+    contact: (
+      <>
+        Call <Link href="tel:19053721280" className="text-primary underline">905-372-1280 ext. 2410</Link> (24/7)
+      </>
+    ),
   },
 ];
 

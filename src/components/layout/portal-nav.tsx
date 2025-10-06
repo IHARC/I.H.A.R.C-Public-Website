@@ -12,6 +12,7 @@ type PortalLink = {
 };
 
 const links: PortalLink[] = [
+  { href: '/portal/petition', label: 'Petition' },
   { href: '/portal/ideas', label: 'Ideas', exact: false },
   { href: '/portal/plans', label: 'Plans' },
   { href: '/portal/progress', label: 'Progress' },

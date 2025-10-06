@@ -4,7 +4,7 @@ const programAreas = [
   {
     title: 'Street Outreach',
     description:
-      'Multi-agency teams share safer-use supplies, coordinate warm hand-offs to housing support, and check in on wellness goals neighbours set for themselves.',
+      'Multi-agency teams share health and safety supplies, coordinate warm hand-offs to housing support, and check in on wellness goals neighbours set for themselves.',
   },
   {
     title: 'Shelter & Stabilization',
@@ -14,7 +14,7 @@ const programAreas = [
   {
     title: 'Overdose Prevention',
     description:
-      'Peer responders, health units, and first responders align kit distribution, CPR refreshers, and post-overdose follow-up so nobody is left alone after a poisoning.',
+      'Peer responders and health partners align kit distribution, CPR refreshers, and post-overdose follow-up so nobody is left alone after a poisoning.',
   },
   {
     title: 'Community Safety',

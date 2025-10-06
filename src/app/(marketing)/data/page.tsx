@@ -15,7 +15,7 @@ const datasets = [
   {
     title: 'Plan accountability metrics',
     description:
-      'Each Working Plan publishes the measures community members chose—like safe supply referrals completed, units secured, or outreach shifts added—so progress stays transparent.',
+      'Each Working Plan publishes the measures community members chose—like clinical referrals completed, units secured, or outreach shifts added—so progress stays transparent.',
   },
 ];
 
