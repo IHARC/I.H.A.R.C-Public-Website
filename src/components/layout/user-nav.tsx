@@ -49,10 +49,14 @@ export async function UserNav() {
           <span className="text-xs text-on-surface/60">{positionTitle}</span>
         ) : null}
         {awaitingVerification ? (
-          <span className="text-xs font-medium text-amber-600">Awaiting verification</span>
+          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            Awaiting verification
+          </span>
         ) : null}
         {affiliationRevoked ? (
-          <span className="text-xs font-medium text-rose-600">Verification declined</span>
+          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-inverse-surface/10 px-2 py-0.5 text-xs font-semibold text-inverse-on-surface">
+            Verification declined
+          </span>
         ) : null}
       </div>
       <Link

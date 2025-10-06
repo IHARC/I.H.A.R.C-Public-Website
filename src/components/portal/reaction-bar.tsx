@@ -28,18 +28,18 @@ interface ReactionBarProps {
 }
 
 const ACTIVE_STYLES: Record<string, string> = {
-  positive: 'border-brand bg-brand text-white dark:border-brand',
-  neutral: 'border-amber-500 bg-amber-500 text-white dark:border-amber-500',
-  negative: 'border-rose-500 bg-rose-500 text-white dark:border-rose-400/90',
+  positive: 'border-primary bg-primary text-on-primary',
+  neutral: 'border-secondary bg-secondary text-secondary-foreground',
+  negative: 'border-inverse-surface bg-inverse-surface text-inverse-on-surface',
 };
 
 const IDLE_STYLES: Record<string, string> = {
   positive:
-    'border-slate-200 bg-white text-slate-700 hover:border-brand/70 hover:text-brand dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-brand/80 dark:hover:text-brand',
+    'border-outline bg-surface text-on-surface hover:border-primary hover:text-primary hover:bg-primary/5',
   neutral:
-    'border-slate-200 bg-white text-slate-700 hover:border-amber-400/80 hover:text-amber-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:text-amber-400',
+    'border-outline bg-surface text-on-surface hover:border-secondary hover:text-secondary-foreground hover:bg-secondary-container/60',
   negative:
-    'border-slate-200 bg-white text-slate-700 hover:border-rose-400/80 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-rose-400 dark:hover:text-rose-300',
+    'border-outline bg-surface text-on-surface hover:border-inverse-surface hover:text-inverse-on-surface hover:bg-inverse-surface/10',
 };
 
 const SIZE_STYLES: Record<'sm' | 'md', string> = {
@@ -160,7 +160,7 @@ export function ReactionBar({
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" align="center" className="max-w-xs text-center text-xs">
-              <p className="font-semibold text-slate-900 dark:text-slate-100">{definition.label}</p>
+              <p className="font-semibold text-on-surface">{definition.label}</p>
               {tooltipExtra}
             </TooltipContent>
           </Tooltip>

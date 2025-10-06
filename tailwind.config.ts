@@ -53,12 +53,12 @@ const config: Config = {
           foreground: materialColor('--md-sys-color-on-tertiary-container'),
         },
         warning: {
-          DEFAULT: 'rgb(194 130 37 / <alpha-value>)',
-          foreground: 'rgb(37 24 0 / <alpha-value>)',
+          DEFAULT: materialColor('--md-sys-color-primary-container'),
+          foreground: materialColor('--md-sys-color-on-primary-container'),
         },
         info: {
-          DEFAULT: 'rgb(51 94 168 / <alpha-value>)',
-          foreground: 'rgb(235 241 255 / <alpha-value>)',
+          DEFAULT: materialColor('--md-sys-color-secondary-container'),
+          foreground: materialColor('--md-sys-color-on-secondary-container'),
         },
         brand: materialColor('--md-sys-color-primary'),
         'brand-strong': materialColor('--md-sys-color-primary-container'),

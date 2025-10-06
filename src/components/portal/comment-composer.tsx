@@ -144,7 +144,7 @@ export function CommentComposer({
   return (
     <div className="space-y-3">
       {isCoolingDown && (
-        <Alert className="border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
+        <Alert className="border-primary/30 bg-primary/10 text-on-primary-container">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Cooldown active</AlertTitle>
           <AlertDescription>
@@ -173,9 +173,9 @@ export function CommentComposer({
         </div>
       </RadioGroup>
       {canShowOfficialToggle && (
-        <div className="flex items-center gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+        <div className="flex items-center gap-3 rounded-md border border-outline/40 bg-surface-container p-3 text-sm text-on-surface/80">
           <Switch id="official-comment" checked={postAsOfficial} onCheckedChange={setPostAsOfficial} />
-          <Label htmlFor="official-comment" className="cursor-pointer font-medium text-slate-700 dark:text-slate-200">
+          <Label htmlFor="official-comment" className="cursor-pointer font-medium text-on-surface">
             {officialLabel}
           </Label>
         </div>
@@ -210,7 +210,7 @@ export function CommentComposer({
             Link to data, news updates, or partner documentation so moderators can verify quickly.
           </p>
           {!evidenceTrimmed && (
-            <p className="text-xs text-amber-600 dark:text-amber-300">
+            <p className="text-xs text-primary">
               Evidence links keep the project board focused on measurable progress.
             </p>
           )}

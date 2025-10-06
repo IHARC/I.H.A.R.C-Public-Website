@@ -51,10 +51,10 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
     .slice(0, 3);
 
   return (
-    <Card className="border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+    <Card className="border border-outline/40 bg-surface shadow-subtle transition hover:shadow-red-glow">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+          <CardTitle className="text-lg font-semibold text-on-surface">
             <Link href={`/solutions/${idea.id}`} className="focus-outline inline-flex items-center gap-2">
               {idea.title}
               <span className="text-xs font-medium uppercase tracking-wide text-muted-subtle">{idea.category}</span>
@@ -62,14 +62,14 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
           </CardTitle>
           <div className="flex items-center gap-2">
             {idea.publicationStatus === 'draft' ? (
-              <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200">
+              <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary">
                 {draftBadge}
               </Badge>
             ) : null}
             <StatusBadge status={idea.status} />
           </div>
         </div>
-        <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{preview}</p>
+        <p className="line-clamp-3 text-sm text-on-surface/80">{preview}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
@@ -90,13 +90,13 @@ export function IdeaCard({ idea, actions }: { idea: IdeaSummary; actions?: React
         />
         <TagChips tags={idea.tags} />
       </CardContent>
-      <CardFooter className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300 md:flex-row md:items-center md:justify-between">
+      <CardFooter className="flex flex-col gap-3 border-t border-outline/30 bg-surface-container px-6 py-4 text-sm text-on-surface/80 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2" aria-label="Community reactions">
           {topReactions.length ? (
             topReactions.map(({ definition, count }) => (
               <span
                 key={definition.type}
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold leading-none text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                className="inline-flex items-center gap-1 rounded-full border border-outline/40 bg-surface px-2 py-0.5 text-xs font-semibold leading-none text-on-surface/80"
               >
                 <span aria-hidden>{definition.emoji}</span>
                 <span>{count}</span>

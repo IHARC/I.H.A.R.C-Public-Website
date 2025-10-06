@@ -35,7 +35,7 @@ export function EmergencyCallout({ briefPath, supportHref }: EmergencyCalloutPro
   };
 
   return (
-    <div className="border-b border-amber-300 bg-amber-50 text-amber-900">
+    <div className="border-b border-primary/30 bg-primary-container text-on-primary-container">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide">State of Emergency Declaration</p>
@@ -46,14 +46,14 @@ export function EmergencyCallout({ briefPath, supportHref }: EmergencyCalloutPro
         <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
           <Link
             href={briefPath}
-            className="rounded-full bg-amber-700 px-4 py-2 text-white shadow transition hover:bg-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-50"
+            className="rounded-full bg-primary px-4 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
             onClick={() => trackEvent('se_banner_click', { cta: 'read' })}
           >
             Read the brief
           </Link>
           <Link
             href={supportHref}
-            className="rounded-full border border-amber-400 px-4 py-2 text-amber-900 transition hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-50"
+            className="rounded-full border border-on-primary-container/40 px-4 py-2 text-on-primary-container transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
             onClick={() => trackEvent('se_banner_click', { cta: 'support' })}
           >
             Support the declaration
@@ -61,7 +61,7 @@ export function EmergencyCallout({ briefPath, supportHref }: EmergencyCalloutPro
           <button
             type="button"
             onClick={handleDismiss}
-            className="ml-auto inline-flex rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide text-amber-700 transition hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-50"
+            className="ml-auto inline-flex rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide text-on-primary-container/80 transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
             aria-label="Dismiss emergency banner"
           >
             Dismiss

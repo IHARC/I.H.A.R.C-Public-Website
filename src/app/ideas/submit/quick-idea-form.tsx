@@ -161,7 +161,7 @@ export function QuickIdeaForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <CommunityStandardsCallout acknowledged={acknowledged} onAcknowledge={handleRulesAcknowledge} />
       {!displayConfirmed && (
-        <Alert className="border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
+        <Alert className="border-primary/30 bg-primary/10 text-on-primary-container">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Confirm your display name</AlertTitle>
           <AlertDescription className="space-y-3">

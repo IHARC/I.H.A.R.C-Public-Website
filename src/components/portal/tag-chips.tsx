@@ -8,7 +8,11 @@ export function TagChips({ tags }: { tags: string[] }) {
   return (
     <div className="flex flex-wrap gap-2" aria-label="Idea tags">
       {tags.slice(0, 6).map((tag) => (
-        <Badge key={tag} variant="secondary" className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+        <Badge
+          key={tag}
+          variant="secondary"
+          className="border-outline/40 bg-surface-container-high text-on-surface/80"
+        >
           #{tag.trim()}
         </Badge>
       ))}

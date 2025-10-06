@@ -135,7 +135,7 @@ export function PromoteIdeaCard({
           {!isDraft ? (
             <CheckCircle2 className="h-4 w-4 text-brand" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-4 w-4 text-primary" />
           )}
           <span>Idea published (not marked as draft)</span>
         </li>
@@ -143,7 +143,7 @@ export function PromoteIdeaCard({
           {supportSatisfied ? (
             <CheckCircle2 className="h-4 w-4 text-brand" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-4 w-4 text-primary" />
           )}
           <span>{voteCount} positive reactions (needs {supportThreshold})</span>
         </li>
@@ -151,7 +151,7 @@ export function PromoteIdeaCard({
           {infoComplete ? (
             <CheckCircle2 className="h-4 w-4 text-brand" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-4 w-4 text-primary" />
           )}
           <span>All required idea sections completed</span>
         </li>
@@ -159,7 +159,7 @@ export function PromoteIdeaCard({
           {hasVerifiedSponsor ? (
             <CheckCircle2 className="h-4 w-4 text-brand" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-4 w-4 text-primary" />
           )}
           <span>Verified partner sponsoring</span>
         </li>

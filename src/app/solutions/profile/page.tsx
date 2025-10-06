@@ -80,7 +80,7 @@ export default async function PortalProfilePage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Portal profile</h1>
       {profile.affiliation_status === 'pending' ? (
-        <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+        <Alert className="mb-6 border-primary/30 bg-primary/10 text-on-primary-container">
           <AlertTitle>Verification in progress</AlertTitle>
           <AlertDescription>
             An IHARC administrator is verifying your agency or government role. You can keep collaborating as a community member in the meantime.
@@ -88,7 +88,7 @@ export default async function PortalProfilePage() {
         </Alert>
       ) : null}
       {profile.affiliation_status === 'revoked' ? (
-        <Alert className="mb-6 border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-100">
+        <Alert className="mb-6 border-inverse-surface/30 bg-inverse-surface/10 text-inverse-on-surface">
           <AlertTitle>Verification declined</AlertTitle>
           <AlertDescription>
             Reach out to an IHARC administrator if details have changed or you need to update your affiliation.

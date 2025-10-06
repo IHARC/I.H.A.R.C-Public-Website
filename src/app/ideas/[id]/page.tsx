@@ -371,20 +371,20 @@ export default async function IdeaDetailPage({
     <TooltipProvider>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
       <div className="space-y-6">
-        <header className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <header className="rounded-xl border border-outline/40 bg-surface p-6 shadow-subtle">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
                 {isDraft ? (
-                  <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-100">
+                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary">
                     {quickCopy.draftBadge}
                   </Badge>
                 ) : null}
                 <StatusBadge status={idea.status} />
                 <span className="uppercase tracking-wide">{idea.category}</span>
               </div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">{idea.title}</h1>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+              <h1 className="text-3xl font-semibold text-on-surface">{idea.title}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface/80">
                 <span>By {displayAuthor}</span>
                 {authorPosition ? <span>· {authorPosition}</span> : null}
                 {idea.author?.organization?.name && !idea.is_anonymous ? (
@@ -418,20 +418,20 @@ export default async function IdeaDetailPage({
         </header>
 
         {canCompleteDraft ? (
-          <Alert className="border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-100">
+          <Alert className="border-primary/30 bg-primary/10 text-on-primary-container">
             <AlertTitle>Finish your proposal</AlertTitle>
             <AlertDescription className="mt-2 space-y-3 text-sm">
               <p>{quickCopy.upgradePrompt}</p>
-              <Button asChild size="sm" variant="outline" className="border-amber-400 text-amber-900 dark:border-amber-500 dark:text-amber-100">
+              <Button asChild size="sm" variant="outline" className="border-primary/40 text-primary">
                 <Link href={`/ideas/${idea.id}/complete`}>Complete full proposal</Link>
               </Button>
             </AlertDescription>
           </Alert>
         ) : null}
 
-        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <section className="space-y-4 rounded-xl border border-outline/40 bg-surface p-6 shadow-subtle">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Canonical summary</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Canonical summary</h2>
             <Badge variant="secondary" className="uppercase tracking-wide">Locked</Badge>
           </div>
           <div className="mt-4 space-y-6">
@@ -441,14 +441,14 @@ export default async function IdeaDetailPage({
               if (!content) return null;
               return (
                 <div key={section.key} className="space-y-2">
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{section.title}</h3>
-                  <p className="whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">{String(content)}</p>
+                  <h3 className="text-sm font-semibold text-on-surface/90">{section.title}</h3>
+                  <p className="whitespace-pre-line text-sm text-on-surface/80">{String(content)}</p>
                 </div>
               );
             })}
             {metrics.length ? (
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Success metrics</h3>
+                <h3 className="text-sm font-semibold text-on-surface/90">Success metrics</h3>
                 <IdeaMetricsList metrics={metrics} />
               </div>
             ) : null}
@@ -456,8 +456,8 @@ export default async function IdeaDetailPage({
         </section>
 
         {attachments.length ? (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Attachments</h2>
+          <section className="rounded-xl border border-outline/40 bg-surface p-5 shadow-subtle">
+            <h2 className="text-lg font-semibold text-on-surface">Attachments</h2>
             <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
               {attachments.map((attachment) => (
                 <li key={attachment.path} className="flex items-center justify-between rounded border border-slate-200 p-2 dark:border-slate-800">

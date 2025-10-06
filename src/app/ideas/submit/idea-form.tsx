@@ -430,7 +430,7 @@ export function IdeaSubmissionForm({
     <>
       <CommunityStandardsCallout acknowledged={acknowledged} onAcknowledge={handleRulesAcknowledge} />
       {mode === 'create' && typeof cooldown === 'number' && cooldown > 0 && (
-        <Alert className="mb-4 border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
+        <Alert className="mb-4 border-primary/30 bg-primary/10 text-on-primary-container">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Cooling down</AlertTitle>
           <AlertDescription>
@@ -448,10 +448,10 @@ export function IdeaSubmissionForm({
               className={[
                 'inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors',
                 active
-                  ? 'border-brand/70 bg-brand/5 text-brand'
+                  ? 'border-primary bg-primary/10 text-primary'
                   : completed
-                    ? 'border-emerald-500/60 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 text-muted dark:border-slate-800',
+                    ? 'border-inverse-surface/30 bg-inverse-surface/15 text-inverse-on-surface'
+                    : 'border-outline text-muted',
               ].join(' ')}
             >
               {completed ? <CheckCircle2 className="h-4 w-4" /> : <span className="text-xs font-medium">{index + 1}</span>}
@@ -461,7 +461,7 @@ export function IdeaSubmissionForm({
         })}
       </div>
       {!displayConfirmed && (
-        <Alert className="mb-6 border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-100">
+        <Alert className="mb-6 border-primary/30 bg-primary/10 text-on-primary-container">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Confirm your display name</AlertTitle>
           <AlertDescription className="space-y-3">
@@ -475,9 +475,9 @@ export function IdeaSubmissionForm({
           </AlertDescription>
         </Alert>
       )}
-      <section aria-labelledby="wizard-step" className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <section aria-labelledby="wizard-step" className="rounded-xl border border-outline/40 bg-surface p-6 shadow-subtle">
         <div className="mb-4 space-y-1">
-          <h2 id="wizard-step" className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+          <h2 id="wizard-step" className="text-xl font-semibold text-on-surface">
             {currentStep.title}
           </h2>
           <p className="text-sm text-muted">{currentStep.description}</p>
@@ -560,7 +560,7 @@ export function IdeaSubmissionForm({
               />
               <p className="text-xs text-muted">Evidence is required before you can continue.</p>
               {form.evidence.trim().length < MIN_SECTION_LENGTH && (
-                <p className="text-xs text-amber-600 dark:text-amber-300">
+                <p className="text-xs text-primary">
                   Cite a statistic, observation, or peer insight so moderators can validate quickly.
                 </p>
               )}
@@ -757,7 +757,7 @@ export function IdeaSubmissionForm({
                   })}
                 </div>
                 {!metricsAreValid && (
-                  <p className="text-xs text-amber-600 dark:text-amber-300">
+                  <p className="text-xs text-primary">
                     Add detail or a target so moderators can validate the metric with partners.
                   </p>
                 )}

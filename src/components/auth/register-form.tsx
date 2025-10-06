@@ -41,7 +41,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
   const hideRoleField = affiliationType === 'community_member';
 
   return (
-    <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-outline/40 bg-surface p-8 shadow-subtle">
       <div className="space-y-3">
         <GoogleAuthButton intent="register" nextPath={nextPath} />
         <AuthDivider label="or continue by sharing details" />
@@ -55,7 +55,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
       <div className="grid gap-3">
         <Label>How are you joining the Command Center?</Label>
         <RadioGroup name="affiliation_type" value={affiliationType} onValueChange={(value) => setAffiliationType(value as AffiliationType)} className="grid gap-3 md:grid-cols-3">
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-brand/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
             <RadioGroupItem id="affiliation-community" value="community_member" className="mt-1" />
             <span>
               Community member
@@ -64,7 +64,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
               </span>
             </span>
           </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-brand/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
             <RadioGroupItem id="affiliation-agency" value="agency_partner" className="mt-1" />
             <span>
               Agency / organization
@@ -73,7 +73,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
               </span>
             </span>
           </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-brand/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
             <RadioGroupItem id="affiliation-government" value="government_partner" className="mt-1" />
             <span>
               Government representative
@@ -84,7 +84,7 @@ export function RegisterForm({ organizations, action, nextPath, initialError }: 
           </label>
         </RadioGroup>
         {affiliationType !== 'community_member' ? (
-          <Alert className="bg-amber-50 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">
+          <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
             <AlertTitle>Pending verification</AlertTitle>
             <AlertDescription>
               An IHARC administrator will confirm your role before activating official posting privileges. You can still participate as a community member while we verify.
