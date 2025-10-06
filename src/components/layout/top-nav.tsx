@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { UserNav } from '@/components/layout/user-nav';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { siteConfig } from '@/config/site';
 
 const marketingLinks = [
@@ -76,6 +77,7 @@ export async function TopNav() {
           >
             Open Collaboration Portal
           </Link>
+          <ThemeToggle />
           <UserNav />
         </div>
       </div>
