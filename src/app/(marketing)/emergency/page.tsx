@@ -54,6 +54,9 @@ export default function EmergencyBriefPage() {
         </p>
         <h1 className="text-4xl font-bold tracking-tight">A coordinated response to keep neighbours safe</h1>
         <p className="text-lg text-on-surface/80">
+          A declaration is a coordination tool. It accelerates staffing and procurement for housing and overdose response, and requires transparent progress reporting. It is not punitive. Actions are public, measured, and community-led.
+        </p>
+        <p className="text-base text-on-surface/80">
           This brief summarizes the shared evidence, commitments, and accountability measures supporting the declaration.
         </p>
       </header>
@@ -80,7 +83,7 @@ export default function EmergencyBriefPage() {
             Endorse the declaration
           </Link>
           <Link
-            href="/ideas/submit"
+            href="/portal/ideas/submit"
             className="rounded-full border border-outline/30 px-6 py-3 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Provide feedback or propose an idea

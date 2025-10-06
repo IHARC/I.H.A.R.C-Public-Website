@@ -1,7 +1,7 @@
 export const siteConfig = {
   emergency: {
-    enabled: process.env.NEXT_PUBLIC_STATE_OF_EMERGENCY === 'true',
+    enabled: process.env.NEXT_PUBLIC_STATE_OF_EMERGENCY !== 'false',
     briefPath: '/emergency',
-    supportHref: '/command-center/ideas/declare-emergency',
+    supportHref: '/portal/ideas/declare-emergency',
   },
 };

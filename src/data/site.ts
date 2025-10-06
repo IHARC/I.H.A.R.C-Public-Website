@@ -48,7 +48,7 @@ export const nav: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Programs & Services', href: '/programs' },
   { label: 'Get Help', href: '/get-help' },
-  { label: 'Collaboration Portal', href: '/command-center' },
+  { label: 'Collaboration Portal', href: '/portal/ideas' },
   { label: 'News', href: '/news' },
   { label: 'Get Involved', href: '/involved' },
   { label: 'Contact', href: '/contact' },
@@ -165,7 +165,7 @@ export const footer: {
       title: 'Resources',
       links: [
         { label: 'Service Directory', href: '/resources' },
-        { label: 'Collaboration Portal', href: '/command-center' },
+        { label: 'Collaboration Portal', href: '/portal/ideas' },
         { label: 'News & Updates', href: '/news' },
         { label: 'Contact Us', href: '/contact' },
       ],

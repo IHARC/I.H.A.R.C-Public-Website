@@ -18,7 +18,7 @@ export default async function ModerationPage() {
 
   const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role)) {
-    redirect('/command-center');
+    redirect('/portal/ideas');
   }
 
   const { data: flagRows } = await portal

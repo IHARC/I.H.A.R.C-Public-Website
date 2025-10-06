@@ -19,7 +19,7 @@ export default async function CommandCenterPage({
     }
   }
 
-  const basePath = '/command-center/ideas';
+  const basePath = '/portal/ideas';
   const target = serialized.toString() ? `${basePath}?${serialized.toString()}` : basePath;
   redirect(target);
 }

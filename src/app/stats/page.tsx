@@ -176,13 +176,13 @@ function DashboardPlaceholder() {
         </p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link
-            href="/command-center"
+            href="/portal/ideas"
             className="inline-flex items-center rounded-full bg-brand px-4 py-2 font-medium text-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            Go to the command center
+            Go to the collaboration portal
           </Link>
           <Link
-            href="/command-center?status=under_review"
+            href="/portal/ideas?status=under_review"
             className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Review project board candidates

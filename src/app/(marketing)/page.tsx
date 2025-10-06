@@ -29,24 +29,24 @@ export default function MarketingHomePage() {
           <div>
             <h2 className="text-2xl font-semibold text-on-surface">Stay involved</h2>
             <p className="mt-2 max-w-xl text-on-surface/80">
-              Join neighbours, agencies, and Town staff in shaping rapid responses. Every action is trackable and grounded in shared evidence.
+              Join neighbours, agencies, and Town staff in shaping rapid responses. Every proposal includes evidence, community support, and clear accountability notes.
             </p>
           </div>
           <div className="grid w-full max-w-xl gap-3 md:w-auto">
             <Link
-              href="/command-center/ideas"
+              href="/portal/ideas"
               className="rounded-full bg-primary px-6 py-3 text-center text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
             >
               Propose a solution
             </Link>
             <Link
-              href="/command-center/ideas?sort=top"
+              href="/portal/ideas?sort=top"
               className="rounded-full border border-outline/30 px-6 py-3 text-center text-sm font-semibold text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
             >
               Comment and react to ideas
             </Link>
             <Link
-              href="/command-center/roadmap"
+              href="/portal/plans"
               className="rounded-full border border-outline/30 px-6 py-3 text-center text-sm font-semibold text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
             >
               Track plan progress

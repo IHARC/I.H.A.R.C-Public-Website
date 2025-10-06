@@ -1,7 +1,7 @@
 export type NextParam = string | string[] | undefined;
 export type AuthErrorCode = 'google_auth_cancelled' | 'google_auth_error';
 
-export function resolveNextPath(raw: NextParam, fallback = '/command-center'): string {
+export function resolveNextPath(raw: NextParam, fallback = '/portal/ideas'): string {
   if (!raw) {
     return fallback;
   }

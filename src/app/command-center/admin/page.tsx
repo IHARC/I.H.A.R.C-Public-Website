@@ -64,7 +64,7 @@ export default async function CommandCenterAdminPage() {
 
   const profile = await ensurePortalProfile(supabase, user.id);
   if (!['moderator', 'admin'].includes(profile.role)) {
-    redirect('/command-center');
+    redirect('/portal/ideas');
   }
 
   const isAdmin = profile.role === 'admin';
@@ -140,7 +140,7 @@ export default async function CommandCenterAdminPage() {
       meta: { value, source, notes },
     });
 
-    revalidatePath('/command-center');
+    revalidatePath('/portal/ideas');
     revalidatePath('/stats');
   }
 

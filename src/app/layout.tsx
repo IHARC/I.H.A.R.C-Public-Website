@@ -3,8 +3,6 @@ import { Roboto, Roboto_Flex } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { NavBar } from '@/components/NavBar';
-import { SiteFooter } from '@/components/SiteFooter';
 
 const DEFAULT_APP_URL = 'https://iharc.ca';
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
@@ -65,13 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
-          <div className="flex min-h-screen flex-col bg-background">
-            <NavBar />
-            <main id="main-content" className="flex-1 bg-background">
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
+          {children}
         </ThemeProvider>
       </body>
     </html>

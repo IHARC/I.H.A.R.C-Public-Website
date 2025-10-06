@@ -12,7 +12,7 @@ export default async function LegacyIdeaRoute({
   const ideaId = Array.isArray(idParam) ? idParam[0] : idParam;
 
   if (!ideaId) {
-    redirect('/ideas');
+    redirect('/portal/ideas');
   }
 
   redirect(`/ideas/${ideaId}`);

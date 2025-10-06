@@ -11,32 +11,25 @@ export function Hero() {
           Inclusive Housing & Health Collaboration
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-on-surface sm:text-5xl">
-          Northumberland neighbours working together for housing stability and overdose prevention.
+          Northumberland neighbours working for housing stability and overdose prevention.
         </h1>
         <p className="max-w-xl text-lg text-on-surface/80">
-          IHARC brings service partners, residents, and local government into one shared workflow. We respond quickly, share evidence, and keep every action grounded in dignity.
+          The command center is a shared space for neighbours, service agencies, and local government to move quickly with compassion. Every step is co-designed, measured, and accountable to people most impacted.
         </p>
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link
-            href="/#help"
+            href="/get-help"
             className="rounded-full bg-primary px-6 py-3 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={() => trackEvent('hero_click', { cta: 'help' })}
+            onClick={() => trackEvent('hero_click', { cta: 'get_help_now' })}
           >
-            Get Help
+            Get Help Now
           </Link>
           <Link
             href="/emergency"
             className="rounded-full border border-outline/40 px-6 py-3 text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={() => trackEvent('hero_click', { cta: 'brief' })}
+            onClick={() => trackEvent('hero_click', { cta: 'state_of_emergency' })}
           >
-            State of Emergency Brief
-          </Link>
-          <Link
-            href="/command-center"
-            className="rounded-full border border-primary px-6 py-3 text-primary transition hover:bg-brand-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={() => trackEvent('hero_click', { cta: 'portal' })}
-          >
-            Open Collaboration Portal
+            Why a State of Emergency
           </Link>
         </div>
       </div>

@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { SignOutButton } from '@/components/auth/sign-out-button';
+import { AuthLinks } from '@/components/layout/auth-links';
+import { UserMenu } from '@/components/layout/user-menu';
 
 export async function UserNav() {
   const supabase = await createSupabaseRSCClient();
@@ -12,22 +12,7 @@ export async function UserNav() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-on-surface/80">
-        <Link
-          href="/login"
-          className="rounded-full border border-outline/40 bg-surface px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-        >
-          Sign in
-        </Link>
-        <Link
-          href="/register"
-          className="rounded-full bg-primary px-3 py-1 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-        >
-          Register
-        </Link>
-      </div>
-    );
+    return <AuthLinks />;
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
@@ -39,50 +24,23 @@ export async function UserNav() {
   const showModeration = role === 'moderator' || role === 'admin';
   const showAdmin = role === 'admin';
 
+  const menuItems: Array<{ href: string; label: string }> = [
+    { href: '/portal/ideas', label: 'Portal' },
+    { href: '/solutions/profile', label: 'Account' },
+    ...(showModeration ? [{ href: '/solutions/mod', label: 'Moderation' }] : []),
+    ...(showAdmin ? [{ href: '/command-center/admin', label: 'Admin' }] : []),
+  ];
+
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface/80">
-      <div className="flex flex-col">
-        <span className="rounded-full bg-surface-container px-3 py-1 text-on-surface">
-          {displayName}
-        </span>
-        {positionTitle ? (
-          <span className="text-xs text-on-surface/60">{positionTitle}</span>
-        ) : null}
-        {awaitingVerification ? (
-          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-            Awaiting verification
-          </span>
-        ) : null}
-        {affiliationRevoked ? (
-          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-inverse-surface/10 px-2 py-0.5 text-xs font-semibold text-inverse-on-surface">
-            Verification declined
-          </span>
-        ) : null}
-      </div>
-      <Link
-        href="/solutions/profile"
-        className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-      >
-        Profile
-      </Link>
-      {showModeration ? (
-        <Link
-          href="/solutions/mod"
-          className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-        >
-          Moderation
-        </Link>
-      ) : null}
-      {showAdmin ? (
-        <Link
-          href="/command-center/admin"
-          className="rounded-full px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-        >
-          Admin
-        </Link>
-      ) : null}
-      <SignOutButton action={signOut} />
-    </div>
+    <UserMenu
+      displayName={displayName}
+      positionTitle={positionTitle ?? undefined}
+      awaitingVerification={awaitingVerification}
+      affiliationRevoked={affiliationRevoked}
+      menuItems={menuItems}
+      initials={getInitials(displayName)}
+      signOutAction={signOut}
+    />
   );
 }
 
@@ -92,4 +50,17 @@ async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect('/');
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) {
+    return 'CM';
+  }
+
+  const first = parts[0]?.[0];
+  const second = parts.length > 1 ? parts[parts.length - 1]?.[0] : parts[0]?.[1];
+  const initials = `${first ?? ''}${second ?? ''}`.toUpperCase();
+
+  return initials || 'CM';
 }
