@@ -97,8 +97,11 @@ export async function signPetition(
 
     const firstName = firstNameFromForm ?? defaultFirstName;
     const lastName = lastNameFromForm ?? defaultLastName;
-    const email = emailFromForm ?? defaultEmail;
-    const phone = phoneFromForm ?? defaultPhone;
+    const emailInput = emailFromForm ?? defaultEmail;
+    const phoneInput = phoneFromForm ?? defaultPhone;
+
+    const normalizedEmail = normalizeEmail(emailInput ?? undefined);
+    const normalizedPhone = normalizePhoneNumber(phoneInput ?? undefined);
 
     if (!firstName) {
       return { status: 'error', message: 'Enter your first name to continue.' };
@@ -106,14 +109,69 @@ export async function signPetition(
     if (!lastName) {
       return { status: 'error', message: 'Enter your last name to continue.' };
     }
-    if (!email && !phone) {
+    if (!normalizedEmail && !normalizedPhone) {
       return { status: 'error', message: 'Share an email or phone number so we can confirm delivery with you.' };
     }
-    if (email && !validateEmail(email)) {
+    if (normalizedEmail && !validateEmail(normalizedEmail)) {
       return { status: 'error', message: 'Enter a valid email address.' };
     }
 
     const portal = supabase.schema('portal');
+
+    let emailContactId: string | null = null;
+    let phoneContactId: string | null = null;
+
+    if (normalizedEmail) {
+      const { data: emailContact, error: emailContactError } = await portal
+        .from('profile_contacts')
+        .upsert(
+          {
+            profile_id: profile.id,
+            user_id: user.id,
+            contact_type: 'email',
+            contact_value: normalizedEmail,
+            normalized_value: normalizedEmail,
+          },
+          { onConflict: 'profile_id,contact_type,normalized_value' },
+        )
+        .select('id')
+        .single();
+
+      if (emailContactError) {
+        console.error('Failed to upsert email contact for petition signature', emailContactError);
+        return { status: 'error', message: 'We could not record your signature. Try again shortly.' };
+      }
+
+      emailContactId = emailContact?.id ?? null;
+    }
+
+    if (normalizedPhone) {
+      const { data: phoneContact, error: phoneContactError } = await portal
+        .from('profile_contacts')
+        .upsert(
+          {
+            profile_id: profile.id,
+            user_id: user.id,
+            contact_type: 'phone',
+            contact_value: normalizedPhone,
+            normalized_value: normalizedPhone,
+          },
+          { onConflict: 'profile_id,contact_type,normalized_value' },
+        )
+        .select('id')
+        .single();
+
+      if (phoneContactError) {
+        console.error('Failed to upsert phone contact for petition signature', phoneContactError);
+        return { status: 'error', message: 'We could not record your signature. Try again shortly.' };
+      }
+
+      phoneContactId = phoneContact?.id ?? null;
+    }
+
+    if (!emailContactId && !phoneContactId) {
+      return { status: 'error', message: 'Share an email or phone number so we can confirm delivery with you.' };
+    }
 
     const { error: insertError } = await portal.from('petition_signatures').insert({
       petition_id: petitionId,
@@ -123,8 +181,8 @@ export async function signPetition(
       share_with_partners: optIn,
       first_name: firstName,
       last_name: lastName,
-      email,
-      phone,
+      email_contact_id: emailContactId,
+      phone_contact_id: phoneContactId,
       postal_code: postalCode,
       display_preference: displayPreferenceRaw as DisplayPreference,
     });

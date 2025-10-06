@@ -995,6 +995,52 @@ export type Database = {
           }?,
         ];
       };
+      profile_contacts: {
+        Row: {
+          id: string;
+          profile_id: string;
+          user_id: string;
+          contact_type: Database["portal"]["Enums"]["contact_method"];
+          contact_value: string;
+          normalized_value: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          user_id: string;
+          contact_type: Database["portal"]["Enums"]["contact_method"];
+          contact_value: string;
+          normalized_value: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          user_id?: string;
+          contact_type?: Database["portal"]["Enums"]["contact_method"];
+          contact_value?: string;
+          normalized_value?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_contacts_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "profile_contacts_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       profile_invites: {
         Row: {
           id: string;
@@ -1142,8 +1188,8 @@ export type Database = {
           withdrawn_at: string | null;
           first_name: string;
           last_name: string;
-          email: string | null;
-          phone: string | null;
+          email_contact_id: string | null;
+          phone_contact_id: string | null;
           postal_code: string;
           display_preference: Database["portal"]["Enums"]["petition_display_preference"];
         };
@@ -1158,8 +1204,8 @@ export type Database = {
           withdrawn_at?: string | null;
           first_name: string;
           last_name: string;
-          email?: string | null;
-          phone?: string | null;
+          email_contact_id?: string | null;
+          phone_contact_id?: string | null;
           postal_code: string;
           display_preference: Database["portal"]["Enums"]["petition_display_preference"];
         };
@@ -1174,8 +1220,8 @@ export type Database = {
           withdrawn_at?: string | null;
           first_name?: string;
           last_name?: string;
-          email?: string | null;
-          phone?: string | null;
+          email_contact_id?: string | null;
+          phone_contact_id?: string | null;
           postal_code?: string;
           display_preference?: Database["portal"]["Enums"]["petition_display_preference"];
         };
@@ -1196,6 +1242,18 @@ export type Database = {
             foreignKeyName: "petition_signatures_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "petition_signatures_email_contact_id_fkey";
+            columns: ["email_contact_id"];
+            referencedRelation: "profile_contacts";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "petition_signatures_phone_contact_id_fkey";
+            columns: ["phone_contact_id"];
+            referencedRelation: "profile_contacts";
             referencedColumns: ["id"];
           }?,
         ];
@@ -2059,6 +2117,10 @@ export type Database = {
         Args: { roles: Database["portal"]["Enums"]["profile_role"][] };
         Returns: boolean;
       };
+      normalize_phone: {
+        Args: { value: string | null };
+        Returns: string | null;
+      };
     };
     Enums: {
       profile_role: "user" | "org_rep" | "moderator" | "admin";
@@ -2066,6 +2128,7 @@ export type Database = {
       affiliation_status: "approved" | "pending" | "revoked";
       lived_experience_status: "none" | "current" | "former" | "prefer_not_to_share";
       invite_status: "pending" | "accepted" | "cancelled" | "expired";
+      contact_method: "email" | "phone";
       idea_category: "Housing" | "Health" | "Policing" | "Community" | "Prevention" | "Other";
       idea_status:
         | "new"
@@ -2344,6 +2407,7 @@ export const Constants = {
       affiliation_status: ["approved", "pending", "revoked"] as const,
       lived_experience_status: ["none", "current", "former", "prefer_not_to_share"] as const,
       invite_status: ["pending", "accepted", "cancelled", "expired"] as const,
+      contact_method: ["email", "phone"] as const,
       idea_category: ["Housing", "Health", "Policing", "Community", "Prevention", "Other"] as const,
       idea_status: ["new", "under_review", "in_progress", "adopted", "not_feasible", "archived"] as const,
       idea_publication_status: ["draft", "published", "archived"] as const,
