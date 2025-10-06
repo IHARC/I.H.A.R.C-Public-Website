@@ -10,10 +10,11 @@ import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { SearchBar } from '@/components/portal/search-bar';
 import { Filters } from '@/components/portal/filters';
 import { EmptyState } from '@/components/portal/empty-state';
-import { KanbanBoard, STATUS_COLUMNS, type ColumnKey } from '@/components/portal/kanban-board';
+import { KanbanBoard } from '@/components/portal/kanban-board';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Database } from '@/types/supabase';
 import { createReactionTally, type ReactionSummary, type PortalReactionType } from '@/lib/reactions';
+import { isIdeaStatusKey, type IdeaStatusKey } from '@/lib/idea-status';
 
 const METRIC_LABELS: Record<string, string> = {
   outdoor_count: 'Neighbours Outdoors',
@@ -196,8 +197,8 @@ export default async function IdeasPage({
         {ideaBoard.length ? (
           <KanbanBoard
             ideas={ideaBoard.map((idea) => {
-              const statusKey = STATUS_COLUMNS.some((column) => column.key === (idea.status as ColumnKey))
-                ? (idea.status as ColumnKey)
+              const statusKey: IdeaStatusKey = isIdeaStatusKey(idea.status)
+                ? idea.status
                 : 'new';
               return { ...idea, status: statusKey };
             })}

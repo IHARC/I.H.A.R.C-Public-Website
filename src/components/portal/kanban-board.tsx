@@ -7,17 +7,14 @@ import { StatusBadge } from '@/components/portal/status-badge';
 import { LivedExperienceBadges } from '@/components/portal/lived-experience-badges';
 import type { IdeaSummary } from '@/components/portal/idea-card';
 import { countSupportReactions, REACTION_DEFINITIONS } from '@/lib/reactions';
+import {
+  IDEA_STATUS_COLUMNS,
+  getIdeaStatusMeta,
+  ideaStatusLabel,
+  type IdeaStatusKey,
+} from '@/lib/idea-status';
 
-export const STATUS_COLUMNS = [
-  { key: 'new', label: 'New', limit: Infinity },
-  { key: 'under_review', label: 'Under review', limit: 8 },
-  { key: 'in_progress', label: 'In progress', limit: 5 },
-  { key: 'adopted', label: 'Adopted', limit: Infinity },
-  { key: 'not_feasible', label: 'Not feasible', limit: Infinity },
-  { key: 'archived', label: 'Archived', limit: Infinity },
-] as const;
-
-export type ColumnKey = (typeof STATUS_COLUMNS)[number]['key'];
+type ColumnKey = IdeaStatusKey;
 
 type KanbanIdea = IdeaSummary & { status: ColumnKey };
 
@@ -27,7 +24,7 @@ type ColumnState = {
 };
 
 function buildColumns(ideas: KanbanIdea[]): ColumnState[] {
-  return STATUS_COLUMNS.map((column) => ({
+  return IDEA_STATUS_COLUMNS.map((column) => ({
     status: column.key,
     items: ideas.filter((idea) => idea.status === column.key),
   }));
@@ -97,7 +94,7 @@ export function KanbanBoard({
     const targetColumn = columns.find((column) => column.status === targetStatus);
     if (!targetColumn) return;
 
-    const targetMeta = STATUS_COLUMNS.find((column) => column.key === targetStatus);
+    const targetMeta = getIdeaStatusMeta(targetStatus);
     const limit = targetMeta?.limit ?? Infinity;
     if (Number.isFinite(limit) && targetColumn.items.length >= limit) {
       toast({
@@ -142,7 +139,7 @@ export function KanbanBoard({
         }
         toast({
           title: 'Status updated',
-          description: `${idea.title} moved to ${statusLabel(targetStatus)}.`,
+          description: `${idea.title} moved to ${ideaStatusLabel(targetStatus)}.`,
         });
       } catch (error) {
         toast({
@@ -167,7 +164,7 @@ export function KanbanBoard({
   return (
     <div className="grid gap-4 overflow-x-auto pb-4 lg:grid-cols-3 xl:grid-cols-6">
       {columns.map((column) => {
-        const columnMeta = STATUS_COLUMNS.find((meta) => meta.key === column.status);
+        const columnMeta = getIdeaStatusMeta(column.status);
         const limitLabel = columnMeta && Number.isFinite(columnMeta.limit)
           ? `${column.items.length}/${columnMeta.limit}`
           : `${column.items.length}`;
@@ -185,7 +182,7 @@ export function KanbanBoard({
           >
             <header className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-100">
-                {statusLabel(column.status)}
+                {ideaStatusLabel(column.status)}
                 <Badge variant="secondary">{limitLabel}</Badge>
               </div>
               {pending && <span className="text-xs text-muted-subtle">Saving…</span>}
@@ -250,11 +247,11 @@ function KanbanCard({
       <div className="flex items-center justify-between gap-2 text-xs text-muted">
         <StatusBadge status={idea.status} />
         <span className="inline-flex items-center gap-1" aria-label="Positive reactions">
-          <span aria-hidden>{leadingReaction ? leadingReaction.definition.emoji : '👍'}</span>
-          <span>{supportCount}</span>
-        </span>
-      </div>
-      <h3 className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{idea.title}</h3>
+        <span aria-hidden>{leadingReaction ? leadingReaction.definition.emoji : '👍'}</span>
+        <span>{supportCount}</span>
+      </span>
+    </div>
+    <h3 className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{idea.title}</h3>
       <p className="mt-1 line-clamp-3 text-xs text-slate-600 dark:text-slate-300">
         {idea.proposalSummary || idea.problemStatement || idea.body}
       </p>
@@ -269,9 +266,4 @@ function KanbanCard({
       />
     </div>
   );
-}
-
-function statusLabel(status: ColumnKey) {
-  const entry = STATUS_COLUMNS.find((column) => column.key === status);
-  return entry ? entry.label : status;
 }
