@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useId } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useId } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { trackEvent } from '@/lib/analytics';
+import type { PetitionSignerDefaults } from '@/lib/petition/signature';
 
 export type PetitionFormState = {
   status: 'idle' | 'success' | 'error';
@@ -22,10 +23,11 @@ const INITIAL_STATE: PetitionFormState = { status: 'idle' };
 type PetitionSignFormProps = {
   action: (state: PetitionFormState, formData: FormData) => Promise<PetitionFormState>;
   petitionId: string;
+  defaults?: PetitionSignerDefaults | null;
 };
 
-export function PetitionSignForm({ action, petitionId }: PetitionSignFormProps) {
-  const [state, formAction] = useFormState(action, INITIAL_STATE);
+export function PetitionSignForm({ action, petitionId, defaults }: PetitionSignFormProps) {
+  const [state, formAction] = useActionState(action, INITIAL_STATE);
   const { toast } = useToast();
 
   const statementId = useId();
@@ -60,8 +62,20 @@ export function PetitionSignForm({ action, petitionId }: PetitionSignFormProps) 
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
-        <TextField name="first_name" label="First name" autoComplete="given-name" required />
-        <TextField name="last_name" label="Last name" autoComplete="family-name" required />
+        <TextField
+          name="first_name"
+          label="First name"
+          autoComplete="given-name"
+          required
+          defaultValue={defaults?.firstName}
+        />
+        <TextField
+          name="last_name"
+          label="Last name"
+          autoComplete="family-name"
+          required
+          defaultValue={defaults?.lastName}
+        />
         <TextField
           type="email"
           name="email"
@@ -69,6 +83,7 @@ export function PetitionSignForm({ action, petitionId }: PetitionSignFormProps) 
           autoComplete="email"
           className="md:col-span-2"
           required
+          defaultValue={defaults?.email}
         />
         <TextField
           name="postal_code"
@@ -145,9 +160,10 @@ type TextFieldProps = {
   className?: string;
   autoComplete?: string;
   required?: boolean;
+  defaultValue?: string;
 };
 
-function TextField({ name, label, type = 'text', className, autoComplete, required }: TextFieldProps) {
+function TextField({ name, label, type = 'text', className, autoComplete, required, defaultValue }: TextFieldProps) {
   const id = useId();
   return (
     <div className={className}>
@@ -160,6 +176,7 @@ function TextField({ name, label, type = 'text', className, autoComplete, requir
         type={type}
         autoComplete={autoComplete}
         required={required}
+        defaultValue={defaultValue}
         className="mt-2"
       />
     </div>

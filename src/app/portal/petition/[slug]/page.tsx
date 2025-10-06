@@ -6,6 +6,7 @@ import { PetitionSignForm, type PetitionFormState } from '@/components/portal/pe
 import { PetitionPostSignActions } from '@/components/site/petition-post-sign-actions';
 import { signPetition } from '@/lib/actions/sign-petition';
 import type { Database } from '@/types/supabase';
+import { deriveSignerDefaults, type PetitionSignerDefaults } from '@/lib/petition/signature';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,12 +69,15 @@ let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement'
     viewerProfile = await ensurePortalProfile(supabase, user.id);
   }
 
+  const signerDefaults = user ? deriveSignerDefaults(user, viewerProfile) : null;
+
   return (
     <PetitionPageContent
       petition={petition}
       existingSignature={existingSignature}
       isAuthenticated={Boolean(user)}
       viewerProfile={viewerProfile}
+      signerDefaults={signerDefaults}
     />
   );
 }
@@ -83,9 +87,10 @@ type PetitionPageContentProps = {
   existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null;
   isAuthenticated: boolean;
   viewerProfile: PortalProfile | null;
+  signerDefaults: PetitionSignerDefaults | null;
 };
 
-function PetitionPageContent({ petition, existingSignature, isAuthenticated, viewerProfile }: PetitionPageContentProps) {
+function PetitionPageContent({ petition, existingSignature, isAuthenticated, viewerProfile, signerDefaults }: PetitionPageContentProps) {
   const signatureCount = petition.signature_count ?? 0;
   const target = petition.target_signatures;
   const progressPercentage = typeof target === 'number' && target > 0 ? Math.min(100, Math.round((signatureCount / target) * 100)) : null;
@@ -154,6 +159,7 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
           viewerProfile={viewerProfile}
           existingSignature={existingSignature}
           isAuthenticated={isAuthenticated}
+          signerDefaults={signerDefaults}
         />
         <div className="text-xs text-on-surface/60">
           <p>
@@ -202,9 +208,10 @@ type PetitionSignSectionProps = {
   viewerProfile: PortalProfile | null;
   existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null;
   isAuthenticated: boolean;
+  signerDefaults: PetitionSignerDefaults | null;
 };
 
-function PetitionSignSection({ petition, viewerProfile, existingSignature, isAuthenticated }: PetitionSignSectionProps) {
+function PetitionSignSection({ petition, viewerProfile, existingSignature, isAuthenticated, signerDefaults }: PetitionSignSectionProps) {
   const petitionPath = `/portal/petition/${petition.slug}`;
   const petitionUrl = `${APP_URL}/petition`;
 
@@ -274,7 +281,7 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
 
   return (
     <div className="space-y-5 rounded-2xl border border-primary/15 bg-surface-container p-5">
-      <PetitionSignForm action={handleSign} petitionId={petition.id} />
+      <PetitionSignForm action={handleSign} petitionId={petition.id} defaults={signerDefaults} />
       <p className="text-xs text-on-surface/60">
         After signing you will receive a confirmation email. Moderators may follow up only if you opt in to additional contact.
       </p>

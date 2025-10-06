@@ -7,6 +7,7 @@ import { PetitionSignForm, type PetitionFormState } from '@/components/portal/pe
 import { PetitionPostSignActions } from '@/components/site/petition-post-sign-actions';
 import { signPetition } from '@/lib/actions/sign-petition';
 import type { Database } from '@/types/supabase';
+import { deriveSignerDefaults } from '@/lib/petition/signature';
 
 export const metadata: Metadata = {
   title: 'Support the declaration — IHARC',
@@ -56,6 +57,8 @@ export default async function PetitionPage() {
 
     viewerProfile = await ensurePortalProfile(supabase, user.id);
   }
+
+  const signerDefaults = user ? deriveSignerDefaults(user, viewerProfile) : null;
 
   const signatureCount = petition.signature_count ?? 0;
   const formattedCount = numberFormatter.format(signatureCount);
@@ -115,7 +118,7 @@ export default async function PetitionPage() {
         />
       ) : user ? (
         <div className="space-y-5 rounded-2xl border border-primary/20 bg-surface-container p-5">
-          <PetitionSignForm action={handleSign} petitionId={petition.id} />
+          <PetitionSignForm action={handleSign} petitionId={petition.id} defaults={signerDefaults} />
           <p className="text-xs text-on-surface/60">
             After signing you will receive a confirmation email. Moderators only follow up if you opt into petition updates.
           </p>

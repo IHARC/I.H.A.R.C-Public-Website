@@ -5,6 +5,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { scanContentForSafety } from '@/lib/safety';
 import { logAuditEvent } from '@/lib/audit';
+import { normalizeNamePart } from '@/lib/names';
+import { deriveSignerDefaults, normalizeEmail } from '@/lib/petition/signature';
 import type { Database } from '@/types/supabase';
 
 export type PetitionActionResult = {
@@ -45,23 +47,14 @@ export async function signPetition(
     return { status: 'error', message: 'We could not match this petition. Refresh and try again.' };
   }
 
-  const firstName = (formData.get('first_name') as string | null)?.trim();
-  const lastName = (formData.get('last_name') as string | null)?.trim();
-  const email = ((formData.get('email') as string | null) ?? '').trim().toLowerCase();
+  const firstNameFromForm = normalizeNamePart(formData.get('first_name'));
+  const lastNameFromForm = normalizeNamePart(formData.get('last_name'));
+  const emailFromForm = normalizeEmail(formData.get('email'));
   const postalCodeRaw = (formData.get('postal_code') as string | null)?.trim();
   const displayPreferenceRaw = (formData.get('display_preference') as string | null) ?? '';
   const statementInput = (formData.get('statement') as string | null) ?? '';
   const optIn = formData.get('petition_updates') === 'on';
 
-  if (!firstName) {
-    return { status: 'error', message: 'Enter your first name to continue.' };
-  }
-  if (!lastName) {
-    return { status: 'error', message: 'Enter your last name to continue.' };
-  }
-  if (!email || !validateEmail(email)) {
-    return { status: 'error', message: 'Enter a valid email address.' };
-  }
   if (!postalCodeRaw) {
     return { status: 'error', message: 'Enter your postal code.' };
   }
@@ -92,6 +85,26 @@ export async function signPetition(
 
   try {
     const profile = await ensurePortalProfile(supabase, user.id);
+    const {
+      firstName: defaultFirstName,
+      lastName: defaultLastName,
+      email: defaultEmail,
+    } = deriveSignerDefaults(user, profile) ?? {};
+
+    const firstName = firstNameFromForm ?? defaultFirstName;
+    const lastName = lastNameFromForm ?? defaultLastName;
+    const email = emailFromForm ?? defaultEmail;
+
+    if (!firstName) {
+      return { status: 'error', message: 'Enter your first name to continue.' };
+    }
+    if (!lastName) {
+      return { status: 'error', message: 'Enter your last name to continue.' };
+    }
+    if (!email || !validateEmail(email)) {
+      return { status: 'error', message: 'Enter a valid email address.' };
+    }
+
     const portal = supabase.schema('portal');
 
     const { error: insertError } = await portal.from('petition_signatures').insert({
