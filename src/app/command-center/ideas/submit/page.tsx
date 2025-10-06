@@ -1,4 +1,4 @@
-import IdeaSubmitPage from '@/app/ideas/submit/page';
+import IdeaSubmitPage from '@/app/portal/ideas/submit/page';
 
 export const dynamic = 'force-dynamic';
 

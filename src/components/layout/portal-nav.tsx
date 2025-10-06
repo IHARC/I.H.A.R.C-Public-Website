@@ -37,9 +37,11 @@ export function PortalNav() {
   );
 }
 
-type PortalNavLinkProps = PortalLink & {
-  children: ReactNode;
+type PortalNavLinkProps = {
+  href: string;
+  exact?: boolean;
   pathname: string;
+  children: ReactNode;
 };
 
 function PortalNavLink({ href, children, exact, pathname }: PortalNavLinkProps) {

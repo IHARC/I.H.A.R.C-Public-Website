@@ -1,4 +1,4 @@
-import PlanDetailPage from '@/app/plans/[slug]/page';
+import PlanDetailPage from '@/app/portal/plans/[slug]/page';
 
 export const dynamic = 'force-dynamic';
 

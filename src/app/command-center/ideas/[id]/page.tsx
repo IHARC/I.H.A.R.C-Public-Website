@@ -1,4 +1,4 @@
-import IdeaDetailPage from '@/app/ideas/[id]/page';
+import IdeaDetailPage from '@/app/portal/ideas/[id]/page';
 
 export const dynamic = 'force-dynamic';
 

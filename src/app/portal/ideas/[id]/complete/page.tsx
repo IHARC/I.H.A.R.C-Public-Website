@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { IdeaSubmissionForm } from '@/app/ideas/submit/idea-form';
+import { IdeaSubmissionForm } from '@/app/portal/ideas/submit/idea-form';
 import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
