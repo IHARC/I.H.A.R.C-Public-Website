@@ -5,13 +5,13 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type PortalLink = {
+export type PortalLink = {
   href: string;
   label: string;
   exact?: boolean;
 };
 
-const links: PortalLink[] = [
+export const portalLinks: PortalLink[] = [
   { href: '/portal/petition', label: 'Petition' },
   { href: '/portal/ideas', label: 'Ideas', exact: false },
   { href: '/portal/plans', label: 'Plans' },
@@ -27,8 +27,8 @@ export function PortalNav() {
       aria-label="Portal navigation"
       className="border-b border-outline/10 bg-surface-container text-on-surface"
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-2 overflow-x-auto px-4 py-3">
-        {links.map((link) => (
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
+        {portalLinks.map((link) => (
           <PortalNavLink key={link.href} href={link.href} exact={link.exact} pathname={pathname}>
             {link.label}
           </PortalNavLink>
