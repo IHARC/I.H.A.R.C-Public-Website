@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
@@ -12,9 +13,94 @@ export const dynamic = 'force-dynamic';
 
 const numberFormatter = new Intl.NumberFormat('en-CA');
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
+const DEFAULT_PETITION_TITLE = 'Support the declaration — IHARC';
+const DEFAULT_PETITION_DESCRIPTION =
+  'Add your name to the public petition so neighbours, agencies, and the Town can coordinate housing and overdose supports.';
 
 type PetitionSummary = Database['portal']['Views']['petition_public_summary']['Row'];
 type PetitionSignature = Database['portal']['Tables']['petition_signatures']['Row'];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slugParam = resolvedParams.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
+
+  if (!slug) {
+    return {
+      title: DEFAULT_PETITION_TITLE,
+      description: DEFAULT_PETITION_DESCRIPTION,
+      alternates: {
+        canonical: '/portal/petition',
+      },
+    };
+  }
+
+  try {
+    const supabase = await createSupabaseRSCClient();
+    const portal = supabase.schema('portal');
+    const { data: petition } = await portal
+      .from('petition_public_summary')
+      .select('title, lede, is_active, slug')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!petition || !petition.is_active) {
+      return {
+        title: DEFAULT_PETITION_TITLE,
+        description: DEFAULT_PETITION_DESCRIPTION,
+        alternates: {
+          canonical: `/portal/petition/${slug}`,
+        },
+      };
+    }
+
+    const canonicalPath = `/portal/petition/${petition.slug}`;
+    const title = `${petition.title} — IHARC`;
+    const description = petition.lede ?? DEFAULT_PETITION_DESCRIPTION;
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: canonicalPath,
+      },
+      openGraph: {
+        type: 'article',
+        title,
+        description,
+        url: canonicalPath,
+        images: [
+          {
+            url: '/og-default.png',
+            width: 1200,
+            height: 630,
+            alt: 'IHARC Command Center — Community collaboration for housing and health',
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: ['/og-default.png'],
+      },
+    };
+  } catch (error) {
+    console.warn('Failed to build petition metadata', error);
+    const canonicalPath = `/portal/petition/${slug}`;
+    return {
+      title: DEFAULT_PETITION_TITLE,
+      description: DEFAULT_PETITION_DESCRIPTION,
+      alternates: {
+        canonical: canonicalPath,
+      },
+    };
+  }
+}
 
 export default async function PetitionPage({
   params,

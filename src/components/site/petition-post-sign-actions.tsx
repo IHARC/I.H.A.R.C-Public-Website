@@ -11,6 +11,7 @@ interface PetitionPostSignActionsProps {
 
 export function PetitionPostSignActions({ petitionUrl }: PetitionPostSignActionsProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(petitionUrl)}`;
 
   async function handleShare() {
     trackEvent('petition_share_clicked');
@@ -61,6 +62,15 @@ export function PetitionPostSignActions({ petitionUrl }: PetitionPostSignActions
           onClick={() => trackEvent('emergency_brief_open_after_petition')}
         >
           <Link href="/emergency">Read the Emergency brief</Link>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          onClick={() => trackEvent('petition_share_facebook_clicked')}
+        >
+          <Link href={facebookShareUrl} target="_blank" rel="noopener noreferrer">
+            Share on Facebook
+          </Link>
         </Button>
         <Button type="button" variant="secondary" onClick={handleShare}>
           Share the petition

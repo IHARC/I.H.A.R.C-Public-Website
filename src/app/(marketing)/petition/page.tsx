@@ -9,10 +9,36 @@ import { signPetition } from '@/lib/actions/sign-petition';
 import type { Database } from '@/types/supabase';
 import { deriveSignerDefaults } from '@/lib/petition/signature';
 
+const PETITION_CANONICAL_PATH = '/petition';
+const PETITION_DESCRIPTION =
+  'Add your name to the public petition calling on the Town of Cobourg to declare a municipal State of Emergency over housing instability and the toxic drug crisis.';
+
 export const metadata: Metadata = {
   title: 'Support the declaration — IHARC',
-  description:
-    'Add your name to the public petition calling on the Town of Cobourg to declare a municipal State of Emergency over housing instability and the toxic drug crisis.',
+  description: PETITION_DESCRIPTION,
+  alternates: {
+    canonical: PETITION_CANONICAL_PATH,
+  },
+  openGraph: {
+    type: 'article',
+    title: 'Support the declaration — IHARC',
+    description: PETITION_DESCRIPTION,
+    url: PETITION_CANONICAL_PATH,
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'IHARC Command Center — Community collaboration for housing and health',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Support the declaration — IHARC',
+    description: PETITION_DESCRIPTION,
+    images: ['/og-default.png'],
+  },
 };
 
 const numberFormatter = new Intl.NumberFormat('en-CA');
