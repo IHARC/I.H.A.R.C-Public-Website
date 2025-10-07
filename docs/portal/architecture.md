@@ -1,83 +1,55 @@
 # IHARC Command Center Architecture Overview
 
 ## Guiding Principles
-- Preserve existing Supabase auth configuration; extend functionality strictly within a new `portal` schema.
-- Isolate all storage to a private bucket `portal-attachments` using signed URL access.
-- Enforce least-privilege through RLS, Postgres policies, and role-aware logic in API handlers and Edge Functions.
-- Meet WCAG AA accessibility targets and provide resilient, offline-friendly UX where practical.
-- Default timezone handling to `America/Toronto` across database timestamps, analytics, and UI presentation.
+- Extend the existing Supabase project strictly within the `portal` schema. Preserve auth configuration and enforce least-privilege with RLS, policies, and role-aware logic.
+- Keep every portal route strengths-based, accessibility-aware, and ready to serve dynamic data. All `/portal/*` pages remain fully dynamic (`export const dynamic = 'force-dynamic'`).
+- Maintain compassionate storytelling and privacy: anonymise neighbours by default, surface opt-in controls, and ensure audit logging for sensitive actions.
+- Normalise time handling around `America/Toronto` for analytics, plan timelines, and petition milestones.
 
-## High-Level Components
-1. **Next.js 15 App Router Frontend**
-   - Routes `/command-center`, `/command-center/admin`, `/solutions`, `/solutions/submit`, `/solutions/[id]`, `/solutions/profile`, `/solutions/mod`.
-   - Uses TypeScript, Tailwind, shadcn/ui primitives, and Supabase JS v2 for data access.
-   - Implements reusable component library (Cards, TrendChart, IdeaCard, StatusBadge, TagChips, UpvoteButton, CommentThread, AttachmentUploader, OrgBadge, RulesModal, EmptyState, Paginator, SearchBar, Filters).
-   - Client/server validation for PII and profanity; rate-limit messaging surfaced via UI.
-   - Accessibility features include keyboard navigation, aria labels, screen reader summaries, high contrast support.
+## Application Layers
 
-2. **Supabase Schema (`portal` namespace)**
-   - `portal.profiles`: Connects to `auth.users` via FK; stores display name, optional org, role enum `{user, org_rep, moderator, admin}`.
-   - `portal.organizations`: Agency/org registry with verification flag.
-   - `portal.ideas`: Core Idea entity with category enum, tags array, status enum, anonymous flag, counts, timestamps, last activity.
-   - `portal.idea_edits`: Historical body snapshots with editor reference.
-   - `portal.attachments`: Metadata for stored files (path, mime, size, checksum) linked to ideas.
-   - `portal.comments`: Two-level threaded comments with official flag.
-   - `portal.votes`: Composite PK `(idea_id, voter_id)` toggling support.
-   - `portal.flags`: Moderation flags with status enum and metadata.
-   - `portal.audit_log`: Append-only audit trail for all mutations.
-   - `portal.metrics_daily`: Daily metric time-series for dashboard.
-   - Support tables: `portal.pi_guard` (regex patterns), `portal.profanity_guard` (blocked terms) for managed lists.
+### 1. Next.js 15 App Router Frontend
+- Routes are split between marketing content (`/(marketing)`) and the authenticated collaboration surface (`/portal/*`). Legacy `/command-center` and `/solutions/*` paths redirect into the portal while preserving search parameters.
+- `/portal/ideas` provides the proposal queue with filters, search, locked-action tooltips for guests, and a six-step submit wizard at `/portal/ideas/submit`. `/portal/ideas/[id]` shows summaries, metrics, typed comments, timelines, and “How to help” prompts, plus moderator-only promotion workflows.
+- `/portal/plans` enumerates Working Plans; `/portal/plans/[slug]` offers tabs (Overview | Updates | Decisions | Timeline), a six-field plan update composer, decision notes, per-person support votes, and moderator actions (reopen, accept, not moving forward, added to plan).
+- `/portal/progress` aggregates 30-day metrics and links back into stats and plans. `/portal/about` anchors commitments, privacy, and anonymisation guidelines.
+- `/portal/petition/[slug]` and marketing `/petition` share the petition component, capturing signatures, display preferences, statements, and partner contact consent. Petition call-to-actions route supporters back into portal collaboration.
+- Shared components (idea/plan cards, update composer, moderation queue, petition forms) live under `src/components/portal/`. Supabase data fetching uses server actions, RSC loaders, and client hooks with consistent caching strategies.
 
-3. **Database Types & Helpers**
-   - Enums: `portal.role_type`, `portal.idea_category`, `portal.idea_status`, `portal.flag_reason`, `portal.flag_status`, `portal.metric_key`, `portal.entity_type` (for flags/audit).
-   - Views/materialized views for metrics aggregation where warranted (e.g., 7-day, 30-day rollups).
-   - Functions:
-     - `portal.ensure_profile()` to create default profile for authenticated users.
-     - `portal.log_audit(actor uuid, action text, entity portal.entity_type, entity_id uuid, meta jsonb)` to centralize audit writes.
-     - `portal.assert_rate_limit(...)` to enforce per-user idea/comment quotas.
-     - `portal.detect_pii(text)` and `portal.detect_profanity(text)` returning boolean and matched tokens for server-side validation.
-     - `portal.update_counts()` trigger to keep denormalized idea counts in sync.
+### 2. Supabase Schema (`portal` Namespace)
+- **Profiles & Organisations**: `profiles`, `organizations`, `profile_contacts`, and enums (`profile_role`, `affiliation_type`, etc.) connect portal roles to `auth.users`.
+- **Ideas**: `ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`, `attachments`. Denormalised counts and search vectors keep listings responsive.
+- **Working Plans**: `plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, plus `plan_updates_v` for efficient tab views.
+- **Petitions**: `petitions`, `petition_signatures`, views `petition_public_summary`, `petition_public_signers`, and `petition_signature_totals` for public display and analytics.
+- **Metrics & Notifications**: `metric_daily`, `notifications`, `audit_log`, along with helper functions (`current_profile_id`, `current_role`, `normalize_phone`).
 
-4. **RLS & Security**
-   - Default deny on all `portal.*` tables with selective policies for read/write.
-   - Public read policies on metrics, organizations, ideas (filtered to non-archived), comments with `is_official` gating for non-auth?
-   - Authenticated insert/update policies referencing `auth.uid()` matching `portal.profiles.user_id`.
-   - Moderation/Admin policies enabling status changes, flag resolution, official comments.
-   - Flags & audit logs restricted to moderator/admin roles; Expose aggregated counts for others where needed via dedicated views.
-   - Enforce vote uniqueness via PK and RLS check; allow toggling by deleting record.
+### 3. Database Views, Enums & Functions
+- Enums include `idea_category`, `idea_status`, `idea_publication_status`, `comment_type`, `flag_reason`, `flag_status`, `plan_update_status`, `petition_display_preference`, `reaction_type`, and metric keys.
+- Views (`idea_reaction_totals`, `plan_update_reaction_totals`, `petition_public_summary`, `petition_signature_totals`) power dashboard summaries without bypassing RLS.
+- Core functions: `portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit` (via RPC wrappers), `portal.ensure_profile`, `portal.petition_signature_totals_public`, and `portal.normalize_phone`.
 
-5. **Edge Functions**
-   - `portal-ingest-metrics`: Protected by header secret `PORTAL_INGEST_SECRET`; upserts `portal.metrics_daily` with audit log entry.
-   - `portal-moderate`: Requires authenticated session with moderator/admin role; handles idea status transitions, official response tagging, flag resolution, content archiving; logs actions.
+### 4. Access Control & Safety
+- Every table defaults to `REVOKE ALL`; RLS policies whitelist reads/writes by role. Public reads are limited to safe views. Moderators/admins gain elevated policies for promotion, status changes, decisions, and moderation queue actions.
+- Mutations run through RPC helpers to guarantee audit logging and rate limiting. `portal_check_rate_limit` returns `retry_in_ms` for UI messaging.
+- Official responses, plan updates, and petition statements all generate audit events (`plan_promoted`, `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, `key_date_set`) to support accountability reporting.
 
-6. **Storage**
-   - Bucket `portal-attachments` (private). Objects stored under `idea/{idea_uuid}/{attachment_uuid}.{ext}`.
-   - An attachment upload API issues signed URLs post server-side validation (mime allowlist, size <= 8MB, file scanning hook stub).
-   - Attachment metadata recorded in `portal.attachments` referencing idea and uploader.
+### 5. Edge Functions & Server Actions
+- `portal-moderate`: Handles idea status changes, official response tagging, moderation queue actions, and plan lifecycle events under moderator/admin authentication.
+- `portal-ingest-metrics`: Authenticated via `PORTAL_INGEST_SECRET`, upserts `metric_daily` records, and logs ingestion events.
+- `portal-attachments`: Issues signed URLs after verifying role-based access.
+- `portal-admin-invite`: Processes administrative invites, ensuring Supabase Auth + audit instrumentation stays server-side.
+- Server actions within Next.js wrap Supabase clients, enforce RLS-aware queries, and centralise rate checks.
 
-7. **API Layer (Next.js Route Handlers/Server Actions)**
-   - `POST /api/portal/ideas`: Validates input, rate limits, enforces PII/profanity guard, handles attachments via signed URLs, writes idea, edit history, audit.
-   - `POST /api/portal/ideas/:id/vote`: Toggle semantics with audit.
-   - `POST /api/portal/ideas/:id/comments`: Validates depth, role requirements for official comments, attachments? (comments use text only), logs audit.
-   - `POST /api/portal/flags`: Records flag, auto-notifies moderators (placeholder), audit.
-   - `GET /api/portal/metrics`: Returns 7/30 day data + latest snapshot; includes screen reader summary text.
+### 6. Storage & Attachments
+- Private bucket `portal-attachments` stores files (`idea/{idea_uuid}/{attachment_uuid}.{ext}`). Upload flow issues signed URLs only after MIME/type validation and size checks (≤ 8 MB). Metadata persists in `portal.attachments`.
+- Petition collateral leverages the same storage patterns when campaigns include downloadable resources.
 
-8. **Client Authentication Flow**
-   - Email/password login and registration via Supabase Auth; multi-step sign-up capturing display name, organization selection, community rules acknowledgment.
-   - `middleware.ts` gatekeeping for `/solutions/mod` and `/command-center/admin` routes.
-   - On first login, server ensures `portal.profiles` record with role `user` exists.
+### 7. Authentication & Middleware
+- Supabase Auth handles registration (`/register`), login, and session management. Middleware gates moderator-only routes and ensures portal profiles exist (`portal.ensure_profile`) upon first login.
+- Profiles track petition opt-ins (`has_signed_petition`, `petition_signed_at`) and affiliations. Role claims steer UI states and RLS decisions.
 
-9. **Safety & Moderation**
-   - Shared utility for PII detection (regex for emails, phone, addresses, doxxing phrases) used both client & server.
-   - Profanity list maintained server-side; client fetches hashed set for local blocking.
-   - Auto-flag when server detects PII/profanity after initial block.
-   - Rate limit using DB function + caching (Redis optional placeholder) and fallback in API layer.
+### 8. Telemetry & Audit Logging
+- Every mutation triggers `portal_log_audit_event`, capturing actor (profile/user), action, entity, and hashed IP/User-Agent metadata.
+- Reaction totals, plan updates, and petition signatures roll up into materialised views for `/portal/progress` and marketing pages.
+- Notifications queue emails/SMS via `portal_queue_notification`, with SMTP credentials managed in Azure Functions.
 
-10. **Telemetry & Auditing**
-    - All mutations call `portal.log_audit` with hashed IP (SHA-256 truncated) and user agent where available; API extracts metadata from headers.
-    - Dashboard displays counts using aggregated views; admin metrics ingestion writes to audit with `action` value `portal.metrics.ingest` etc.
-
-## Pending Decisions
-- Determine caching strategy (e.g., Next.js cached data vs SWR) once data volume known.
-- Evaluate incremental static regeneration vs fully dynamic routes; initial build will use dynamic SSR to respect auth gating.
-- Choose charting approach compatible with Next+Tailwind and accessible fallback (e.g., Visx, Tremor, or custom d3). Baseline will use lightweight chart component with canvas fallback.

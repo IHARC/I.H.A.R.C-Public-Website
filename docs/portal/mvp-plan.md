@@ -1,32 +1,28 @@
-# Portal MVP Implementation Plan
+# Portal Delivery Notes
 
-## Guiding Outcomes
-- Deliver a collaborative workflow that mirrors agile cadences while remaining approachable for community members through the community project board.
-- Keep `/command-center` lightweight for now with headline cards and a “coming soon” backlog preview until richer data sources are ready.
-- Prioritise authenticated participation flows (idea submission, voting, two-level comments, flagging) with transparent moderation touchpoints.
+This document tracks the current state of the public-facing Command Center MVP and the near-term priorities that keep the portal evolving in step with community needs.
 
-## Dashboard Placeholder Strategy
-- Show most recent value per metric (if any) with simple summary copy; hide charts when data volume is sparse and replace with "Trend insights coming soon" message.
-- Reserve sections for project cadence summaries ("Ideas in progress", "Next review window") populated with static copy for MVP.
-- Provide quick links into `/solutions` filters (e.g., "Active this week", "Needs review") to guide users into the collaborative workspace.
+## Delivered Capabilities
+- **Idea collaboration**: `/portal/ideas` queue with filters, guest tooltips, and six-step submission (`/portal/ideas/submit`). Canonical idea pages include metrics, typed comments, timeline history, and the moderator-only “Promote to Working Plan” workflow.
+- **Working Plans**: `/portal/plans` directory and `/portal/plans/[slug]` tabs (Overview | Updates | Decisions | Timeline) with update composer, plan support voting, decision notes, and moderator actions (`reopen`, `accept`, `not moving forward`, `added to plan`).
+- **Progress dashboard**: `/portal/progress` summarises 30-day metrics with navigation back to stats, ideas, and plans. Audit events power update streaks and decision logs.
+- **Petition campaigns**: `/portal/petition/[slug]` (and marketing `/petition`) capture signatures, statements, partner consent, and display preferences, all backed by `petition_public_summary` views.
+- **Safety & governance**: RLS-enforced Supabase schema, audit logging for every mutation, moderation queue handled via `portal-moderate`, private attachments bucket, and cooldown messaging backed by `portal_check_rate_limit`.
 
-## Collaboration Workflow (Inspired by Agile)
-1. **Backlog Intake** – ideas land in `status = 'new'`; moderators triage into "Sprint candidates" (under_review/in_progress).
-2. **Community Project Board** – statuses map to columns: `new`, `under_review`, `in_progress`, `adopted`, `not_feasible`, `archived`.
-3. **Review Rituals** – official agency/org responses recorded as comments flagged `is_official`, surfaced alongside idea timeline.
-4. **Retrospective Signals** – vote totals, comment activity, and moderation flags roll into audit log for future reporting.
+## Current Iteration Focus
+- Harden the idea → plan promotion flow by verifying sponsor/support thresholds, seeding focus areas, and logging `plan_promoted` plus `key_date_set` events.
+- Ensure plan updates include all six required fields, respect `plan_update_status` transitions, and emit `update_opened`, `update_accepted`, `update_declined`, and `added_to_plan` audit events.
+- Persist filters and search parameters when moving between `/portal/ideas`, `/portal/plans`, and `/portal/progress`, including legacy redirects.
+- Fine-tune petition storytelling so marketing and portal surfaces stay aligned, highlight anonymisation guidance, and reinforce partner follow-up consent.
 
-## Feature Priorities (This Iteration)
-- [ ] API endpoints: ideas (create), votes (toggle), comments (post with depth control), flags (create), metrics (public range query).
-- [ ] Rate limiting and safety validation on server for all mutations, mirroring client-side guards.
-- [ ] Attachment workflow: signed upload URLs + metadata persistence for private bucket `portal-attachments`.
-- [ ] Audit logging wired for every mutation endpoint with hashed IP/User-Agent metadata.
-- [ ] Portal profile onboarding: persist `rules_acknowledged_at` when first modal is accepted.
-- [ ] Moderation queue UX refresh (use router refresh instead of full reload) and official-response audit entry.
-- [ ] Dashboard placeholder copy + quick links emphasising community project board collaboration.
+## Near-Term Opportunities
+- Expand `/portal/progress` with additional plan outcome metrics and petition signature rollups once enough history exists.
+- Introduce notification templates that reference petition involvement and plan support votes while respecting opt-out preferences.
+- Explore light-touch analytics overlays (e.g., spark lines) that stay accessible and respect real-time data constraints.
+- Continue deprecating references to legacy `/command-center` UI in favour of `/portal/*` components, ensuring search params remain intact.
 
-## Known Follow-Ups (Post-MVP)
-- Rich analytics visualisation once daily metrics history grows; integrate cumulative trend analysis.
-- Automated notifications (email/webhook) for status changes and official responses.
-- Advanced safety tooling (machine-learning moderation, full PII/profanity lists synced from database tables).
-- Crowd project planning surface that batches ideas into themed iterations with timeline projections.
+## Collaboration Checklist
+- Coordinate schema changes through Supabase migrations and immediately update `docs/portal/architecture.md`.
+- Use the Supabase MCP tool (or CLI) to verify policies, enums, and views before shipping features that depend on them.
+- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) are redeployed after schema or environment updates.
+- Validate language and accessibility requirements with community partners before publishing new petition content or plan narratives.
