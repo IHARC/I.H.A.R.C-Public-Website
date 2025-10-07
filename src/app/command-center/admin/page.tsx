@@ -506,8 +506,6 @@ export default async function CommandCenterAdminPage() {
 
     const profileId = formData.get('profile_id') as string;
     const actorProfileId = formData.get('actor_profile_id') as string;
-    const approvedOrganizationIdRaw = (formData.get('approved_organization_id') as string | null)?.trim() ?? null;
-    const approvedGovernmentRoleRaw = (formData.get('approved_government_role') as string | null)?.trim() ?? null;
     if (!profileId) {
       throw new Error('Missing profile identifier.');
     }
