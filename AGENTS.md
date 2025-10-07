@@ -1,67 +1,50 @@
 ## Mission & Audience Context
-- The portal is the public-facing MVP for the IHARC Command Center. It prioritizes compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
-- Content should emphasize collaboration, dignity, and community care. Avoid deficit-based language and maintain trust with service users, neighbours, and agency partners.
-- Two core intents drive every iteration: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative "command center" where neighbours, agencies, and government co-design rapid solutions in plain, accessible language. 
+- The portal is the public-facing MVP for the IHARC Command Center, centring compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
+- Content must emphasise collaboration, dignity, and community care. Avoid deficit framing and maintain trust with service users, neighbours, and agency partners.
+- Every iteration advances two intents: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative “command center” where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
 
-## Product Intent & Current State
-- `/ideas` is the public proposal queue. Banner copy explains the 1-2-3 idea workflow. Guests see tooltips on locked actions; auth users get type-enforced comments, single-vote support, and the six-step idea form at `/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submission still blocks without evidence and ≥1 metric." 
-- `/ideas/[id]` shows the canonical summary, metrics, typed comments, timeline, and the right-rail “How to help” helper. Moderators/org reps can post official responses. The “Promote to Working Plan” card is moderator-only, enforcing support/sponsor criteria before creating plans.
-- `/plans` lists Working Plans with next key date, focus area chips, and CTA into each plan. `/plans/[slug]` replaces RFC flows with tabs (Overview | Updates | Decisions | Timeline), a plan-update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
-- `/progress` summarizes 30-day metrics alongside navigation back to stats and plans. `/about` documents plain-language commitments for the portal.
-- `/command-center` and legacy `/solutions/*` now redirect into `/ideas` while preserving search params. Moderation queue, profile management, and stats remain accessible via existing routes.
-- Notifications, audit logging, board role rules, and cooldown messaging remain unchanged. Audit event types extended to cover plan lifecycle actions (plan_promoted, update_opened, update_accepted, update_declined, decision_posted, key_date_set).
+## Product Snapshot
+- `/portal/ideas` is the public proposal queue with 1-2-3 workflow guidance, guest tooltips for locked actions, authenticated comments with enforced types, and the six-step submit form at `/portal/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submissions require evidence and at least one metric.
+- `/portal/ideas/[id]` presents the canonical summary, metrics, typed comments, timeline, and “How to help” rail. Moderators and verified org reps post official responses, while the Promote to Working Plan card enforces support and sponsor thresholds.
+- `/portal/plans` lists Working Plans with focus-area chips, next key date, and CTA. `/portal/plans/[slug]` delivers tabbed detail (Overview | Updates | Decisions | Timeline), plan-update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
+- `/portal/progress` summarises 30-day metrics alongside quick navigation back to stats and plans. `/portal/about` documents plain-language commitments and privacy safeguards.
+- `/portal/petition/[slug]` hosts petition campaigns with signature tracking, display preferences, and post-sign actions. Marketing surfaces (`/petition`, `/portal/about` preview content) link back into portal experiences.
+- Legacy `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` routes (plus `/command-center` admin tools) now redirect into `/portal/*` while preserving search params. Marketing content lives in `/(marketing)`.
+
+## Operating Rules for Codex
+- Always inspect the live schema through the Supabase MCP tool (or Supabase CLI). Do **not** rely on migration files to determine what exists in the database.
+- Avoid running git commands unless they are absolutely necessary to complete a task the user has requested.
+- Keep edits in ASCII unless a file already uses other characters; favour `apply_patch` for concise modifications.
+- Never introduce service-role keys into the Next.js runtime. Privileged actions must run via Supabase Edge Functions or authenticated server clients.
 
 ## Current Tech & Architecture
-- **Framework:** Next.js 15 App Router with TypeScript.
-- **Rendering:** All routes remain dynamic (`export const dynamic = 'force-dynamic'`) to fetch fresh Supabase data per request.
-- **Styling:** Tailwind utilities with shared tokens in `src/styles/main.css` and design enforcement via Tailwind config.
-- **Data:** Supabase schema `portal` now includes Working Plan tables (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`). Existing idea/comment/vote tables unchanged. All reads and mutations rely on RLS + Supabase RPC/Edge Functions; no service-role fallback keys live in the app bundle.
-- **Build:** `npm run build` runs `build.js` (Next lint/build). Azure Static Web Apps deploys `.next`.
-- **Testing:** Vitest (unit) and Playwright (e2e) available; Vitest requires `jsdom` dev dependency. Default workflow still manual.
-
-## Key Directories & Files
-- `src/app/ideas` – Proposal queue, submit wizard, and idea detail pages.
-- `src/app/plans` – Working Plan list/detail pages (tabs, composer, moderator tools).
-- `src/app/api/portal/plans` – API endpoints for plan promotion, updates, support votes, and status transitions.
-- `src/components/portal/` – Idea/plan cards, plan update composer + moderation actions, promote dialog, kanban board, moderation queue, etc.
-- `src/lib/` – Supabase clients, audit helpers, new `plans.ts` constants (support threshold, default focus areas, slug helper).
-- `src/styles/main.css` – Design overrides and base typography.
-- `.github/workflows/azure-static-web-apps-happy-beach-01eb36a10.yml` – CI/CD deploying `.next` to Azure Static Web Apps.
+- Framework: Next.js 15 App Router with React Server Components. All `/portal/*` routes export `dynamic = 'force-dynamic'` to fetch fresh Supabase data.
+- Styling: Tailwind CSS with shared tokens in `src/styles/main.css`; design system enforced via Tailwind config.
+- Data: Supabase schema `portal` covers ideas (`ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`), working plans (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`), petitions (`petitions`, `petition_signatures`, `petition_public_summary`, `petition_public_signers`, `petition_signature_totals`), and metrics (`metric_daily`). All reads and mutations depend on RLS, RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.), and Edge Functions.
+- Components: Idea cards, plan composer, moderation queue, kanban board, petition sign form, and helper rails live in `src/components/portal/`.
+- Storage: Private `portal-attachments` bucket accessed through signed URLs after server-side validation.
 
 ## Development Workflow
-1. Node.js ≥ 18.18 required. Install deps with `npm install` (single npm lockfile).
-2. Run `npm run dev` (default port 3000). Provide Supabase credentials for live data; fallback keys hit the placeholder project.
+1. Node.js ≥ 18.18 and npm 9+ are required. Install dependencies with `npm install`.
+2. Run `npm run dev` (default port 3000). Supply Supabase credentials for live data; fallback keys point to placeholder projects.
 3. Type checking: `npm run typecheck`. Linting: `npm run lint`. Build verification: `npm run build`.
-4. Vitest requires `jsdom` (`npm install --save-dev jsdom`) before `npm run test`. Playwright e2e tests require a build `npm run build` first.
+4. Vitest requires `jsdom` (`npm install --save-dev jsdom`) before `npm run test`. Playwright e2e tests require a build via `npm run build`.
 
-- Keep TypeScript strict; prefer explicit types, avoid `any`, and reuse shared enums from generated Supabase types.
-- Use Tailwind utilities for styling; extend `main.css` only for shared tokens or cross-app patterns.
+## Data, Safety & Moderation
 - Maintain accessible semantics (landmarks, heading order, labelled inputs, focus-visible states, SR-only descriptions for metrics/timelines).
-- Normalize App Router params (`searchParams`/`params`) and perform mutations through the authenticated server client plus RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.). Never instantiate Supabase with a service-role key inside the app.
-- All mutations must log via `logAuditEvent` RPC and respect RLS. Rate limiting should call `checkRateLimit` (which wraps the `portal_check_rate_limit` RPC) and surface `retry_in_ms` feedback in UI.
-- Idea submit wizard: enforce evidence + ≥1 metric, display cooldown messaging, and keep comment composer type/evidence requirements.
-- Working Plan lifecycle: promotion requires verified sponsor or ≥ support threshold with full idea sections. Creating a plan inserts focus areas + first key date, sets idea status to `in_progress`, and logs `plan_promoted` + `key_date_set` events.
-- Plan updates must include all six fields and default to `open` state. Use audit events for `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, and `update` summary refresh (`added_to_plan`).
-- Persist URL params (filters, metric ranges, search) when linking across Ideas, Plans, and Stats. Legacy `/command-center` and `/solutions/*` should continue redirecting with params.
-- Moderation queue actions still route through the `portal-moderate` Edge Function. Working Plan moderation uses RLS-aware API routes; ensure notes are captured and surfaced.
-- Attachments are accessed via the `portal-attachments` Edge Function, which signs URLs server-side after verifying moderator/author/public permissions.
-- Administrative invites flow through the `portal-admin-invite` Edge Function so Supabase Auth + audit logging happen within Supabase infrastructure.
-
-## Content & Tone
-- Narratives should highlight community solutions, peer insights, and agency collaboration. Center first-person perspectives respectfully.
-- Avoid publishing identifying information for neighbours; reinforce anonymization guidelines in UI copy and API validations.
+- Idea submission enforces evidence plus ≥1 metric; comment composer respects type and evidence requirements.
+- Working Plan lifecycle logs audit events (`plan_promoted`, `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, `key_date_set`). Plan updates must populate all six fields and default to `open`.
+- Rate limiting uses `checkRateLimit`/`portal_check_rate_limit` RPCs with `retry_in_ms` surfaced in UI. All mutations log via `logAuditEvent`.
+- Moderation queue actions continue to route through the `portal-moderate` Edge Function. Attachments are signed through `portal-attachments` after role checks. Notifications, board role rules, and cooldown messaging remain unchanged.
 
 ## Deployment Notes
-- Azure deploy uses the `.next` artifact; ensure `npm run build` passes before pushing to `main`.
-- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA. Keep service-role keys exclusively in Supabase-managed environments (Edge Functions) and rotation tooling.
-- Use the Supabase CLI or Codex Supabase tool for migrations and seeds; avoid committing raw seed SQL files (see README for the current seeding block).
-- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`) are deployed after schema changes.
+- Azure Static Web Apps deploys the `.next` artifact generated by `npm run build` (via `build.js`, which runs lint + build).
+- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; keep service-role keys only in Supabase-managed environments and edge functions.
+- Use the Supabase CLI or Codex Supabase tool for migrations and seeds; avoid committing raw seed SQL files.
+- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) are redeployed after schema changes.
 
 ## Documentation
-- `README.md` for setup specifics and design goals.
-- `INTEGRATIONS.md` for analytics/chat toggles (currently optional).
-- Supabase schema definitions live in `supabase/` – update there when changing database tables.
-
-Use this file as the single source of truth for repo conventions; remove outdated assumptions when architecture changes.
-
-
+- `README.md` – setup, environment, portal overview.
+- `docs/portal/architecture.md` – schema, RLS, edge function contracts, portal flows.
+- `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
+- `INTEGRATIONS.md` – analytics/live chat configuration toggles.
