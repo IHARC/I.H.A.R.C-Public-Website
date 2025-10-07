@@ -9,6 +9,8 @@ import { signPetition } from '@/lib/actions/sign-petition';
 import type { Database } from '@/types/supabase';
 import { deriveSignerDefaults } from '@/lib/petition/signature';
 
+export const dynamic = 'force-dynamic';
+
 const PETITION_CANONICAL_PATH = '/petition';
 const PETITION_DESCRIPTION =
   'Add your name to the public petition calling on the Town of Cobourg to declare a municipal State of Emergency over housing instability and the toxic drug crisis.';
