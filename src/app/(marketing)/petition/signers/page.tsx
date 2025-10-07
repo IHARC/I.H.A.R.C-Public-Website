@@ -6,6 +6,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { SupportDeclarationLink } from '@/components/site/support-declaration-link';
 import type { Database } from '@/types/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Petition signers — IHARC',
   description: 'See the public list of neighbours supporting the State of Emergency declaration.',

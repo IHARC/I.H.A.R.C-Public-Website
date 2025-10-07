@@ -4,6 +4,8 @@ import { siteConfig } from '@/config/site';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { SupportDeclarationLink } from '@/components/site/support-declaration-link';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'State of Emergency Brief — IHARC',
   description:
