@@ -5,11 +5,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
-import {
-  addOfflinePetitionSignature,
-  type OfflinePetitionSignatureState,
-} from '@/lib/actions/add-offline-petition-signature';
-import { AdminPetitionSignatureForm } from '@/components/portal/petition/admin-petition-signature-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,8 +62,6 @@ type ManageableProfileRow = {
     | { id: string; name: string; category: Database['portal']['Enums']['organization_category']; government_level: Database['portal']['Enums']['government_level'] | null }
     | null;
 };
-
-type PetitionOption = Pick<Database['portal']['Tables']['petitions']['Row'], 'id' | 'title' | 'slug' | 'is_active'>;
 
 function formatGovernmentLevel(level: Database['portal']['Enums']['government_level'] | null): string {
   switch (level) {
@@ -174,15 +167,6 @@ export default async function CommandCenterAdminPage() {
       ).data as ManageableProfileRow[] | null) ?? null
     : null;
 
-  const petitionOptions: PetitionOption[] = isAdmin
-    ? ((
-        await portal
-          .from('petitions')
-          .select('id, title, slug, is_active')
-          .order('created_at', { ascending: false })
-      ).data as PetitionOption[] | null) ?? []
-    : [];
-
   async function uploadMetric(formData: FormData) {
     'use server';
 
@@ -190,29 +174,56 @@ export default async function CommandCenterAdminPage() {
     const portalClient = supa.schema('portal');
     const metric_date = formData.get('metric_date') as string;
     const metric_key = formData.get('metric_key') as string;
-    const value = Number(formData.get('value'));
+    const statusInput = (formData.get('metric_status') as string | null)?.toLowerCase() ?? 'reported';
+    const valueStatus: Database['portal']['Enums']['metric_value_status'] =
+      statusInput === 'pending' ? 'pending' : 'reported';
+    const rawValue = formData.get('value');
+    const valueString = typeof rawValue === 'string' ? rawValue.trim() : '';
+    const hasValueInput = valueString.length > 0;
+    let value: number | null = null;
+    if (valueStatus === 'reported') {
+      if (!hasValueInput) {
+        throw new Error('Enter a numeric value for reported metrics.');
+      }
+      value = Number(valueString);
+      if (!Number.isFinite(value)) {
+        throw new Error('Metric value must be a number.');
+      }
+    } else if (hasValueInput) {
+      const parsed = Number(valueString);
+      if (!Number.isFinite(parsed)) {
+        throw new Error('Metric value must be a number.');
+      }
+      value = parsed;
+    }
     const source = (formData.get('source') as string) || null;
     const notes = (formData.get('notes') as string) || null;
     const actorProfileId = formData.get('actor_profile_id') as string;
 
-    if (!metric_date || !metric_key || Number.isNaN(value)) {
+    if (!metric_date || !metric_key) {
       throw new Error('Missing required fields');
     }
 
-    await portalClient.from('metric_daily').upsert({
-      metric_date,
-      metric_key,
-      value,
-      source,
-      notes,
-    });
+    await portalClient
+      .from('metric_daily')
+      .upsert(
+        {
+          metric_date,
+          metric_key,
+          value,
+          value_status: valueStatus,
+          source,
+          notes,
+        },
+        { onConflict: 'metric_date,metric_key' },
+      );
 
     await logAuditEvent(supa, {
       actorProfileId,
       action: 'metric_upsert',
       entityType: 'metric_daily',
       entityId: `${metric_date}:${metric_key}`,
-      meta: { value, source, notes },
+      meta: { value, value_status: valueStatus, source, notes },
     });
 
     revalidatePath('/portal/ideas');
@@ -854,17 +865,6 @@ export default async function CommandCenterAdminPage() {
     revalidatePath('/portal/plans');
   }
 
-  async function handleOfflineSignature(
-    prevState: OfflinePetitionSignatureState,
-    formData: FormData,
-  ): Promise<OfflinePetitionSignatureState> {
-    'use server';
-
-    return addOfflinePetitionSignature(formData, {
-      actorProfileId: profile.id,
-    });
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
       <Card>
@@ -895,8 +895,28 @@ export default async function CommandCenterAdminPage() {
               </Select>
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="metric_status">Status</Label>
+              <Select name="metric_status" defaultValue="reported" required>
+                <SelectTrigger id="metric_status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="reported">Reported value</SelectItem>
+                  <SelectItem value="pending">Pending update</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="value">Value</Label>
-              <Input id="value" name="value" type="number" step="0.1" required min="0" />
+              <Input
+                id="value"
+                name="value"
+                type="number"
+                step="0.1"
+                min="0"
+                placeholder="Enter when status is reported"
+              />
+              <p className="text-xs text-muted">Leave blank when the data partner has not confirmed a number yet.</p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="source">Source</Label>
@@ -912,20 +932,6 @@ export default async function CommandCenterAdminPage() {
           </form>
         </CardContent>
       </Card>
-      {isAdmin ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Record offline petition signature</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <AdminPetitionSignatureForm petitions={petitionOptions} action={handleOfflineSignature} />
-            <p className="text-xs text-on-surface/70">
-              Use this form when neighbours sign up in person. Each entry creates a portal profile without login access
-              and updates petition metrics immediately.
-            </p>
-          </CardContent>
-        </Card>
-      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Register partner organization</CardTitle>

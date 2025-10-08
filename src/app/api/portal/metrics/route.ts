@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const portal = supabase.schema('portal');
   const { data, error } = await portal
     .from('metric_daily')
-    .select('metric_date, metric_key, value, source')
+    .select('metric_date, metric_key, value, value_status, source')
     .gte('metric_date', sinceDate)
     .order('metric_date', { ascending: true });
 
@@ -29,18 +29,20 @@ export async function GET(req: NextRequest) {
     date: row.metric_date,
     key: row.metric_key,
     value: typeof row.value === 'number' ? row.value : row.value === null ? null : Number(row.value),
+    status: row.value_status,
     source: row.source ?? null,
   }));
 
   const latestMap = new Map<
     string,
-    { value: number | null; date: string; source: string | null }
+    { value: number | null; date: string; status: string; source: string | null }
   >();
 
   for (const entry of entries) {
     latestMap.set(entry.key, {
       value: entry.value,
       date: entry.date,
+      status: entry.status,
       source: entry.source,
     });
   }
@@ -49,6 +51,7 @@ export async function GET(req: NextRequest) {
     key,
     date: payload.date,
     value: payload.value,
+    status: payload.status,
     source: payload.source,
   }));
 
@@ -62,14 +65,24 @@ export async function GET(req: NextRequest) {
   });
 }
 
-function buildSummary(latest: Array<{ key: string; value: number | null; date: string }>) {
+function buildSummary(
+  latest: Array<{ key: string; value: number | null; date: string; status: string }>,
+) {
   if (!latest.length) {
     return 'No metric data is available for the selected range yet.';
   }
 
-  const parts = latest
-    .filter((item) => item.value !== null)
-    .map((item) => `${formatMetricKey(item.key)} reported ${item.value} on ${item.date}`);
+  const reported = latest.filter((item) => item.status === 'reported' && item.value !== null);
+  const pendingCount = latest.filter((item) => item.status === 'pending').length;
+
+  const parts = reported.map(
+    (item) => `${formatMetricKey(item.key)} reported ${item.value} on ${item.date}`,
+  );
+
+  if (pendingCount > 0) {
+    const label = pendingCount === 1 ? 'metric' : 'metrics';
+    parts.push(`${pendingCount} ${label} awaiting update`);
+  }
 
   return parts.length ? parts.join('; ') : 'Metrics recorded, but no numeric values available for summary.';
 }

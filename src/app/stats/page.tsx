@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { TrendChart } from '@/components/portal/trend-chart';
+import type { Database } from '@/types/supabase';
 
 const METRIC_LABELS: Record<string, string> = {
   outdoor_count: 'Neighbours Outdoors',
@@ -13,6 +14,23 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 export const dynamic = 'force-dynamic';
+
+type MetricRow = Pick<
+  Database['portal']['Tables']['metric_daily']['Row'],
+  'metric_key' | 'metric_date' | 'value' | 'value_status'
+>;
+
+type MetricSeries = Record<string, MetricRow[]>;
+
+type MetricCard = {
+  key: string;
+  label: string;
+  value: string;
+  caption?: string;
+  description?: string;
+  trend?: 'up' | 'down' | 'flat';
+  status: Database['portal']['Enums']['metric_value_status'];
+};
 
 export default async function StatsDashboardPage({
   searchParams,
@@ -26,13 +44,13 @@ export default async function StatsDashboardPage({
   const portal = supabase.schema('portal');
   const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  let metricRows: Array<{ metric_key: string; metric_date: string; value: number | null }> = [];
+  let metricRows: MetricRow[] = [];
   let metricsUnavailable = false;
 
   try {
     const { data, error } = await portal
       .from('metric_daily')
-      .select('*')
+      .select('metric_key, metric_date, value, value_status')
       .gte('metric_date', since)
       .order('metric_date', { ascending: true });
 
@@ -40,7 +58,7 @@ export default async function StatsDashboardPage({
       metricsUnavailable = true;
       console.error('Failed to load IHARC portal metrics', error);
     } else {
-      metricRows = data ?? [];
+      metricRows = (data ?? []) as MetricRow[];
     }
   } catch (error) {
     metricsUnavailable = true;
@@ -53,7 +71,9 @@ export default async function StatsDashboardPage({
   const groupedEntries = Object.entries(grouped);
   const hasMetrics = cards.length > 0 && !metricsUnavailable;
   const showPlaceholder = !hasMetrics;
-  const summary = hasMetrics ? buildSummary(cards) : 'Metric data will surface here once partners publish updates.';
+  const summary = hasMetrics
+    ? buildMetricSummary(cards)
+    : 'Metric data will surface here once partners publish updates.';
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
@@ -73,17 +93,23 @@ export default async function StatsDashboardPage({
         <DashboardPlaceholder />
       ) : (
         <>
-          <DashboardCards items={cards} />
+          <DashboardCards items={cards.map(({ status: _status, ...card }) => card)} />
           <section className="grid gap-6 lg:grid-cols-2">
-            {groupedEntries.map(([key, series]) => (
-              <TrendChart
-                key={key}
-                title={METRIC_LABELS[key] ?? key}
-                description={`${range}-day trend`}
-                data={series.map((item) => ({ date: item.metric_date, value: item.value ?? 0 }))}
-                rangeLabel={`${range}-day range`}
-              />
-            ))}
+            {groupedEntries.map(([key, series]) => {
+              const chartData = series
+                .filter((item) => item.value_status === 'reported' && item.value !== null)
+                .map((item) => ({ date: item.metric_date, value: item.value as number }));
+
+              return (
+                <TrendChart
+                  key={key}
+                  title={METRIC_LABELS[key] ?? key}
+                  description={`${range}-day trend`}
+                  data={chartData}
+                  rangeLabel={`${range}-day range`}
+                />
+              );
+            })}
           </section>
         </>
       )}
@@ -91,53 +117,113 @@ export default async function StatsDashboardPage({
   );
 }
 
-function groupMetrics(rows: Array<{ metric_key: string; metric_date: string; value: number | null }>) {
-  return rows.reduce<Record<string, { metric_date: string; value: number | null }[]>>((acc, row) => {
+function groupMetrics(rows: MetricRow[]): MetricSeries {
+  return rows.reduce<MetricSeries>((acc, row) => {
     if (!acc[row.metric_key]) acc[row.metric_key] = [];
     acc[row.metric_key].push(row);
     return acc;
   }, {});
 }
 
-function buildCardData(grouped: ReturnType<typeof groupMetrics>) {
+function buildCardData(grouped: MetricSeries): MetricCard[] {
   return Object.entries(grouped).map(([key, series]) => {
-    const latest = series[series.length - 1];
-    const first = series[0];
-    const delta = (latest?.value ?? 0) - (first?.value ?? 0);
-    const trend: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    const ordered = [...series].sort((a, b) => a.metric_date.localeCompare(b.metric_date));
+    const latest = ordered.at(-1);
+
+    if (!latest) {
+      return {
+        key,
+        label: METRIC_LABELS[key] ?? key,
+        value: 'Pending update',
+        caption: undefined,
+        description: 'Awaiting first reported value',
+        trend: undefined,
+        status: 'pending',
+      } satisfies MetricCard;
+    }
+
+    const reportedSeries = ordered.filter(
+      (row) => row.value_status === 'reported' && row.value !== null,
+    );
+    const latestReported = reportedSeries.at(-1) ?? null;
+    const firstReported = reportedSeries[0] ?? null;
+
+    let value = 'Pending update';
+    let description: string | undefined;
+    let trend: 'up' | 'down' | 'flat' | undefined;
+
+    if (latest.value_status === 'pending') {
+      if (latestReported) {
+        description = `Last reported ${formatNumber(latestReported.value as number)} on ${formatDate(
+          latestReported.metric_date,
+        )}`;
+      } else {
+        description = 'Awaiting first reported value';
+      }
+    } else {
+      const currentValue = (latest.value ?? 0) as number;
+      value = formatNumber(currentValue);
+      if (reportedSeries.length > 1 && firstReported) {
+        const baseline = (firstReported.value ?? 0) as number;
+        const delta = currentValue - baseline;
+        trend = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+        description = `Changed ${formatDelta(delta)} since ${formatDate(firstReported.metric_date)}`;
+      } else {
+        description = 'Awaiting additional updates to show change';
+      }
+    }
 
     return {
       key,
       label: METRIC_LABELS[key] ?? key,
-      value: formatMetric(latest?.value),
-      caption: latest ? `Updated ${new Date(latest.metric_date).toLocaleDateString('en-CA')}` : undefined,
-      description:
-        series.length > 1
-          ? `Changed ${delta > 0 ? '+' : ''}${delta.toFixed(1)} since ${new Date(first.metric_date).toLocaleDateString('en-CA')}`
-          : undefined,
+      value,
+      caption: `Updated ${formatDate(latest.metric_date)}`,
+      description,
       trend,
-    };
+      status: latest.value_status,
+    } satisfies MetricCard;
   });
 }
 
-function buildSummary(cards: ReturnType<typeof buildCardData>) {
+function buildMetricSummary(cards: MetricCard[]): string {
   if (!cards.length) return 'No metric data available yet.';
 
   return cards
     .map((card) => {
-      const trendWord = card.trend === 'up' ? 'increased' : card.trend === 'down' ? 'decreased' : 'held steady';
-      if (!card.description) {
-        return `${card.label} reported ${card.value}`;
+      if (card.status === 'pending') {
+        const detail = card.description ? withPeriod(card.description) : '';
+        return `${card.label} awaiting update.${detail ? ' ' + detail : ''}`;
       }
-      return `${card.label} ${trendWord}. ${card.description}.`;
+
+      const trendWord =
+        card.trend === 'up' ? 'increased' : card.trend === 'down' ? 'decreased' : 'held steady';
+      if (!card.description) {
+        return `${card.label} reported ${card.value}.`;
+      }
+
+      const detail = withPeriod(card.description);
+      return `${card.label} ${trendWord}. ${detail}`;
     })
     .join(' ');
 }
 
-function formatMetric(value: number | null | undefined) {
-  if (value === null || value === undefined) return '—';
-  if (value % 1 === 0) return value.toLocaleString('en-CA');
-  return value.toFixed(1);
+function withPeriod(text?: string) {
+  if (!text) return '';
+  return text.endsWith('.') ? text : `${text}.`;
+}
+
+function formatNumber(value: number) {
+  return Number.isInteger(value) ? value.toLocaleString('en-CA') : value.toFixed(1);
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function formatDelta(delta: number) {
+  const precision = Math.abs(delta) >= 1 ? 1 : 2;
+  const formatted = delta.toFixed(precision);
+  return delta > 0 ? `+${formatted}` : formatted;
 }
 
 function RangeSelector({ active }: { active: number }) {

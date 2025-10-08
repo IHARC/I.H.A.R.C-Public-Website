@@ -112,6 +112,7 @@ export async function signPetitionGuest(
   const paths = new Set(revalidatePaths);
   paths.add(`/portal/petition/${petitionSlug}`);
   paths.add('/petition');
+  paths.add('/emergency');
   paths.add('/petition/signers');
   paths.add('/portal/progress');
 

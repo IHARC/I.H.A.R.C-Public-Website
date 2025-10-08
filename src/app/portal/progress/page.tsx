@@ -14,7 +14,10 @@ const METRIC_LABELS: Record<string, string> = {
 
 export const dynamic = 'force-dynamic';
 
-type MetricRow = Pick<Database['portal']['Tables']['metric_daily']['Row'], 'metric_key' | 'metric_date' | 'value'>;
+type MetricRow = Pick<
+  Database['portal']['Tables']['metric_daily']['Row'],
+  'metric_key' | 'metric_date' | 'value' | 'value_status'
+>;
 
 export default async function ProgressPage() {
   const supabase = await createSupabaseRSCClient();
@@ -22,7 +25,7 @@ export default async function ProgressPage() {
 
   const { data, error } = await portal
     .from('metric_daily')
-    .select('metric_key, metric_date, value')
+    .select('metric_key, metric_date, value, value_status')
     .gte('metric_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
     .order('metric_date', { ascending: true });
 
@@ -38,25 +41,54 @@ export default async function ProgressPage() {
     return acc;
   }, {});
 
-  const cards = Object.entries(grouped).map(([key, series]) => {
-    const ordered = [...series].sort((a, b) => a.metric_date.localeCompare(b.metric_date));
-    const latest = ordered.at(-1);
-    const first = ordered[0];
-    const value = latest?.value ?? 0;
-    const delta = value - (first?.value ?? 0);
-    const trend: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+  const cards = Object.entries(grouped)
+    .map(([key, series]) => {
+      const ordered = [...series].sort((a, b) => a.metric_date.localeCompare(b.metric_date));
+      const latest = ordered.at(-1);
+      if (!latest) return null;
 
-    return {
-      key,
-      label: METRIC_LABELS[key] ?? key,
-      value: typeof value === 'number' ? value.toString() : '—',
-      caption: latest ? `Updated ${new Date(latest.metric_date).toLocaleDateString('en-CA')}` : undefined,
-      description: first
-        ? `Change ${delta > 0 ? '+' : ''}${delta.toFixed(1)} in last 30 days`
-        : undefined,
-      trend,
-    };
-  });
+      const reportedSeries = ordered.filter(
+        (row) => row.value_status === 'reported' && row.value !== null,
+      );
+      const latestReported = reportedSeries.at(-1) ?? null;
+      const firstReported = reportedSeries[0] ?? null;
+
+      const caption = `Updated ${new Date(latest.metric_date).toLocaleDateString('en-CA')}`;
+      let valueLabel = 'Pending update';
+      let description: string | undefined;
+      let trend: 'up' | 'down' | 'flat' | undefined;
+
+      if (latest.value_status === 'pending') {
+        if (latestReported) {
+          description = `Last reported ${formatNumber(latestReported.value as number)} on ${formatDate(
+            latestReported.metric_date,
+          )}`;
+        } else {
+          description = 'Awaiting first reported value';
+        }
+      } else {
+        const currentValue = (latest.value ?? 0) as number;
+        valueLabel = formatNumber(currentValue);
+        if (reportedSeries.length > 1 && firstReported) {
+          const baseline = (firstReported.value ?? 0) as number;
+          const delta = currentValue - baseline;
+          trend = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+          description = `Change ${formatDelta(delta)} since ${formatDate(firstReported.metric_date)}`;
+        } else {
+          description = 'Awaiting additional updates to show change';
+        }
+      }
+
+      return {
+        key,
+        label: METRIC_LABELS[key] ?? key,
+        value: valueLabel,
+        caption,
+        description,
+        trend,
+      };
+    })
+    .filter((card): card is NonNullable<typeof card> => card !== null);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10">
@@ -90,4 +122,17 @@ export default async function ProgressPage() {
       )}
     </div>
   );
+}
+
+function formatNumber(value: number) {
+  return Number.isInteger(value) ? value.toLocaleString('en-CA') : value.toFixed(1);
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function formatDelta(delta: number) {
+  const formatted = Math.abs(delta) >= 1 ? delta.toFixed(1) : delta.toFixed(2);
+  return delta > 0 ? `+${formatted}` : formatted;
 }

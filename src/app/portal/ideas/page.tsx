@@ -175,7 +175,7 @@ export default async function IdeasPage({
           {metricSummary}
         </p>
         {metricCards.length ? (
-          <DashboardCards items={metricCards} />
+          <DashboardCards items={metricCards.map(({ status: _status, ...card }) => card)} />
         ) : (
           <div className="rounded-lg border border-dashed border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
             Metrics will appear once data partners publish daily updates.
@@ -260,7 +260,7 @@ async function loadMetricHighlights(client: SupabaseClient<Database>, range: num
   try {
     const { data, error } = await portal
       .from('metric_daily')
-      .select('metric_key, metric_date, value')
+      .select('metric_key, metric_date, value, value_status')
       .gte('metric_date', new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
       .order('metric_date', { ascending: true });
 
@@ -269,7 +269,8 @@ async function loadMetricHighlights(client: SupabaseClient<Database>, range: num
       return [];
     }
 
-    const grouped = groupMetrics(data ?? []);
+    const rows: MetricRow[] = (data ?? []) as MetricRow[];
+    const grouped = groupMetrics(rows);
     const cards = buildCardData(grouped).sort((a, b) => (a.key < b.key ? -1 : 1));
     return cards.slice(0, 4);
   } catch (error) {
@@ -413,6 +414,7 @@ type MetricRow = {
   metric_key: string;
   metric_date: string;
   value: number | null;
+  value_status: Database['portal']['Enums']['metric_value_status'];
 };
 
 type MetricSeries = Record<string, MetricRow[]>;
@@ -423,10 +425,11 @@ type MetricCard = {
   value: string;
   caption?: string;
   description?: string;
-  trend: 'up' | 'down' | 'flat';
+  trend?: 'up' | 'down' | 'flat';
+  status: Database['portal']['Enums']['metric_value_status'];
 };
 
-function groupMetrics(rows: MetricRow[]) {
+function groupMetrics(rows: MetricRow[]): MetricSeries {
   return rows.reduce<MetricSeries>((acc, row) => {
     if (!acc[row.metric_key]) acc[row.metric_key] = [];
     acc[row.metric_key].push(row);
@@ -437,45 +440,104 @@ function groupMetrics(rows: MetricRow[]) {
 function buildCardData(grouped: MetricSeries): MetricCard[] {
   return Object.entries(grouped).map(([key, series]) => {
     const ordered = [...series].sort((a, b) => a.metric_date.localeCompare(b.metric_date));
-    const latest = ordered[ordered.length - 1];
-    const first = ordered[0];
-    const latestValue = latest?.value ?? null;
-    const firstValue = first?.value ?? null;
-    const delta = (latestValue ?? 0) - (firstValue ?? 0);
-    const trend: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    const latest = ordered.at(-1);
+
+    if (!latest) {
+      return {
+        key,
+        label: METRIC_LABELS[key] ?? key,
+        value: 'Pending update',
+        caption: undefined,
+        description: 'Awaiting first reported value',
+        trend: undefined,
+        status: 'pending',
+      } as MetricCard;
+    }
+
+    const reportedSeries = ordered.filter(
+      (row) => row.value_status === 'reported' && row.value !== null,
+    );
+    const latestReported = reportedSeries.at(-1) ?? null;
+    const firstReported = reportedSeries[0] ?? null;
+
+    let value = 'Pending update';
+    let description: string | undefined;
+    let trend: 'up' | 'down' | 'flat' | undefined;
+
+    if (latest.value_status === 'pending') {
+      if (latestReported) {
+        description = `Last reported ${formatNumber(latestReported.value as number)} on ${formatDate(
+          latestReported.metric_date,
+        )}`;
+      } else {
+        description = 'Awaiting first reported value';
+      }
+    } else {
+      const currentValue = (latest.value ?? 0) as number;
+      value = formatNumber(currentValue);
+      if (reportedSeries.length > 1 && firstReported) {
+        const baseline = (firstReported.value ?? 0) as number;
+        const delta = currentValue - baseline;
+        trend = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+        description = `Change ${formatDelta(delta)} since ${formatDate(firstReported.metric_date)}`;
+      } else {
+        description = 'Awaiting additional updates to show change';
+      }
+    }
 
     return {
       key,
       label: METRIC_LABELS[key] ?? key,
-      value: formatMetric(latestValue),
-      caption: latest ? `Updated ${new Date(latest.metric_date).toLocaleDateString('en-CA')}` : undefined,
-      description:
-        ordered.length > 1 && first
-          ? `Change ${delta > 0 ? '+' : ''}${delta.toFixed(1)} since ${new Date(first.metric_date).toLocaleDateString('en-CA')}`
-          : undefined,
+      value,
+      caption: `Updated ${formatDate(latest.metric_date)}`,
+      description,
       trend,
-    };
+      status: latest.value_status,
+    } as MetricCard;
   });
 }
 
-function formatMetric(value: number | null | undefined) {
-  if (value === null || value === undefined) return '—';
-  const numeric = Number(value);
-  if (Number.isNaN(numeric)) return '—';
-  if (numeric % 1 === 0) return numeric.toLocaleString('en-CA');
-  return numeric.toFixed(1);
-}
-
 function buildMetricSummary(cards: MetricCard[]) {
+  if (!cards.length) {
+    return 'Metric data will surface here once partners publish updates.';
+  }
+
   return cards
     .map((card) => {
-      const trendWord = card.trend === 'up' ? 'increased' : card.trend === 'down' ? 'decreased' : 'held steady';
+      if (card.status === 'pending') {
+        const detail = card.description ? withPeriod(card.description) : '';
+        return `${card.label} awaiting update.${detail ? ' ' + detail : ''}`;
+      }
+
+      const trendWord =
+        card.trend === 'up' ? 'increased' : card.trend === 'down' ? 'decreased' : 'held steady';
       if (!card.description) {
         return `${card.label} reported ${card.value}.`;
       }
-      return `${card.label} ${trendWord}. ${card.description}.`;
+
+      const detail = withPeriod(card.description);
+      return `${card.label} ${trendWord}. ${detail}`;
     })
     .join(' ');
+}
+
+function withPeriod(text?: string) {
+  if (!text) return '';
+  return text.endsWith('.') ? text : `${text}.`;
+}
+
+function formatNumber(value: number) {
+  return Number.isInteger(value) ? value.toLocaleString('en-CA') : value.toFixed(1);
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function formatDelta(delta: number) {
+  const precision = Math.abs(delta) >= 1 ? 1 : 2;
+  const formatted = delta.toFixed(precision);
+  return delta > 0 ? `+${formatted}` : formatted;
 }
 
 function RangeSelector({

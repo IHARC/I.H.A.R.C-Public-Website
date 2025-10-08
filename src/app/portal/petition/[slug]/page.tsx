@@ -238,6 +238,76 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
         </p>
       </section>
 
+      <section id="emergency-brief" className="space-y-5 rounded-3xl border border-outline/15 bg-surface p-6 text-balance">
+        <div className="space-y-3">
+          <h2 className="text-2xl font-semibold">Emergency brief: why this declaration matters</h2>
+          <p className="text-base text-on-surface/80">
+            A municipal declaration is a coordination tool. It speeds staffing and purchasing for housing and overdose response
+            and requires public updates with clear accountability. It is not punitive.
+          </p>
+          <p className="text-base text-on-surface/80">
+            This briefing brings together the evidence, commitments, and guardrails that Northumberland partners track together.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-on-surface">What it is</h3>
+            <p className="text-base text-on-surface/80">
+              A formal step that lets the head of council direct resources faster and report progress in one place, using the
+              Incident Management System to align departments and partners.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-on-surface">Why now</h3>
+            <p className="text-base text-on-surface/80">
+              Shelter capacity, outreach reports, and overdose data show rising displacement and drug poisonings. Existing
+              processes move too slowly to keep neighbours safe.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-on-surface">What it enables</h3>
+            <ul className="space-y-2 rounded-2xl border border-outline/20 bg-surface-container p-5 text-base text-on-surface/80">
+              <li>Faster purchasing of critical health and safety supplies without weeks of tendering.</li>
+              <li>Quicker coordination of placements, outreach coverage, and staffing.</li>
+              <li>A single public brief with accountable updates and measurable metrics.</li>
+            </ul>
+            <div className="rounded-2xl border border-outline/20 bg-surface px-5 py-4 text-sm text-on-surface/80">
+              <h4 className="text-base font-semibold text-on-surface">What this unlocks in practice</h4>
+              <ul className="mt-2 space-y-2">
+                <li>Rapid hotel overflow when shelter beds are full or unsafe.</li>
+                <li>Bulk procurement of naloxone, warming gear, and mobile health supplies.</li>
+                <li>Unified updates so neighbours, agencies, and Council review decisions in one place.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-on-surface">Guardrails</h3>
+            <p className="text-base text-on-surface/80">
+              Plain-language updates, anonymized reporting, public feedback loops, and documentation of enforcement-only ideas
+              without advancement keep this focused on care, not punishment.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-on-surface">Learn more</h3>
+            <p className="text-base text-on-surface/80">
+              Recent coverage outlines why community partners are urging Council to act. Read the summary from{' '}
+              <Link
+                href="https://todaysnorthumberland.ca/2025/10/02/iharc-calls-on-cobourg-to-declare-a-state-of-emergency/amp/"
+                className="text-primary underline"
+              >
+                Today&apos;s Northumberland
+              </Link>{' '}
+              for additional context.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section id="sign-petition" className="space-y-5 rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
         <div className="space-y-2 text-balance">
           <h2 className="text-2xl font-semibold">Sign the petition</h2>

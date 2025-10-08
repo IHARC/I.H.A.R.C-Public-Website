@@ -2261,7 +2261,8 @@ export type Database = {
         Row: {
           metric_date: string;
           metric_key: Database["portal"]["Enums"]["metric_key"];
-          value: number;
+          value: number | null;
+          value_status: Database["portal"]["Enums"]["metric_value_status"];
           source: string | null;
           notes: string | null;
           created_at: string;
@@ -2270,7 +2271,8 @@ export type Database = {
         Insert: {
           metric_date: string;
           metric_key: Database["portal"]["Enums"]["metric_key"];
-          value: number;
+          value?: number | null;
+          value_status?: Database["portal"]["Enums"]["metric_value_status"];
           source?: string | null;
           notes?: string | null;
           created_at?: string;
@@ -2279,7 +2281,8 @@ export type Database = {
         Update: {
           metric_date?: string;
           metric_key?: Database["portal"]["Enums"]["metric_key"];
-          value?: number;
+          value?: number | null;
+          value_status?: Database["portal"]["Enums"]["metric_value_status"];
           source?: string | null;
           notes?: string | null;
           created_at?: string;
@@ -2392,6 +2395,7 @@ export type Database = {
         | "narcan_distributed"
         | "encampment_count"
         | "warming_beds_available";
+      metric_value_status: "reported" | "pending";
       plan_update_status:
         | "draft"
         | "open"
