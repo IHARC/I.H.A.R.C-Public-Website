@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/logo.png',
-        alt: 'IHARC logo',
+        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
       },
     ],
   },

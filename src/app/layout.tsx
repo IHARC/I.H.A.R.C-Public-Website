@@ -30,34 +30,34 @@ const GA_MEASUREMENT_ID =
 const ANALYTICS_DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false').toLowerCase() === 'true';
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
 const OG_IMAGE_PATH = '/logo.png';
-const OG_IMAGE_ALT = 'IHARC logo';
+const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response Centre';
 
 export const metadata: Metadata = {
   metadataBase,
-  title: 'IHARC — Northumberland Housing & Health Collaboration',
+  title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
-    'IHARC is the community front door for housing stability and overdose response collaboration across Northumberland County.',
+    'The Integrated Homelessness and Addictions Response Centre (IHARC) brings neighbours, frontline teams, and local government together to coordinate housing stability and overdose response across Northumberland County.',
   icons: {
     icon: '/favicon.svg',
   },
   openGraph: {
     type: 'website',
     siteName: 'IHARC',
-    title: 'IHARC — Northumberland Housing & Health Collaboration',
+    title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'IHARC is the community front door for housing stability and overdose response collaboration across Northumberland County.',
+      'The Integrated Homelessness and Addictions Response Centre (IHARC) brings neighbours, frontline teams, and local government together to coordinate housing stability and overdose response across Northumberland County.',
     images: [
       {
         url: OG_IMAGE_PATH,
-        alt: OG_IMAGE_ALT,
+        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IHARC — Northumberland Housing & Health Collaboration',
+    title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'Neighbours, agencies, and local government co-design rapid housing and overdose solutions together.',
+      'The Integrated Homelessness and Addictions Response Centre helps neighbours, service partners, and local government co-design rapid housing and overdose solutions.',
     images: [OG_IMAGE_PATH],
   },
 };

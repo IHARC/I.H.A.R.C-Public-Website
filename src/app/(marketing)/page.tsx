@@ -6,9 +6,9 @@ import { ContextCards } from '@/components/site/ContextCards';
 import { siteConfig } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: 'IHARC — Inclusive Housing & Health Collaboration',
+  title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
-    'Learn how Northumberland partners co-design housing and overdose responses. Explore the collaboration portal, read the emergency brief, and see how to support neighbours.',
+    'Discover how the Integrated Homelessness and Addictions Response Centre supports neighbours across Northumberland and how the IHARC Portal coordinates urgent housing and overdose response.',
 };
 
 export default function MarketingHomePage() {

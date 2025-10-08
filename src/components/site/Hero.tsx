@@ -9,7 +9,7 @@ export function Hero() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 lg:flex-row lg:items-center lg:justify-between">
       <div className="space-y-6 text-balance">
         <p className="inline-flex rounded-full bg-brand/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
-          Inclusive Housing & Health Collaboration
+          Integrated Homelessness & Addictions Response Centre
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-on-surface sm:text-5xl">
           Northumberland neighbours working for housing stability and overdose prevention.

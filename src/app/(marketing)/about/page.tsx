@@ -28,7 +28,7 @@ const collaborationLoops = [
 ];
 
 export const metadata: Metadata = {
-  title: 'About IHARC — Inclusive Housing & Health Collaboration',
+  title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
     'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the IHARC Portal coordinates community-led crisis response with dignity.',
   alternates: {
@@ -36,20 +36,20 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'About IHARC — Inclusive Housing & Health Collaboration',
+    title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
       'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the IHARC Portal coordinates community-led crisis response with dignity.',
     url: '/about',
     images: [
       {
         url: '/logo.png',
-        alt: 'IHARC logo',
+        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About IHARC — Inclusive Housing & Health Collaboration',
+    title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
       'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the IHARC Portal coordinates community-led crisis response with dignity.',
     images: ['/logo.png'],
