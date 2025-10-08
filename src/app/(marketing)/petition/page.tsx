@@ -28,10 +28,8 @@ export const metadata: Metadata = {
     url: PETITION_CANONICAL_PATH,
     images: [
       {
-        url: '/og-default.png',
-        width: 1200,
-        height: 630,
-        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+        url: '/logo.png',
+        alt: 'IHARC logo',
       },
     ],
   },
@@ -39,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Support the declaration — IHARC',
     description: PETITION_DESCRIPTION,
-    images: ['/og-default.png'],
+    images: ['/logo.png'],
   },
 };
 

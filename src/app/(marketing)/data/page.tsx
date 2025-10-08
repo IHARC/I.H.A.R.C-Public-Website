@@ -30,6 +30,29 @@ export const metadata: Metadata = {
   title: 'Community Data & Metrics — IHARC',
   description:
     'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+  alternates: {
+    canonical: '/data',
+  },
+  openGraph: {
+    type: 'website',
+    title: 'Community Data & Metrics — IHARC',
+    description:
+      'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+    url: '/data',
+    images: [
+      {
+        url: '/logo.png',
+        alt: 'IHARC logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Community Data & Metrics — IHARC',
+    description:
+      'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+    images: ['/logo.png'],
+  },
 };
 
 export default function DataPage() {

@@ -37,6 +37,29 @@ export const metadata: Metadata = {
   title: 'Programs & Collaborative Supports — IHARC',
   description:
     'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the IHARC Portal.',
+  alternates: {
+    canonical: '/programs',
+  },
+  openGraph: {
+    type: 'website',
+    title: 'Programs & Collaborative Supports — IHARC',
+    description:
+      'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the IHARC Portal.',
+    url: '/programs',
+    images: [
+      {
+        url: '/logo.png',
+        alt: 'IHARC logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Programs & Collaborative Supports — IHARC',
+    description:
+      'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the IHARC Portal.',
+    images: ['/logo.png'],
+  },
 };
 
 export default function ProgramsPage() {

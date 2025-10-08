@@ -29,6 +29,8 @@ const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? DEFAULT_GA_MEASUREMENT_ID;
 const ANALYTICS_DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false').toLowerCase() === 'true';
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
+const OG_IMAGE_PATH = '/logo.png';
+const OG_IMAGE_ALT = 'IHARC logo';
 
 export const metadata: Metadata = {
   metadataBase,
@@ -40,15 +42,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
+    siteName: 'IHARC',
     title: 'IHARC — Northumberland Housing & Health Collaboration',
     description:
       'IHARC is the community front door for housing stability and overdose response collaboration across Northumberland County.',
     images: [
       {
-        url: '/og-default.png',
-        width: 1200,
-        height: 630,
-        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+        url: OG_IMAGE_PATH,
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     title: 'IHARC — Northumberland Housing & Health Collaboration',
     description:
       'Neighbours, agencies, and local government co-design rapid housing and overdose solutions together.',
-    images: ['/og-default.png'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

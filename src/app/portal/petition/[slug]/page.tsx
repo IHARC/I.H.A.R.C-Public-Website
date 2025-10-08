@@ -75,10 +75,8 @@ export async function generateMetadata({
         url: canonicalPath,
         images: [
           {
-            url: '/og-default.png',
-            width: 1200,
-            height: 630,
-            alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+            url: '/logo.png',
+            alt: 'IHARC logo',
           },
         ],
       },
@@ -86,7 +84,7 @@ export async function generateMetadata({
         card: 'summary_large_image',
         title,
         description,
-        images: ['/og-default.png'],
+        images: ['/logo.png'],
       },
     };
   } catch (error) {
