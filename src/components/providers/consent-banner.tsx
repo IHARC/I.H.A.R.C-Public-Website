@@ -38,6 +38,7 @@ function updateConsentFlags(state: ConsentState) {
     };
 
   gtag('consent', 'update', consentFlags);
+  gtag('set', 'ads_data_redaction', state === 'denied');
 
   if (state === 'granted') {
     const pagePath = `${window.location.pathname}${window.location.search}`;

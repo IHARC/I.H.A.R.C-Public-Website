@@ -89,10 +89,11 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
               window.gtag = window.gtag || gtag;
 
               var consentDefaults = {
-                ad_storage: 'denied',
-                analytics_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
+                ad_storage: 'granted',
+                analytics_storage: 'granted',
+                ad_user_data: 'granted',
+                ad_personalization: 'granted',
+                wait_for_update: 500,
               };
 
               try {
@@ -103,6 +104,7 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
                     analytics_storage: 'granted',
                     ad_user_data: 'granted',
                     ad_personalization: 'granted',
+                    wait_for_update: 500,
                   };
                 } else if (storedConsent === 'denied') {
                   consentDefaults = {
@@ -110,6 +112,7 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
                     analytics_storage: 'denied',
                     ad_user_data: 'denied',
                     ad_personalization: 'denied',
+                    wait_for_update: 500,
                   };
                 }
               } catch (error) {
@@ -117,6 +120,7 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
               }
 
               gtag('consent', 'default', consentDefaults);
+              gtag('set', 'ads_data_redaction', consentDefaults.ad_storage === 'denied');
               gtag('js', new Date());
               gtag('config', measurementId, { anonymize_ip: true });
             })();
