@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Roboto, Roboto_Flex } from 'next/font/google';
 import { cn } from '@/lib/utils';
@@ -71,11 +72,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
-          <AnalyticsProvider
-            measurementId={GA_MEASUREMENT_ID}
-            respectDNT={RESPECT_DNT}
-            enabled={ANALYTICS_ENABLED}
-          />
+          <Suspense fallback={null}>
+            <AnalyticsProvider
+              measurementId={GA_MEASUREMENT_ID}
+              respectDNT={RESPECT_DNT}
+              enabled={ANALYTICS_ENABLED}
+            />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>
