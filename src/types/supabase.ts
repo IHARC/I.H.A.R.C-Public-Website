@@ -335,6 +335,22 @@ export type Database = {
         Args: { p_invite_id: string; p_profile_id: string };
         Returns: undefined;
       };
+      portal_add_guest_petition_signature: {
+        Args: {
+          p_petition_id: string;
+          p_first_name: string;
+          p_last_name: string;
+          p_email: string;
+          p_postal_code: string;
+          p_display_preference?: Database["portal"]["Enums"]["petition_display_preference"] | null;
+          p_statement?: string | null;
+          p_share_with_partners?: boolean | null;
+        };
+        Returns: {
+          signature_id: string;
+          profile_id: string;
+        }[];
+      };
       portal_check_rate_limit: {
         Args: { p_event: string; p_limit: number; p_cooldown_ms?: number | null };
         Returns: { allowed: boolean; retry_in_ms: number }[];
