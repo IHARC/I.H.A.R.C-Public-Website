@@ -93,24 +93,30 @@ export function ConsentBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-outline bg-surface shadow-lg">
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-6 py-4 text-sm md:flex-row md:items-center md:justify-between">
-        <div className="text-on-surface">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 text-sm md:flex-row md:items-center md:justify-between md:px-6">
+        <div className="text-on-surface md:max-w-xl">
           <p className="font-medium">Cookies that strengthen community care</p>
           <p className="mt-1 text-muted-foreground">
             We use privacy-aware analytics to learn where neighbours need more support. Approving cookies helps us
             improve shared solutions faster.
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleChoice('denied')}
             data-testid="consent-decline"
+            className="w-full sm:w-auto"
           >
             No, prefer fewer cookies
           </Button>
-          <Button size="sm" onClick={() => handleChoice('granted')} data-testid="consent-accept">
+          <Button
+            size="sm"
+            onClick={() => handleChoice('granted')}
+            data-testid="consent-accept"
+            className="w-full sm:w-auto"
+          >
             Yes, support IHARC insights
           </Button>
         </div>
