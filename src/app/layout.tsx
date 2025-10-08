@@ -34,18 +34,18 @@ const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response 
 
 export const metadata: Metadata = {
   metadataBase,
-  title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+  title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
   description:
-    'The Integrated Homelessness and Addictions Response Centre (IHARC) brings neighbours, frontline teams, and local government together to coordinate housing stability and overdose response across Northumberland County.',
+    'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
   icons: {
     icon: '/favicon.svg',
   },
   openGraph: {
     type: 'website',
     siteName: 'IHARC',
-    title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+    title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
     description:
-      'The Integrated Homelessness and Addictions Response Centre (IHARC) brings neighbours, frontline teams, and local government together to coordinate housing stability and overdose response across Northumberland County.',
+      'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
     images: [
       {
         url: OG_IMAGE_PATH,
@@ -55,9 +55,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+    title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
     description:
-      'The Integrated Homelessness and Addictions Response Centre helps neighbours, service partners, and local government co-design rapid housing and overdose solutions.',
+      'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
     images: [OG_IMAGE_PATH],
   },
 };

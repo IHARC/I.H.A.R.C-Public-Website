@@ -12,32 +12,38 @@ const urgentSupports: UrgentSupport[] = [
   {
     title: 'Shelter placement and warming sites',
     description:
-      'Call 2-1-1 or the County housing help centre. Staff coordinate transportation, motel overflow, and on-call wellness checks.',
+      'Call 2-1-1 or Transition House coordinated entry so staff can arrange placement, transportation, and motel overflow when beds are full. Transition House operates at 310 Division Street, Cobourg.',
     contact: (
       <>
         Dial <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
-        <Link href="tel:19053723831" className="text-primary underline">905-372-3831</Link>
+        <Link href="tel:19053769562" className="text-primary underline">905-376-9562</Link>
       </>
     ),
   },
   {
     title: 'Overdose response and essential health supplies',
     description:
-      'Mobile teams and peer responders share naloxone, health and safety supplies, and connect people to primary care without police involvement.',
+      'If someone is unresponsive or turning blue, call 911 and start naloxone or rescue breathing. The Good Samaritan Drug Overdose Act protects callers from possession charges. After the emergency, IHARC outreach staff can coordinate follow-up and distribute naloxone, sharps kits, and other health supplies.',
     contact: (
       <>
-        Text <Link href="tel:19053769898" className="text-primary underline">905-376-9898</Link> or email{' '}
-        <Link href="mailto:outreach@iharc.ca" className="text-primary underline">outreach@iharc.ca</Link>
+        Email{' '}
+        <Link href="mailto:outreach@iharc.ca" className="text-primary underline">
+          outreach@iharc.ca
+        </Link>{' '}
+        while the IHARC text line is under maintenance. We respond within one business day.
       </>
     ),
   },
   {
     title: 'Mental health crisis support',
     description:
-      'Community counsellors and health outreach workers respond together. Supports can be anonymous; follow-up is coordinated only with consent.',
+      'Use 9-8-8 for immediate counselling. For local follow-up, Northumberland Hills Hospital Community Mental Health Services provides crisis assessment and short-term supports. The Rapid Access Addiction Medicine (RAAM) clinic welcomes appointments and walk-ins when time permits.',
     contact: (
       <>
-        Call <Link href="tel:19053721280" className="text-primary underline">905-372-1280 ext. 2410</Link> (24/7)
+        Call or text <Link href="tel:988" className="text-primary underline">9-8-8</Link>. Locally, contact{' '}
+        <Link href="tel:19053779891" className="text-primary underline">905-377-9891</Link>. The RAAM clinic runs Tuesdays, 12–3
+        {'\u00a0'}
+        pm at 1011 Elgin St. W., 2nd floor.
       </>
     ),
   },
@@ -65,6 +71,12 @@ export default function GetHelpPage() {
           No one using this list needs to share personal details publicly. Contact teams directly and let them know how to reach you safely. Moderators refresh this page whenever hours or contacts change.
         </p>
       </header>
+
+      <section className="rounded-3xl border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive-foreground">
+        <p>
+          <strong>In an emergency call 911.</strong> Tell dispatch if drugs are involved so responders bring naloxone. You are protected from simple possession charges under the Good Samaritan Drug Overdose Act.
+        </p>
+      </section>
 
       <section className="grid gap-4 md:grid-cols-3">
         {urgentSupports.map((support) => (

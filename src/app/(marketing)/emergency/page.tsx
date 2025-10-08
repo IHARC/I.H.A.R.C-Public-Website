@@ -33,6 +33,10 @@ export default async function EmergencyBriefPage() {
 
   const signatureCount = petition?.signature_count ?? 0;
   const formattedCount = numberFormatter.format(signatureCount);
+  const signatureSentence =
+    signatureCount === 1
+      ? '1 neighbour has signed.'
+      : `${formattedCount} neighbours have signed.`;
 
   return (
     <article className="mx-auto w-full max-w-4xl space-y-12 px-4 py-16 text-on-surface">
@@ -47,8 +51,8 @@ export default async function EmergencyBriefPage() {
         <p className="text-base text-on-surface/80">
           This brief summarizes the shared evidence, commitments, and accountability measures supporting the declaration.
         </p>
-        <p className="text-base text-on-surface">
-          <strong>{formattedCount} neighbours have signed.</strong>{' '}
+        <p id="petition-support" className="text-base text-on-surface">
+          <strong>{signatureSentence}</strong>{' '}
           <SupportDeclarationLink
             href={supportHref}
             source="emergency_page"
@@ -80,11 +84,32 @@ export default async function EmergencyBriefPage() {
             <li>Quicker coordination of placements and staffing.</li>
             <li>A single public brief with accountable updates.</li>
           </ul>
+          <div className="rounded-3xl border border-outline/20 bg-surface-container p-5 text-sm text-on-surface/80">
+            <h3 className="text-base font-semibold text-on-surface">What this unlocks in practice</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5">
+              <li>Rapid hotel overflow when shelter beds are full or unsafe.</li>
+              <li>Bulk procurement of life-saving health supplies and warming gear without weeks of tendering.</li>
+              <li>Unified updates so neighbours, agencies, and council see decisions in one place.</li>
+            </ul>
+          </div>
         </section>
         <section id="guardrails" className="space-y-3 text-balance">
           <h2 className="text-2xl font-semibold">Guardrails</h2>
           <p className="text-base text-on-surface/80">
             Plain-language updates. Anonymized reporting. Public feedback. Documentation of enforcement-only ideas without advancement.
+          </p>
+        </section>
+        <section id="learn-more" className="space-y-3 text-balance">
+          <h2 className="text-2xl font-semibold">Learn more</h2>
+          <p className="text-base text-on-surface/80">
+            Recent coverage outlines why community partners are urging council to act. Read the summary from{' '}
+            <Link
+              href="https://todaysnorthumberland.ca/2025/10/02/iharc-calls-on-cobourg-to-declare-a-state-of-emergency/amp/"
+              className="text-primary underline"
+            >
+              Today&apos;s Northumberland
+            </Link>{' '}
+            for additional context.
           </p>
         </section>
       </div>

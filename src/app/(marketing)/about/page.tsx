@@ -65,6 +65,9 @@ export default function AboutPage() {
         <p className="text-base text-on-surface/80">
           IHARC, the Integrated Homelessness and Addictions Response Centre, is a non-profit already delivering street outreach and wraparound supports with neighbours across Northumberland. The IHARC Portal extends that work by offering a transparent space where partners can organise crisis response, share evidence, and document next steps together.
         </p>
+        <p className="text-sm text-on-surface/70">
+          We work across Northumberland County alongside partners in Cobourg, Port Hope, Alderville First Nation, and rural townships.
+        </p>
       </header>
 
       <section className="grid gap-4 md:grid-cols-3">

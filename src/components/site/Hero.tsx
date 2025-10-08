@@ -9,13 +9,16 @@ export function Hero() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 lg:flex-row lg:items-center lg:justify-between">
       <div className="space-y-6 text-balance">
         <p className="inline-flex rounded-full bg-brand/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
-          Integrated Homelessness & Addictions Response Centre
+          Integrated Homelessness and Addictions Response Centre
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-on-surface sm:text-5xl">
           Northumberland neighbours working for housing stability and overdose prevention.
         </h1>
         <p className="max-w-xl text-lg text-on-surface/80">
-          IHARC is the Integrated Homelessness and Addictions Response Centre. This main site keeps neighbours, service agencies, and local government aligned on the story, while the IHARC Portal hosts live collaboration and crisis management.
+          IHARC is the Integrated Homelessness and Addictions Response Centre, a non-profit working across Northumberland County. This main site keeps neighbours, service agencies, and local government aligned on the story, while the IHARC Portal hosts live collaboration and crisis management.
+        </p>
+        <p className="max-w-xl text-sm text-on-surface/70">
+          Together we co-design rapid responses that centre housing stability, overdose prevention, and accountable public reporting.
         </p>
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link
@@ -26,7 +29,7 @@ export function Hero() {
             Get Help Now
           </Link>
           <SupportDeclarationLink
-            href="/petition"
+            href="/emergency#petition-support"
             source="home_hero"
             className="rounded-full border border-outline/40 px-6 py-3 text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >

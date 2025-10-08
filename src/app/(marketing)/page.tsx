@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ContextCards } from '@/components/site/ContextCards';
-import { siteConfig } from '@/config/site';
 
 export const metadata: Metadata = {
   title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
@@ -44,7 +43,7 @@ export default function MarketingHomePage() {
             <StayInvolvedLink href="/portal/plans" label="Track plan progress">
               Follow Working Plans, decision notes, and key dates in one place.
             </StayInvolvedLink>
-            <StayInvolvedLink href={siteConfig.emergency.supportHref} label="Support the declaration">
+            <StayInvolvedLink href="/emergency#petition-support" label="Support the declaration">
               Add your name to the community petition. It is a public show of support, not a legal referendum.
             </StayInvolvedLink>
           </div>
@@ -54,7 +53,7 @@ export default function MarketingHomePage() {
       <section id="help" className="mx-auto w-full max-w-6xl space-y-6 px-4">
         <h2 className="text-3xl font-semibold text-on-surface">Need support right now?</h2>
         <p className="max-w-3xl text-on-surface/80">
-          Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. Moderators keep this list current.
+          Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. In an emergency call 911 and stay with the person until responders arrive. Moderators keep this list current.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
           <HelpCard
@@ -62,7 +61,7 @@ export default function MarketingHomePage() {
             description={
               <>
                 Call <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
-                <Link href="tel:19053723831" className="text-primary underline">905-372-3831</Link>.
+                <Link href="tel:19053769562" className="text-primary underline">905-376-9562</Link> for Transition House coordinated entry.
               </>
             }
           />
@@ -70,7 +69,7 @@ export default function MarketingHomePage() {
             title="Overdose response and essential health supplies"
             description={
               <>
-                Text <Link href="tel:19053769898" className="text-primary underline">905-376-9898</Link> or email{' '}
+                Call 911 if someone is unresponsive. For naloxone and follow-up while our text system is offline, email{' '}
                 <Link href="mailto:outreach@iharc.ca" className="text-primary underline">outreach@iharc.ca</Link>.
               </>
             }
@@ -79,7 +78,8 @@ export default function MarketingHomePage() {
             title="Mental health crisis support"
             description={
               <>
-                Call <Link href="tel:19053721280" className="text-primary underline">905-372-1280 ext. 2410</Link> (24/7).
+                Call or text <Link href="tel:988" className="text-primary underline">9-8-8</Link>. Locally, contact{' '}
+                <Link href="tel:19053779891" className="text-primary underline">905-377-9891</Link> for NHH Community Mental Health Services.
               </>
             }
           />

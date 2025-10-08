@@ -9,7 +9,7 @@ const programAreas = [
   {
     title: 'Shelter & Stabilization',
     description:
-      'Housing staff navigate intake, coordinate hotel overflow when shelters are full, and publish real-time bed availability without naming people who are waiting.',
+      'Housing staff navigate intake, coordinate hotel overflow when shelters are full, and aim to publish near real-time availability wherever partners share data.',
   },
   {
     title: 'Overdose Prevention',

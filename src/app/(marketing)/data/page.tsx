@@ -64,6 +64,9 @@ export default function DataPage() {
         <p className="text-base text-on-surface/80">
           IHARC shares the data neighbours asked for most often. Each dataset is stewarded by a public agency or trusted partner, and every chart links back to the responsible team so you can ask questions or suggest new measures.
         </p>
+        <p className="text-sm text-on-surface/70">
+          We timestamp every update and link to the stewarding team so you always know who published the numbers and when.
+        </p>
       </header>
 
       <section className="space-y-6">
