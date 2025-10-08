@@ -31,14 +31,22 @@ export function AnalyticsProvider({
   respectDNT = true,
   enabled = true,
 }: AnalyticsProviderProps) {
+  type AnalyticsWindow = Window & {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+    __gaInitialized?: boolean;
+  };
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const [canTrack, setCanTrack] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (!enabled || !measurementId) {
       setCanTrack(false);
+      setInitialized(false);
       return;
     }
 
@@ -47,6 +55,7 @@ export function AnalyticsProvider({
         console.debug('[analytics] Do Not Track enabled; scripts not loaded');
       }
       setCanTrack(false);
+      setInitialized(false);
       return;
     }
 
@@ -62,6 +71,39 @@ export function AnalyticsProvider({
       return;
     }
 
+    const analyticsWindow = window as AnalyticsWindow;
+
+    if (analyticsWindow.__gaInitialized) {
+      setInitialized(true);
+      return;
+    }
+
+    analyticsWindow.dataLayer = analyticsWindow.dataLayer ?? [];
+    if (typeof analyticsWindow.gtag !== 'function') {
+      analyticsWindow.gtag = (...args: unknown[]) => {
+        analyticsWindow.dataLayer?.push(args);
+      };
+    }
+
+    analyticsWindow.gtag?.('js', new Date());
+    analyticsWindow.gtag?.('config', measurementId, {
+      anonymize_ip: true,
+      send_page_view: false,
+    });
+
+    analyticsWindow.__gaInitialized = true;
+    setInitialized(true);
+  }, [canTrack, measurementId]);
+
+  useEffect(() => {
+    if (!canTrack || !measurementId || !initialized) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const location = window.location.href;
     const pagePath = search ? `${pathname}?${search}` : pathname ?? '/';
 
@@ -70,7 +112,7 @@ export function AnalyticsProvider({
       page_path: pagePath,
       page_title: document.title,
     });
-  }, [canTrack, measurementId, pathname, search]);
+  }, [canTrack, initialized, measurementId, pathname, search]);
 
   if (!canTrack || !measurementId) {
     return null;
@@ -83,19 +125,6 @@ export function AnalyticsProvider({
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
         strategy="afterInteractive"
       />
-      <Script id="ga4-config" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){window.dataLayer.push(arguments);}
-          window.gtag = window.gtag || gtag;
-          gtag('js', new Date());
-          gtag('config', '${measurementId}', {
-            anonymize_ip: true,
-            send_page_view: false
-          });
-        `}
-      </Script>
     </>
   );
 }
-

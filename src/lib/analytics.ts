@@ -1,7 +1,7 @@
 import { trackClientEvent } from './telemetry';
 
 type AnalyticsWindow = Window & {
-  dataLayer?: Array<Record<string, unknown>>;
+  dataLayer?: unknown[];
   gtag?: (...args: unknown[]) => void;
   fbq?: (...args: unknown[]) => void;
 };
@@ -14,7 +14,6 @@ const ENABLE_IN_DEV = isTrue(
 const RESPECT_DNT = (process.env.NEXT_PUBLIC_ANALYTICS_RESPECT_DNT ?? 'true').toLowerCase() !== 'false';
 const ANALYTICS_DISABLED = isTrue(process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false');
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID;
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? process.env.PUBLIC_GTM_ID;
 
 export function trackEvent(name: string, data: Record<string, unknown> = {}) {
   if (typeof window === 'undefined') {
@@ -45,20 +44,21 @@ export function trackEvent(name: string, data: Record<string, unknown> = {}) {
     return;
   }
 
-  const payload = { ...data, event: name, timestamp: Date.now() };
-
   if (!Array.isArray(analyticsWindow.dataLayer)) {
     analyticsWindow.dataLayer = [];
   }
 
+  if (typeof analyticsWindow.gtag !== 'function') {
+    analyticsWindow.gtag = (...args: unknown[]) => {
+      analyticsWindow.dataLayer?.push(args);
+    };
+  }
+
+  const payload = { ...data, event: name, timestamp: Date.now() };
   analyticsWindow.dataLayer.push(payload);
 
   if (GA4_ID && typeof analyticsWindow.gtag === 'function') {
     analyticsWindow.gtag('event', name, data);
-  }
-
-  if (GTM_ID && typeof analyticsWindow.dataLayer !== 'undefined') {
-    // Google Tag Manager listens on the same dataLayer; the push above is sufficient.
   }
 
   if (typeof analyticsWindow.fbq === 'function') {

@@ -1,6 +1,6 @@
 export type TelemetryPayload = Record<string, unknown>;
 
-type TelemetryWindow = Window & { dataLayer?: Array<Record<string, unknown>> };
+type TelemetryWindow = Window & { dataLayer?: unknown[] };
 
 const TELEMETRY_ENDPOINT = '/api/portal/telemetry';
 
