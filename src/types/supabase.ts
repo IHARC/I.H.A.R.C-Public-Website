@@ -914,7 +914,7 @@ export type Database = {
       profiles: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
           display_name: string;
           organization_id: string | null;
           role: Database["portal"]["Enums"]["profile_role"];
@@ -943,7 +943,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
           display_name: string;
           organization_id?: string | null;
           role?: Database["portal"]["Enums"]["profile_role"];
@@ -972,7 +972,7 @@ export type Database = {
         };
         Update: {
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
           display_name?: string;
           organization_id?: string | null;
           role?: Database["portal"]["Enums"]["profile_role"];
@@ -1024,7 +1024,7 @@ export type Database = {
         Row: {
           id: string;
           profile_id: string;
-          user_id: string;
+          user_id: string | null;
           contact_type: Database["portal"]["Enums"]["contact_method"];
           contact_value: string;
           normalized_value: string;
@@ -1034,7 +1034,7 @@ export type Database = {
         Insert: {
           id?: string;
           profile_id: string;
-          user_id: string;
+          user_id?: string | null;
           contact_type: Database["portal"]["Enums"]["contact_method"];
           contact_value: string;
           normalized_value: string;
@@ -1044,7 +1044,7 @@ export type Database = {
         Update: {
           id?: string;
           profile_id?: string;
-          user_id?: string;
+          user_id?: string | null;
           contact_type?: Database["portal"]["Enums"]["contact_method"];
           contact_value?: string;
           normalized_value?: string;
@@ -1405,7 +1405,7 @@ export type Database = {
           id: string;
           petition_id: string;
           profile_id: string;
-          user_id: string;
+          user_id: string | null;
           statement: string | null;
           share_with_partners: boolean;
           created_at: string;
@@ -1421,7 +1421,7 @@ export type Database = {
           id?: string;
           petition_id: string;
           profile_id: string;
-          user_id: string;
+          user_id?: string | null;
           statement?: string | null;
           share_with_partners?: boolean;
           created_at?: string;
@@ -1437,7 +1437,7 @@ export type Database = {
           id?: string;
           petition_id?: string;
           profile_id?: string;
-          user_id?: string;
+          user_id?: string | null;
           statement?: string | null;
           share_with_partners?: boolean;
           created_at?: string;

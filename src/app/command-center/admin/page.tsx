@@ -5,6 +5,11 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import {
+  addOfflinePetitionSignature,
+  type OfflinePetitionSignatureState,
+} from '@/lib/actions/add-offline-petition-signature';
+import { AdminPetitionSignatureForm } from '@/components/portal/petition/admin-petition-signature-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,6 +67,8 @@ type ManageableProfileRow = {
     | { id: string; name: string; category: Database['portal']['Enums']['organization_category']; government_level: Database['portal']['Enums']['government_level'] | null }
     | null;
 };
+
+type PetitionOption = Pick<Database['portal']['Tables']['petitions']['Row'], 'id' | 'title' | 'slug' | 'is_active'>;
 
 function formatGovernmentLevel(level: Database['portal']['Enums']['government_level'] | null): string {
   switch (level) {
@@ -166,6 +173,15 @@ export default async function CommandCenterAdminPage() {
           .limit(100)
       ).data as ManageableProfileRow[] | null) ?? null
     : null;
+
+  const petitionOptions: PetitionOption[] = isAdmin
+    ? ((
+        await portal
+          .from('petitions')
+          .select('id, title, slug, is_active')
+          .order('created_at', { ascending: false })
+      ).data as PetitionOption[] | null) ?? []
+    : [];
 
   async function uploadMetric(formData: FormData) {
     'use server';
@@ -838,6 +854,17 @@ export default async function CommandCenterAdminPage() {
     revalidatePath('/portal/plans');
   }
 
+  async function handleOfflineSignature(
+    prevState: OfflinePetitionSignatureState,
+    formData: FormData,
+  ): Promise<OfflinePetitionSignatureState> {
+    'use server';
+
+    return addOfflinePetitionSignature(formData, {
+      actorProfileId: profile.id,
+    });
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
       <Card>
@@ -885,6 +912,20 @@ export default async function CommandCenterAdminPage() {
           </form>
         </CardContent>
       </Card>
+      {isAdmin ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Record offline petition signature</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AdminPetitionSignatureForm petitions={petitionOptions} action={handleOfflineSignature} />
+            <p className="text-xs text-on-surface/70">
+              Use this form when neighbours sign up in person. Each entry creates a portal profile without login access
+              and updates petition metrics immediately.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Register partner organization</CardTitle>

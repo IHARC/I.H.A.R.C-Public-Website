@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { trackEvent } from '@/lib/analytics';
+import { trackClientEvent } from '@/lib/telemetry';
 
 type AnalyticsProviderProps = {
   measurementId?: string | null;
@@ -35,6 +35,7 @@ export function AnalyticsProvider({
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
     __gaInitialized?: boolean;
+    __gaLastPagePath?: string;
   };
 
   const pathname = usePathname();
@@ -42,9 +43,11 @@ export function AnalyticsProvider({
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const [canTrack, setCanTrack] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const lastTrackedPathRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled || !measurementId) {
+      lastTrackedPathRef.current = null;
       setCanTrack(false);
       setInitialized(false);
       return;
@@ -54,11 +57,13 @@ export function AnalyticsProvider({
       if (process.env.NODE_ENV !== 'production') {
         console.debug('[analytics] Do Not Track enabled; scripts not loaded');
       }
+      lastTrackedPathRef.current = null;
       setCanTrack(false);
       setInitialized(false);
       return;
     }
 
+    lastTrackedPathRef.current = null;
     setCanTrack(true);
   }, [enabled, measurementId, respectDNT]);
 
@@ -104,14 +109,38 @@ export function AnalyticsProvider({
       return;
     }
 
-    const location = window.location.href;
+    const analyticsWindow = window as AnalyticsWindow;
     const pagePath = search ? `${pathname}?${search}` : pathname ?? '/';
 
-    trackEvent('page_view', {
-      page_location: location,
+    if (lastTrackedPathRef.current === pagePath) {
+      return;
+    }
+
+    lastTrackedPathRef.current = pagePath;
+    analyticsWindow.__gaLastPagePath = pagePath;
+
+    const pageLocation = window.location.href;
+    const pageTitle = document.title;
+    const payload = {
+      page_location: pageLocation,
       page_path: pagePath,
-      page_title: document.title,
+      page_title: pageTitle,
+    };
+
+    if (!Array.isArray(analyticsWindow.dataLayer)) {
+      analyticsWindow.dataLayer = [];
+    }
+
+    analyticsWindow.dataLayer.push({ event: 'page_view', ...payload });
+
+    analyticsWindow.gtag?.('config', measurementId, {
+      anonymize_ip: true,
+      page_location: pageLocation,
+      page_path: pagePath,
+      page_title: pageTitle,
     });
+
+    trackClientEvent('page_view', payload);
   }, [canTrack, initialized, measurementId, pathname, search]);
 
   if (!canTrack || !measurementId) {

@@ -58,7 +58,8 @@ export function trackEvent(name: string, data: Record<string, unknown> = {}) {
   analyticsWindow.dataLayer.push(payload);
 
   if (GA4_ID && typeof analyticsWindow.gtag === 'function') {
-    analyticsWindow.gtag('event', name, data);
+    const gaPayload = { ...data, send_to: GA4_ID };
+    analyticsWindow.gtag('event', name, gaPayload);
   }
 
   if (typeof analyticsWindow.fbq === 'function') {
