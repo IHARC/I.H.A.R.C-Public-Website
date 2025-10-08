@@ -4,7 +4,6 @@ import { TopNavMobile } from '@/components/layout/top-nav-mobile';
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { UserNav } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { siteConfig } from '@/config/site';
 
 const marketingLinks = [
   { href: '/', label: 'Home' },
@@ -17,30 +16,10 @@ const marketingLinks = [
 ];
 
 export async function TopNav() {
-  const {
-    emergency: { enabled: emergencyEnabled },
-  } = siteConfig;
-
   const userNavigation = await UserNav();
 
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-      {emergencyEnabled ? (
-        <div className="border-b border-outline/20 bg-brand-soft text-sm text-brand">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-medium">
-              IHARC has urged Cobourg to declare a <strong className="font-semibold">State of Emergency</strong> to coordinate housing and overdose response.
-            </p>
-            <Link
-              href="/emergency"
-              className="inline-flex items-center gap-1 font-semibold underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-soft"
-            >
-              Learn why
-              <span aria-hidden>→</span>
-            </Link>
-          </div>
-        </div>
-      ) : null}
       <div className="mx-auto w-full max-w-6xl px-4 py-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
