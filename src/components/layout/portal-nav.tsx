@@ -27,12 +27,27 @@ export function PortalNav() {
       aria-label="Portal navigation"
       className="border-b border-outline/10 bg-surface-container text-on-surface"
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
-        {portalLinks.map((link) => (
-          <PortalNavLink key={link.href} href={link.href} exact={link.exact} pathname={pathname}>
-            {link.label}
-          </PortalNavLink>
-        ))}
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <div className="relative -mx-4">
+          <div
+            className="flex items-center gap-2 overflow-x-auto px-4 py-3 [-ms-overflow-style:'none'] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:px-0"
+            role="list"
+          >
+            {portalLinks.map((link) => (
+              <PortalNavLink key={link.href} href={link.href} exact={link.exact} pathname={pathname}>
+                {link.label}
+              </PortalNavLink>
+            ))}
+          </div>
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-surface-container to-transparent sm:hidden"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-surface-container to-transparent sm:hidden"
+            aria-hidden
+          />
+        </div>
       </div>
     </nav>
   );
@@ -52,8 +67,10 @@ function PortalNavLink({ href, children, exact, pathname }: PortalNavLinkProps) 
     <Link
       href={href}
       className={cn(
-        'whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container',
-        active ? 'bg-primary text-on-primary shadow' : 'text-on-surface/80 hover:bg-brand-soft hover:text-brand'
+        'flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container',
+        active
+          ? 'bg-primary text-on-primary shadow'
+          : 'text-on-surface/80 hover:bg-brand-soft hover:text-brand'
       )}
       aria-current={active ? 'page' : undefined}
     >

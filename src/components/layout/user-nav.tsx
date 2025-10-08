@@ -1,18 +1,28 @@
+import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { AuthLinks } from '@/components/layout/auth-links';
 import { UserMenu } from '@/components/layout/user-menu';
+import { MobileAccountNav } from '@/components/layout/mobile-account-nav';
 
-export async function UserNav() {
+type UserNavigation = {
+  desktop: ReactNode;
+  mobile: ReactNode;
+};
+
+export async function getUserNavigation(): Promise<UserNavigation> {
   const supabase = await createSupabaseRSCClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <AuthLinks />;
+    return {
+      desktop: <AuthLinks />,
+      mobile: <AuthLinks layout="stacked" />,
+    };
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
@@ -31,17 +41,35 @@ export async function UserNav() {
     ...(showAdmin ? [{ href: '/command-center/admin', label: 'Admin' }] : []),
   ];
 
-  return (
-    <UserMenu
-      displayName={displayName}
-      positionTitle={positionTitle ?? undefined}
-      awaitingVerification={awaitingVerification}
-      affiliationRevoked={affiliationRevoked}
-      menuItems={menuItems}
-      initials={getInitials(displayName)}
-      signOutAction={signOut}
-    />
-  );
+  return {
+    desktop: (
+      <UserMenu
+        displayName={displayName}
+        positionTitle={positionTitle ?? undefined}
+        awaitingVerification={awaitingVerification}
+        affiliationRevoked={affiliationRevoked}
+        menuItems={menuItems}
+        initials={getInitials(displayName)}
+        signOutAction={signOut}
+      />
+    ),
+    mobile: (
+      <MobileAccountNav
+        displayName={displayName}
+        positionTitle={positionTitle ?? undefined}
+        awaitingVerification={awaitingVerification}
+        affiliationRevoked={affiliationRevoked}
+        menuItems={menuItems}
+        initials={getInitials(displayName)}
+        signOutAction={signOut}
+      />
+    ),
+  };
+}
+
+export async function UserNav() {
+  const navigation = await getUserNavigation();
+  return navigation.desktop;
 }
 
 async function signOut() {

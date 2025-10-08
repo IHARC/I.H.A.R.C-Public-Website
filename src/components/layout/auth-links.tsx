@@ -3,10 +3,15 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_NEXT = '/portal/ideas';
 
-export function AuthLinks() {
+type AuthLinksProps = {
+  layout?: 'inline' | 'stacked';
+};
+
+export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -22,18 +27,30 @@ export function AuthLinks() {
   }, [pathname, searchParams]);
 
   const encodedNext = encodeURIComponent(nextParam);
+  const isStacked = layout === 'stacked';
 
   return (
-    <div className="flex items-center gap-2 text-sm font-medium text-on-surface/80">
+    <div
+      className={cn(
+        'text-sm font-semibold text-on-surface/80',
+        isStacked ? 'flex flex-col gap-2' : 'flex items-center gap-2'
+      )}
+    >
       <Link
         href={`/login?next=${encodedNext}`}
-        className="rounded-full border border-outline/40 bg-surface px-3 py-1 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        className={cn(
+          'inline-flex items-center justify-center rounded-full border border-outline/40 bg-surface text-on-surface/80 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
+        )}
       >
         Sign in
       </Link>
       <Link
         href={`/register?next=${encodedNext}`}
-        className="rounded-full bg-primary px-3 py-1 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        className={cn(
+          'inline-flex items-center justify-center rounded-full bg-primary text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
+        )}
       >
         Sign up
       </Link>
