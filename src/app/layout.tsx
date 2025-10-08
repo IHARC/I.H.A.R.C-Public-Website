@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE_PATH,
-        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
