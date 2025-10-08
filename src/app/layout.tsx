@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
+import { ConsentBanner } from '@/components/providers/consent-banner';
 
 const DEFAULT_APP_URL = 'https://iharc.ca';
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
         url: '/og-default.png',
         width: 1200,
         height: 630,
-        alt: 'IHARC Command Center — Community collaboration for housing and health',
+        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
       },
     ],
   },
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               enabled={ANALYTICS_ENABLED}
             />
           </Suspense>
+          <ConsentBanner />
           {children}
         </ThemeProvider>
       </body>

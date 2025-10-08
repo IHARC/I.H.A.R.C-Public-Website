@@ -14,7 +14,7 @@ type InvitePayload = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const PORTAL_EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM') ?? 'IHARC Command Center <notifications@iharc.example>';
+const PORTAL_EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM') ?? 'IHARC Portal <notifications@iharc.example>';
 const SMTP_HOST = Deno.env.get('PORTAL_SMTP_HOST');
 const SMTP_PORT = Number(Deno.env.get('PORTAL_SMTP_PORT') ?? '587');
 const SMTP_USERNAME = Deno.env.get('PORTAL_SMTP_USERNAME');
@@ -208,7 +208,7 @@ async function sendPortalInviteEmail(args: SendPortalInviteArgs) {
 
   let client: SMTPClient | null = null;
 
-  const inviterName = args.inviterDisplayName ?? 'the IHARC Command Center team';
+  const inviterName = args.inviterDisplayName ?? 'the IHARC Portal team';
   const greetingName = args.recipientDisplayName ?? null;
   const greeting = greetingName ? `Hello ${greetingName},` : 'Hello,';
   const affiliationLabel = formatAffiliation(args.affiliationType);
@@ -218,17 +218,17 @@ async function sendPortalInviteEmail(args: SendPortalInviteArgs) {
   const textBody = [
     greeting,
     '',
-    `${inviterName} invited you to collaborate on the IHARC Command Center as a ${affiliationLabel}.`,
+    `${inviterName} invited you to collaborate on the IHARC Portal as a ${affiliationLabel}.`,
     orgLine ?? undefined,
     sharedMessage ? `Message from ${inviterName}:\n${sharedMessage}` : undefined,
     '',
-    'Use the "Accept invite" link in the Supabase email you just received to set your password and sign in with this address.',
+    'Use the "Accept invite" link in the IHARC Portal email you just received to set your password and sign in with this address.',
     'Once you are signed in, you can confirm your profile and join plan coordination threads with neighbours and partners.',
     '',
     'If anything is unclear or you run into issues, reply to this message and we will help right away.',
     '',
     'In solidarity,',
-    `${inviterName} and the IHARC Command Center moderation team`,
+    `${inviterName} and the IHARC Portal moderation team`,
   ]
     .filter((line) => typeof line === 'string')
     .join('\n');
@@ -256,7 +256,7 @@ async function sendPortalInviteEmail(args: SendPortalInviteArgs) {
     await client.send({
       from: PORTAL_EMAIL_FROM,
       to: args.recipientEmail,
-      subject: 'Invitation to join the IHARC Command Center',
+      subject: 'Invitation to join the IHARC Portal',
       content: textBody,
       html: htmlBody,
     });
@@ -298,7 +298,7 @@ function buildInviteHtml(args: {
   const parts: string[] = [];
   parts.push(`<p>${escapeHtml(args.greeting)}</p>`);
   parts.push(
-    `<p>${escapeHtml(args.inviterName)} invited you to collaborate on the IHARC Command Center as a ${escapeHtml(args.affiliationLabel)}.</p>`,
+    `<p>${escapeHtml(args.inviterName)} invited you to collaborate on the IHARC Portal as a ${escapeHtml(args.affiliationLabel)}.</p>`,
   );
   if (args.orgLine) {
     parts.push(`<p>${escapeHtml(args.orgLine)}</p>`);
@@ -309,7 +309,7 @@ function buildInviteHtml(args: {
     );
   }
   parts.push(
-    '<p>Use the <em>Accept invite</em> link in the IHARC Command Center email you just received to set your password and sign in with this address.</p>',
+    '<p>Use the <em>Accept invite</em> link in the IHARC Portal email you just received to set your password and sign in with this address.</p>',
   );
   parts.push(
     '<p>Once you are signed in, you can confirm your profile and join plan coordination threads with neighbours and partners.</p>',
@@ -318,7 +318,7 @@ function buildInviteHtml(args: {
   parts.push(`
     <p>
       In solidarity,<br />
-      ${escapeHtml(args.inviterName)} and the IHARC Command Center moderation team
+      ${escapeHtml(args.inviterName)} and the IHARC Portal moderation team
     </p>
   `);
   return parts.join('\n');

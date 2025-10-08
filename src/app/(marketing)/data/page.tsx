@@ -29,7 +29,7 @@ const dataPrinciples = [
 export const metadata: Metadata = {
   title: 'Community Data & Metrics — IHARC',
   description:
-    'Understand which housing and overdose response indicators feed the IHARC Command Center and how neighbours can request new metrics.',
+    'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
 };
 
 export default function DataPage() {

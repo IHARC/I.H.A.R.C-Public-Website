@@ -1,4 +1,4 @@
-# IHARC Command Center Architecture Overview
+# IHARC Portal Architecture Overview
 
 ## Guiding Principles
 - Extend the existing Supabase project strictly within the `portal` schema. Preserve auth configuration and enforce least-privilege with RLS, policies, and role-aware logic.
@@ -52,4 +52,3 @@
 - Every mutation triggers `portal_log_audit_event`, capturing actor (profile/user), action, entity, and hashed IP/User-Agent metadata.
 - Reaction totals, plan updates, and petition signatures roll up into materialised views for `/portal/progress` and marketing pages.
 - Notifications queue emails/SMS via `portal_queue_notification`, with SMTP credentials managed in Azure Functions.
-

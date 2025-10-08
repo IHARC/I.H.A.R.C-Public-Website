@@ -36,7 +36,7 @@ const programAreas = [
 export const metadata: Metadata = {
   title: 'Programs & Collaborative Supports — IHARC',
   description:
-    'Explore the collaborative programs behind the IHARC Command Center, from outreach and shelter to overdose prevention and compassionate community safety.',
+    'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the IHARC Portal.',
 };
 
 export default function ProgramsPage() {
@@ -46,7 +46,7 @@ export default function ProgramsPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Programs & Supports</p>
         <h1 className="text-4xl font-bold tracking-tight">Community teams coordinating through the portal</h1>
         <p className="text-base text-on-surface/80">
-          IHARC does not replace frontline programs—it gives them a shared space to stay organized. These focus areas describe how partners are currently using the command center to move faster, close gaps, and honour lived experience.
+          IHARC does not replace frontline programs—it gives them a shared space to stay organized. These focus areas describe how partners use the IHARC Portal to move faster, close gaps, and honour lived experience.
         </p>
       </header>
 

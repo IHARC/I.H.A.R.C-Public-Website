@@ -31,7 +31,7 @@ export const metadata: Metadata = {
         url: '/og-default.png',
         width: 1200,
         height: 630,
-        alt: 'IHARC Command Center — Community collaboration for housing and health',
+        alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
       },
     ],
   },

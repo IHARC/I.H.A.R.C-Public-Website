@@ -30,17 +30,17 @@ const collaborationLoops = [
 export const metadata: Metadata = {
   title: 'About IHARC — Inclusive Housing & Health Collaboration',
   description:
-    'Learn how neighbours, agencies, and local government use the IHARC Command Center to coordinate housing stability and overdose response with dignity.',
+    'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the IHARC Portal coordinates community-led crisis response with dignity.',
 };
 
 export default function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">About the Command Center</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-primary">About IHARC</p>
         <h1 className="text-4xl font-bold tracking-tight">Collaboration built to honour neighbours first</h1>
         <p className="text-base text-on-surface/80">
-          IHARC exists because community members asked for a single, accountable place to track what is happening with housing stability and overdose response. The command center keeps every update public, every decision logged, and every invitation grounded in dignity.
+          IHARC, the Integrated Homelessness and Addictions Response Centre, is a non-profit already delivering street outreach and wraparound supports with neighbours across Northumberland. The IHARC Portal extends that work by offering a transparent space where partners can organise crisis response, share evidence, and document next steps together.
         </p>
       </header>
 

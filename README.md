@@ -1,6 +1,6 @@
-# IHARC Command Center
+# IHARC Portal & Main Site
 
-The IHARC Command Center is a fully dynamic Next.js 15 portal that surfaces real-time homelessness and overdose response insights for Northumberland County. The public MVP invites neighbours, peer workers, agencies, and municipal partners to co-design solutions through an idea queue, working plan lifecycle, live progress dashboards, and petition campaigns. Every feature foregrounds strengths-based storytelling and collaborative care.
+The Integrated Homelessness and Addictions Response Centre (IHARC) is a non-profit delivering outreach and wraparound supports with neighbours across Northumberland County. This project powers both the public iharc.ca marketing site and the IHARC Portal—the collaboration and crisis management workspace where community partners co-design housing and overdose responses. The portal pairs real-time metrics, working plans, and petitions so neighbours, peer workers, agencies, and municipal partners stay aligned through a dignified, strengths-based workflow.
 
 ## Requirements
 - Node.js 18.18.0 or newer

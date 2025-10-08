@@ -81,10 +81,45 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', ${JSON.stringify(measurementId)});
+            (function () {
+              var measurementId = ${JSON.stringify(measurementId)};
+              var consentKey = 'iharc-consent-preference';
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = window.gtag || gtag;
+
+              var consentDefaults = {
+                ad_storage: 'denied',
+                analytics_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+              };
+
+              try {
+                var storedConsent = window.localStorage.getItem(consentKey);
+                if (storedConsent === 'granted') {
+                  consentDefaults = {
+                    ad_storage: 'granted',
+                    analytics_storage: 'granted',
+                    ad_user_data: 'granted',
+                    ad_personalization: 'granted',
+                  };
+                } else if (storedConsent === 'denied') {
+                  consentDefaults = {
+                    ad_storage: 'denied',
+                    analytics_storage: 'denied',
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                  };
+                }
+              } catch (error) {
+                // Ignore storage access issues
+              }
+
+              gtag('consent', 'default', consentDefaults);
+              gtag('js', new Date());
+              gtag('config', measurementId, { anonymize_ip: true });
+            })();
           `,
         }}
       />

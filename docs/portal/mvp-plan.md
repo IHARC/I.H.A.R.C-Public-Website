@@ -1,6 +1,6 @@
 # Portal Delivery Notes
 
-This document tracks the current state of the public-facing Command Center MVP and the near-term priorities that keep the portal evolving in step with community needs.
+This document tracks the current state of the public-facing IHARC Portal MVP and the near-term priorities that keep the workspace evolving in step with community needs.
 
 ## Delivered Capabilities
 - **Idea collaboration**: `/portal/ideas` queue with filters, guest tooltips, and six-step submission (`/portal/ideas/submit`). Canonical idea pages include metrics, typed comments, timeline history, and the moderator-only “Promote to Working Plan” workflow.

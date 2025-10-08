@@ -14,7 +14,7 @@ export default function AboutPage() {
       <header className="space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">About this portal</h1>
         <p className="text-base text-slate-700 dark:text-slate-300">
-          The IHARC Command Center portal is a shared workspace for neighbours, agencies, and local government to address homelessness and the toxic drug crisis together. Every page is written in plain language so anyone can follow along, offer feedback, and hold partners accountable.
+          The IHARC Portal is the collaboration space powering the Integrated Homelessness and Addictions Response Centre. Outreach teams, neighbours, agencies, and local government use this workspace to organise crisis response, track resources, and stay accountable while the local emergency deepens.
         </p>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           We surface ideas that expand housing, health, and social supports. Suggestions that criminalize or displace neighbours are documented for transparency but do not move forward.

@@ -38,13 +38,13 @@ export default async function StatsDashboardPage({
 
     if (error) {
       metricsUnavailable = true;
-      console.error('Failed to load command center metrics', error);
+      console.error('Failed to load IHARC portal metrics', error);
     } else {
       metricRows = data ?? [];
     }
   } catch (error) {
     metricsUnavailable = true;
-    console.error('Failed to load command center metrics', error);
+    console.error('Failed to load IHARC portal metrics', error);
   }
 
   const grouped = metricRows.length ? groupMetrics(metricRows) : {};

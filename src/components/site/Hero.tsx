@@ -15,7 +15,7 @@ export function Hero() {
           Northumberland neighbours working for housing stability and overdose prevention.
         </h1>
         <p className="max-w-xl text-lg text-on-surface/80">
-          The command center is a shared space for neighbours, service agencies, and local government to move quickly with compassion. Every step is co-designed, measured, and accountable to people most impacted.
+          IHARC is the Integrated Homelessness and Addictions Response Centre. This main site keeps neighbours, service agencies, and local government aligned on the story, while the IHARC Portal hosts live collaboration and crisis management.
         </p>
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link

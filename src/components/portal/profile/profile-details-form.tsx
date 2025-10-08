@@ -363,7 +363,7 @@ export function ProfileDetailsForm({ organizations, governmentBodies, action, in
             maxLength={120}
             placeholder="Public Health Nurse, Town Councillor, Outreach Supervisor, ..."
           />
-          <p className="text-xs text-muted">Helps neighbours understand how you collaborate through the Command Center.</p>
+          <p className="text-xs text-muted">Helps neighbours understand how you collaborate through the IHARC Portal.</p>
         </div>
       )}
 

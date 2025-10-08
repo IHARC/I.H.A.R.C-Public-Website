@@ -292,7 +292,7 @@ function RegistrationFields(props: RegistrationFieldsProps) {
       </div>
 
       <div className="grid gap-3">
-        <Label>How are you joining the Command Center?</Label>
+        <Label>How are you collaborating through the IHARC Portal?</Label>
         <RadioGroup
           name="affiliation_type"
           value={affiliationType}
@@ -475,7 +475,7 @@ function RegistrationFields(props: RegistrationFieldsProps) {
             placeholder="Public Health Nurse, Mayor, Outreach Coordinator, ..."
             required
           />
-          <p className="text-xs text-muted">Helps neighbours understand how you collaborate in the Command Center.</p>
+          <p className="text-xs text-muted">Helps neighbours understand how you collaborate through the IHARC Portal.</p>
         </div>
       )}
 
