@@ -11,7 +11,7 @@ const isTrue = (value: string | undefined | null) => value?.toLowerCase() === 't
 const ENABLE_IN_DEV = isTrue(
   process.env.NEXT_PUBLIC_ENABLE_INTEGRATIONS_IN_DEV ?? process.env.PUBLIC_ENABLE_INTEGRATIONS_IN_DEV,
 );
-const RESPECT_DNT = (process.env.NEXT_PUBLIC_ANALYTICS_RESPECT_DNT ?? 'true').toLowerCase() !== 'false';
+const RESPECT_DNT = (process.env.NEXT_PUBLIC_ANALYTICS_RESPECT_DNT ?? 'false').toLowerCase() === 'true';
 const ANALYTICS_DISABLED = isTrue(process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false');
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID;
 

@@ -28,7 +28,7 @@ function isDoNotTrackEnabled(): boolean {
 
 export function AnalyticsProvider({
   measurementId,
-  respectDNT = true,
+  respectDNT = false,
   enabled = true,
 }: AnalyticsProviderProps) {
   type AnalyticsWindow = Window & {
@@ -127,17 +127,11 @@ export function AnalyticsProvider({
       page_title: pageTitle,
     };
 
-    if (!Array.isArray(analyticsWindow.dataLayer)) {
-      analyticsWindow.dataLayer = [];
-    }
-
-    analyticsWindow.dataLayer.push({ event: 'page_view', ...payload });
-
-    analyticsWindow.gtag?.('config', measurementId, {
-      anonymize_ip: true,
+    analyticsWindow.gtag?.('event', 'page_view', {
       page_location: pageLocation,
       page_path: pagePath,
       page_title: pageTitle,
+      send_to: measurementId,
     });
 
     trackClientEvent('page_view', payload);
