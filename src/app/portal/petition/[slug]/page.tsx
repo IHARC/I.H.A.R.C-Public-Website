@@ -20,6 +20,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
   hour: 'numeric',
   minute: '2-digit',
+  timeZone: 'America/Toronto',
+  timeZoneName: 'short',
 });
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 const DEFAULT_PETITION_TITLE = 'Support the declaration — IHARC';

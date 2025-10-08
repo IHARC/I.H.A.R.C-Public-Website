@@ -54,7 +54,7 @@ export function PetitionSignForm({ action, petitionId, defaults }: PetitionSignF
           className={`rounded-xl border px-4 py-3 text-sm ${
             state.status === 'error'
               ? 'border-error/40 bg-error/10 text-error'
-              : 'border-primary/25 bg-primary/10 text-on-primary'
+              : 'border-primary/70 bg-primary text-on-primary shadow-sm'
           }`}
           aria-live="polite"
         >
