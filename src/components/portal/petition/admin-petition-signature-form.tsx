@@ -178,7 +178,7 @@ export function AdminPetitionSignatureForm({ petitions, action }: AdminPetitionS
       </div>
 
       <p className="rounded-xl bg-surface-container px-4 py-3 text-xs text-on-surface/80">
-        Record the signer's consent before submitting. Contact details remain private and only inform coordination
+        Record the signer&#39;s consent before submitting. Contact details remain private and only inform coordination
         between neighbours, agencies, and local government.
       </p>
 
