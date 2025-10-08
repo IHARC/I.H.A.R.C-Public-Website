@@ -110,6 +110,7 @@ export function AnalyticsProvider({
     }
 
     const analyticsWindow = window as AnalyticsWindow;
+    const previousPagePath = analyticsWindow.__gaLastPagePath;
     const pagePath = search ? `${pathname}?${search}` : pathname ?? '/';
 
     if (lastTrackedPathRef.current === pagePath) {
@@ -117,21 +118,28 @@ export function AnalyticsProvider({
     }
 
     lastTrackedPathRef.current = pagePath;
-    analyticsWindow.__gaLastPagePath = pagePath;
 
     const pageLocation = window.location.href;
     const pageTitle = document.title;
+    const referrerFromHistory =
+      previousPagePath && previousPagePath !== pagePath ? `${window.location.origin}${previousPagePath}` : null;
+    const pageReferrer = referrerFromHistory || document.referrer || null;
+
     const payload = {
       page_location: pageLocation,
       page_path: pagePath,
       page_title: pageTitle,
+      ...(pageReferrer ? { page_referrer: pageReferrer } : {}),
     };
+
+    analyticsWindow.__gaLastPagePath = pagePath;
 
     analyticsWindow.gtag?.('event', 'page_view', {
       page_location: pageLocation,
       page_path: pagePath,
       page_title: pageTitle,
       send_to: measurementId,
+      ...(pageReferrer ? { page_referrer: pageReferrer } : {}),
     });
 
     trackClientEvent('page_view', payload);
