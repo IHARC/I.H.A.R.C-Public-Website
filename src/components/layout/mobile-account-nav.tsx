@@ -17,7 +17,6 @@ type MobileAccountNavProps = {
   initials: string;
   menuItems: MenuItem[];
   signOutAction: () => Promise<void>;
-  onNavigate?: () => void;
 };
 
 export function MobileAccountNav({
@@ -28,7 +27,6 @@ export function MobileAccountNav({
   initials,
   menuItems,
   signOutAction,
-  onNavigate,
 }: MobileAccountNavProps) {
   const [pending, startTransition] = useTransition();
 
@@ -69,9 +67,6 @@ export function MobileAccountNav({
           <Link
             key={item.href}
             href={item.href}
-            onClick={() => {
-              onNavigate?.();
-            }}
             className="inline-flex w-full items-center justify-between rounded-full border border-outline/20 bg-surface px-4 py-2 text-sm font-semibold text-on-surface/90 transition hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <span>{item.label}</span>

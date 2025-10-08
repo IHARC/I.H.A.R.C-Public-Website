@@ -1,7 +1,7 @@
 'use client';
 
-import type { MouseEvent, ReactNode } from 'react';
-import { cloneElement, isValidElement, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
@@ -67,27 +67,6 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
     [links, onPortalRoute, pathname]
   );
 
-  const enhancedAccountSection = isValidElement(accountSection)
-    ? cloneElement(accountSection, {
-        onNavigate: () => setOpen(false),
-      })
-    : accountSection;
-
-  const enhancedQuickAction = isValidElement(quickAction)
-    ? cloneElement(quickAction, {
-        onClick: (event: MouseEvent<HTMLElement>) => {
-          const originalHandler = (quickAction.props as { onClick?: (event: MouseEvent<HTMLElement>) => void })?.onClick;
-          if (originalHandler) {
-            originalHandler(event);
-          }
-
-          if (!event.defaultPrevented) {
-            setOpen(false);
-          }
-        },
-      })
-    : quickAction;
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -140,19 +119,41 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
               </div>
             ))}
           </nav>
-          {enhancedQuickAction ? (
-            <div className="flex flex-col gap-2">
+          {quickAction ? (
+            <div
+              className="flex flex-col gap-2"
+              onClickCapture={(event) => {
+                const target = event.target as HTMLElement | null;
+                if (!target) {
+                  return;
+                }
+                if (target.closest('a[href],button')) {
+                  setOpen(false);
+                }
+              }}
+            >
               <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
                 Quick action
               </p>
-              {enhancedQuickAction}
+              {quickAction}
             </div>
           ) : null}
-          <div className="flex flex-col gap-2">
+          <div
+            className="flex flex-col gap-2"
+            onClickCapture={(event) => {
+              const target = event.target as HTMLElement | null;
+              if (!target) {
+                return;
+              }
+              if (target.closest('a[href],button')) {
+                setOpen(false);
+              }
+            }}
+          >
             <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
               Account
             </p>
-            {enhancedAccountSection}
+            {accountSection}
           </div>
         </div>
       </SheetContent>
