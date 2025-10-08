@@ -79,8 +79,9 @@ export async function signPetitionGuest(
   }
 
   const supabase = await createSupabaseServerClient();
+  const portal = supabase.schema('portal');
 
-  const { data, error } = await supabase.rpc('portal_add_guest_petition_signature', {
+  const { data, error } = await portal.rpc('add_guest_petition_signature', {
     p_petition_id: petitionId,
     p_first_name: firstName,
     p_last_name: lastName,
@@ -93,6 +94,24 @@ export async function signPetitionGuest(
 
   if (error) {
     const message = typeof error.message === 'string' ? error.message : '';
+    if (message.includes('first_name_required')) {
+      return { status: 'error', message: 'Enter your first name to continue.' };
+    }
+    if (message.includes('last_name_required')) {
+      return { status: 'error', message: 'Enter your last name to continue.' };
+    }
+    if (message.includes('email_required') || message.includes('email_invalid')) {
+      return { status: 'error', message: 'Enter a valid email address.' };
+    }
+    if (message.includes('postal_code_required')) {
+      return { status: 'error', message: 'Enter your postal code.' };
+    }
+    if (message.includes('postal_code_invalid')) {
+      return { status: 'error', message: 'Postal code should be between 3 and 10 characters.' };
+    }
+    if (message.includes('statement_too_long')) {
+      return { status: 'error', message: 'Notes must be 500 characters or fewer.' };
+    }
     if (message.includes('signature_already_exists')) {
       return { status: 'error', message: 'You already signed this petition with this email address.' };
     }

@@ -335,22 +335,6 @@ export type Database = {
         Args: { p_invite_id: string; p_profile_id: string };
         Returns: undefined;
       };
-      portal_add_guest_petition_signature: {
-        Args: {
-          p_petition_id: string;
-          p_first_name: string;
-          p_last_name: string;
-          p_email: string;
-          p_postal_code: string;
-          p_display_preference?: Database["portal"]["Enums"]["petition_display_preference"] | null;
-          p_statement?: string | null;
-          p_share_with_partners?: boolean | null;
-        };
-        Returns: {
-          signature_id: string;
-          profile_id: string;
-        }[];
-      };
       portal_check_rate_limit: {
         Args: { p_event: string; p_limit: number; p_cooldown_ms?: number | null };
         Returns: { allowed: boolean; retry_in_ms: number }[];
@@ -2257,10 +2241,43 @@ export type Database = {
           }?,
         ];
       };
+      metric_catalog: {
+        Row: {
+          id: string;
+          slug: string;
+          label: string;
+          unit: string | null;
+          sort_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          label: string;
+          unit?: string | null;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          label?: string;
+          unit?: string | null;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       metric_daily: {
         Row: {
           metric_date: string;
-          metric_key: Database["portal"]["Enums"]["metric_key"];
+          metric_id: string;
           value: number | null;
           value_status: Database["portal"]["Enums"]["metric_value_status"];
           source: string | null;
@@ -2270,7 +2287,7 @@ export type Database = {
         };
         Insert: {
           metric_date: string;
-          metric_key: Database["portal"]["Enums"]["metric_key"];
+          metric_id: string;
           value?: number | null;
           value_status?: Database["portal"]["Enums"]["metric_value_status"];
           source?: string | null;
@@ -2280,7 +2297,7 @@ export type Database = {
         };
         Update: {
           metric_date?: string;
-          metric_key?: Database["portal"]["Enums"]["metric_key"];
+          metric_id?: string;
           value?: number | null;
           value_status?: Database["portal"]["Enums"]["metric_value_status"];
           source?: string | null;
@@ -2288,7 +2305,14 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "metric_daily_metric_id_fkey";
+            columns: ["metric_id"];
+            referencedRelation: "metric_catalog";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
@@ -2348,6 +2372,22 @@ export type Database = {
       };
     };
     Functions: {
+      add_guest_petition_signature: {
+        Args: {
+          p_petition_id: string;
+          p_first_name: string;
+          p_last_name: string;
+          p_email: string;
+          p_postal_code: string;
+          p_display_preference?: Database["portal"]["Enums"]["petition_display_preference"] | null;
+          p_statement?: string | null;
+          p_share_with_partners?: boolean | null;
+        };
+        Returns: {
+          signature_id: string;
+          profile_id: string;
+        }[];
+      };
       current_profile_id: {
         Args: Record<PropertyKey, never>;
         Returns: string | null;
@@ -2388,13 +2428,6 @@ export type Database = {
       flag_entity_type: "idea" | "comment";
       flag_reason: "privacy" | "abuse" | "hate" | "spam" | "wrong_cat" | "other";
       flag_status: "open" | "reviewing" | "resolved" | "rejected";
-      metric_key:
-        | "outdoor_count"
-        | "shelter_occupancy"
-        | "overdoses_reported"
-        | "narcan_distributed"
-        | "encampment_count"
-        | "warming_beds_available";
       metric_value_status: "reported" | "pending";
       plan_update_status:
         | "draft"
@@ -2661,14 +2694,6 @@ export const Constants = {
       flag_entity_type: ["idea", "comment"] as const,
       flag_reason: ["privacy", "abuse", "hate", "spam", "wrong_cat", "other"] as const,
       flag_status: ["open", "reviewing", "resolved", "rejected"] as const,
-      metric_key: [
-        "outdoor_count",
-        "shelter_occupancy",
-        "overdoses_reported",
-        "narcan_distributed",
-        "encampment_count",
-        "warming_beds_available",
-      ] as const,
       petition_display_preference: [
         "anonymous",
         "first_name_last_initial",

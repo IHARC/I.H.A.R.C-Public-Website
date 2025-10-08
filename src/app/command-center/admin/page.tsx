@@ -11,20 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
 
 const GOVERNMENT_ROLE_TYPES: Database['portal']['Enums']['government_role_type'][] = ['staff', 'politician'];
 const GOVERNMENT_LEVELS: Database['portal']['Enums']['government_level'][] = ['municipal', 'county', 'provincial', 'federal', 'other'];
-
-const METRIC_OPTIONS = [
-  { key: 'outdoor_count', label: 'Neighbours Outdoors' },
-  { key: 'shelter_occupancy', label: 'Shelter Occupancy (%)' },
-  { key: 'overdoses_reported', label: 'Drug Poisoning Emergencies' },
-  { key: 'narcan_distributed', label: 'Naloxone Kits Shared' },
-  { key: 'encampment_count', label: 'Encampment Sites Documented' },
-  { key: 'warming_beds_available', label: 'Warming Beds Available' },
-] as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -80,6 +72,25 @@ function formatGovernmentLevel(level: Database['portal']['Enums']['government_le
   }
 }
 
+const metricNumberFormatter = new Intl.NumberFormat('en-CA', { maximumFractionDigits: 1 });
+
+function formatMetricNumber(value: number): string {
+  return Number.isInteger(value) ? value.toLocaleString('en-CA') : metricNumberFormatter.format(value);
+}
+
+function formatMetricDate(value: string): string {
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function normalizeMetricSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+}
+
 type ProfileInviteWithOrg = {
   id: string;
   email: string;
@@ -90,6 +101,21 @@ type ProfileInviteWithOrg = {
   created_at: string;
   organization: { id: string; name: string }[] | { id: string; name: string } | null;
 };
+
+type MetricDefinition = Database['portal']['Tables']['metric_catalog']['Row'];
+
+type MetricDailyRow = Database['portal']['Tables']['metric_daily']['Row'] & {
+  metric_catalog: MetricDefinition | MetricDefinition[] | null;
+};
+
+function resolveMetricCatalogRelation(
+  relation: MetricDefinition | MetricDefinition[] | null,
+): MetricDefinition | null {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+  return relation;
+}
 
 export default async function CommandCenterAdminPage() {
   const supabase = await createSupabaseRSCClient();
@@ -109,11 +135,29 @@ export default async function CommandCenterAdminPage() {
 
   const isAdmin = profile.role === 'admin';
 
-  const { data: recentMetrics } = await portal
+  const { data: metricCatalogRows } = await portal
+    .from('metric_catalog')
+    .select('id, slug, label, unit, sort_order, is_active')
+    .order('sort_order', { ascending: true })
+    .order('label', { ascending: true });
+
+  const metricDefinitions: MetricDefinition[] = (metricCatalogRows ?? []) as MetricDefinition[];
+  const activeMetricDefinitions = metricDefinitions.filter((definition) => definition.is_active);
+
+  const { data: recentMetricsRaw } = await portal
     .from('metric_daily')
-    .select('*')
+    .select('metric_date, metric_id, value, value_status, source, notes, metric_catalog:metric_id(id, slug, label, unit, sort_order, is_active)')
     .order('metric_date', { ascending: false })
     .limit(12);
+
+  const recentMetricEntries: Array<MetricDailyRow & { metric_catalog: MetricDefinition | null }> = (
+    (recentMetricsRaw ?? []) as unknown as MetricDailyRow[]
+  )
+    .map((item) => ({
+      ...item,
+      metric_catalog: resolveMetricCatalogRelation(item.metric_catalog),
+    }))
+    .filter((item) => item.metric_catalog !== null);
 
   const { data: organizations } = await portal
     .from('organizations')
@@ -167,71 +211,333 @@ export default async function CommandCenterAdminPage() {
       ).data as ManageableProfileRow[] | null) ?? null
     : null;
 
-  async function uploadMetric(formData: FormData) {
-    'use server';
+async function uploadMetric(formData: FormData) {
+  'use server';
 
-    const supa = await createSupabaseServerClient();
-    const portalClient = supa.schema('portal');
-    const metric_date = formData.get('metric_date') as string;
-    const metric_key = formData.get('metric_key') as string;
-    const statusInput = (formData.get('metric_status') as string | null)?.toLowerCase() ?? 'reported';
-    const valueStatus: Database['portal']['Enums']['metric_value_status'] =
-      statusInput === 'pending' ? 'pending' : 'reported';
-    const rawValue = formData.get('value');
-    const valueString = typeof rawValue === 'string' ? rawValue.trim() : '';
-    const hasValueInput = valueString.length > 0;
-    let value: number | null = null;
-    if (valueStatus === 'reported') {
-      if (!hasValueInput) {
-        throw new Error('Enter a numeric value for reported metrics.');
-      }
-      value = Number(valueString);
-      if (!Number.isFinite(value)) {
-        throw new Error('Metric value must be a number.');
-      }
-    } else if (hasValueInput) {
-      const parsed = Number(valueString);
-      if (!Number.isFinite(parsed)) {
-        throw new Error('Metric value must be a number.');
-      }
-      value = parsed;
-    }
-    const source = (formData.get('source') as string) || null;
-    const notes = (formData.get('notes') as string) || null;
-    const actorProfileId = formData.get('actor_profile_id') as string;
-
-    if (!metric_date || !metric_key) {
-      throw new Error('Missing required fields');
-    }
-
-    await portalClient
-      .from('metric_daily')
-      .upsert(
-        {
-          metric_date,
-          metric_key,
-          value,
-          value_status: valueStatus,
-          source,
-          notes,
-        },
-        { onConflict: 'metric_date,metric_key' },
-      );
-
-    await logAuditEvent(supa, {
-      actorProfileId,
-      action: 'metric_upsert',
-      entityType: 'metric_daily',
-      entityId: `${metric_date}:${metric_key}`,
-      meta: { value, value_status: valueStatus, source, notes },
-    });
-
-    revalidatePath('/portal/ideas');
-    revalidatePath('/stats');
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  if (!actorProfileId) {
+    throw new Error('Moderator context is required.');
   }
 
-  async function createOrganization(formData: FormData) {
-    'use server';
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id) {
+    throw new Error('Unable to verify moderator permissions.');
+  }
+
+  if (!['admin', 'moderator'].includes(actorProfile.role)) {
+    throw new Error('You do not have permission to record metrics.');
+  }
+
+  const metric_date = formData.get('metric_date') as string;
+  const metric_id = formData.get('metric_id') as string;
+  const statusInput = (formData.get('metric_status') as string | null)?.toLowerCase() ?? 'reported';
+  const valueStatus: Database['portal']['Enums']['metric_value_status'] =
+    statusInput === 'pending' ? 'pending' : 'reported';
+  const rawValue = formData.get('value');
+  const valueString = typeof rawValue === 'string' ? rawValue.trim() : '';
+  const hasValueInput = valueString.length > 0;
+  let value: number | null = null;
+  if (valueStatus === 'reported') {
+    if (!hasValueInput) {
+      throw new Error('Enter a numeric value for reported metrics.');
+    }
+    value = Number(valueString);
+    if (!Number.isFinite(value)) {
+      throw new Error('Metric value must be a number.');
+    }
+  } else if (hasValueInput) {
+    const parsed = Number(valueString);
+    if (!Number.isFinite(parsed)) {
+      throw new Error('Metric value must be a number.');
+    }
+    value = parsed;
+  }
+  const source = (formData.get('source') as string) || null;
+  const notes = (formData.get('notes') as string) || null;
+
+  if (!metric_date || !metric_id) {
+    throw new Error('Missing required fields');
+  }
+
+  await portalClient
+    .from('metric_daily')
+    .upsert(
+      {
+        metric_date,
+        metric_id,
+        value,
+        value_status: valueStatus,
+        source,
+        notes,
+      },
+        { onConflict: 'metric_date,metric_id' },
+      );
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'metric_upsert',
+    entityType: 'metric_daily',
+    entityId: `${metric_date}:${metric_id}`,
+    meta: { value, value_status: valueStatus, source, notes },
+  });
+
+  revalidatePath('/portal/ideas');
+  revalidatePath('/stats');
+  revalidatePath('/portal/progress');
+  revalidatePath('/api/portal/metrics');
+}
+
+async function createMetricDefinition(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  if (!actorProfileId) {
+    throw new Error('Moderator context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage metrics.');
+  }
+
+  const label = (formData.get('label') as string | null)?.trim();
+  if (!label) {
+    throw new Error('Label is required.');
+  }
+
+  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
+  let slug = normalizeMetricSlug(slugInput) || normalizeMetricSlug(label);
+  if (!slug) {
+    slug = `metric-${Date.now()}`;
+  }
+
+  const unitInput = (formData.get('unit') as string | null)?.trim() ?? null;
+  const sortOrderRaw = (formData.get('sort_order') as string | null)?.trim() ?? '';
+  const sortOrderParsed = Number(sortOrderRaw);
+  let sortOrder = Number.isFinite(sortOrderParsed) ? sortOrderParsed : null;
+  if (sortOrder === null) {
+    const { data: maxSort } = await portalClient
+      .from('metric_catalog')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    sortOrder = ((maxSort?.sort_order as number) ?? 0) + 10;
+  }
+
+  const isActive = formData.get('is_active') === 'on';
+
+  const { data: inserted, error: insertError } = await portalClient
+    .from('metric_catalog')
+    .insert({
+      slug,
+      label,
+      unit: unitInput,
+      sort_order: sortOrder,
+      is_active: isActive,
+    })
+    .select('id')
+    .maybeSingle();
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'metric_definition_created',
+    entityType: 'metric_catalog',
+    entityId: inserted?.id ?? null,
+    meta: { slug, label, unit: unitInput, sort_order: sortOrder, is_active: isActive },
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/portal/progress');
+  revalidatePath('/stats');
+  revalidatePath('/portal/ideas');
+  revalidatePath('/api/portal/metrics');
+}
+
+async function updateMetricDefinition(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  const metricId = formData.get('metric_id') as string | null;
+
+  if (!actorProfileId || !metricId) {
+    throw new Error('Metric context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage metrics.');
+  }
+
+  const { data: existingRaw, error: existingError } = await portalClient
+    .from('metric_catalog')
+    .select('slug, sort_order')
+    .eq('id', metricId)
+    .maybeSingle();
+
+  const existing = (existingRaw as { slug: string; sort_order: number } | null) ?? null;
+
+  if (existingError || !existing) {
+    throw new Error('Metric definition not found.');
+  }
+
+  const label = (formData.get('label') as string | null)?.trim();
+  if (!label) {
+    throw new Error('Label is required.');
+  }
+
+  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
+  let slug = normalizeMetricSlug(slugInput);
+  if (!slug) {
+    slug = normalizeMetricSlug(label) || existing.slug || `metric-${Date.now()}`;
+  }
+
+  const unitInput = (formData.get('unit') as string | null)?.trim() ?? null;
+  const sortOrderRaw = (formData.get('sort_order') as string | null)?.trim() ?? '';
+  const sortOrderParsed = Number(sortOrderRaw);
+  const sortOrder = Number.isFinite(sortOrderParsed) ? sortOrderParsed : existing.sort_order ?? 0;
+  const isActive = formData.get('is_active') === 'on';
+
+  const { error: updateError } = await portalClient
+    .from('metric_catalog')
+    .update({
+      slug,
+      label,
+      unit: unitInput,
+      sort_order: sortOrder,
+      is_active: isActive,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', metricId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'metric_definition_updated',
+    entityType: 'metric_catalog',
+    entityId: metricId,
+    meta: { slug, label, unit: unitInput, sort_order: sortOrder, is_active: isActive },
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/portal/progress');
+  revalidatePath('/stats');
+  revalidatePath('/portal/ideas');
+  revalidatePath('/api/portal/metrics');
+}
+
+async function deleteMetricDefinition(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  const metricId = formData.get('metric_id') as string | null;
+
+  if (!actorProfileId || !metricId) {
+    throw new Error('Metric context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage metrics.');
+  }
+
+  const { error: deleteError } = await portalClient
+    .from('metric_catalog')
+    .delete()
+    .eq('id', metricId);
+
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'metric_definition_deleted',
+    entityType: 'metric_catalog',
+    entityId: metricId,
+    meta: {},
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/portal/progress');
+  revalidatePath('/stats');
+  revalidatePath('/portal/ideas');
+  revalidatePath('/api/portal/metrics');
+}
+
+async function createOrganization(formData: FormData) {
+  'use server';
 
     const supa = await createSupabaseServerClient();
     const portalClient = supa.schema('portal');
@@ -880,19 +1186,31 @@ export default async function CommandCenterAdminPage() {
               <Input id="metric_date" name="metric_date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="metric_key">Metric key</Label>
-              <Select name="metric_key" defaultValue="outdoor_count" required>
-                <SelectTrigger id="metric_key">
-                  <SelectValue />
+              <Label htmlFor="metric_id">Metric</Label>
+              <Select
+                name="metric_id"
+                defaultValue={activeMetricDefinitions[0]?.id ?? ''}
+                required
+                disabled={!activeMetricDefinitions.length}
+              >
+                <SelectTrigger id="metric_id">
+                  <SelectValue
+                    placeholder={
+                      activeMetricDefinitions.length ? 'Select metric' : 'No metrics available'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {METRIC_OPTIONS.map((option) => (
-                    <SelectItem key={option.key} value={option.key}>
-                      {option.label}
+                  {activeMetricDefinitions.map((definition) => (
+                    <SelectItem key={definition.id} value={definition.id}>
+                      {definition.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {!activeMetricDefinitions.length ? (
+                <p className="text-xs text-muted">Add a metric below before recording values.</p>
+              ) : null}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="metric_status">Status</Label>
@@ -926,12 +1244,131 @@ export default async function CommandCenterAdminPage() {
               <Label htmlFor="notes">Notes</Label>
               <Textarea id="notes" name="notes" rows={3} placeholder="Context for this measurement" />
             </div>
-            <Button type="submit" className="justify-self-start">
+            <Button type="submit" className="justify-self-start" disabled={!activeMetricDefinitions.length}>
               Save metric
             </Button>
           </form>
         </CardContent>
       </Card>
+      {isAdmin ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage metrics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-muted">Add metric</h3>
+              <form
+                action={createMetricDefinition}
+                className="grid gap-4 rounded-lg border border-outline/20 bg-surface-container p-4 md:grid-cols-5"
+              >
+                <input type="hidden" name="actor_profile_id" value={profile.id} />
+                <div className="md:col-span-2">
+                  <Label htmlFor="new_metric_label">Label</Label>
+                  <Input id="new_metric_label" name="label" required maxLength={120} placeholder="e.g. Outreach coverage" />
+                </div>
+                <div>
+                  <Label htmlFor="new_metric_slug">Slug (optional)</Label>
+                  <Input id="new_metric_slug" name="slug" placeholder="outreach-coverage" />
+                </div>
+                <div>
+                  <Label htmlFor="new_metric_unit">Unit (optional)</Label>
+                  <Input id="new_metric_unit" name="unit" placeholder="%, people, kits" />
+                </div>
+                <div>
+                  <Label htmlFor="new_metric_sort">Sort order</Label>
+                  <Input id="new_metric_sort" name="sort_order" type="number" placeholder="10" />
+                </div>
+                <div className="flex items-center gap-2 md:col-span-2">
+                  <Checkbox id="new_metric_active" name="is_active" defaultChecked />
+                  <Label htmlFor="new_metric_active" className="text-sm font-medium text-on-surface">
+                    Active
+                  </Label>
+                </div>
+                <div className="md:col-span-5 flex justify-end">
+                  <Button type="submit">Add metric</Button>
+                </div>
+              </form>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-muted">Existing metrics</h3>
+              {metricDefinitions.length ? (
+                <div className="space-y-3">
+                  {metricDefinitions.map((definition) => (
+                    <form
+                      key={definition.id}
+                      action={updateMetricDefinition}
+                      className="grid gap-4 rounded-lg border border-outline/20 p-4 md:grid-cols-6"
+                    >
+                      <input type="hidden" name="actor_profile_id" value={profile.id} />
+                      <input type="hidden" name="metric_id" value={definition.id} />
+                      <div className="md:col-span-2">
+                        <Label htmlFor={`metric-label-${definition.id}`}>Label</Label>
+                        <Input
+                          id={`metric-label-${definition.id}`}
+                          name="label"
+                          defaultValue={definition.label}
+                          required
+                          maxLength={120}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor={`metric-slug-${definition.id}`}>Slug</Label>
+                        <Input
+                          id={`metric-slug-${definition.id}`}
+                          name="slug"
+                          defaultValue={definition.slug}
+                          maxLength={120}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`metric-unit-${definition.id}`}>Unit</Label>
+                        <Input
+                          id={`metric-unit-${definition.id}`}
+                          name="unit"
+                          defaultValue={definition.unit ?? ''}
+                          maxLength={40}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`metric-sort-${definition.id}`}>Sort order</Label>
+                        <Input
+                          id={`metric-sort-${definition.id}`}
+                          name="sort_order"
+                          type="number"
+                          defaultValue={definition.sort_order}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`metric-active-${definition.id}`}
+                          name="is_active"
+                          defaultChecked={definition.is_active}
+                        />
+                        <Label htmlFor={`metric-active-${definition.id}`} className="text-sm font-medium text-on-surface">
+                          Active
+                        </Label>
+                      </div>
+                      <div className="md:col-span-6 flex flex-wrap items-center justify-end gap-3">
+                        <Button type="submit">Save</Button>
+                        <Button
+                          formAction={deleteMetricDefinition}
+                          variant="outline"
+                          type="submit"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </form>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted">No metrics configured yet.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Register partner organization</CardTitle>
@@ -1431,25 +1868,43 @@ export default async function CommandCenterAdminPage() {
           </CardContent>
         </Card>
       ) : null}
-      {recentMetrics?.length ? (
+      {recentMetricEntries.length ? (
         <Card>
           <CardHeader>
             <CardTitle>Recent submissions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              {recentMetrics.map((item) => (
-                <div key={`${item.metric_date}-${item.metric_key}`} className="flex items-center justify-between rounded border border-slate-100 p-2 dark:border-slate-800">
-                  <div>
-                    <p className="font-medium">{METRIC_OPTIONS.find((option) => option.key === item.metric_key)?.label ?? item.metric_key}</p>
-                    <p className="text-xs text-muted">{item.metric_date}</p>
+              {recentMetricEntries.map((item) => {
+                const definition = item.metric_catalog;
+                const label = definition?.label ?? definition?.slug ?? 'Metric';
+                const status = item.value_status as Database['portal']['Enums']['metric_value_status'];
+                const unit = definition?.unit ?? null;
+                const value =
+                  status === 'reported' && typeof item.value === 'number'
+                    ? `${formatMetricNumber(item.value)}${unit ? ` ${unit}` : ''}`
+                    : 'Pending update';
+
+                return (
+                  <div
+                    key={`${item.metric_date}-${item.metric_id}`}
+                    className="flex items-center justify-between rounded border border-slate-100 p-2 dark:border-slate-800"
+                  >
+                    <div>
+                      <p className="font-medium">{label}</p>
+                      <p className="text-xs text-muted">
+                        {status === 'pending'
+                          ? `Pending update • ${formatMetricDate(item.metric_date)}`
+                          : formatMetricDate(item.metric_date)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{value}</p>
+                      {item.source ? <p className="text-xs text-muted">{item.source}</p> : null}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{item.value}</p>
-                    {item.source && <p className="text-xs text-muted">{item.source}</p>}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
