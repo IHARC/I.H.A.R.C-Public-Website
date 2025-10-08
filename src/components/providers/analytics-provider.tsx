@@ -31,86 +31,31 @@ export function AnalyticsProvider({
   respectDNT = false,
   enabled = true,
 }: AnalyticsProviderProps) {
-  type AnalyticsWindow = Window & {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-    __gaInitialized?: boolean;
-    __gaLastPagePath?: string;
-  };
-
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
-  const [canTrack, setCanTrack] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [trackingAllowed, setTrackingAllowed] = useState(false);
   const lastTrackedPathRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled || !measurementId) {
-      lastTrackedPathRef.current = null;
-      setCanTrack(false);
-      setInitialized(false);
+      setTrackingAllowed(false);
       return;
     }
 
     if (respectDNT && isDoNotTrackEnabled()) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.debug('[analytics] Do Not Track enabled; scripts not loaded');
-      }
-      lastTrackedPathRef.current = null;
-      setCanTrack(false);
-      setInitialized(false);
+      setTrackingAllowed(false);
       return;
     }
 
-    lastTrackedPathRef.current = null;
-    setCanTrack(true);
+    setTrackingAllowed(true);
   }, [enabled, measurementId, respectDNT]);
 
   useEffect(() => {
-    if (!canTrack || !measurementId) {
+    if (!trackingAllowed || !measurementId || typeof window === 'undefined') {
       return;
     }
 
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const analyticsWindow = window as AnalyticsWindow;
-
-    if (analyticsWindow.__gaInitialized) {
-      setInitialized(true);
-      return;
-    }
-
-    analyticsWindow.dataLayer = analyticsWindow.dataLayer ?? [];
-    if (typeof analyticsWindow.gtag !== 'function') {
-      analyticsWindow.gtag = (...args: unknown[]) => {
-        analyticsWindow.dataLayer?.push(args);
-      };
-    }
-
-    analyticsWindow.gtag?.('js', new Date());
-    analyticsWindow.gtag?.('config', measurementId, {
-      anonymize_ip: true,
-      send_page_view: false,
-    });
-
-    analyticsWindow.__gaInitialized = true;
-    setInitialized(true);
-  }, [canTrack, measurementId]);
-
-  useEffect(() => {
-    if (!canTrack || !measurementId || !initialized) {
-      return;
-    }
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const analyticsWindow = window as AnalyticsWindow;
-    const previousPagePath = analyticsWindow.__gaLastPagePath;
     const pagePath = search ? `${pathname}?${search}` : pathname ?? '/';
 
     if (lastTrackedPathRef.current === pagePath) {
@@ -118,34 +63,28 @@ export function AnalyticsProvider({
     }
 
     lastTrackedPathRef.current = pagePath;
-
     const pageLocation = window.location.href;
     const pageTitle = document.title;
-    const referrerFromHistory =
-      previousPagePath && previousPagePath !== pagePath ? `${window.location.origin}${previousPagePath}` : null;
-    const pageReferrer = referrerFromHistory || document.referrer || null;
+
+    const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
 
     const payload = {
       page_location: pageLocation,
       page_path: pagePath,
       page_title: pageTitle,
-      ...(pageReferrer ? { page_referrer: pageReferrer } : {}),
     };
 
-    analyticsWindow.__gaLastPagePath = pagePath;
-
-    analyticsWindow.gtag?.('event', 'page_view', {
+    gtag?.('event', 'page_view', {
       page_location: pageLocation,
       page_path: pagePath,
       page_title: pageTitle,
       send_to: measurementId,
-      ...(pageReferrer ? { page_referrer: pageReferrer } : {}),
     });
 
     trackClientEvent('page_view', payload);
-  }, [canTrack, initialized, measurementId, pathname, search]);
+  }, [trackingAllowed, measurementId, pathname, search]);
 
-  if (!canTrack || !measurementId) {
+  if (!trackingAllowed || !measurementId) {
     return null;
   }
 
@@ -155,6 +94,18 @@ export function AnalyticsProvider({
         id="ga4-script"
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
         strategy="afterInteractive"
+      />
+      <Script
+        id="ga4-inline"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', ${JSON.stringify(measurementId)}, { anonymize_ip: true, send_page_view: false });
+          `,
+        }}
       />
     </>
   );
