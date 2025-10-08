@@ -13,6 +13,7 @@ const marketingLinks = [
   { href: '/get-help', label: 'Get Help' },
   { href: '/news', label: 'News' },
   { href: '/emergency', label: 'Emergency' },
+  { href: '/after-the-declaration', label: 'After the Declaration' },
 ];
 
 export async function TopNav() {

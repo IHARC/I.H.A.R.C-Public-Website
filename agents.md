@@ -2,6 +2,17 @@
 - The portal is the public-facing IHARC Portal MVP, centring compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
 - Content must emphasise collaboration, dignity, and community care. Avoid deficit framing and maintain trust with service users, neighbours, and agency partners.
 - Every iteration advances two intents: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative IHARC Portal where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
+- Always refer to the organization as the **Integrated Homelessness and Addictions Response Centre (IHARC)**. Use “and” (not “&”) in formal copy, metadata, and footers.
+
+### Marketing Content Guardrails
+- **Get Help** must list verified numbers only: 2-1-1, Transition House coordinated entry **905-376-9562**, 9-8-8, and NHH Community Mental Health Services **905-377-9891**. Note that the IHARC text line is under maintenance—direct people to `outreach@iharc.ca` instead. Keep the Good Samaritan Drug Overdose Act reminder and RAAM clinic hours (Tuesdays, 12–3 pm at 1011 Elgin St. W.).
+- Repeat the emergency call-to-action “In an emergency call 911” wherever urgent supports are listed.
+- Footer copy on every page: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” plus the descriptive line “Inclusive, accessible, community-first data platform.”
+- Site-wide `<title>` and meta description:  
+  - `IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County`  
+  - `IHARC coordinates housing stability and overdose response with neighbours, agencies and local government in Northumberland County. Co-design plans, track data, get help.`
+- Emergency brief language must pluralise petition signatures correctly (“1 neighbour has signed” vs “0/2+ neighbours have signed”) and link to press coverage for context.
+- When referencing overdose response, remind readers to call 911 immediately and note Good Samaritan protections.
 
 ## Product Snapshot
 - `/portal/ideas` is the public proposal queue with 1-2-3 workflow guidance, guest tooltips for locked actions, authenticated comments with enforced types, and the six-step submit form at `/portal/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submissions require evidence and at least one metric.

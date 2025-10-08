@@ -4,14 +4,23 @@ import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { PetitionSignForm, type PetitionFormState } from '@/components/portal/petition/petition-sign-form';
+import { PetitionGuestSignForm } from '@/components/portal/petition/petition-guest-sign-form';
 import { PetitionPostSignActions } from '@/components/site/petition-post-sign-actions';
 import { signPetition } from '@/lib/actions/sign-petition';
+import { signPetitionGuest, type GuestPetitionFormState } from '@/lib/actions/sign-petition-guest';
 import type { Database } from '@/types/supabase';
 import { deriveSignerDefaults, type PetitionSignerDefaults } from '@/lib/petition/signature';
 
 export const dynamic = 'force-dynamic';
 
 const numberFormatter = new Intl.NumberFormat('en-CA');
+const dateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 const DEFAULT_PETITION_TITLE = 'Support the declaration — IHARC';
 const DEFAULT_PETITION_DESCRIPTION =
@@ -176,66 +185,66 @@ type PetitionPageContentProps = {
 
 function PetitionPageContent({ petition, existingSignature, isAuthenticated, viewerProfile, signerDefaults }: PetitionPageContentProps) {
   const signatureCount = petition.signature_count ?? 0;
-  const target = petition.target_signatures;
-  const progressPercentage = typeof target === 'number' && target > 0 ? Math.min(100, Math.round((signatureCount / target) * 100)) : null;
-  const descriptionParagraphs: string[] = petition.description
-    ? petition.description
-        .split('\n')
-        .map((paragraph) => paragraph.trim())
-        .filter((paragraph): paragraph is string => paragraph.length > 0)
-    : [];
+  const target = typeof petition.target_signatures === 'number' && petition.target_signatures > 0 ? petition.target_signatures : null;
+  const signatureProgressText = target
+    ? `${numberFormatter.format(signatureCount)} / ${numberFormatter.format(target)} neighbours`
+    : `${numberFormatter.format(signatureCount)} neighbours`;
+  const lastUpdatedAt = petition.last_signed_at ?? petition.updated_at ?? petition.created_at ?? null;
+  const lastUpdatedText = lastUpdatedAt ? dateTimeFormatter.format(new Date(lastUpdatedAt)) : null;
+  const signedAt = existingSignature?.created_at ?? viewerProfile?.petition_signed_at ?? null;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-12 text-on-surface">
       <header className="space-y-6 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">State of Emergency Petition</p>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{petition.title}</h1>
-        <p className="max-w-3xl text-lg text-on-surface/80">{petition.lede}</p>
-        {petition.hero_statement ? (
-          <p className="max-w-3xl text-base text-on-surface/80">{petition.hero_statement}</p>
-        ) : null}
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          Add your name: call on Cobourg to declare a municipal State of Emergency
+        </h1>
+        <div className="space-y-4 text-base text-on-surface/80">
+          <p>
+            Declaring a municipal State of Emergency is <strong>not a silver bullet</strong>—it’s the starting line. It formally
+            recognizes that homelessness and addiction have reached emergency levels and that Cobourg must activate a{' '}
+            <strong>coordinated emergency response</strong> under its existing emergency plan.
+          </p>
+          <p>
+            A declaration won’t fix everything overnight, but it lets everyone—Town, agencies, and community—operate under one
+            structure with clear direction and accountability.
+          </p>
+        </div>
+        <p className="text-lg font-semibold text-error/90 sm:text-xl">
+          <span className="font-bold">Every day that passes is another day this crisis goes unmanaged.</span> Add your name to
+          call for an organized, transparent response that replaces confusion and finger-pointing with coordination and
+          measurable progress.
+        </p>
       </header>
 
-      <section className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">Why this petition matters</h2>
-          <p className="mt-2 text-sm text-on-surface/70">
-            Every signature signals that neighbours expect compassionate, transparent housing and overdose supports. Moderators log updates so the community can see how commitments move forward.
-          </p>
-          {petition.pledge_statement ? (
-            <p className="mt-4 rounded-2xl bg-surface-container px-5 py-4 text-sm text-on-surface">
-              {petition.pledge_statement}
-            </p>
+      <section className="flex flex-col gap-4 rounded-3xl border border-outline/15 bg-surface-container p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          href="#sign-petition"
+          className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-on-primary transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+        >
+          Sign Now
+        </Link>
+        <p className="text-sm text-on-surface">
+          <span className="font-semibold text-on-surface">{signatureProgressText}</span>
+          {lastUpdatedText ? (
+            <>
+              <span aria-hidden className="mx-2 text-on-surface/60">
+                •
+              </span>
+              <span className="font-semibold text-on-surface">Last updated {lastUpdatedText}</span>
+            </>
           ) : null}
-        </div>
-        <div className="rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-on-surface/60">Signatures recorded</h2>
-          <p className="mt-3 text-4xl font-bold text-on-surface">{numberFormatter.format(signatureCount)}</p>
-          {typeof target === 'number' && target > 0 ? (
-            <p className="text-sm text-on-surface/70">Goal: {numberFormatter.format(target)} neighbours</p>
-          ) : (
-            <p className="text-sm text-on-surface/70">Goal: keep the declaration moving with public backing</p>
-          )}
-          {progressPercentage !== null ? (
-            <div className="mt-4">
-              <div className="h-2 w-full overflow-hidden rounded-full bg-outline/10">
-                <div
-                  className="h-full rounded-full bg-primary transition-[width]"
-                  style={{ width: `${progressPercentage}%` }}
-                  aria-hidden
-                />
-              </div>
-              <p className="mt-1 text-xs font-medium text-on-surface/60">{progressPercentage}% of the target reached</p>
-            </div>
-          ) : null}
-        </div>
+        </p>
       </section>
 
-      <section className="space-y-4 rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
+      <section id="sign-petition" className="space-y-5 rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
         <div className="space-y-2 text-balance">
-          <h2 className="text-2xl font-semibold">Add your name</h2>
+          <h2 className="text-2xl font-semibold">Sign the petition</h2>
           <p className="text-sm text-on-surface/70">
-            Signing is free and uses the same secure login as the collaboration portal. After you sign you can join conversations on ideas and plans without creating another account.
+            Signing is free and uses the same secure login as the collaboration portal. If you’d rather not create an account,
+            add your name using the secure email option below. In an emergency call 911 and stay with the person until help
+            arrives—the Good Samaritan Drug Overdose Act protects anyone calling for medical support during an overdose.
           </p>
         </div>
         <PetitionSignSection
@@ -245,45 +254,148 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
           isAuthenticated={isAuthenticated}
           signerDefaults={signerDefaults}
         />
-        <div className="text-xs text-on-surface/60">
-          <p>
-            Need to review the declaration first? <Link href="/emergency" className="text-primary underline">Read the brief</Link>.
-          </p>
-        </div>
       </section>
 
-      {descriptionParagraphs.length ? (
-        <section className="space-y-4 text-balance">
-          <h2 className="text-2xl font-semibold">What the declaration commits to</h2>
-          <div className="space-y-3 text-base text-on-surface/80">
-            {descriptionParagraphs.map((paragraph, index) => (
-              <p key={`${index}-${paragraph.slice(0, 8)}`}>{paragraph}</p>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <section className="space-y-4 text-balance">
+        <h2 className="text-2xl font-semibold">What this declaration does</h2>
+        <ul className="space-y-3 text-base text-on-surface/80">
+          <li>
+            Activates the <strong>Town’s emergency management framework</strong>, using the proven Incident Management System
+            (IMS) model
+          </li>
+          <li>
+            Unifies municipal departments, health, housing, and community supports under <strong>one coordinated plan</strong>
+          </li>
+          <li>
+            Establishes a clear <strong>command structure</strong> with defined roles and public reporting
+          </li>
+          <li>
+            Commits to <strong>open communication</strong>, shared data, and plain-language updates
+          </li>
+          <li>Treats homelessness and addiction with the same seriousness as any other emergency</li>
+        </ul>
+      </section>
 
-      <section className="rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm text-sm text-on-surface/70">
-        <p>
-          After signing you will receive a confirmation message using the email or phone number you share. Moderators may
-          contact petition signers about upcoming collaboration sessions only if you opt in. Your name is stored securely
-          and only visible to portal moderators.
+      <section className="space-y-4 text-balance">
+        <h2 className="text-2xl font-semibold">What this declaration does not do</h2>
+        <ul className="space-y-3 text-base text-on-surface/80">
+          <li>It does <strong>not</strong> create new enforcement powers</li>
+          <li>It does <strong>not</strong> create new spending powers</li>
+          <li>It does <strong>not</strong> solve the crisis by itself</li>
+        </ul>
+        <p className="text-base text-on-surface/80">
+          It sets the stage for coordination—so decisions, data, and people finally move in the same direction.
         </p>
-        {(() => {
-          const signedAt = existingSignature?.created_at ?? viewerProfile?.petition_signed_at;
-          if (!signedAt) return null;
-          return (
-            <p className="mt-3 text-on-surface">
-              You signed this petition on{' '}
-              {new Date(signedAt).toLocaleDateString('en-CA', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-              .
-            </p>
-          );
-        })()}
+      </section>
+
+      <section className="space-y-4 text-balance">
+        <h2 className="text-2xl font-semibold">What comes next</h2>
+        <p className="text-base text-on-surface/80">
+          After the declaration, the Town can immediately stand up a unified <strong>Incident Management Team (IMT)</strong> to
+          coordinate the local response. That team can draw on the experience and infrastructure already operating in the
+          community—including IHARC’s outreach systems, data tools, and collaboration platform—to accelerate progress and
+          maintain transparency.
+        </p>
+        <h3 className="text-lg font-semibold text-on-surface">Key early actions include:</h3>
+        <ul className="space-y-3 text-base text-on-surface/80">
+          <li>
+            Standing up a <strong>Local Emergency Operations Group</strong> using the IMS model
+          </li>
+          <li>
+            Publishing a <strong>clear Emergency Response Plan</strong> with short-term objectives and public metrics
+          </li>
+          <li>
+            Launching a <strong>public dashboard</strong> to track progress and outcomes
+          </li>
+          <li>
+            Drawing ideas from the <strong>IHARC Collaboration Portal</strong>, where residents, front-line workers, and
+            agencies already propose and iterate local solutions
+          </li>
+          <li>
+            Establishing a <strong>predictable reporting cycle</strong> for Council and the public
+          </li>
+        </ul>
+        <p className="text-base font-medium text-on-surface">
+          A declaration doesn’t end the crisis—it’s how we begin managing it properly.
+        </p>
+      </section>
+
+      <section className="space-y-4 text-balance">
+        <h2 className="text-2xl font-semibold">Privacy and verification</h2>
+        <p className="text-base text-on-surface/80">
+          Each signature is verified by email to protect against spam. You can choose to display your full name or initials on
+          the public list. We collect only your name, email, and postal code to verify local support. Your email is never shared,
+          and you can remove your signature at any time.
+        </p>
+        <p className="text-base text-on-surface/80">
+          If you witness an overdose, call 911 immediately. The Good Samaritan Drug Overdose Act protects anyone seeking medical
+          help during an overdose.
+        </p>
+        {signedAt ? (
+          <p className="text-base text-on-surface">
+            You signed this petition on{' '}
+            {new Date(signedAt).toLocaleDateString('en-CA', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+            .
+          </p>
+        ) : null}
+      </section>
+
+      <section className="space-y-4 text-balance">
+        <h2 className="text-2xl font-semibold">FAQ</h2>
+        <dl className="space-y-6 text-base text-on-surface/80">
+          <div className="space-y-2">
+            <dt className="font-semibold text-on-surface">What is a municipal State of Emergency?</dt>
+            <dd>
+              Under Ontario’s <em>Emergency Management and Civil Protection Act (EMCPA)</em>, a mayor can declare a local
+              emergency to activate the Town’s emergency plan. It’s a coordination tool—not an expansion of authority.
+            </dd>
+          </div>
+          <div className="space-y-2">
+            <dt className="font-semibold text-on-surface">Why is this needed?</dt>
+            <dd>
+              Because fragmented responses have failed. This declaration creates a structure where agencies, data, and decisions
+              align—and where results are publicly tracked.
+            </dd>
+          </div>
+          <div className="space-y-2">
+            <dt className="font-semibold text-on-surface">What happens after it’s declared?</dt>
+            <dd>
+              The Town establishes an <strong>Incident Management Team (IMT)</strong> and begins executing a unified{' '}
+              <strong>Emergency Response Plan</strong>. Existing community systems, like IHARC’s outreach and collaboration
+              infrastructure, plug into that structure immediately to speed communication and coordination. See{' '}
+              <Link href="/after-the-declaration" className="text-primary underline">
+                After the Declaration
+              </Link>{' '}
+              for the roadmap.
+            </dd>
+          </div>
+          <div className="space-y-2">
+            <dt className="font-semibold text-on-surface">Does this change police or bylaw powers?</dt>
+            <dd>No. It’s about coordination, not enforcement.</dd>
+          </div>
+          <div className="space-y-2">
+            <dt className="font-semibold text-on-surface">How will the public stay informed?</dt>
+            <dd>
+              Through <strong>weekly updates</strong>, an open dashboard, and transparent timelines showing what’s being done
+              and who’s responsible.
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="space-y-3 rounded-3xl border border-outline/15 bg-surface-container p-6 text-balance text-base text-on-surface/80">
+        <p className="text-lg font-semibold text-on-surface">Closing message</p>
+        <p>
+          A State of Emergency isn’t about panic—it’s about leadership, structure, and honesty. Cobourg has the people,
+          knowledge, and tools to respond effectively. What’s missing is the framework to bring them together.
+        </p>
+        <p className="font-semibold text-on-surface">
+          Add your name today—because the absence of coordination is the real emergency.
+        </p>
       </section>
     </div>
   );
@@ -302,24 +414,46 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
   const petitionUrl = `${APP_URL}/petition`;
 
   if (!isAuthenticated) {
+    const handleGuestSign = async (
+      prevState: GuestPetitionFormState,
+      formData: FormData,
+    ): Promise<GuestPetitionFormState> => {
+      'use server';
+
+      return signPetitionGuest(formData, {
+        petitionId: petition.id,
+        petitionSlug: petition.slug,
+        revalidatePaths: [petitionPath],
+      });
+    };
+
     return (
-      <div className="space-y-4 rounded-2xl border border-outline/15 bg-surface-container p-5">
-        <p className="text-sm text-on-surface">
-          Create a free account or sign in with your existing portal credentials to add your name to the petition.
-        </p>
-        <div className="flex flex-wrap gap-3 text-sm font-semibold">
-          <Link
-            href={`/register?next=${encodeURIComponent(petitionPath)}`}
-            className="rounded-full bg-primary px-5 py-2 text-on-primary transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
-          >
-            Create an account
-          </Link>
-          <Link
-            href={`/login?next=${encodeURIComponent(petitionPath)}`}
-            className="rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
-          >
-            Sign in
-          </Link>
+      <div className="space-y-5">
+        <div className="space-y-4 rounded-2xl border border-outline/15 bg-surface-container p-5">
+          <p className="text-sm text-on-surface">
+            Create a free account or sign in with your existing portal credentials to add your name to the petition. You
+            can follow ideas, comment on plans, and receive updates when logged in.
+          </p>
+          <div className="flex flex-wrap gap-3 text-sm font-semibold">
+            <Link
+              href={`/register?next=${encodeURIComponent(petitionPath)}`}
+              className="rounded-full bg-primary px-5 py-2 text-on-primary transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+            >
+              Create an account
+            </Link>
+            <Link
+              href={`/login?next=${encodeURIComponent(petitionPath)}`}
+              className="rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+            >
+              Sign in
+            </Link>
+          </div>
+          <p className="text-xs text-on-surface/60">
+            Prefer not to create an account? Use the secure email option below. In an emergency call 911.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-primary/20 bg-surface-container p-5">
+          <PetitionGuestSignForm action={handleGuestSign} petitionId={petition.id} />
         </div>
       </div>
     );
