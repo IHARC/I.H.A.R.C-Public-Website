@@ -149,10 +149,12 @@ const MYTH_STATUS_ENTRIES = Object.entries(MYTH_STATUS_CONFIG) as Array<
   [MythStatus, (typeof MYTH_STATUS_CONFIG)[MythStatus]]
 >;
 
+type AdminPageSearchParams = Record<string, string | string[] | undefined>;
+
 export default async function CommandCenterAdminPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<AdminPageSearchParams>;
 }) {
   const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
@@ -170,9 +172,10 @@ export default async function CommandCenterAdminPage({
   }
 
   const isAdmin = profile.role === 'admin';
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const normalizedSearchParams: Record<string, string> = {};
-  if (searchParams) {
-    for (const [key, value] of Object.entries(searchParams)) {
+  if (resolvedSearchParams) {
+    for (const [key, value] of Object.entries(resolvedSearchParams)) {
       if (typeof value === 'string') {
         normalizedSearchParams[key] = value;
       } else if (Array.isArray(value) && value[0]) {
