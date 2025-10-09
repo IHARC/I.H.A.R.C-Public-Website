@@ -126,6 +126,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      myth_busting_entries: {
+        Row: {
+          analysis: string;
+          created_at: string;
+          fact_statement: string;
+          id: string;
+          is_published: boolean;
+          myth_statement: string;
+          order_index: number;
+          slug: string;
+          sources: Json;
+          status: Database["public"]["Enums"]["myth_truth_status"];
+          tags: string[];
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          analysis: string;
+          created_at?: string;
+          fact_statement: string;
+          id?: string;
+          is_published?: boolean;
+          myth_statement: string;
+          order_index?: number;
+          slug: string;
+          sources?: Json;
+          status?: Database["public"]["Enums"]["myth_truth_status"];
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          analysis?: string;
+          created_at?: string;
+          fact_statement?: string;
+          id?: string;
+          is_published?: boolean;
+          myth_statement?: string;
+          order_index?: number;
+          slug?: string;
+          sources?: Json;
+          status?: Database["public"]["Enums"]["myth_truth_status"];
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       n8n_chat_histories: {
         Row: {
           id: number;
@@ -772,6 +820,12 @@ export type Database = {
         | "moderate"
         | "routine"
         | "wellness";
+      myth_truth_status:
+        | "true"
+        | "false"
+        | "partially_true"
+        | "context_dependent"
+        | "needs_more_evidence";
       organization_service_type_enum:
         | "Addiction"
         | "Crisis Support"

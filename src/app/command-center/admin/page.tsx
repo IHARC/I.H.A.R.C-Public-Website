@@ -8,6 +8,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,16 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import {
+  MYTH_STATUS_BADGE_STYLES,
+  MYTH_STATUS_CONFIG,
+  normalizeMythSlug,
+  parseMythSourcesInput,
+  parseMythTagsInput,
+  mythSourcesToTextarea,
+  isValidMythStatus,
+  type MythStatus,
+} from '@/lib/myth-busting';
 import type { Database } from '@/types/supabase';
 
 const GOVERNMENT_ROLE_TYPES: Database['portal']['Enums']['government_role_type'][] = ['staff', 'politician'];
@@ -120,7 +131,9 @@ type MetricDailyRow = Database['portal']['Tables']['metric_daily']['Row'] & {
   metric_catalog: MetricDefinition | MetricDefinition[] | null;
 };
 
-type AdminTabValue = 'metrics' | 'organizations' | 'invitations' | 'affiliations' | 'members' | 'system';
+type MythEntryRow = Database['public']['Tables']['myth_busting_entries']['Row'];
+
+type AdminTabValue = 'metrics' | 'organizations' | 'invitations' | 'affiliations' | 'myths' | 'members' | 'system';
 type AdminTab = { value: AdminTabValue; label: string; badge?: string | number };
 
 function resolveMetricCatalogRelation(
@@ -131,6 +144,10 @@ function resolveMetricCatalogRelation(
   }
   return relation;
 }
+
+const MYTH_STATUS_ENTRIES = Object.entries(MYTH_STATUS_CONFIG) as Array<
+  [MythStatus, (typeof MYTH_STATUS_CONFIG)[MythStatus]]
+>;
 
 export default async function CommandCenterAdminPage({
   searchParams,
@@ -267,10 +284,23 @@ export default async function CommandCenterAdminPage({
     }
   }
 
+  const mythEntries: MythEntryRow[] = isAdmin
+    ? ((
+        await supabase
+          .from('myth_busting_entries')
+          .select(
+            'id, slug, title, myth_statement, fact_statement, status, analysis, sources, tags, order_index, is_published, created_at, updated_at',
+          )
+          .order('order_index', { ascending: false })
+          .order('created_at', { ascending: false })
+      ).data as MythEntryRow[] | null) ?? []
+    : [];
+
   const pendingInviteCount = recentInvites?.filter((invite) => invite.status === 'pending').length ?? 0;
   const verifiedOrganizationCount = organizationsList.filter((org) => org.verified).length;
   const totalOrganizations = organizationsList.length;
   const recentMetricCount = recentMetricEntries.length;
+  const mythEntriesCount = mythEntries.length;
 
   const baseTabs: AdminTab[] = [
     { value: 'metrics', label: 'Community metrics', badge: recentMetricCount > 0 ? recentMetricCount : undefined },
@@ -293,6 +323,11 @@ export default async function CommandCenterAdminPage({
           value: 'affiliations',
           label: 'Affiliation reviews',
           badge: pendingAffiliations && pendingAffiliations.length > 0 ? pendingAffiliations.length : undefined,
+        },
+        {
+          value: 'myths',
+          label: 'Myth busting library',
+          badge: mythEntriesCount > 0 ? mythEntriesCount : undefined,
         },
         { value: 'members', label: 'Members' },
         { value: 'system', label: 'System settings' },
@@ -677,6 +712,309 @@ async function deleteMetricDefinition(formData: FormData) {
   revalidatePath('/stats');
   revalidatePath('/portal/ideas');
   revalidatePath('/api/portal/metrics');
+}
+
+async function createMythEntry(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  if (!actorProfileId) {
+    throw new Error('Admin context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage myth busting entries.');
+  }
+
+  const title = (formData.get('title') as string | null)?.trim() ?? '';
+  const mythStatement = (formData.get('myth_statement') as string | null)?.trim() ?? '';
+  const factStatement = (formData.get('fact_statement') as string | null)?.trim() ?? '';
+  const analysis = (formData.get('analysis') as string | null)?.trim() ?? '';
+  const statusInput = (formData.get('status') as string | null)?.trim() ?? '';
+  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
+  const sourcesInput = (formData.get('sources') as string | null)?.trim() ?? '';
+  const tagsInput = (formData.get('tags') as string | null)?.trim() ?? '';
+  const orderInput = (formData.get('order_index') as string | null)?.trim() ?? '';
+  const isPublished = formData.get('is_published') === 'on';
+
+  if (!title) {
+    throw new Error('Headline is required.');
+  }
+  if (!mythStatement) {
+    throw new Error('Enter the myth statement you are addressing.');
+  }
+  if (!factStatement) {
+    throw new Error('Clarify the fact that responds to the myth.');
+  }
+  if (!analysis) {
+    throw new Error('Provide analysis so neighbours understand the context.');
+  }
+  if (!isValidMythStatus(statusInput)) {
+    throw new Error('Select a valid myth status.');
+  }
+  const status: MythStatus = statusInput;
+
+  let slug = normalizeMythSlug(slugInput);
+  if (!slug) {
+    slug = normalizeMythSlug(title) || `myth-${Date.now()}`;
+  }
+
+  const orderParsed = Number(orderInput);
+  let orderIndex = Number.isFinite(orderParsed) ? orderParsed : null;
+  if (orderIndex === null) {
+    const { data: maxOrder } = await supa
+      .from('myth_busting_entries')
+      .select('order_index')
+      .order('order_index', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    orderIndex = ((maxOrder?.order_index as number | undefined) ?? 0) + 10;
+  }
+
+  const sources = parseMythSourcesInput(sourcesInput);
+  const tags = parseMythTagsInput(tagsInput);
+
+  const { data: inserted, error: insertError } = await supa
+    .from('myth_busting_entries')
+    .insert({
+      slug,
+      title,
+      myth_statement: mythStatement,
+      fact_statement: factStatement,
+      status,
+      analysis,
+      sources: sources.map((source) => (source.url ? { label: source.label, url: source.url } : { label: source.label })),
+      tags,
+      order_index: orderIndex,
+      is_published: isPublished,
+    })
+    .select('id')
+    .maybeSingle();
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'myth_busting_entry_created',
+    entityType: 'myth_busting_entry',
+    entityId: inserted?.id ?? null,
+    meta: {
+      slug,
+      status,
+      order_index: orderIndex,
+      is_published: isPublished,
+      tags,
+    },
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/myth-busting');
+}
+
+async function updateMythEntry(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  const entryId = formData.get('entry_id') as string | null;
+
+  if (!actorProfileId || !entryId) {
+    throw new Error('Admin context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage myth busting entries.');
+  }
+
+  const { data: existingRaw, error: existingError } = await supa
+    .from('myth_busting_entries')
+    .select('slug, order_index')
+    .eq('id', entryId)
+    .maybeSingle();
+
+  const existing = (existingRaw as { slug: string; order_index: number } | null) ?? null;
+
+  if (existingError || !existing) {
+    throw new Error('Myth busting entry not found.');
+  }
+
+  const title = (formData.get('title') as string | null)?.trim() ?? '';
+  const mythStatement = (formData.get('myth_statement') as string | null)?.trim() ?? '';
+  const factStatement = (formData.get('fact_statement') as string | null)?.trim() ?? '';
+  const analysis = (formData.get('analysis') as string | null)?.trim() ?? '';
+  const statusInput = (formData.get('status') as string | null)?.trim() ?? '';
+  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
+  const sourcesInput = (formData.get('sources') as string | null)?.trim() ?? '';
+  const tagsInput = (formData.get('tags') as string | null)?.trim() ?? '';
+  const orderInput = (formData.get('order_index') as string | null)?.trim() ?? '';
+  const isPublished = formData.get('is_published') === 'on';
+
+  if (!title) {
+    throw new Error('Headline is required.');
+  }
+  if (!mythStatement) {
+    throw new Error('Enter the myth statement you are addressing.');
+  }
+  if (!factStatement) {
+    throw new Error('Clarify the fact that responds to the myth.');
+  }
+  if (!analysis) {
+    throw new Error('Provide analysis so neighbours understand the context.');
+  }
+  if (!isValidMythStatus(statusInput)) {
+    throw new Error('Select a valid myth status.');
+  }
+  const status: MythStatus = statusInput;
+
+  let slug = normalizeMythSlug(slugInput);
+  if (!slug) {
+    slug = normalizeMythSlug(title) || existing.slug || `myth-${Date.now()}`;
+  }
+
+  const orderParsed = Number(orderInput);
+  const orderIndex = Number.isFinite(orderParsed) ? orderParsed : existing.order_index ?? 0;
+
+  const sources = parseMythSourcesInput(sourcesInput);
+  const tags = parseMythTagsInput(tagsInput);
+
+  const { error: updateError } = await supa
+    .from('myth_busting_entries')
+    .update({
+      slug,
+      title,
+      myth_statement: mythStatement,
+      fact_statement: factStatement,
+      status,
+      analysis,
+      sources: sources.map((source) => (source.url ? { label: source.label, url: source.url } : { label: source.label })),
+      tags,
+      order_index: orderIndex,
+      is_published: isPublished,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', entryId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'myth_busting_entry_updated',
+    entityType: 'myth_busting_entry',
+    entityId: entryId,
+    meta: {
+      slug,
+      status,
+      order_index: orderIndex,
+      is_published: isPublished,
+      tags,
+    },
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/myth-busting');
+}
+
+async function deleteMythEntry(formData: FormData) {
+  'use server';
+
+  const supa = await createSupabaseServerClient();
+  const portalClient = supa.schema('portal');
+
+  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  const entryId = formData.get('entry_id') as string | null;
+
+  if (!actorProfileId || !entryId) {
+    throw new Error('Admin context is required.');
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supa.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const { data: actorProfile, error: actorProfileError } = await portalClient
+    .from('profiles')
+    .select('id, role, user_id')
+    .eq('id', actorProfileId)
+    .maybeSingle();
+
+  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to manage myth busting entries.');
+  }
+
+  const { data: existingRaw, error: existingError } = await supa
+    .from('myth_busting_entries')
+    .select('slug')
+    .eq('id', entryId)
+    .maybeSingle();
+
+  const existing = (existingRaw as { slug: string } | null) ?? null;
+
+  if (existingError || !existing) {
+    throw existingError ?? new Error('Myth busting entry not found.');
+  }
+
+  const { error: deleteError } = await supa.from('myth_busting_entries').delete().eq('id', entryId);
+
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  await logAuditEvent(supa, {
+    actorProfileId,
+    action: 'myth_busting_entry_deleted',
+    entityType: 'myth_busting_entry',
+    entityId: entryId,
+    meta: {
+      slug: existing.slug,
+    },
+  });
+
+  revalidatePath('/command-center/admin');
+  revalidatePath('/myth-busting');
 }
 
 async function createOrganization(formData: FormData) {
@@ -1525,6 +1863,271 @@ async function createOrganization(formData: FormData) {
       </Card>
     ) : null;
 
+  const manageMythEntriesCard = isAdmin ? (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Myth busting library</CardTitle>
+        <CardDescription>
+          Track common myths with collaborative evidence so neighbours receive accurate, strengths-based context.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        <section className="rounded-3xl border border-outline/20 bg-surface-container p-4 sm:p-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-on-surface">Add myth</h3>
+            <p className="text-sm text-on-surface/70">
+              Speak in plain language, reference verified data, and remind people to call 911 in emergencies. For sources, add one per line with an optional URL using
+              {' '}
+              <code className="rounded bg-surface px-1 py-0.5 text-xs">Source name | https://link</code>
+              .
+            </p>
+          </div>
+          <form action={createMythEntry} className="mt-4 space-y-6">
+            <input type="hidden" name="actor_profile_id" value={profile.id} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="new_myth_title">Headline</Label>
+                <Input id="new_myth_title" name="title" required maxLength={160} placeholder="e.g. Shelters turn people away every night" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new_myth_slug">Slug (optional)</Label>
+                <Input id="new_myth_slug" name="slug" maxLength={80} placeholder="shelter-capacity" />
+                <p className="text-xs text-muted">Leave blank to auto-generate.</p>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="new_myth_status">Status</Label>
+                <Select name="status" defaultValue="needs_more_evidence" required>
+                  <SelectTrigger id="new_myth_status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MYTH_STATUS_ENTRIES.map(([value, config]) => (
+                      <SelectItem key={value} value={value}>
+                        <div className="flex flex-col text-left">
+                          <span className="font-medium">{config.label}</span>
+                          <span className="text-xs text-on-surface/70">{config.helper}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new_myth_order">Display order</Label>
+                <Input id="new_myth_order" name="order_index" type="number" placeholder="Higher numbers float to the top" />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2 md:col-span-2">
+                <Label htmlFor="new_myth_statement">Myth statement</Label>
+                <Textarea id="new_myth_statement" name="myth_statement" rows={3} required maxLength={400} placeholder="State the misconception exactly as neighbours hear it." />
+              </div>
+              <div className="grid gap-2 md:col-span-2">
+                <Label htmlFor="new_myth_fact">Fact</Label>
+                <Textarea
+                  id="new_myth_fact"
+                  name="fact_statement"
+                  rows={3}
+                  required
+                  maxLength={400}
+                  placeholder="Provide the concise fact check, highlighting collaboration and care."
+                />
+              </div>
+              <div className="grid gap-2 md:col-span-2">
+                <Label htmlFor="new_myth_analysis">Analysis</Label>
+                <Textarea
+                  id="new_myth_analysis"
+                  name="analysis"
+                  rows={6}
+                  required
+                  placeholder="Share plain-language context, mention community supports, and reinforce Good Samaritan protections when relevant."
+                />
+              </div>
+              <div className="grid gap-2 md:col-span-2">
+                <Label htmlFor="new_myth_sources">Sources</Label>
+                <Textarea
+                  id="new_myth_sources"
+                  name="sources"
+                  rows={4}
+                  placeholder={`Shelter occupancy dashboard | https://example.ca\nCommunity responder notes`}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new_myth_tags">Tags (optional)</Label>
+                <Input id="new_myth_tags" name="tags" placeholder="housing, overdose, outreach" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="new_myth_published" name="is_published" />
+                <Label htmlFor="new_myth_published" className="text-sm">
+                  Publish to the marketing page
+                </Label>
+              </div>
+            </div>
+            <Button type="submit" className="justify-self-start">
+              Save myth entry
+            </Button>
+          </form>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-on-surface-variant">Edit existing entries</h3>
+          {mythEntries.length ? (
+            <div className="space-y-4">
+              {mythEntries.map((entry) => {
+                const statusConfig = MYTH_STATUS_CONFIG[entry.status];
+                const badgeStyle = MYTH_STATUS_BADGE_STYLES[entry.status];
+                const sourcesValue = mythSourcesToTextarea(entry.sources);
+                const tagsValue = (entry.tags ?? []).join(', ');
+
+                return (
+                  <details
+                    key={entry.id}
+                    className="group rounded-3xl border border-outline/20 bg-surface shadow-sm"
+                  >
+                    <summary className="flex cursor-pointer flex-col gap-2 px-4 py-3 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <p className="text-base font-semibold text-on-surface">{entry.title}</p>
+                          <p className="text-sm text-on-surface/70">{entry.myth_statement}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={badgeStyle.variant} className={cn('capitalize', badgeStyle.className)}>
+                            {statusConfig.label}
+                          </Badge>
+                          <Badge
+                            variant={entry.is_published ? 'secondary' : 'outline'}
+                            className={cn(entry.is_published ? '' : 'border-outline/40 text-on-surface/70')}
+                          >
+                            {entry.is_published ? 'Published to marketing' : 'Draft'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-on-surface/60">{statusConfig.helper}</p>
+                      </div>
+                      <span className="text-xs text-on-surface/60">
+                        Updated{' '}
+                        {new Date(entry.updated_at).toLocaleDateString('en-CA', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </summary>
+                    <div className="border-t border-outline/10 p-4 sm:p-6">
+                      <form action={updateMythEntry} className="space-y-6">
+                        <input type="hidden" name="actor_profile_id" value={profile.id} />
+                        <input type="hidden" name="entry_id" value={entry.id} />
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label htmlFor={`myth-title-${entry.id}`}>Headline</Label>
+                            <Input id={`myth-title-${entry.id}`} name="title" defaultValue={entry.title} required maxLength={160} />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor={`myth-slug-${entry.id}`}>Slug</Label>
+                            <Input id={`myth-slug-${entry.id}`} name="slug" defaultValue={entry.slug} maxLength={80} />
+                            <p className="text-xs text-muted">Used for anchor links in the marketing page.</p>
+                          </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label htmlFor={`myth-status-${entry.id}`}>Status</Label>
+                            <Select name="status" defaultValue={entry.status} required>
+                              <SelectTrigger id={`myth-status-${entry.id}`}>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {MYTH_STATUS_ENTRIES.map(([value, config]) => (
+                                  <SelectItem key={value} value={value}>
+                                    <div className="flex flex-col text-left">
+                                      <span className="font-medium">{config.label}</span>
+                                      <span className="text-xs text-on-surface/70">{config.helper}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor={`myth-order-${entry.id}`}>Display order</Label>
+                            <Input id={`myth-order-${entry.id}`} name="order_index" type="number" defaultValue={entry.order_index} />
+                          </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor={`myth-statement-${entry.id}`}>Myth statement</Label>
+                            <Textarea
+                              id={`myth-statement-${entry.id}`}
+                              name="myth_statement"
+                              rows={3}
+                              defaultValue={entry.myth_statement}
+                              required
+                              maxLength={400}
+                            />
+                          </div>
+                          <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor={`myth-fact-${entry.id}`}>Fact</Label>
+                            <Textarea
+                              id={`myth-fact-${entry.id}`}
+                              name="fact_statement"
+                              rows={3}
+                              defaultValue={entry.fact_statement}
+                              required
+                              maxLength={400}
+                            />
+                          </div>
+                          <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor={`myth-analysis-${entry.id}`}>Analysis</Label>
+                            <Textarea
+                              id={`myth-analysis-${entry.id}`}
+                              name="analysis"
+                              rows={6}
+                              defaultValue={entry.analysis}
+                              required
+                            />
+                          </div>
+                          <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor={`myth-sources-${entry.id}`}>Sources</Label>
+                            <Textarea
+                              id={`myth-sources-${entry.id}`}
+                              name="sources"
+                              rows={4}
+                              defaultValue={sourcesValue}
+                            />
+                          </div>
+                          <div className="grid gap-2 md:grid-cols-2 md:gap-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor={`myth-tags-${entry.id}`}>Tags</Label>
+                              <Input id={`myth-tags-${entry.id}`} name="tags" defaultValue={tagsValue} placeholder="housing, overdose" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Checkbox id={`myth-published-${entry.id}`} name="is_published" defaultChecked={entry.is_published} />
+                              <Label htmlFor={`myth-published-${entry.id}`} className="text-sm">
+                                Publish to the marketing page
+                              </Label>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-3 pt-2">
+                          <Button type="submit">Save changes</Button>
+                          <Button formAction={deleteMythEntry} variant="destructive" type="submit">
+                            Delete entry
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted">No myth entries yet. Use the form above to add one.</p>
+          )}
+        </section>
+      </CardContent>
+    </Card>
+  ) : null;
+
   const registerOrganizationCard = (
     <Card className="shadow-sm">
       <CardHeader>
@@ -2109,6 +2712,21 @@ async function createOrganization(formData: FormData) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted">Reach out to an administrator if you need an affiliation reviewed.</p>
+          </CardContent>
+        </Card>
+      );
+      break;
+    case 'myths':
+      tabBody = isAdmin ? (
+        <>{manageMythEntriesCard}</>
+      ) : (
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>Myth busting library</CardTitle>
+            <CardDescription>Only IHARC administrators can publish myth busting entries.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted">Reach out to an administrator if you need to update public myth busting copy.</p>
           </CardContent>
         </Card>
       );

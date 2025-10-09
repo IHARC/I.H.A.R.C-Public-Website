@@ -100,7 +100,9 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                 const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href);
 
                 return {
-                  ...link,
+                  type: 'link' as const,
+                  href: link.href,
+                  label: link.label,
                   isActive,
                 };
               }),
