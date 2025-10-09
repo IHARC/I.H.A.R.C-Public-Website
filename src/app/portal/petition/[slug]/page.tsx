@@ -249,6 +249,10 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
   const lastUpdatedAt = petition.last_signed_at ?? petition.updated_at ?? petition.created_at ?? null;
   const lastUpdatedText = lastUpdatedAt ? dateTimeFormatter.format(new Date(lastUpdatedAt)) : null;
   const signedAt = existingSignature?.created_at ?? viewerProfile?.petition_signed_at ?? null;
+  const pledgeStatement = petition.pledge_statement?.trim() ?? '';
+  const pledgeParagraphs = pledgeStatement
+    ? pledgeStatement.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean)
+    : [];
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-12 text-on-surface">
@@ -364,6 +368,19 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
           </div>
         </div>
       </section>
+
+      {pledgeParagraphs.length > 0 ? (
+        <section className="space-y-5 rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
+          <div className="space-y-2 text-balance">
+            <h2 className="text-2xl font-semibold">Community pledge</h2>
+            <div className="space-y-3 text-base text-on-surface/80">
+              {pledgeParagraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section id="sign-petition" className="space-y-5 rounded-3xl border border-outline/15 bg-surface p-6 shadow-sm">
         <div className="space-y-2 text-balance">
