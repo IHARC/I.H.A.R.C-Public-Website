@@ -1,3 +1,5 @@
+import { Fragment, type ReactNode } from 'react';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
@@ -5,13 +7,23 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { NO_ORGANIZATION_VALUE, PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
 
@@ -108,6 +120,9 @@ type MetricDailyRow = Database['portal']['Tables']['metric_daily']['Row'] & {
   metric_catalog: MetricDefinition | MetricDefinition[] | null;
 };
 
+type AdminTabValue = 'metrics' | 'organizations' | 'invitations' | 'affiliations' | 'members' | 'system';
+type AdminTab = { value: AdminTabValue; label: string; badge?: string | number };
+
 function resolveMetricCatalogRelation(
   relation: MetricDefinition | MetricDefinition[] | null,
 ): MetricDefinition | null {
@@ -117,7 +132,11 @@ function resolveMetricCatalogRelation(
   return relation;
 }
 
-export default async function CommandCenterAdminPage() {
+export default async function CommandCenterAdminPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
   const {
@@ -134,6 +153,23 @@ export default async function CommandCenterAdminPage() {
   }
 
   const isAdmin = profile.role === 'admin';
+  const normalizedSearchParams: Record<string, string> = {};
+  if (searchParams) {
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (typeof value === 'string') {
+        normalizedSearchParams[key] = value;
+      } else if (Array.isArray(value) && value[0]) {
+        normalizedSearchParams[key] = value[0];
+      }
+    }
+  }
+
+  const membersPageSize = 12;
+  const requestedMembersPage = Number.parseInt(normalizedSearchParams.membersPage ?? '1', 10);
+  let membersPage = Number.isFinite(requestedMembersPage) && requestedMembersPage > 0 ? requestedMembersPage : 1;
+  let manageableProfiles: ManageableProfileRow[] | null = null;
+  let manageableProfilesCount = 0;
+  let membersTotalPages = 0;
 
   const { data: metricCatalogRows } = await portal
     .from('metric_catalog')
@@ -197,19 +233,126 @@ export default async function CommandCenterAdminPage() {
       ).data as ProfileInviteWithOrg[] | null) ?? null
     : null;
 
-  const manageableProfiles = isAdmin
-    ? ((
-        await portal
-          .from('profiles')
-          .select(
-            `id, display_name, position_title, affiliation_type, affiliation_status, organization_id, user_id, government_role_type,
-             organization:organization_id(id, name, category, government_level)`,
-          )
-          .neq('affiliation_status', 'pending')
-          .order('display_name', { ascending: true })
-          .limit(100)
-      ).data as ManageableProfileRow[] | null) ?? null
-    : null;
+  if (isAdmin) {
+    const profilesSelect =
+      `id, display_name, position_title, affiliation_type, affiliation_status, organization_id, user_id, government_role_type,
+       organization:organization_id(id, name, category, government_level)`;
+    const initialFrom = (membersPage - 1) * membersPageSize;
+    const initialTo = initialFrom + membersPageSize - 1;
+
+    const { data, count } = await portal
+      .from('profiles')
+      .select(profilesSelect, { count: 'exact' })
+      .neq('affiliation_status', 'pending')
+      .order('display_name', { ascending: true })
+      .range(initialFrom, initialTo);
+
+    manageableProfiles = (data as ManageableProfileRow[] | null) ?? null;
+    manageableProfilesCount = count ?? 0;
+    membersTotalPages = manageableProfilesCount > 0 ? Math.ceil(manageableProfilesCount / membersPageSize) : 0;
+
+    const maxPage = membersTotalPages > 0 ? membersTotalPages : 1;
+    if (membersPage > maxPage) {
+      membersPage = maxPage;
+      const adjustedFrom = (membersPage - 1) * membersPageSize;
+      const adjustedTo = adjustedFrom + membersPageSize - 1;
+      const { data: adjustedData } = await portal
+        .from('profiles')
+        .select(profilesSelect)
+        .neq('affiliation_status', 'pending')
+        .order('display_name', { ascending: true })
+        .range(adjustedFrom, adjustedTo);
+
+      manageableProfiles = (adjustedData as ManageableProfileRow[] | null) ?? null;
+    }
+  }
+
+  const pendingInviteCount = recentInvites?.filter((invite) => invite.status === 'pending').length ?? 0;
+  const verifiedOrganizationCount = organizationsList.filter((org) => org.verified).length;
+  const totalOrganizations = organizationsList.length;
+  const recentMetricCount = recentMetricEntries.length;
+
+  const baseTabs: AdminTab[] = [
+    { value: 'metrics', label: 'Community metrics', badge: recentMetricCount > 0 ? recentMetricCount : undefined },
+    {
+      value: 'organizations',
+      label: 'Partner organizations',
+      badge: totalOrganizations > 0 ? totalOrganizations : undefined,
+    },
+    {
+      value: 'invitations',
+      label: 'Invitations',
+      badge: pendingInviteCount > 0 ? pendingInviteCount : undefined,
+    },
+  ];
+
+  const tabs: AdminTab[] = isAdmin
+    ? [
+        ...baseTabs,
+        {
+          value: 'affiliations',
+          label: 'Affiliation reviews',
+          badge: pendingAffiliations && pendingAffiliations.length > 0 ? pendingAffiliations.length : undefined,
+        },
+        { value: 'members', label: 'Members' },
+        { value: 'system', label: 'System settings' },
+      ]
+    : baseTabs;
+
+  const activeTabCandidate = normalizedSearchParams.tab ?? null;
+  const defaultTab = tabs[0]?.value ?? 'metrics';
+  const activeTab: AdminTabValue =
+    (tabs.find((tab) => tab.value === activeTabCandidate)?.value as AdminTabValue | undefined) ?? defaultTab;
+
+  const buildAdminUrl = (tabValue: AdminTabValue, updates: Record<string, string | number | null> = {}) => {
+    const params = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(normalizedSearchParams)) {
+      if (key === 'tab') {
+        continue;
+      }
+      if (key === 'membersPage' && tabValue !== 'members') {
+        continue;
+      }
+      params.set(key, value);
+    }
+
+    params.set('tab', tabValue);
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null || value === '') {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    }
+
+    if (tabValue === 'members' && !params.get('membersPage')) {
+      params.set('membersPage', membersPage.toString());
+    }
+
+    const queryString = params.toString();
+    return queryString ? `/command-center/admin?${queryString}` : '/command-center/admin';
+  };
+
+  const membersHasPagination = isAdmin && membersTotalPages > 1;
+  const membersHasPrev = isAdmin && membersPage > 1;
+  const membersHasNext = isAdmin && membersTotalPages > 0 && membersPage < membersTotalPages;
+  const membersPageNumbers =
+    isAdmin && membersTotalPages > 0
+      ? Array.from(
+          new Set(
+            [1, membersTotalPages, membersPage - 1, membersPage, membersPage + 1].filter(
+              (pageNumber) => pageNumber >= 1 && pageNumber <= membersTotalPages,
+            ),
+          ),
+        ).sort((a, b) => a - b)
+      : [];
+
+  const createMembersPageUrl = (page: number) =>
+    buildAdminUrl('members', {
+      membersPage: page.toString(),
+    });
 
 async function uploadMetric(formData: FormData) {
   'use server';
@@ -1171,16 +1314,19 @@ async function createOrganization(formData: FormData) {
     revalidatePath('/portal/plans');
   }
 
-  return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload daily metric</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form action={uploadMetric} className="grid gap-4">
-            <input type="hidden" name="actor_profile_id" value={profile.id} />
-            <input type="hidden" name="actor_user_id" value={user.id} />
+  const uploadMetricCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Upload daily metric</CardTitle>
+        <CardDescription>
+          Keep the shared dashboard current so neighbours, agencies, and first response teams plan together.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={uploadMetric} className="grid gap-4">
+          <input type="hidden" name="actor_profile_id" value={profile.id} />
+          <input type="hidden" name="actor_user_id" value={user.id} />
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="metric_date">Metric date</Label>
               <Input id="metric_date" name="metric_date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
@@ -1194,11 +1340,7 @@ async function createOrganization(formData: FormData) {
                 disabled={!activeMetricDefinitions.length}
               >
                 <SelectTrigger id="metric_id">
-                  <SelectValue
-                    placeholder={
-                      activeMetricDefinitions.length ? 'Select metric' : 'No metrics available'
-                    }
-                  />
+                  <SelectValue placeholder={activeMetricDefinitions.length ? 'Select metric' : 'No metrics available'} />
                 </SelectTrigger>
                 <SelectContent>
                   {activeMetricDefinitions.map((definition) => (
@@ -1212,6 +1354,8 @@ async function createOrganization(formData: FormData) {
                 <p className="text-xs text-muted">Add a metric below before recording values.</p>
               ) : null}
             </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="metric_status">Status</Label>
               <Select name="metric_status" defaultValue="reported" required>
@@ -1226,157 +1370,172 @@ async function createOrganization(formData: FormData) {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="value">Value</Label>
-              <Input
-                id="value"
-                name="value"
-                type="number"
-                step="0.1"
-                min="0"
-                placeholder="Enter when status is reported"
-              />
+              <Input id="value" name="value" type="number" step="0.1" min="0" placeholder="Enter when status is reported" />
               <p className="text-xs text-muted">Leave blank when the data partner has not confirmed a number yet.</p>
             </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="source">Source</Label>
-              <Input id="source" name="source" placeholder="Agency / dataset" />
+              <Input id="source" name="source" placeholder="Agency or dataset" />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 md:col-span-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea id="notes" name="notes" rows={3} placeholder="Context for this measurement" />
             </div>
-            <Button type="submit" className="justify-self-start" disabled={!activeMetricDefinitions.length}>
-              Save metric
-            </Button>
+          </div>
+          <Button type="submit" className="justify-self-start" disabled={!activeMetricDefinitions.length}>
+            Save metric
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+
+  const manageMetricsCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Manage metrics</CardTitle>
+        <CardDescription>Update catalogue entries so shared dashboards reflect community language and measurement units.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-on-surface-variant">Add metric</h3>
+          <form action={createMetricDefinition} className="grid gap-4 rounded-lg border border-outline/20 bg-surface-container p-4 md:grid-cols-5">
+            <input type="hidden" name="actor_profile_id" value={profile.id} />
+            <div className="md:col-span-2">
+              <Label htmlFor="new_metric_label">Label</Label>
+              <Input id="new_metric_label" name="label" required maxLength={120} placeholder="e.g. Outreach coverage" />
+            </div>
+            <div>
+              <Label htmlFor="new_metric_slug">Slug (optional)</Label>
+              <Input id="new_metric_slug" name="slug" placeholder="outreach-coverage" />
+            </div>
+            <div>
+              <Label htmlFor="new_metric_unit">Unit (optional)</Label>
+              <Input id="new_metric_unit" name="unit" placeholder="%, people, kits" />
+            </div>
+            <div>
+              <Label htmlFor="new_metric_sort">Sort order</Label>
+              <Input id="new_metric_sort" name="sort_order" type="number" placeholder="10" />
+            </div>
+            <div className="flex items-center gap-2 md:col-span-2">
+              <Checkbox id="new_metric_active" name="is_active" defaultChecked />
+              <Label htmlFor="new_metric_active" className="text-sm font-medium text-on-surface">
+                Active
+              </Label>
+            </div>
+            <div className="md:col-span-5 flex justify-end">
+              <Button type="submit">Add metric</Button>
+            </div>
           </form>
-        </CardContent>
-      </Card>
-      {isAdmin ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Manage metrics</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        </div>
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-on-surface-variant">Existing metrics</h3>
+          {metricDefinitions.length ? (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted">Add metric</h3>
-              <form
-                action={createMetricDefinition}
-                className="grid gap-4 rounded-lg border border-outline/20 bg-surface-container p-4 md:grid-cols-5"
-              >
-                <input type="hidden" name="actor_profile_id" value={profile.id} />
-                <div className="md:col-span-2">
-                  <Label htmlFor="new_metric_label">Label</Label>
-                  <Input id="new_metric_label" name="label" required maxLength={120} placeholder="e.g. Outreach coverage" />
-                </div>
-                <div>
-                  <Label htmlFor="new_metric_slug">Slug (optional)</Label>
-                  <Input id="new_metric_slug" name="slug" placeholder="outreach-coverage" />
-                </div>
-                <div>
-                  <Label htmlFor="new_metric_unit">Unit (optional)</Label>
-                  <Input id="new_metric_unit" name="unit" placeholder="%, people, kits" />
-                </div>
-                <div>
-                  <Label htmlFor="new_metric_sort">Sort order</Label>
-                  <Input id="new_metric_sort" name="sort_order" type="number" placeholder="10" />
-                </div>
-                <div className="flex items-center gap-2 md:col-span-2">
-                  <Checkbox id="new_metric_active" name="is_active" defaultChecked />
-                  <Label htmlFor="new_metric_active" className="text-sm font-medium text-on-surface">
-                    Active
-                  </Label>
-                </div>
-                <div className="md:col-span-5 flex justify-end">
-                  <Button type="submit">Add metric</Button>
-                </div>
-              </form>
+              {metricDefinitions.map((definition) => (
+                <form
+                  key={definition.id}
+                  action={updateMetricDefinition}
+                  className="grid gap-4 rounded-lg border border-outline/20 bg-surface-container-low p-4 md:grid-cols-6"
+                >
+                  <input type="hidden" name="actor_profile_id" value={profile.id} />
+                  <input type="hidden" name="metric_id" value={definition.id} />
+                  <div className="md:col-span-2">
+                    <Label htmlFor={`metric-label-${definition.id}`}>Label</Label>
+                    <Input id={`metric-label-${definition.id}`} name="label" defaultValue={definition.label} required maxLength={120} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor={`metric-slug-${definition.id}`}>Slug</Label>
+                    <Input id={`metric-slug-${definition.id}`} name="slug" defaultValue={definition.slug} maxLength={120} />
+                  </div>
+                  <div>
+                    <Label htmlFor={`metric-unit-${definition.id}`}>Unit</Label>
+                    <Input id={`metric-unit-${definition.id}`} name="unit" defaultValue={definition.unit ?? ''} maxLength={40} />
+                  </div>
+                  <div>
+                    <Label htmlFor={`metric-sort-${definition.id}`}>Sort order</Label>
+                    <Input id={`metric-sort-${definition.id}`} name="sort_order" type="number" defaultValue={definition.sort_order} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id={`metric-active-${definition.id}`} name="is_active" defaultChecked={definition.is_active} />
+                    <Label htmlFor={`metric-active-${definition.id}`} className="text-sm font-medium text-on-surface">
+                      Active
+                    </Label>
+                  </div>
+                  <div className="md:col-span-6 flex flex-wrap items-center justify-end gap-3">
+                    <Button type="submit">Save</Button>
+                    <Button formAction={deleteMetricDefinition} variant="outline" type="submit">
+                      Delete
+                    </Button>
+                  </div>
+                </form>
+              ))}
             </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted">Existing metrics</h3>
-              {metricDefinitions.length ? (
-                <div className="space-y-3">
-                  {metricDefinitions.map((definition) => (
-                    <form
-                      key={definition.id}
-                      action={updateMetricDefinition}
-                      className="grid gap-4 rounded-lg border border-outline/20 p-4 md:grid-cols-6"
-                    >
-                      <input type="hidden" name="actor_profile_id" value={profile.id} />
-                      <input type="hidden" name="metric_id" value={definition.id} />
-                      <div className="md:col-span-2">
-                        <Label htmlFor={`metric-label-${definition.id}`}>Label</Label>
-                        <Input
-                          id={`metric-label-${definition.id}`}
-                          name="label"
-                          defaultValue={definition.label}
-                          required
-                          maxLength={120}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor={`metric-slug-${definition.id}`}>Slug</Label>
-                        <Input
-                          id={`metric-slug-${definition.id}`}
-                          name="slug"
-                          defaultValue={definition.slug}
-                          maxLength={120}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`metric-unit-${definition.id}`}>Unit</Label>
-                        <Input
-                          id={`metric-unit-${definition.id}`}
-                          name="unit"
-                          defaultValue={definition.unit ?? ''}
-                          maxLength={40}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`metric-sort-${definition.id}`}>Sort order</Label>
-                        <Input
-                          id={`metric-sort-${definition.id}`}
-                          name="sort_order"
-                          type="number"
-                          defaultValue={definition.sort_order}
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id={`metric-active-${definition.id}`}
-                          name="is_active"
-                          defaultChecked={definition.is_active}
-                        />
-                        <Label htmlFor={`metric-active-${definition.id}`} className="text-sm font-medium text-on-surface">
-                          Active
-                        </Label>
-                      </div>
-                      <div className="md:col-span-6 flex flex-wrap items-center justify-end gap-3">
-                        <Button type="submit">Save</Button>
-                        <Button
-                          formAction={deleteMetricDefinition}
-                          variant="outline"
-                          type="submit"
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </form>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted">No metrics configured yet.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-      <Card>
+          ) : (
+            <p className="text-sm text-muted">No metrics configured yet.</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const recentMetricsCard =
+    recentMetricEntries.length > 0 ? (
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Register partner organization</CardTitle>
+          <CardTitle>Recent submissions</CardTitle>
+          <CardDescription>Last 12 metric entries shared with the community dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={createOrganization} className="grid gap-4">
-            <input type="hidden" name="actor_profile_id" value={profile.id} />
-            <input type="hidden" name="actor_user_id" value={user.id} />
+          <div className="space-y-2 text-sm text-on-surface">
+            {recentMetricEntries.map((item) => {
+              const definition = item.metric_catalog;
+              const label = definition?.label ?? definition?.slug ?? 'Metric';
+              const status = item.value_status as Database['portal']['Enums']['metric_value_status'];
+              const unit = definition?.unit ?? null;
+              const value =
+                status === 'reported' && typeof item.value === 'number'
+                  ? `${formatMetricNumber(item.value)}${unit ? ` ${unit}` : ''}`
+                  : 'Pending update';
+
+              return (
+                <div
+                  key={`${item.metric_date}-${item.metric_id}`}
+                  className="flex flex-col gap-1 rounded-lg border border-outline/30 bg-surface-container-low p-3 md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{label}</p>
+                    <p className="text-xs text-muted">
+                      {status === 'pending'
+                        ? `Pending update - ${formatMetricDate(item.metric_date)}`
+                        : formatMetricDate(item.metric_date)}
+                    </p>
+                  </div>
+                  <div className="text-sm font-semibold md:text-right">
+                    <p>{value}</p>
+                    {item.source ? <p className="text-xs text-muted">{item.source}</p> : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    ) : null;
+
+  const registerOrganizationCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Register partner organization</CardTitle>
+        <CardDescription>Add trusted agencies and government teams so their representatives can be verified quickly.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <form action={createOrganization} className="grid gap-4">
+          <input type="hidden" name="actor_profile_id" value={profile.id} />
+          <input type="hidden" name="actor_user_id" value={user.id} />
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="org_name">Organization name</Label>
               <Input id="org_name" name="org_name" required maxLength={120} />
@@ -1385,530 +1544,705 @@ async function createOrganization(formData: FormData) {
               <Label htmlFor="org_website">Website</Label>
               <Input id="org_website" name="org_website" type="url" placeholder="https://" />
             </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="org_category">Category</Label>
-              <select
-                id="org_category"
-                name="org_category"
-                defaultValue="community"
-                className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              >
-                <option value="community">Community / agency partner</option>
-                <option value="government">Government team</option>
-              </select>
-              <p className="text-xs text-muted">Government teams require a level selection below.</p>
+              <Select name="org_category" defaultValue="community" required>
+                <SelectTrigger id="org_category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="community">Community partner</SelectItem>
+                  <SelectItem value="government">Government team</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="org_government_level">Government level</Label>
-              <select
-                id="org_government_level"
-                name="org_government_level"
-                defaultValue=""
-                className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              <Select name="org_government_level" defaultValue="">
+                <SelectTrigger id="org_government_level">
+                  <SelectValue placeholder="Select when government" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Not applicable</SelectItem>
+                  <SelectItem value="municipal">Municipal</SelectItem>
+                  <SelectItem value="county">County or regional</SelectItem>
+                  <SelectItem value="provincial">Provincial or territorial</SelectItem>
+                  <SelectItem value="federal">Federal</SelectItem>
+                  <SelectItem value="other">Other or multi-jurisdictional</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="org_verified" name="org_verified" />
+            <Label htmlFor="org_verified" className="text-sm">
+              Mark as verified agency representative
+            </Label>
+          </div>
+          <Button type="submit" className="justify-self-start">
+            Add organization
+          </Button>
+        </form>
+        {organizationsList.length ? (
+          <div className="space-y-2 text-sm text-muted">
+            {organizationsList.map((org) => (
+              <div
+                key={org.id}
+                className="flex flex-col gap-1 rounded-lg border border-outline/30 bg-surface-container-low p-3 md:flex-row md:items-center md:justify-between"
               >
-                <option value="">Select level (required for government)</option>
-                <option value="municipal">Municipal</option>
-                <option value="county">County / regional</option>
-                <option value="provincial">Provincial / territorial</option>
-                <option value="federal">Federal</option>
-                <option value="other">Other / multi-jurisdictional</option>
-              </select>
-              <p className="text-xs text-muted">Leave blank for community organizations.</p>
+                <div>
+                  <p className="font-medium text-on-surface">{org.name}</p>
+                  {org.website ? (
+                    <a className="text-xs text-primary hover:underline" href={org.website} target="_blank" rel="noreferrer">
+                      {org.website}
+                    </a>
+                  ) : null}
+                </div>
+                <div className="text-xs uppercase tracking-wide text-on-surface-variant">
+                  {org.verified ? 'Verified' : 'Pending'}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+
+  const invitePartnerCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Invite agency or government partner</CardTitle>
+        <CardDescription>Invite colleagues so we can co-design responses in the open. Invitations expire after 14 days.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form action={invitePartner} className="grid gap-4">
+          <input type="hidden" name="actor_profile_id" value={profile.id} />
+          <input type="hidden" name="actor_user_id" value={user.id} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="invite_email">Email</Label>
+              <Input id="invite_email" name="invite_email" type="email" required placeholder="partner@example.ca" />
             </div>
-            <div className="flex items-center gap-2">
-              <input id="org_verified" name="org_verified" type="checkbox" className="h-4 w-4 accent-brand" />
-              <Label htmlFor="org_verified" className="text-sm">
-                Mark as verified agency representative
-              </Label>
+            <div className="grid gap-2">
+              <Label htmlFor="invite_display_name">Suggested display name</Label>
+              <Input id="invite_display_name" name="invite_display_name" placeholder="Agency contact name" maxLength={120} />
             </div>
-            <Button type="submit" className="justify-self-start">
-              Add organization
-            </Button>
-          </form>
-          {organizationsList.length ? (
-            <div className="mt-4 space-y-2 text-sm text-muted">
-              {organizationsList.map((org) => (
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="invite_position_title">Position or role</Label>
+              <Input
+                id="invite_position_title"
+                name="invite_position_title"
+                placeholder="Public Health Nurse, Mayor, Outreach Supervisor, ..."
+                maxLength={120}
+              />
+              <p className="text-xs text-muted">
+                Appears beside their name so neighbours understand how they support community care.
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="invite_organization_id">Organization</Label>
+              <Select name="invite_organization_id" defaultValue={NO_ORGANIZATION_VALUE}>
+                <SelectTrigger id="invite_organization_id">
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_ORGANIZATION_VALUE}>No linked organization yet</SelectItem>
+                  {organizationsList.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="invite_affiliation_type">Affiliation type</Label>
+              <Select name="invite_affiliation_type" defaultValue="agency_partner" required>
+                <SelectTrigger id="invite_affiliation_type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agency_partner">Agency or organization representative</SelectItem>
+                  <SelectItem value="government_partner">Government representative</SelectItem>
+                  <SelectItem value="community_member">Community collaborator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="invite_message">Message (optional)</Label>
+              <Textarea
+                id="invite_message"
+                name="invite_message"
+                rows={3}
+                placeholder="Context for why you're inviting this partner or supports they can offer"
+              />
+            </div>
+          </div>
+          <Button type="submit" className="justify-self-start">
+            Send invitation
+          </Button>
+        </form>
+        {recentInvites?.length ? (
+          <div className="space-y-2 text-sm text-on-surface">
+            {recentInvites.map((invite) => {
+              const organizationName = Array.isArray(invite.organization)
+                ? invite.organization[0]?.name ?? null
+                : invite.organization?.name ?? null;
+              return (
                 <div
-                  key={org.id}
-                  className="flex items-center justify-between rounded border border-slate-100 px-3 py-2 dark:border-slate-800"
+                  key={invite.id}
+                  className="flex flex-col gap-1 rounded-lg border border-outline/30 bg-surface-container-low p-3 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
-                    <p className="font-medium">{org.name}</p>
-                    {org.website && (
-                      <a
-                        className="text-xs text-brand hover:underline"
-                        href={org.website}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {org.website}
-                      </a>
+                    <p className="font-semibold">{invite.display_name ?? invite.email}</p>
+                    <p className="text-xs text-muted">{invite.email}</p>
+                    {invite.position_title ? <p className="text-xs text-muted">{invite.position_title}</p> : null}
+                    {organizationName ? <p className="text-xs text-muted">{organizationName}</p> : null}
+                  </div>
+                  <div className="text-xs uppercase tracking-wide text-on-surface-variant">
+                    {invite.status === 'pending'
+                      ? 'Pending'
+                      : invite.status === 'accepted'
+                        ? 'Accepted'
+                        : invite.status === 'cancelled'
+                          ? 'Cancelled'
+                          : 'Expired'}
+                    <span className="ml-2 lowercase text-muted-subtle">
+                      {new Date(invite.created_at).toLocaleDateString('en-CA')}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+
+  const pendingAffiliationsCard =
+    pendingAffiliations && pendingAffiliations.length ? (
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>Pending affiliation approvals</CardTitle>
+          <CardDescription>Review affiliation requests so representatives can speak with authority on behalf of their teams.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {pendingAffiliations.map((pending) => {
+              const organizationRelation = Array.isArray(pending.organization)
+                ? pending.organization[0] ?? null
+                : pending.organization ?? null;
+              const organizationId = organizationRelation?.id ?? null;
+              const organizationName = organizationRelation?.name ?? null;
+              const requestedOrgName = pending.requested_organization_name;
+              const requestedGovName = pending.requested_government_name;
+              const requestedGovLevel = pending.requested_government_level;
+              const defaultGovRole = pending.requested_government_role ?? pending.government_role_type ?? 'staff';
+              return (
+                <div key={pending.id} className="space-y-3 rounded border border-outline/30 bg-surface-container-low p-4">
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-on-surface">{pending.display_name}</p>
+                    {pending.position_title ? <p className="text-sm text-muted">{pending.position_title}</p> : null}
+                    {organizationName ? <p className="text-xs text-muted">Current: {organizationName}</p> : null}
+                    {pending.affiliation_requested_at ? (
+                      <p className="text-xs text-muted-subtle">
+                        Requested {new Date(pending.affiliation_requested_at).toLocaleDateString('en-CA')} -{' '}
+                        {pending.affiliation_type === 'agency_partner'
+                          ? 'agency partner'
+                          : pending.affiliation_type === 'government_partner'
+                            ? 'government partner'
+                            : 'community member'}
+                      </p>
+                    ) : null}
+                    {pending.affiliation_type === 'agency_partner' && requestedOrgName ? (
+                      <p className="text-xs text-muted">Pending organization: {requestedOrgName}</p>
+                    ) : null}
+                    {pending.affiliation_type === 'government_partner' && requestedGovName ? (
+                      <p className="text-xs text-muted">
+                        Requested: {requestedGovName}
+                        {requestedGovLevel ? ` (${formatGovernmentLevel(requestedGovLevel)})` : ''}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-col gap-3 border-t border-outline/20 pt-3 md:flex-row md:items-end md:justify-between">
+                    <form action={approveAffiliation} className="grid gap-3 md:grid-cols-2">
+                      <input type="hidden" name="actor_profile_id" value={profile.id} />
+                      <input type="hidden" name="actor_user_id" value={user.id} />
+                      <input type="hidden" name="profile_id" value={pending.id} />
+                      <div className="grid gap-1">
+                        <Label htmlFor={`approved-organization-${pending.id}`} className="text-xs font-medium text-muted">
+                          Approved organization
+                        </Label>
+                        <select
+                          id={`approved-organization-${pending.id}`}
+                          name="approved_organization_id"
+                          defaultValue={organizationId ?? ''}
+                          className="rounded border border-outline bg-surface px-2 py-1 text-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          required={pending.affiliation_type !== 'community_member'}
+                        >
+                          <option value="">Select organization</option>
+                          {pending.affiliation_type !== 'government_partner'
+                            ? communityOrganizations.map((org) => (
+                                <option key={org.id} value={org.id}>
+                                  {org.name}
+                                </option>
+                              ))
+                            : governmentOrganizations.map((org) => (
+                                <option key={org.id} value={org.id}>
+                                  {org.name} ({formatGovernmentLevel(org.government_level)})
+                                </option>
+                              ))}
+                        </select>
+                        {pending.affiliation_type === 'community_member' ? (
+                          <p className="text-xs text-muted">Community members do not link to organizations.</p>
+                        ) : null}
+                      </div>
+                      {pending.affiliation_type === 'government_partner' ? (
+                        <div className="grid gap-1">
+                          <Label htmlFor={`approved-role-${pending.id}`} className="text-xs font-medium text-muted">
+                            Role type
+                          </Label>
+                          <select
+                            id={`approved-role-${pending.id}`}
+                            name="approved_government_role"
+                            defaultValue={defaultGovRole}
+                            required
+                            className="rounded border border-outline bg-surface px-2 py-1 text-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          >
+                            <option value="staff">Public servant or staff</option>
+                            <option value="politician">Elected leadership</option>
+                          </select>
+                        </div>
+                      ) : null}
+                      <Button type="submit" size="sm">
+                        Approve
+                      </Button>
+                    </form>
+                    <form action={declineAffiliation} className="flex flex-row items-end gap-2">
+                      <input type="hidden" name="actor_profile_id" value={profile.id} />
+                      <input type="hidden" name="actor_user_id" value={user.id} />
+                      <input type="hidden" name="profile_id" value={pending.id} />
+                      <Button type="submit" size="sm" variant="outline">
+                        Decline
+                      </Button>
+                    </form>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    ) : (
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>Pending affiliation approvals</CardTitle>
+          <CardDescription>All affiliation requests are reviewed. New submissions will appear here first.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted">No pending affiliation approvals.</p>
+        </CardContent>
+      </Card>
+    );
+
+  const manageMembersCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>Manage member affiliations</CardTitle>
+        <CardDescription>Affiliation updates refresh permissions immediately and keep public job titles accurate.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted">
+          Approve, pause, or update a member&apos;s organization link. Community collaborators keep the public label Neighbour partner when no
+          organization is linked.
+        </p>
+        {manageableProfiles && manageableProfiles.length ? (
+          manageableProfiles.map((member) => {
+            const organizationRelation = Array.isArray(member.organization)
+              ? member.organization[0] ?? null
+              : member.organization ?? null;
+            const organizationName = organizationRelation?.name ?? null;
+            const organizationCategory = organizationRelation?.category ?? null;
+            const organizationLevel = organizationRelation?.government_level ?? null;
+
+            return (
+              <form
+                key={member.id}
+                action={updateMemberAffiliation}
+                className="grid gap-3 rounded border border-slate-100 p-3 shadow-subtle dark:border-slate-800"
+              >
+                <input type="hidden" name="profile_id" value={member.id} />
+                <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="font-semibold text-on-surface">{member.display_name}</p>
+                    {member.position_title ? (
+                      <p className="text-xs text-muted">{member.position_title}</p>
+                    ) : (
+                      <p className="text-xs text-muted">No public role listed</p>
+                    )}
+                    {organizationName ? (
+                      <p className="text-xs text-muted">
+                        Linked to {organizationName}
+                        {organizationCategory === 'government' && organizationLevel ? ` (${formatGovernmentLevel(organizationLevel)})` : ''}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted">No linked organization</p>
                     )}
                   </div>
                   <span className="text-xs uppercase tracking-wide text-muted">
-                    {org.verified ? 'Verified' : 'Pending'}
+                    {member.affiliation_status === 'approved'
+                      ? 'Approved'
+                      : member.affiliation_status === 'pending'
+                        ? 'Pending'
+                        : 'Revoked'}
                   </span>
                 </div>
-              ))}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-      {isAdmin ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Invite agency or government partner</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form action={invitePartner} className="grid gap-4">
-                <input type="hidden" name="actor_profile_id" value={profile.id} />
-                <input type="hidden" name="actor_user_id" value={user.id} />
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_email">Email</Label>
-                  <Input id="invite_email" name="invite_email" type="email" required placeholder="partner@example.ca" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_display_name">Suggested display name</Label>
-                  <Input id="invite_display_name" name="invite_display_name" placeholder="Agency contact name" maxLength={120} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_position_title">Position or role</Label>
-                  <Input
-                    id="invite_position_title"
-                    name="invite_position_title"
-                    placeholder="Public Health Nurse, Mayor, Outreach Supervisor, ..."
-                    maxLength={120}
-                  />
-                  <p className="text-xs text-muted">Used across the portal to highlight the invitee&rsquo;s role in community care.</p>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_organization_id">Organization</Label>
-                  <Select name="invite_organization_id" defaultValue={NO_ORGANIZATION_VALUE}>
-                    <SelectTrigger id="invite_organization_id">
-                      <SelectValue placeholder="Select organization" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NO_ORGANIZATION_VALUE}>No linked organization yet</SelectItem>
-                      {organizationsList.map((org) => (
-                        <SelectItem key={org.id} value={org.id}>
-                          {org.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_affiliation_type">Affiliation type</Label>
-                  <Select name="invite_affiliation_type" defaultValue="agency_partner" required>
-                    <SelectTrigger id="invite_affiliation_type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="agency_partner">Agency / organization representative</SelectItem>
-                      <SelectItem value="government_partner">Government representative</SelectItem>
-                      <SelectItem value="community_member">Community collaborator</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="invite_message">Message (optional)</Label>
-                  <Textarea
-                    id="invite_message"
-                    name="invite_message"
-                    rows={3}
-                    placeholder="Context for why you&rsquo;re inviting this partner or supports they can offer"
-                  />
-                </div>
-                <Button type="submit" className="justify-self-start">
-                  Send invitation
-                </Button>
-              </form>
-              {recentInvites?.length ? (
-                <div className="space-y-2 text-sm text-muted">
-                  {recentInvites.map((invite) => {
-                    const organizationName = Array.isArray(invite.organization)
-                      ? invite.organization[0]?.name ?? null
-                      : invite.organization?.name ?? null;
-                    return (
-                      <div
-                        key={invite.id}
-                        className="flex flex-col gap-1 rounded border border-slate-100 p-3 dark:border-slate-800 md:flex-row md:items-center md:justify-between"
-                      >
-                        <div>
-                          <p className="font-semibold text-slate-700 dark:text-slate-200">
-                            {invite.display_name ?? invite.email}
-                          </p>
-                          <p className="text-xs text-muted">{invite.email}</p>
-                          {invite.position_title ? (
-                            <p className="text-xs text-muted">{invite.position_title}</p>
-                          ) : null}
-                          {organizationName ? (
-                            <p className="text-xs text-muted">{organizationName}</p>
-                          ) : null}
-                        </div>
-                        <div className="text-xs uppercase tracking-wide text-muted">
-                          {invite.status === 'pending'
-                            ? 'Pending'
-                            : invite.status === 'accepted'
-                              ? 'Accepted'
-                              : invite.status === 'cancelled'
-                                ? 'Cancelled'
-                                : 'Expired'}
-                          <span className="ml-2 lowercase text-muted-subtle">
-                            {new Date(invite.created_at).toLocaleDateString('en-CA')}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending affiliation approvals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pendingAffiliations?.length ? (
-                <div className="space-y-4">
-                  {pendingAffiliations.map((pending) => {
-                    const organizationRelation = Array.isArray(pending.organization)
-                      ? pending.organization[0] ?? null
-                      : pending.organization ?? null;
-                    const organizationId = organizationRelation?.id ?? null;
-                    const organizationName = organizationRelation?.name ?? null;
-                    const requestedOrgName = pending.requested_organization_name;
-                    const requestedGovName = pending.requested_government_name;
-                    const requestedGovLevel = pending.requested_government_level;
-                    const defaultGovRole = pending.requested_government_role ?? pending.government_role_type ?? 'staff';
-                    return (
-                      <div key={pending.id} className="space-y-3 rounded border border-slate-100 p-3 dark:border-slate-800">
-                        <div className="space-y-1">
-                          <p className="font-semibold text-slate-700 dark:text-slate-200">{pending.display_name}</p>
-                          {pending.position_title ? (
-                            <p className="text-sm text-muted">{pending.position_title}</p>
-                          ) : null}
-                          {organizationName ? (
-                            <p className="text-xs text-muted">Current: {organizationName}</p>
-                          ) : null}
-                          {pending.affiliation_requested_at ? (
-                            <p className="text-xs text-muted-subtle">
-                              Requested {new Date(pending.affiliation_requested_at).toLocaleDateString('en-CA')} ·{' '}
-                              {pending.affiliation_type === 'agency_partner'
-                                ? 'Agency partner'
-                                : pending.affiliation_type === 'government_partner'
-                                  ? 'Government partner'
-                                  : 'Community member'}
-                            </p>
-                          ) : null}
-                          {pending.affiliation_type === 'agency_partner' && requestedOrgName ? (
-                            <p className="text-xs text-muted">Pending org: {requestedOrgName}</p>
-                          ) : null}
-                          {pending.affiliation_type === 'government_partner' && requestedGovName ? (
-                            <p className="text-xs text-muted">
-                              Pending government: {requestedGovName}
-                              {requestedGovLevel ? ` · ${formatGovernmentLevel(requestedGovLevel)}` : ''}
-                            </p>
-                          ) : null}
-                          {pending.affiliation_type === 'government_partner' && pending.requested_government_role ? (
-                            <p className="text-xs text-muted">Requested role: {pending.requested_government_role === 'politician' ? 'Elected leadership' : 'Public servant / staff'}</p>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                          <form action={approveAffiliation} className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
-                            <input type="hidden" name="actor_profile_id" value={profile.id} />
-                            <input type="hidden" name="actor_user_id" value={user.id} />
-                            <input type="hidden" name="profile_id" value={pending.id} />
-                            {pending.affiliation_type === 'agency_partner' ? (
-                              <div className="flex flex-col">
-                                <Label htmlFor={`approved-org-${pending.id}`} className="text-xs font-medium text-muted">
-                                  Assign organization
-                                </Label>
-                                <select
-                                  id={`approved-org-${pending.id}`}
-                                  name="approved_organization_id"
-                                  defaultValue={organizationId ?? ''}
-                                  required
-                                  className="min-w-[200px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                                >
-                                  <option value="">Select organization</option>
-                                  {communityOrganizations.map((org) => (
-                                    <option key={org.id} value={org.id}>
-                                      {org.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                {requestedOrgName ? (
-                                  <span className="mt-1 text-xs text-muted">Neighbour requested: {requestedOrgName}</span>
-                                ) : null}
-                              </div>
-                            ) : null}
-                            {pending.affiliation_type === 'government_partner' ? (
-                              <div className="flex flex-col gap-3 md:flex-row md:items-end">
-                                <div className="flex flex-col">
-                                  <Label htmlFor={`approved-gov-${pending.id}`} className="text-xs font-medium text-muted">
-                                    Assign government team
-                                  </Label>
-                                  <select
-                                    id={`approved-gov-${pending.id}`}
-                                    name="approved_organization_id"
-                                    defaultValue={organizationId ?? ''}
-                                    required
-                                    className="min-w-[220px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                                  >
-                                    <option value="">Select government team</option>
-                                    {governmentOrganizations.map((org) => (
-                                      <option key={org.id} value={org.id}>
-                                        {org.name} • {formatGovernmentLevel(org.government_level)}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  {requestedGovName ? (
-                                    <span className="mt-1 text-xs text-muted">
-                                      Requested: {requestedGovName}
-                                      {requestedGovLevel ? ` · ${formatGovernmentLevel(requestedGovLevel)}` : ''}
-                                    </span>
-                                  ) : null}
-                                </div>
-                                <div className="flex flex-col">
-                                  <Label htmlFor={`approved-role-${pending.id}`} className="text-xs font-medium text-muted">
-                                    Role type
-                                  </Label>
-                                  <select
-                                    id={`approved-role-${pending.id}`}
-                                    name="approved_government_role"
-                                    defaultValue={defaultGovRole}
-                                    required
-                                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                                  >
-                                    <option value="staff">Public servant / staff</option>
-                                    <option value="politician">Elected leadership</option>
-                                  </select>
-                                </div>
-                              </div>
-                            ) : null}
-                            <Button type="submit" size="sm">Approve</Button>
-                          </form>
-                          <form action={declineAffiliation} className="flex flex-row items-end gap-2">
-                            <input type="hidden" name="actor_profile_id" value={profile.id} />
-                            <input type="hidden" name="actor_user_id" value={user.id} />
-                            <input type="hidden" name="profile_id" value={pending.id} />
-                            <Button type="submit" size="sm" variant="outline">Decline</Button>
-                          </form>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-muted">No pending affiliation approvals.</p>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      ) : null}
-      {isAdmin && manageableProfiles?.length ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Manage member affiliations</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted">
-              Update a member&rsquo;s affiliation type, status, and linked organization. Changes refresh permissions
-              immediately.
-            </p>
-            {manageableProfiles.map((member) => {
-              const organizationRelation = Array.isArray(member.organization)
-                ? member.organization[0] ?? null
-                : member.organization ?? null;
-              const organizationName = organizationRelation?.name ?? null;
-              const organizationCategory = organizationRelation?.category ?? null;
-              const organizationLevel = organizationRelation?.government_level ?? null;
-
-              return (
-                <form
-                  key={member.id}
-                  action={updateMemberAffiliation}
-                  className="grid gap-3 rounded border border-slate-100 p-3 shadow-subtle dark:border-slate-800"
-                >
-                  <input type="hidden" name="profile_id" value={member.id} />
-                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-700 dark:text-slate-200">{member.display_name}</p>
-                      {member.position_title ? (
-                        <p className="text-xs text-muted">{member.position_title}</p>
-                      ) : (
-                        <p className="text-xs text-muted">No public role listed</p>
-                      )}
-                      {organizationName ? (
-                        <p className="text-xs text-muted">
-                          Linked to {organizationName}
-                          {organizationCategory === 'government' && organizationLevel
-                            ? ` · ${formatGovernmentLevel(organizationLevel)}`
-                            : ''}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted">No linked organization</p>
-                      )}
-                    </div>
-                    <span className="text-xs uppercase tracking-wide text-muted">
-                      {member.affiliation_status === 'approved'
-                        ? 'Approved'
-                        : member.affiliation_status === 'pending'
-                          ? 'Pending'
-                          : 'Revoked'}
-                    </span>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="grid gap-1">
-                      <Label htmlFor={`manage-affiliation-${member.id}`} className="text-xs font-medium text-muted">
-                        Affiliation type
-                      </Label>
-                      <select
-                        id={`manage-affiliation-${member.id}`}
-                        name="affiliation_type"
-                        defaultValue={member.affiliation_type}
-                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                      >
-                        <option value="community_member">Community member</option>
-                        <option value="agency_partner">Agency / organization</option>
-                        <option value="government_partner">Government representative</option>
-                      </select>
-                    </div>
-                    <div className="grid gap-1">
-                      <Label htmlFor={`manage-status-${member.id}`} className="text-xs font-medium text-muted">
-                        Affiliation status
-                      </Label>
-                      <select
-                        id={`manage-status-${member.id}`}
-                        name="affiliation_status"
-                        defaultValue={member.affiliation_status}
-                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                      >
-                        <option value="approved">Approved</option>
-                        <option value="pending">Pending</option>
-                        <option value="revoked">Revoked</option>
-                      </select>
-                    </div>
-                  </div>
+                <div className="grid gap-3 md:grid-cols-2">
                   <div className="grid gap-1">
-                    <Label htmlFor={`manage-organization-${member.id}`} className="text-xs font-medium text-muted">
-                      Linked organization
+                    <Label htmlFor={`manage-affiliation-${member.id}`} className="text-xs font-medium text-muted">
+                      Affiliation type
                     </Label>
                     <select
-                      id={`manage-organization-${member.id}`}
-                      name="organization_id"
-                      defaultValue={member.organization_id ?? ''}
+                      id={`manage-affiliation-${member.id}`}
+                      name="affiliation_type"
+                      defaultValue={member.affiliation_type}
                       className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                     >
-                      <option value="">No linked organization</option>
-                      {communityOrganizations.length ? (
-                        <optgroup label="Community partners">
-                          {communityOrganizations.map((org) => (
-                            <option key={org.id} value={org.id}>
-                              {org.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ) : null}
-                      {governmentOrganizations.length ? (
-                        <optgroup label="Government teams">
-                          {governmentOrganizations.map((org) => (
-                            <option key={org.id} value={org.id}>
-                              {org.name} · {formatGovernmentLevel(org.government_level)}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ) : null}
+                      <option value="community_member">Community member</option>
+                      <option value="agency_partner">Agency or organization</option>
+                      <option value="government_partner">Government representative</option>
+                    </select>
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor={`manage-status-${member.id}`} className="text-xs font-medium text-muted">
+                      Affiliation status
+                    </Label>
+                    <select
+                      id={`manage-status-${member.id}`}
+                      name="affiliation_status"
+                      defaultValue={member.affiliation_status}
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    >
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                      <option value="revoked">Revoked</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid gap-1">
+                  <Label htmlFor={`manage-organization-${member.id}`} className="text-xs font-medium text-muted">
+                    Linked organization
+                  </Label>
+                  <select
+                    id={`manage-organization-${member.id}`}
+                    name="organization_id"
+                    defaultValue={member.organization_id ?? ''}
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                  >
+                    <option value="">No linked organization</option>
+                    {communityOrganizations.length ? (
+                      <optgroup label="Community partners">
+                        {communityOrganizations.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ) : null}
+                    {governmentOrganizations.length ? (
+                      <optgroup label="Government teams">
+                        {governmentOrganizations.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name} ({formatGovernmentLevel(org.government_level)})
+                          </option>
+                        ))}
+                      </optgroup>
+                    ) : null}
+                  </select>
+                  <p className="text-xs text-muted">
+                    Government partners must link to a government listing. Community collaborators can leave this blank.
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid gap-1">
+                    <Label htmlFor={`manage-gov-role-${member.id}`} className="text-xs font-medium text-muted">
+                      Government role classification
+                    </Label>
+                    <select
+                      id={`manage-gov-role-${member.id}`}
+                      name="government_role_type"
+                      defaultValue={member.government_role_type ?? ''}
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    >
+                      <option value="">Select classification</option>
+                      <option value="staff">Public servant or staff</option>
+                      <option value="politician">Elected leadership</option>
                     </select>
                     <p className="text-xs text-muted">
-                      Community members ignore this field. Government partners must link to a government listing.
+                      Required when approving government representatives. Leave blank for community or agency members.
                     </p>
                   </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="grid gap-1">
-                      <Label htmlFor={`manage-gov-role-${member.id}`} className="text-xs font-medium text-muted">
-                        Government role classification
-                      </Label>
-                      <select
-                        id={`manage-gov-role-${member.id}`}
-                        name="government_role_type"
-                        defaultValue={member.government_role_type ?? ''}
-                        className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                      >
-                        <option value="">Select classification</option>
-                        <option value="staff">Public servant / staff</option>
-                        <option value="politician">Elected leadership</option>
-                      </select>
-                      <p className="text-xs text-muted">
-                        Required when approving government representatives. Leave blank for community or agency members.
-                      </p>
-                    </div>
-                    <div className="grid gap-1">
-                      <Label htmlFor={`manage-position-${member.id}`} className="text-xs font-medium text-muted">
-                        Position or role
-                      </Label>
-                      <Input
-                        id={`manage-position-${member.id}`}
-                        name="position_title"
-                        defaultValue={member.position_title ?? ''}
-                        maxLength={120}
-                        placeholder="Coordinator, Councillor, Outreach Nurse, ..."
-                      />
-                    </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor={`manage-position-${member.id}`} className="text-xs font-medium text-muted">
+                      Position or role
+                    </Label>
+                    <Input
+                      id={`manage-position-${member.id}`}
+                      name="position_title"
+                      defaultValue={member.position_title ?? ''}
+                      maxLength={120}
+                      placeholder="Coordinator, Councillor, Outreach Nurse, ..."
+                    />
                   </div>
-                  <Button type="submit" size="sm" className="justify-self-start">
-                    Save changes
-                  </Button>
-                </form>
-              );
-            })}
-          </CardContent>
-        </Card>
-      ) : null}
-      {recentMetricEntries.length ? (
-        <Card>
+                </div>
+                <Button type="submit" size="sm" className="justify-self-start">
+                  Save changes
+                </Button>
+              </form>
+            );
+          })
+        ) : (
+          <p className="text-sm text-muted">No members match the current filters.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const systemSummaryCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>System highlights</CardTitle>
+        <CardDescription>Spot-check key counts across the Integrated Homelessness and Addictions Response Centre.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl bg-primary-container p-4 text-on-primary-container shadow-subtle">
+            <p className="text-xs uppercase tracking-wide">Active metrics</p>
+            <p className="text-2xl font-semibold">{activeMetricDefinitions.length.toLocaleString('en-CA')}</p>
+            <p className="text-xs opacity-80">Visible on public dashboards and emergency briefs.</p>
+          </div>
+          <div className="rounded-xl bg-secondary-container p-4 text-on-secondary-container shadow-subtle">
+            <p className="text-xs uppercase tracking-wide">Pending invitations</p>
+            <p className="text-2xl font-semibold">{pendingInviteCount.toLocaleString('en-CA')}</p>
+            <p className="text-xs opacity-80">Awaiting acceptance from community partners.</p>
+          </div>
+          <div className="rounded-xl bg-tertiary-container p-4 text-on-tertiary-container shadow-subtle">
+            <p className="text-xs uppercase tracking-wide">Verified organizations</p>
+            <p className="text-2xl font-semibold">{verifiedOrganizationCount.toLocaleString('en-CA')}</p>
+            <p className="text-xs opacity-80">Trusted to post official updates.</p>
+          </div>
+          <div className="rounded-xl bg-surface-container-high p-4 text-on-surface shadow-subtle">
+            <p className="text-xs uppercase tracking-wide">Recent metric entries</p>
+            <p className="text-2xl font-semibold">{recentMetricCount.toLocaleString('en-CA')}</p>
+            <p className="text-xs text-muted">Recorded in the latest reporting cycle.</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const systemToolsCard = (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>System tools</CardTitle>
+        <CardDescription>Use these quick links to coordinate moderation, privacy, and communications.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-2 md:grid-cols-2">
+          <Button asChild variant="outline">
+            <Link href="/command-center">Open moderation queue</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/portal/progress">View progress dashboard</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/portal/about">Review privacy commitments</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="mailto:outreach@iharc.ca">Contact IHARC operations</Link>
+          </Button>
+        </div>
+        <p className="text-sm text-muted">
+          Need a configuration that is not listed here? Email the operations team so we can respond in step with neighbours and agency partners.
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  const activeTabId = `admin-tab-${activeTab}`;
+  const activePanelId = `${activeTabId}-panel`;
+
+  let tabBody: ReactNode = null;
+
+  switch (activeTab) {
+    case 'metrics':
+      tabBody = (
+        <>
+          {uploadMetricCard}
+          {isAdmin ? manageMetricsCard : null}
+          {recentMetricsCard}
+        </>
+      );
+      break;
+    case 'organizations':
+      tabBody = <>{registerOrganizationCard}</>;
+      break;
+    case 'invitations':
+      tabBody = <>{invitePartnerCard}</>;
+      break;
+    case 'affiliations':
+      tabBody = isAdmin ? (
+        <>{pendingAffiliationsCard}</>
+      ) : (
+        <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Recent submissions</CardTitle>
+            <CardTitle>Affiliation reviews</CardTitle>
+            <CardDescription>Only IHARC administrators can approve affiliations.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              {recentMetricEntries.map((item) => {
-                const definition = item.metric_catalog;
-                const label = definition?.label ?? definition?.slug ?? 'Metric';
-                const status = item.value_status as Database['portal']['Enums']['metric_value_status'];
-                const unit = definition?.unit ?? null;
-                const value =
-                  status === 'reported' && typeof item.value === 'number'
-                    ? `${formatMetricNumber(item.value)}${unit ? ` ${unit}` : ''}`
-                    : 'Pending update';
-
-                return (
-                  <div
-                    key={`${item.metric_date}-${item.metric_id}`}
-                    className="flex items-center justify-between rounded border border-slate-100 p-2 dark:border-slate-800"
-                  >
-                    <div>
-                      <p className="font-medium">{label}</p>
-                      <p className="text-xs text-muted">
-                        {status === 'pending'
-                          ? `Pending update • ${formatMetricDate(item.metric_date)}`
-                          : formatMetricDate(item.metric_date)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{value}</p>
-                      {item.source ? <p className="text-xs text-muted">{item.source}</p> : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="text-sm text-muted">Reach out to an administrator if you need an affiliation reviewed.</p>
           </CardContent>
         </Card>
-      ) : null}
+      );
+      break;
+    case 'members':
+      tabBody = isAdmin ? (
+        <>
+          {manageMembersCard}
+          {membersHasPagination ? (
+            <Pagination className="pt-2">
+              <PaginationContent>
+                <PaginationItem>
+                  {membersHasPrev ? (
+                    <PaginationPrevious href={createMembersPageUrl(membersPage - 1)} />
+                  ) : (
+                    <PaginationPrevious
+                      href={createMembersPageUrl(membersPage)}
+                      className="pointer-events-none opacity-40"
+                      aria-disabled
+                    />
+                  )}
+                </PaginationItem>
+                {membersPageNumbers.map((pageNumber, index) => {
+                  const previousPage = membersPageNumbers[index - 1];
+                  const showEllipsis = previousPage !== undefined && pageNumber - previousPage > 1;
+                  return (
+                    <Fragment key={pageNumber}>
+                      {showEllipsis ? (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : null}
+                      <PaginationItem>
+                        <PaginationLink href={createMembersPageUrl(pageNumber)} isActive={pageNumber === membersPage} size="default">
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </Fragment>
+                  );
+                })}
+                <PaginationItem>
+                  {membersHasNext ? (
+                    <PaginationNext href={createMembersPageUrl(membersPage + 1)} />
+                  ) : (
+                    <PaginationNext
+                      href={createMembersPageUrl(membersPage)}
+                      className="pointer-events-none opacity-40"
+                      aria-disabled
+                    />
+                  )}
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          ) : null}
+        </>
+      ) : (
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>Members</CardTitle>
+            <CardDescription>Only administrators can manage member roles.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted">
+              Moderators can still champion neighbour input through the moderation queue and community updates.
+            </p>
+          </CardContent>
+        </Card>
+      );
+      break;
+    case 'system':
+      tabBody = isAdmin ? (
+        <>
+          {systemSummaryCard}
+          {systemToolsCard}
+        </>
+      ) : null;
+      break;
+    default:
+      tabBody = (
+        <>
+          {uploadMetricCard}
+          {isAdmin ? manageMetricsCard : null}
+          {recentMetricsCard}
+        </>
+      );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-10">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-semibold text-on-surface">IHARC admin workspace</h1>
+        <p className="text-sm text-on-surface-variant">
+          Coordinate data, partners, and settings so the Integrated Homelessness and Addictions Response Centre stays trusted and collaborative.
+        </p>
+      </header>
+      <div className="overflow-x-auto">
+        <div
+          role="tablist"
+          aria-label="IHARC admin sections"
+          className="inline-flex min-w-full items-center gap-2 rounded-full border border-outline/30 bg-surface-container-low p-1"
+        >
+          {tabs.map((tab) => {
+            const isActive = tab.value === activeTab;
+            const tabId = `admin-tab-${tab.value}`;
+            const href = buildAdminUrl(tab.value, tab.value === 'members' ? { membersPage: '1' } : {});
+            const badgeValue = tab.badge;
+            const showBadge = typeof badgeValue !== 'undefined' && String(badgeValue) !== '0';
+            return (
+              <Link
+                key={tab.value}
+                id={tabId}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`${tabId}-panel`}
+                href={href}
+                className={cn(
+                  'rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+                  isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {tab.label}
+                  {showBadge ? (
+                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">{badgeValue}</span>
+                  ) : null}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+      <div id={activePanelId} role="tabpanel" aria-labelledby={activeTabId} className="space-y-6">
+        {tabBody}
+      </div>
     </div>
   );
 }

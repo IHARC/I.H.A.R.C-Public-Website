@@ -1,19 +1,37 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { TopNavMobile } from '@/components/layout/top-nav-mobile';
+import { TopNavMobile, type MarketingNavItem } from '@/components/layout/top-nav-mobile';
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { getUserNavigation } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { TopNavDropdown, type TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
-const marketingLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/programs', label: 'Programs' },
-  { href: '/data', label: 'Data' },
-  { href: '/get-help', label: 'Get Help' },
-  { href: '/news', label: 'News' },
-  { href: '/emergency', label: 'Emergency' },
-  { href: '/after-the-declaration', label: 'After the Declaration' },
+const emergencyNavigation: TopNavDropdownItem[] = [
+  {
+    href: '/emergency',
+    label: 'Emergency Declaration Brief',
+    description: 'Understand why partners declared a housing and overdose emergency.',
+  },
+  {
+    href: '/portal/petition/state-of-emergency',
+    label: 'Sign the Petition',
+    description: 'Add your support so neighbours and Council advance emergency responses.',
+  },
+  {
+    href: '/after-the-declaration',
+    label: 'After the Declaration',
+    description: 'See how Cobourg residents, agencies, and Council are collaborating now.',
+  },
+];
+
+const marketingNavigation: MarketingNavItem[] = [
+  { type: 'link', href: '/', label: 'Home' },
+  { type: 'link', href: '/about', label: 'About' },
+  { type: 'link', href: '/programs', label: 'Programs' },
+  { type: 'link', href: '/data', label: 'Data' },
+  { type: 'link', href: '/get-help', label: 'Get Help' },
+  { type: 'link', href: '/news', label: 'News' },
+  { type: 'menu', label: 'Emergency Response', items: emergencyNavigation },
 ];
 
 export async function TopNav() {
@@ -64,15 +82,16 @@ export async function TopNav() {
                 className="hidden dark:block"
               />
             </Link>
-            <nav
-              aria-label="Marketing pages"
-              className="hidden flex-1 flex-wrap items-center gap-1.5 lg:flex"
-            >
-              {marketingLinks.map((link) => (
-                <TopNavLink key={link.href} href={link.href}>
-                  {link.label}
-                </TopNavLink>
-              ))}
+            <nav aria-label="Marketing pages" className="hidden flex-1 flex-wrap items-center gap-1.5 lg:flex">
+              {marketingNavigation.map((item) =>
+                item.type === 'link' ? (
+                  <TopNavLink key={item.href} href={item.href}>
+                    {item.label}
+                  </TopNavLink>
+                ) : (
+                  <TopNavDropdown key={item.label} label={item.label} items={item.items} />
+                )
+              )}
             </nav>
           </div>
           <div className="hidden items-center gap-3 md:flex">
@@ -83,7 +102,7 @@ export async function TopNav() {
           <div className="flex items-center gap-2 md:hidden">
             <ThemeToggle />
             <TopNavMobile
-              links={marketingLinks}
+              links={marketingNavigation}
               accountSection={mobileUserNavigation}
               quickAction={portalCtaMobile}
             />

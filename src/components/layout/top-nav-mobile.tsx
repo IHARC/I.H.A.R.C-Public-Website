@@ -1,10 +1,10 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -15,14 +15,24 @@ import {
 } from '@/components/ui/sheet';
 import { portalLinks } from '@/components/layout/portal-nav';
 import { cn } from '@/lib/utils';
+import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
 type MarketingLink = {
+  type: 'link';
   href: string;
   label: string;
 };
 
+type MarketingMenu = {
+  type: 'menu';
+  label: string;
+  items: TopNavDropdownItem[];
+};
+
+export type MarketingNavItem = MarketingLink | MarketingMenu;
+
 type TopNavMobileProps = {
-  links: MarketingLink[];
+  links: MarketingNavItem[];
   accountSection: ReactNode;
   quickAction?: ReactNode;
 };
@@ -32,18 +42,52 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
   const [open, setOpen] = useState(false);
   const onPortalRoute = pathname.startsWith('/portal');
 
+  type MobileMenuItem = {
+    type: 'menu';
+    label: string;
+    isActive: boolean;
+    items: Array<TopNavDropdownItem & { isActive: boolean }>;
+  };
+
+  type MobileLinkItem = {
+    type: 'link';
+    href: string;
+    label: string;
+    isActive: boolean;
+  };
+
+  type MobileNavItem = MobileLinkItem | MobileMenuItem;
+
   const navSections = useMemo(
     () => [
       {
         id: 'marketing',
         title: 'Explore IHARC',
-        items: links.map((link) => {
-          const isHome = link.href === '/';
-          const isActive = isHome ? pathname === '/' : pathname.startsWith(link.href);
+        items: links.map<MobileNavItem>((link) => {
+          if (link.type === 'link') {
+            const isHome = link.href === '/';
+            const isActive = isHome ? pathname === '/' : pathname.startsWith(link.href);
+
+            return {
+              ...link,
+              isActive,
+            };
+          }
+
+          const mappedItems = link.items.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+
+            return {
+              ...item,
+              isActive,
+            };
+          });
 
           return {
-            ...link,
-            isActive,
+            type: 'menu',
+            label: link.label,
+            items: mappedItems,
+            isActive: mappedItems.some((item) => item.isActive),
           };
         }),
       },
@@ -95,27 +139,31 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                 <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
                   {section.title}
                 </p>
-                {section.items.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center justify-between rounded-full px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-                      link.isActive
-                        ? 'bg-secondary-container text-on-secondary-container'
-                        : 'text-on-surface hover:bg-surface-container-highest'
-                    )}
-                    aria-current={link.isActive ? 'page' : undefined}
-                  >
-                    <span>{link.label}</span>
-                    {link.isActive ? (
-                      <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                        Active
-                      </span>
-                    ) : null}
-                  </Link>
-                ))}
+                {section.items.map((item) =>
+                  item.type === 'link' ? (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        'flex items-center justify-between rounded-full px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+                        item.isActive
+                          ? 'bg-secondary-container text-on-secondary-container'
+                          : 'text-on-surface hover:bg-surface-container-highest'
+                      )}
+                      aria-current={item.isActive ? 'page' : undefined}
+                    >
+                      <span>{item.label}</span>
+                      {item.isActive ? (
+                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                          Active
+                        </span>
+                      ) : null}
+                    </Link>
+                  ) : (
+                    <MobileNavCollapsible key={item.label} item={item} closeSheet={() => setOpen(false)} />
+                  )
+                )}
               </div>
             ))}
           </nav>
@@ -158,5 +206,75 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+type MobileNavCollapsibleProps = {
+  item: {
+    label: string;
+    isActive: boolean;
+    items: Array<TopNavDropdownItem & { isActive: boolean }>;
+  };
+  closeSheet: () => void;
+};
+
+function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
+  const [expanded, setExpanded] = useState(item.isActive);
+
+  useEffect(() => {
+    setExpanded(item.isActive);
+  }, [item.isActive]);
+
+  return (
+    <div className={cn('rounded-2xl border border-outline/15 bg-surface-container-low shadow-sm')}>
+      <button
+        type="button"
+        onClick={() => setExpanded((previous) => !previous)}
+        className={cn(
+          'flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          item.isActive || expanded
+            ? 'bg-secondary-container text-on-secondary-container'
+            : 'text-on-surface hover:bg-surface-container-high'
+        )}
+        aria-expanded={expanded}
+        aria-controls={`mobile-menu-${item.label.replace(/\s+/g, '-').toLowerCase()}`}
+      >
+        <span>{item.label}</span>
+        <div className="flex items-center gap-2">
+          {item.isActive ? (
+            <span className="text-xs font-semibold uppercase tracking-wide text-primary">Active</span>
+          ) : null}
+          <ChevronDown
+            className={cn('h-4 w-4 transition-transform', expanded ? 'rotate-180' : undefined)}
+            aria-hidden
+          />
+        </div>
+      </button>
+      <div
+        id={`mobile-menu-${item.label.replace(/\s+/g, '-').toLowerCase()}`}
+        className={cn('gap-1 px-2 pb-2 pt-1 transition', expanded ? 'flex flex-col' : 'hidden')}
+        aria-hidden={!expanded}
+      >
+        {item.items.map((child) => (
+          <Link
+            key={child.href}
+            href={child.href}
+            onClick={closeSheet}
+            className={cn(
+              'rounded-xl px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+              child.isActive
+                ? 'bg-primary/15 text-primary'
+                : 'text-on-surface hover:bg-surface-container-high'
+            )}
+            aria-current={child.isActive ? 'page' : undefined}
+          >
+            <span className="block font-semibold">{child.label}</span>
+            {child.description ? (
+              <span className="mt-0.5 block text-xs text-on-surface/70">{child.description}</span>
+            ) : null}
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
