@@ -8,9 +8,33 @@ import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
 
+const PETITION_SOCIAL_IMAGE = '/Petition-image.png';
+const PETITION_SOCIAL_ALT = 'IHARC petition call to action with neighbours supporting the declaration.';
+
 export const metadata: Metadata = {
   title: 'Petition signers — IHARC',
   description: 'See the public list of neighbours supporting the State of Emergency declaration.',
+  alternates: {
+    canonical: '/petition/signers',
+  },
+  openGraph: {
+    type: 'article',
+    title: 'Petition signers — IHARC',
+    description: 'See the public list of neighbours supporting the State of Emergency declaration.',
+    url: '/petition/signers',
+    images: [
+      {
+        url: PETITION_SOCIAL_IMAGE,
+        alt: PETITION_SOCIAL_ALT,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Petition signers — IHARC',
+    description: 'See the public list of neighbours supporting the State of Emergency declaration.',
+    images: [PETITION_SOCIAL_IMAGE],
+  },
 };
 
 const PAGE_SIZE = 25;

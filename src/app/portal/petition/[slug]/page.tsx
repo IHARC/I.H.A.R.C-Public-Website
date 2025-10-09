@@ -27,6 +27,8 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_
 const DEFAULT_PETITION_TITLE = 'Support the declaration — IHARC';
 const DEFAULT_PETITION_DESCRIPTION =
   'Add your name to the public petition so neighbours, agencies, and the Town can coordinate housing and overdose supports.';
+const PETITION_SOCIAL_IMAGE = '/Petition-image.png';
+const PETITION_SOCIAL_ALT = 'IHARC petition call to action with neighbours supporting the declaration.';
 
 type PetitionSummary = Database['portal']['Views']['petition_public_summary']['Row'];
 type PetitionSignature = Database['portal']['Tables']['petition_signatures']['Row'];
@@ -47,6 +49,24 @@ export async function generateMetadata({
       alternates: {
         canonical: '/portal/petition',
       },
+      openGraph: {
+        type: 'article',
+        title: DEFAULT_PETITION_TITLE,
+        description: DEFAULT_PETITION_DESCRIPTION,
+        url: '/portal/petition',
+        images: [
+          {
+            url: PETITION_SOCIAL_IMAGE,
+            alt: PETITION_SOCIAL_ALT,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: DEFAULT_PETITION_TITLE,
+        description: DEFAULT_PETITION_DESCRIPTION,
+        images: [PETITION_SOCIAL_IMAGE],
+      },
     };
   }
 
@@ -65,6 +85,24 @@ export async function generateMetadata({
         description: DEFAULT_PETITION_DESCRIPTION,
         alternates: {
           canonical: `/portal/petition/${slug}`,
+        },
+        openGraph: {
+          type: 'article',
+          title: DEFAULT_PETITION_TITLE,
+          description: DEFAULT_PETITION_DESCRIPTION,
+          url: `/portal/petition/${slug}`,
+          images: [
+            {
+              url: PETITION_SOCIAL_IMAGE,
+              alt: PETITION_SOCIAL_ALT,
+            },
+          ],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: DEFAULT_PETITION_TITLE,
+          description: DEFAULT_PETITION_DESCRIPTION,
+          images: [PETITION_SOCIAL_IMAGE],
         },
       };
     }
@@ -86,8 +124,8 @@ export async function generateMetadata({
         url: canonicalPath,
         images: [
           {
-            url: '/logo.png',
-            alt: 'IHARC — Integrated Homelessness and Addictions Response Centre',
+            url: PETITION_SOCIAL_IMAGE,
+            alt: PETITION_SOCIAL_ALT,
           },
         ],
       },
@@ -95,7 +133,7 @@ export async function generateMetadata({
         card: 'summary_large_image',
         title,
         description,
-        images: ['/logo.png'],
+        images: [PETITION_SOCIAL_IMAGE],
       },
     };
   } catch (error) {
@@ -106,6 +144,24 @@ export async function generateMetadata({
       description: DEFAULT_PETITION_DESCRIPTION,
       alternates: {
         canonical: canonicalPath,
+      },
+      openGraph: {
+        type: 'article',
+        title: DEFAULT_PETITION_TITLE,
+        description: DEFAULT_PETITION_DESCRIPTION,
+        url: canonicalPath,
+        images: [
+          {
+            url: PETITION_SOCIAL_IMAGE,
+            alt: PETITION_SOCIAL_ALT,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: DEFAULT_PETITION_TITLE,
+        description: DEFAULT_PETITION_DESCRIPTION,
+        images: [PETITION_SOCIAL_IMAGE],
       },
     };
   }
@@ -143,8 +199,7 @@ export default async function PetitionPage({
   if (!petition || !petition.is_active) {
     notFound();
   }
-
-let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null = null;
+  let existingSignature: Pick<PetitionSignature, 'id' | 'created_at' | 'statement' | 'share_with_partners'> | null = null;
   let viewerProfile: PortalProfile | null = null;
 
   if (user) {
