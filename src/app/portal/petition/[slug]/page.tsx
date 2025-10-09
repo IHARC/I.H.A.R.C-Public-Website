@@ -386,9 +386,8 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
         <div className="space-y-2 text-balance">
           <h2 className="text-2xl font-semibold">Sign the petition</h2>
           <p className="text-sm text-on-surface/70">
-            Signing is free and uses the same secure login as the collaboration portal. If you’d rather not create an account,
-            add your name using the secure email option below. In an emergency call 911 and stay with the person until help
-            arrives—the Good Samaritan Drug Overdose Act protects anyone calling for medical support during an overdose.
+            Use your portal login or the secure email option below to add your name. Verified signatures keep the public tally
+            accurate and respectful.
           </p>
         </div>
         <PetitionSignSection
@@ -470,10 +469,6 @@ function PetitionPageContent({ petition, existingSignature, isAuthenticated, vie
           Each signature is verified by email to protect against spam. You can choose to display your full name or initials on
           the public list. We collect only your name, email, and postal code to verify local support. Your email is never shared,
           and you can remove your signature at any time.
-        </p>
-        <p className="text-base text-on-surface/80">
-          If you witness an overdose, call 911 immediately. The Good Samaritan Drug Overdose Act protects anyone seeking medical
-          help during an overdose.
         </p>
         {signedAt ? (
           <p className="text-base text-on-surface">
@@ -575,8 +570,8 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
       <div className="space-y-5">
         <div className="space-y-4 rounded-2xl border border-outline/15 bg-surface-container p-5">
           <p className="text-sm text-on-surface">
-            Create a free account or sign in with your existing portal credentials to add your name to the petition. You
-            can follow ideas, comment on plans, and receive updates when logged in.
+            Create a free account or sign in with your existing portal credentials to add your name to the petition. When
+            you're logged in you can follow ideas, comment on plans, and receive updates.
           </p>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <Link
@@ -593,7 +588,7 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
             </Link>
           </div>
           <p className="text-xs text-on-surface/60">
-            Prefer not to create an account? Use the secure email option below. In an emergency call 911.
+            Prefer not to create an account? Use the secure email option below to verify your signature.
           </p>
         </div>
         <div className="rounded-2xl border border-primary/20 bg-surface-container p-5">
