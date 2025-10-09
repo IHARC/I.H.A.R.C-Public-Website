@@ -571,7 +571,7 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
         <div className="space-y-4 rounded-2xl border border-outline/15 bg-surface-container p-5">
           <p className="text-sm text-on-surface">
             Create a free account or sign in with your existing portal credentials to add your name to the petition. When
-            you're logged in you can follow ideas, comment on plans, and receive updates.
+            you&apos;re logged in you can follow ideas, comment on plans, and receive updates.
           </p>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <Link
