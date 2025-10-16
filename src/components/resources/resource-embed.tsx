@@ -2,12 +2,16 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
-import type { Resource } from '@/data/resources';
+import type { Resource } from '@/lib/resources';
 import { assertAllowedEmbedUrl, getKindLabel } from '@/lib/resources';
 import { sanitizeEmbedHtml } from '@/lib/sanitize-embed';
 
 export function ResourceEmbed({ resource }: { resource: Resource }) {
   const { embed } = resource;
+
+  if (!embed) {
+    return null;
+  }
 
   switch (embed.type) {
     case 'google-doc':

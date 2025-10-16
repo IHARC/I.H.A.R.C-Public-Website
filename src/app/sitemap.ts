@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { resources } from '@/data/resources';
+import { fetchResourceLibrary } from '@/lib/resources';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
 
@@ -18,8 +18,10 @@ const marketingPaths = [
   '/resources',
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const generatedAt = new Date().toISOString();
+
+  const resources = await fetchResourceLibrary();
 
   const staticEntries = marketingPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
@@ -30,7 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const resourceEntries = resources.map((resource) => ({
     url: `${SITE_URL}/resources/${resource.slug}`,
-    lastModified: resource.datePublished,
+    lastModified: resource.updatedAt ?? resource.datePublished,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));

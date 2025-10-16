@@ -1978,6 +1978,79 @@ export type Database = {
           }?,
         ];
       };
+      resource_pages: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          kind: Database["portal"]["Enums"]["resource_kind"];
+          summary: string | null;
+          location: string | null;
+          date_published: string;
+          tags: string[];
+          attachments: Json;
+          embed: Json | null;
+          body_html: string;
+          is_published: boolean;
+          cover_image: string | null;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          title: string;
+          kind?: Database["portal"]["Enums"]["resource_kind"];
+          summary?: string | null;
+          location?: string | null;
+          date_published: string;
+          tags?: string[];
+          attachments?: Json;
+          embed?: Json | null;
+          body_html?: string;
+          is_published?: boolean;
+          cover_image?: string | null;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          title?: string;
+          kind?: Database["portal"]["Enums"]["resource_kind"];
+          summary?: string | null;
+          location?: string | null;
+          date_published?: string;
+          tags?: string[];
+          attachments?: Json;
+          embed?: Json | null;
+          body_html?: string;
+          is_published?: boolean;
+          cover_image?: string | null;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "resource_pages_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "resource_pages_updated_by_profile_id_fkey";
+            columns: ["updated_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       comments: {
         Row: {
           id: string;
@@ -2500,6 +2573,14 @@ export type Database = {
         | "sad"
         | "angry"
         | "minus_one";
+      resource_kind:
+        | "delegation"
+        | "report"
+        | "presentation"
+        | "policy"
+        | "press"
+        | "dataset"
+        | "other";
       petition_display_preference:
         | "anonymous"
         | "first_name_last_initial"
@@ -2752,6 +2833,15 @@ export const Constants = {
         "anonymous",
         "first_name_last_initial",
         "full_name",
+      ] as const,
+      resource_kind: [
+        "delegation",
+        "report",
+        "presentation",
+        "policy",
+        "press",
+        "dataset",
+        "other",
       ] as const,
     },
   },

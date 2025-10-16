@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { Resource } from '@/data/resources';
-import type { ResourceFilters } from '@/lib/resources';
+import type { Resource, ResourceFilters } from '@/lib/resources';
 import { trackEvent } from '@/lib/analytics';
 
 export function ResourceIndexAnalytics({

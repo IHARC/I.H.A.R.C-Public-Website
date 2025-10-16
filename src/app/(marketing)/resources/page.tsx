@@ -2,8 +2,15 @@ import type { Metadata } from 'next';
 import { ResourceCard } from '@/components/resources/resource-card';
 import { ResourceFiltersControls } from '@/components/resources/resource-filters';
 import { ResourceIndexAnalytics } from '@/components/resources/resource-analytics';
-import { RESOURCE_KIND_LABELS } from '@/data/resources';
-import { getResourceTags, getResourceYears, listResources, normalizeFilters, type ResourceFilters } from '@/lib/resources';
+import {
+  RESOURCE_KIND_LABELS,
+  fetchResourceLibrary,
+  filterResources,
+  getResourceTags,
+  getResourceYears,
+  normalizeFilters,
+  type ResourceFilters,
+} from '@/lib/resources';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
 
@@ -24,9 +31,10 @@ export default async function ResourcesPage({
   const filters = fromSearchParams(resolved);
   const normalized = normalizeFilters(filters);
 
-  const items = listResources(normalized);
-  const tags = getResourceTags();
-  const years = getResourceYears();
+  const dataset = await fetchResourceLibrary();
+  const items = filterResources(dataset, normalized);
+  const tags = getResourceTags(dataset);
+  const years = getResourceYears(dataset);
   const kinds = (Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>).map((value) => ({
     value,
     label: RESOURCE_KIND_LABELS[value],

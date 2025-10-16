@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { filterResources, normalizeFilters, isAllowedEmbedUrl } from '../src/lib/resources';
 import { sanitizeEmbedHtml } from '../src/lib/sanitize-embed';
-import type { Resource } from '../src/data/resources';
+import type { Resource } from '../src/lib/resources';
 
 const mockResources: Resource[] = [
   {
+    id: 'resource-1',
     slug: 'delegation-a',
     title: 'Cobourg Delegation on Winter Shelter Expansion',
     kind: 'delegation',
@@ -12,24 +13,46 @@ const mockResources: Resource[] = [
     summary: 'Update to council on emergency shelter expansion plans.',
     location: 'Cobourg Council Chambers',
     tags: ['cobourg', 'emergency response'],
+    attachments: [],
     embed: { type: 'external', url: 'https://iharc.ca/resources/delegation-a' },
+    bodyHtml: '<p>Delegation summary</p>',
+    isPublished: true,
+    coverImage: null,
+    createdAt: '2024-02-10T10:00:00.000Z',
+    updatedAt: '2024-02-16T10:00:00.000Z',
   },
   {
+    id: 'resource-2',
     slug: 'report-b',
     title: 'Northumberland Housing Report 2023',
     kind: 'report',
     datePublished: '2023-11-30',
     summary: 'Annual snapshot of coordinated housing work.',
     tags: ['housing', 'annual'],
+    attachments: [],
     embed: { type: 'external', url: 'https://iharc.ca/resources/report-b' },
+    bodyHtml: '<p>Report summary</p>',
+    isPublished: true,
+    coverImage: null,
+    createdAt: '2023-11-15T10:00:00.000Z',
+    updatedAt: '2023-12-01T10:00:00.000Z',
   },
   {
+    id: 'resource-3',
     slug: 'policy-c',
     title: 'Naloxone Policy Brief',
     kind: 'policy',
     datePublished: '2022-06-12',
     tags: ['overdose response'],
+    attachments: [],
     embed: { type: 'external', url: 'https://iharc.ca/resources/policy-c' },
+    summary: null,
+    location: null,
+    bodyHtml: '<p>Policy summary</p>',
+    isPublished: true,
+    coverImage: null,
+    createdAt: '2022-06-01T10:00:00.000Z',
+    updatedAt: '2022-06-13T10:00:00.000Z',
   },
 ];
 

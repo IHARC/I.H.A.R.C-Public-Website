@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import type { Resource } from '@/data/resources';
+import type { Resource } from '@/lib/resources';
 import { formatResourceDate, getKindLabel } from '@/lib/resources';
 
 export function ResourceCard({ resource }: { resource: Resource }) {

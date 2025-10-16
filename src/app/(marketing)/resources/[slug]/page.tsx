@@ -5,14 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ResourceDetailAnalytics } from '@/components/resources/resource-analytics';
 import { ResourceEmbed } from '@/components/resources/resource-embed';
-import { getResourceBySlug, resources } from '@/data/resources';
-import { formatResourceDate, getKindLabel } from '@/lib/resources';
+import { formatResourceDate, getKindLabel, getResourceBySlug } from '@/lib/resources';
+import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
 
-export function generateStaticParams() {
-  return resources.map((resource) => ({ slug: resource.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 type RouteParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -26,7 +24,7 @@ export async function generateMetadata({ params }: { params: RouteParams }): Pro
     };
   }
 
-  const resource = getResourceBySlug(slug);
+  const resource = await getResourceBySlug(slug);
 
   if (!resource) {
     return {
@@ -61,7 +59,7 @@ export default async function ResourceDetailPage({ params }: { params: RoutePara
     notFound();
   }
 
-  const resource = getResourceBySlug(slug);
+  const resource = await getResourceBySlug(slug);
 
   if (!resource) {
     notFound();
@@ -114,11 +112,23 @@ export default async function ResourceDetailPage({ params }: { params: RoutePara
         {resource.summary ? <p className="text-base text-on-surface/80">{resource.summary}</p> : null}
       </header>
 
-      <section aria-label="Primary resource" className="space-y-6">
-        <ResourceEmbed resource={resource} />
-      </section>
+      {resource.embed ? (
+        <section aria-label="Primary resource" className="space-y-6">
+          <ResourceEmbed resource={resource} />
+        </section>
+      ) : null}
 
-      {resource.attachments?.length ? (
+      {resource.bodyHtml ? (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold text-on-surface">About this resource</h2>
+          <div
+            className="prose prose-slate max-w-none rounded-3xl border border-outline/15 bg-surface p-6 text-on-surface prose-headings:text-on-surface prose-strong:text-on-surface prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+            dangerouslySetInnerHTML={{ __html: sanitizeResourceHtml(resource.bodyHtml) }}
+          />
+        </section>
+      ) : null}
+
+      {resource.attachments.length ? (
         <section className="space-y-3">
           <h2 className="text-xl font-semibold text-on-surface">Attachments</h2>
           <ul className="space-y-3">

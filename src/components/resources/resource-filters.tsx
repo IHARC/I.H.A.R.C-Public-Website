@@ -6,8 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ResourceFilters } from '@/lib/resources';
-import type { ResourceKind } from '@/data/resources';
+import type { ResourceFilters, ResourceKind } from '@/lib/resources';
 
 const ALL_VALUE = 'all';
 
