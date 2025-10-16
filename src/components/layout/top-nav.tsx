@@ -29,6 +29,7 @@ const marketingNavigation: MarketingNavItem[] = [
   { type: 'link', href: '/about', label: 'About' },
   { type: 'link', href: '/programs', label: 'Programs' },
   { type: 'link', href: '/data', label: 'Data' },
+  { type: 'link', href: '/resources', label: 'Reports & Resources' },
   { type: 'link', href: '/get-help', label: 'Get Help' },
   { type: 'link', href: '/news', label: 'News' },
   { type: 'menu', label: 'Emergency Response', items: emergencyNavigation },
