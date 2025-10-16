@@ -54,8 +54,17 @@ Local development runs at `http://localhost:3000`.
 | `npm run e2e` | Playwright end-to-end smoke tests (after `npm run build`) |
 | `npm run build` | Production build orchestrated by `build.js` (lint + build) |
 | `npm run start` | Preview the production build locally |
+| `npm run preview` | Start the production build on port 4321 for Playwright |
 
 `npm run build` executes `build.js`, mirroring the Azure Static Web Apps pipeline. The output is a standalone Next.js bundle under `.next/` that Azure serves with SSR/API integration.
+
+## Reports & Resources Hub
+- Marketing resources live at `/resources` with detail pages at `/resources/[slug]`. Content is sourced from the typed catalog in [`src/data/resources.ts`](./src/data/resources.ts).
+- Each resource entry supports the following fields: `slug`, `title`, `kind`, `datePublished`, optional `summary`, optional `location`, `tags`, an `embed` union (Google Doc, PDF, video, external link, or sanitized HTML), optional `attachments`, and optional `coverImage` for future social previews.
+- Embeds are restricted to an allowlist defined in [`src/lib/resources.ts`](./src/lib/resources.ts). Approved hosts include `docs.google.com`, `drive.google.com`, `www.youtube.com`, `youtube.com`, `youtu.be`, `player.vimeo.com`, `vimeo.com`, and `iharc.ca`. Update the allowlist before introducing a new host.
+- Raw HTML embeds are cleaned with [`sanitizeEmbedHtml`](./src/lib/sanitize-embed.ts), which strips scripts, enforces safe iframe attributes, and blocks non-allowlisted hosts.
+- Add attachments by providing `{ label, url }` pairs in the `attachments` array. Attachments render as download buttons beneath the primary embed on the detail page.
+- To add a new resource, update the catalog file, ensure the embed host is allowed, and optionally supply a `coverImage` URL for metadata. Query parameters on `/resources` (`q`, `kind`, `tag`, `year`) power search, type, tag, and year filtering automatically.
 
 ## Portal Overview
 All `/portal/*` routes export `dynamic = 'force-dynamic'` to read fresh Supabase data on every request. Authenticated and guest states are handled via Supabase's RLS policies and RPC helpers.
