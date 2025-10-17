@@ -16,7 +16,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
 import {
   Pagination,
   PaginationContent,
@@ -37,17 +36,7 @@ import {
   isValidMythStatus,
   type MythStatus,
 } from '@/lib/myth-busting';
-import {
-  RESOURCE_KIND_LABELS,
-  assertAllowedEmbedUrl,
-  formatResourceDate,
-  fetchResourceLibrary,
-  normalizeResourceSlug,
-  type Resource,
-  type ResourceAttachment,
-} from '@/lib/resources';
-import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
-import { sanitizeEmbedHtml } from '@/lib/sanitize-embed';
+import { RESOURCE_KIND_LABELS, formatResourceDate, fetchResourceLibrary, type Resource } from '@/lib/resources';
 import type { Database } from '@/types/supabase';
 
 const GOVERNMENT_ROLE_TYPES: Database['portal']['Enums']['government_role_type'][] = ['staff', 'politician'];
@@ -126,160 +115,6 @@ function normalizeMetricSlug(value: string): string {
     .slice(0, 64);
 }
 
-type ResourceEmbedFormType = 'none' | 'google-doc' | 'pdf' | 'video' | 'external' | 'html';
-
-type ResourceEmbedFormValues = {
-  type: ResourceEmbedFormType;
-  url: string;
-  provider: 'youtube' | 'vimeo';
-  label: string;
-  html: string;
-};
-
-function parseResourceTagsInput(input: string): string[] {
-  return input
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter((entry) => entry.length > 0)
-    .map((entry) => entry.toLowerCase())
-    .slice(0, 20);
-}
-
-function parseResourceAttachmentsInput(input: string): ResourceAttachment[] {
-  const lines = input.split('\n').map((line) => line.trim()).filter(Boolean);
-  const attachments: ResourceAttachment[] = [];
-
-  for (const line of lines) {
-    const [labelPart, urlPart] = line.split('|').map((segment) => segment.trim());
-    const url = urlPart ?? labelPart ?? '';
-    if (!url) {
-      continue;
-    }
-    let normalizedUrl: string;
-    try {
-      normalizedUrl = new URL(url).toString();
-    } catch (error) {
-      throw new Error(`Attachment URL must be valid. Check: ${url}`);
-    }
-    const label = labelPart && urlPart ? labelPart : normalizedUrl;
-    attachments.push({ label: label.slice(0, 160), url: normalizedUrl });
-  }
-
-  return attachments.slice(0, 10);
-}
-
-function attachmentsToTextarea(attachments: ResourceAttachment[]): string {
-  return attachments
-    .map((attachment) => `${attachment.label} | ${attachment.url}`)
-    .join('\n');
-}
-
-function getResourceEmbedFormValues(resource: Resource): ResourceEmbedFormValues {
-  const embed = resource.embed;
-  if (!embed) {
-    return {
-      type: 'none',
-      url: '',
-      provider: 'youtube',
-      label: '',
-      html: '',
-    };
-  }
-
-  switch (embed.type) {
-    case 'google-doc':
-    case 'pdf':
-      return {
-        type: embed.type,
-        url: embed.url,
-        provider: 'youtube',
-        label: '',
-        html: '',
-      };
-    case 'video':
-      return {
-        type: 'video',
-        url: embed.url,
-        provider: embed.provider,
-        label: '',
-        html: '',
-      };
-    case 'external':
-      return {
-        type: 'external',
-        url: embed.url,
-        provider: 'youtube',
-        label: embed.label ?? '',
-        html: '',
-      };
-    case 'html':
-      return {
-        type: 'html',
-        url: '',
-        provider: 'youtube',
-        label: '',
-        html: embed.html,
-      };
-    default:
-      return {
-        type: 'none',
-        url: '',
-        provider: 'youtube',
-        label: '',
-        html: '',
-      };
-  }
-}
-
-function buildResourceEmbedPayload(values: {
-  type: string;
-  url?: string | null;
-  provider?: string | null;
-  label?: string | null;
-  html?: string | null;
-}): Record<string, unknown> | null {
-  const type = values.type;
-  if (!type || type === 'none') {
-    return null;
-  }
-
-  switch (type) {
-    case 'google-doc':
-    case 'pdf': {
-      const url = values.url?.trim();
-      if (!url) {
-        throw new Error('Provide a URL for the embed.');
-      }
-      assertAllowedEmbedUrl(url, 'resource_embed');
-      return { type, url };
-    }
-    case 'video': {
-      const url = values.url?.trim();
-      const provider = values.provider === 'vimeo' ? 'vimeo' : 'youtube';
-      if (!url) {
-        throw new Error('Provide a video URL to embed.');
-      }
-      assertAllowedEmbedUrl(url, 'resource_video_embed');
-      return { type, url, provider };
-    }
-    case 'external': {
-      const url = values.url?.trim();
-      if (!url) {
-        throw new Error('Provide the external resource URL.');
-      }
-      return { type, url, label: values.label?.trim() ?? undefined };
-    }
-    case 'html': {
-      const html = values.html?.trim();
-      if (!html) {
-        throw new Error('Paste the HTML snippet you would like to embed.');
-      }
-      return { type, html: sanitizeEmbedHtml(html) };
-    }
-    default:
-      return null;
-  }
-}
 
 type ProfileInviteWithOrg = {
   id: string;
@@ -1205,316 +1040,6 @@ async function deleteMythEntry(formData: FormData) {
 
   revalidatePath('/command-center/admin');
   revalidatePath('/myth-busting');
-}
-
-async function createResourcePage(formData: FormData) {
-  'use server';
-
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
-
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
-  if (!actorProfileId) {
-    throw new Error('Admin context is required.');
-  }
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supa.auth.getUser();
-
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
-  }
-
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to publish resources.');
-  }
-
-  const title = (formData.get('title') as string | null)?.trim() ?? '';
-  if (!title) {
-    throw new Error('Add a resource title.');
-  }
-
-  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
-  let slug = normalizeResourceSlug(slugInput || title);
-  if (!slug) {
-    slug = `resource-${Date.now()}`;
-  }
-
-  const kindInput = (formData.get('kind') as string | null)?.trim() ?? '';
-  if (!kindInput || !Object.hasOwn(RESOURCE_KIND_LABELS, kindInput)) {
-    throw new Error('Select a valid resource type.');
-  }
-  const kind = kindInput as Resource['kind'];
-
-  const datePublished = (formData.get('date_published') as string | null)?.trim() ?? '';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePublished)) {
-    throw new Error('Enter the publication date in YYYY-MM-DD format.');
-  }
-
-  const summary = (formData.get('summary') as string | null)?.trim() ?? null;
-  const location = (formData.get('location') as string | null)?.trim() ?? null;
-
-  const tagsInput = (formData.get('tags') as string | null)?.trim() ?? '';
-  const tags = parseResourceTagsInput(tagsInput);
-
-  const attachmentsInput = (formData.get('attachments') as string | null)?.trim() ?? '';
-  const attachments = parseResourceAttachmentsInput(attachmentsInput);
-
-  const embedType = (formData.get('embed_type') as string | null)?.trim() ?? 'none';
-  const embedUrl = (formData.get('embed_url') as string | null)?.trim() ?? '';
-  const embedProvider = (formData.get('embed_provider') as string | null)?.trim() ?? 'youtube';
-  const embedLabel = (formData.get('embed_label') as string | null)?.trim() ?? '';
-  const embedHtml = (formData.get('embed_html') as string | null) ?? '';
-
-  const embedPayload = buildResourceEmbedPayload({
-    type: embedType,
-    url: embedUrl,
-    provider: embedProvider,
-    label: embedLabel,
-    html: embedHtml,
-  });
-
-  const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
-  const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
-
-  const isPublished = formData.get('is_published') === 'on';
-
-  const { data: inserted, error: insertError } = await portalClient
-    .from('resource_pages')
-    .insert({
-      slug,
-      title,
-      kind,
-      date_published: datePublished,
-      summary,
-      location,
-      tags,
-      attachments,
-      embed: embedPayload,
-      body_html: bodyHtml,
-      is_published: isPublished,
-      created_by_profile_id: actorProfileId,
-      updated_by_profile_id: actorProfileId,
-    })
-    .select('id, slug')
-    .maybeSingle();
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  await logAuditEvent(supa, {
-    actorProfileId,
-    action: 'resource_page_created',
-    entityType: 'resource_page',
-    entityId: inserted?.id ?? null,
-    meta: {
-      slug,
-      kind,
-      is_published: isPublished,
-      tags,
-    },
-  });
-
-  revalidatePath('/resources');
-  revalidatePath(`/resources/${slug}`);
-  revalidatePath('/sitemap.xml');
-}
-
-async function updateResourcePage(formData: FormData) {
-  'use server';
-
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
-
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
-  const resourceId = formData.get('resource_id') as string | null;
-  const currentSlug = (formData.get('current_slug') as string | null)?.trim() ?? null;
-
-  if (!actorProfileId || !resourceId) {
-    throw new Error('Admin context is required.');
-  }
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supa.auth.getUser();
-
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
-  }
-
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to update resources.');
-  }
-
-  const { data: existing, error: existingError } = await portalClient
-    .from('resource_pages')
-    .select('slug')
-    .eq('id', resourceId)
-    .maybeSingle();
-
-  if (existingError || !existing) {
-    throw existingError ?? new Error('Resource not found.');
-  }
-
-  const title = (formData.get('title') as string | null)?.trim() ?? '';
-  if (!title) {
-    throw new Error('Add a resource title.');
-  }
-
-  const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
-  let slug = normalizeResourceSlug(slugInput || title);
-  if (!slug) {
-    slug = existing.slug;
-  }
-
-  const kindInput = (formData.get('kind') as string | null)?.trim() ?? '';
-  if (!kindInput || !Object.hasOwn(RESOURCE_KIND_LABELS, kindInput)) {
-    throw new Error('Select a valid resource type.');
-  }
-  const kind = kindInput as Resource['kind'];
-
-  const datePublished = (formData.get('date_published') as string | null)?.trim() ?? '';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePublished)) {
-    throw new Error('Enter the publication date in YYYY-MM-DD format.');
-  }
-
-  const summary = (formData.get('summary') as string | null)?.trim() ?? null;
-  const location = (formData.get('location') as string | null)?.trim() ?? null;
-  const tagsInput = (formData.get('tags') as string | null)?.trim() ?? '';
-  const tags = parseResourceTagsInput(tagsInput);
-  const attachmentsInput = (formData.get('attachments') as string | null)?.trim() ?? '';
-  const attachments = parseResourceAttachmentsInput(attachmentsInput);
-
-  const embedType = (formData.get('embed_type') as string | null)?.trim() ?? 'none';
-  const embedUrl = (formData.get('embed_url') as string | null)?.trim() ?? '';
-  const embedProvider = (formData.get('embed_provider') as string | null)?.trim() ?? 'youtube';
-  const embedLabel = (formData.get('embed_label') as string | null)?.trim() ?? '';
-  const embedHtml = (formData.get('embed_html') as string | null) ?? '';
-
-  const embedPayload = buildResourceEmbedPayload({
-    type: embedType,
-    url: embedUrl,
-    provider: embedProvider,
-    label: embedLabel,
-    html: embedHtml,
-  });
-
-  const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
-  const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
-  const isPublished = formData.get('is_published') === 'on';
-
-  const { error: updateError } = await portalClient
-    .from('resource_pages')
-    .update({
-      slug,
-      title,
-      kind,
-      date_published: datePublished,
-      summary,
-      location,
-      tags,
-      attachments,
-      embed: embedPayload,
-      body_html: bodyHtml,
-      is_published: isPublished,
-      updated_by_profile_id: actorProfileId,
-    })
-    .eq('id', resourceId);
-
-  if (updateError) {
-    throw updateError;
-  }
-
-  await logAuditEvent(supa, {
-    actorProfileId,
-    action: 'resource_page_updated',
-    entityType: 'resource_page',
-    entityId: resourceId,
-    meta: {
-      slug,
-      kind,
-      is_published: isPublished,
-      tags,
-    },
-  });
-
-  revalidatePath('/resources');
-  revalidatePath(`/resources/${slug}`);
-  if (currentSlug && currentSlug !== slug) {
-    revalidatePath(`/resources/${currentSlug}`);
-  }
-  revalidatePath('/sitemap.xml');
-}
-
-async function deleteResourcePage(formData: FormData) {
-  'use server';
-
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
-
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
-  const resourceId = formData.get('resource_id') as string | null;
-  const resourceSlug = (formData.get('resource_slug') as string | null)?.trim() ?? null;
-
-  if (!actorProfileId || !resourceId) {
-    throw new Error('Admin context is required.');
-  }
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supa.auth.getUser();
-
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
-  }
-
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to remove resources.');
-  }
-
-  const { error: deleteError } = await portalClient.from('resource_pages').delete().eq('id', resourceId);
-  if (deleteError) {
-    throw deleteError;
-  }
-
-  await logAuditEvent(supa, {
-    actorProfileId,
-    action: 'resource_page_deleted',
-    entityType: 'resource_page',
-    entityId: resourceId,
-    meta: {
-      slug: resourceSlug,
-    },
-  });
-
-  revalidatePath('/resources');
-  if (resourceSlug) {
-    revalidatePath(`/resources/${resourceSlug}`);
-  }
-  revalidatePath('/sitemap.xml');
 }
 
 async function createOrganization(formData: FormData) {
@@ -2631,317 +2156,65 @@ async function createOrganization(formData: FormData) {
   const manageResourcesCard = isAdmin ? (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Reports &amp; resources</CardTitle>
-        <CardDescription>
-          Publish delegations, briefings, and community-ready updates so neighbours can act on shared evidence.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <section className="rounded-3xl border border-outline/20 bg-surface-container p-4 sm:p-6">
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-on-surface">Add resource</h3>
-            <p className="text-sm text-on-surface/70">
-              Use language that emphasizes collaboration and dignity. Include at least one clear action neighbours can take, and remind readers that in an emergency they should call 911 immediately.
-            </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Reports &amp; resources</CardTitle>
+            <CardDescription>Track published materials and route edits to a dedicated workspace.</CardDescription>
           </div>
-          <form action={createResourcePage} className="mt-4 space-y-6">
-            <input type="hidden" name="actor_profile_id" value={profile.id} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_title">Title</Label>
-                <Input id="new_resource_title" name="title" required maxLength={160} placeholder="e.g. Coordinated outreach report" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_slug">Slug (optional)</Label>
-                <Input id="new_resource_slug" name="slug" maxLength={80} placeholder="coordinated-outreach-report" />
-                <p className="text-xs text-muted">Leave blank to auto-generate a slug from the title.</p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_kind">Resource type</Label>
-                <Select name="kind" defaultValue="report" required>
-                  <SelectTrigger id="new_resource_kind">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>).map((value) => (
-                      <SelectItem key={value} value={value}>
-                        {RESOURCE_KIND_LABELS[value]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_date">Publication date</Label>
-                <Input id="new_resource_date" name="date_published" type="date" required />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_summary">Summary</Label>
-                <Textarea
-                  id="new_resource_summary"
-                  name="summary"
-                  rows={3}
-                  placeholder="Summarize the key message in two sentences."
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_location">Location (optional)</Label>
-                <Input id="new_resource_location" name="location" placeholder="Northumberland County Council Chambers" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_tags">Tags (comma separated)</Label>
-                <Input id="new_resource_tags" name="tags" placeholder="housing, overdose response, outreach" />
-                <p className="text-xs text-muted">Use lower-case keywords so filters stay consistent.</p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_attachments">Attachments (optional)</Label>
-                <Textarea
-                  id="new_resource_attachments"
-                  name="attachments"
-                  rows={3}
-                  placeholder={`Download the briefing (PDF) | https://example.ca/briefing.pdf`}
-                />
-                <p className="text-xs text-muted">One per line using “Label | https://link”. Only verified hosts will display.</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_embed_type">Embed</Label>
-                <Select name="embed_type" defaultValue="none">
-                  <SelectTrigger id="new_resource_embed_type">
-                    <SelectValue placeholder="Select embed" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No embed</SelectItem>
-                    <SelectItem value="google-doc">Google Doc</SelectItem>
-                    <SelectItem value="pdf">PDF viewer</SelectItem>
-                    <SelectItem value="video">Video (YouTube or Vimeo)</SelectItem>
-                    <SelectItem value="external">External link</SelectItem>
-                    <SelectItem value="html">Custom HTML snippet</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted">Paste urls from trusted hosts only. HTML snippets are sanitized automatically.</p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_embed_url">Embed URL</Label>
-                <Input id="new_resource_embed_url" name="embed_url" placeholder="https://docs.google.com/..." />
-                <p className="text-xs text-muted">Used for Google Docs, PDFs, videos, and external links.</p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_embed_provider">Video provider</Label>
-                <Select name="embed_provider" defaultValue="youtube">
-                  <SelectTrigger id="new_resource_embed_provider">
-                    <SelectValue placeholder="Select provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="vimeo">Vimeo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_resource_embed_label">External link label</Label>
-                <Input id="new_resource_embed_label" name="embed_label" placeholder="Open resource" />
-              </div>
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="new_resource_embed_html">Custom HTML snippet</Label>
-                <Textarea id="new_resource_embed_html" name="embed_html" rows={4} placeholder="&lt;iframe ...&gt;&lt;/iframe&gt;" />
-              </div>
-            </div>
-
-            <ResourceRichTextEditor
-              name="body_html"
-              label="Body content"
-              description="Compose the accessible narrative for this resource. Use headings, lists, and links to reinforce shared accountability."
-            />
-
-            <div className="flex items-center gap-2">
-              <Checkbox id="new_resource_published" name="is_published" defaultChecked />
-              <Label htmlFor="new_resource_published" className="text-sm">
-                Publish immediately to the public marketing page
-              </Label>
-            </div>
-
-            <Button type="submit" className="justify-self-start">
-              Save resource
-            </Button>
-          </form>
-        </section>
-
-        <section className="space-y-4">
-          <h3 className="text-sm font-semibold text-on-surface-variant">Edit existing resources</h3>
-          {resourcePages.length ? (
-            <div className="space-y-4">
-              {resourcePages.map((resource) => {
-                const attachmentsValue = attachmentsToTextarea(resource.attachments);
-                const embedFields = getResourceEmbedFormValues(resource);
-                const tagsValue = resource.tags.join(', ');
-                const updatedDate = new Date(resource.updatedAt).toLocaleDateString('en-CA', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                });
-
-                return (
-                  <details key={resource.id} className="group rounded-3xl border border-outline/20 bg-surface shadow-sm">
-                    <summary className="flex cursor-pointer flex-col gap-3 px-4 py-3 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                      <div className="space-y-2">
-                        <div className="space-y-1">
-                          <p className="text-base font-semibold text-on-surface">{resource.title}</p>
-                          <p className="text-sm text-on-surface/70">Published {formatResourceDate(resource.datePublished)}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline" className="border-primary/60 bg-primary/10 text-primary">
-                            {RESOURCE_KIND_LABELS[resource.kind]}
-                          </Badge>
-                          <Badge variant={resource.isPublished ? 'secondary' : 'outline'} className={cn(resource.isPublished ? '' : 'border-outline/40 text-on-surface/70')}>
-                            {resource.isPublished ? 'Live' : 'Draft'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <span className="text-xs text-on-surface/60">Updated {updatedDate}</span>
-                    </summary>
-                    <div className="space-y-6 border-t border-outline/15 px-4 py-4 sm:px-6">
-                      <form action={updateResourcePage} className="space-y-6">
-                        <input type="hidden" name="actor_profile_id" value={profile.id} />
-                        <input type="hidden" name="resource_id" value={resource.id} />
-                        <input type="hidden" name="current_slug" value={resource.slug} />
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-title-${resource.id}`}>Title</Label>
-                            <Input id={`resource-title-${resource.id}`} name="title" defaultValue={resource.title} required maxLength={160} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-slug-${resource.id}`}>Slug</Label>
-                            <Input id={`resource-slug-${resource.id}`} name="slug" defaultValue={resource.slug} maxLength={80} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-kind-${resource.id}`}>Resource type</Label>
-                            <Select name="kind" defaultValue={resource.kind}>
-                              <SelectTrigger id={`resource-kind-${resource.id}`}>
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {(Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>).map((value) => (
-                                  <SelectItem key={value} value={value}>
-                                    {RESOURCE_KIND_LABELS[value]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-date-${resource.id}`}>Publication date</Label>
-                            <Input id={`resource-date-${resource.id}`} name="date_published" type="date" defaultValue={resource.datePublished} required />
-                          </div>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-summary-${resource.id}`}>Summary</Label>
-                            <Textarea id={`resource-summary-${resource.id}`} name="summary" rows={3} defaultValue={resource.summary ?? ''} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-location-${resource.id}`}>Location</Label>
-                            <Input id={`resource-location-${resource.id}`} name="location" defaultValue={resource.location ?? ''} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-tags-${resource.id}`}>Tags</Label>
-                            <Input id={`resource-tags-${resource.id}`} name="tags" defaultValue={tagsValue} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-attachments-${resource.id}`}>Attachments</Label>
-                            <Textarea id={`resource-attachments-${resource.id}`} name="attachments" rows={3} defaultValue={attachmentsValue} />
-                          </div>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-embed-type-${resource.id}`}>Embed</Label>
-                            <Select name="embed_type" defaultValue={embedFields.type}>
-                              <SelectTrigger id={`resource-embed-type-${resource.id}`}>
-                                <SelectValue placeholder="Select embed" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">No embed</SelectItem>
-                                <SelectItem value="google-doc">Google Doc</SelectItem>
-                                <SelectItem value="pdf">PDF viewer</SelectItem>
-                                <SelectItem value="video">Video (YouTube or Vimeo)</SelectItem>
-                                <SelectItem value="external">External link</SelectItem>
-                                <SelectItem value="html">Custom HTML snippet</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-embed-url-${resource.id}`}>Embed URL</Label>
-                            <Input id={`resource-embed-url-${resource.id}`} name="embed_url" defaultValue={embedFields.url} />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-embed-provider-${resource.id}`}>Video provider</Label>
-                            <Select name="embed_provider" defaultValue={embedFields.provider}>
-                              <SelectTrigger id={`resource-embed-provider-${resource.id}`}>
-                                <SelectValue placeholder="Select provider" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="youtube">YouTube</SelectItem>
-                                <SelectItem value="vimeo">Vimeo</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor={`resource-embed-label-${resource.id}`}>External link label</Label>
-                            <Input id={`resource-embed-label-${resource.id}`} name="embed_label" defaultValue={embedFields.label} />
-                          </div>
-                          <div className="grid gap-2 md:col-span-2">
-                            <Label htmlFor={`resource-embed-html-${resource.id}`}>Custom HTML snippet</Label>
-                            <Textarea id={`resource-embed-html-${resource.id}`} name="embed_html" rows={4} defaultValue={embedFields.html} />
-                          </div>
-                        </div>
-
-                        <ResourceRichTextEditor
-                          name="body_html"
-                          label="Body content"
-                          defaultValue={resource.bodyHtml}
-                          description="Keep copy accessible and strengths-based. Reminder: the Good Samaritan Drug Overdose Act protects anyone helping during a suspected poisoning."
-                        />
-
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id={`resource-published-${resource.id}`}
-                            name="is_published"
-                            defaultChecked={resource.isPublished}
-                          />
-                          <Label htmlFor={`resource-published-${resource.id}`} className="text-sm">
-                            Visible on the public marketing page
-                          </Label>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3 pt-2">
-                          <Button type="submit">Save changes</Button>
-                          <Button
-                            formAction={deleteResourcePage}
-                            variant="destructive"
-                            type="submit"
-                            name="resource_slug"
-                            value={resource.slug}
-                          >
-                            Delete resource
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-                  </details>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-muted">Resources created here will appear in the public Reports &amp; Resources index.</p>
-          )}
-        </section>
+          <Button asChild>
+            <Link href="/command-center/admin/resources/new">Create resource</Link>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {resourcePages.length ? (
+          <div className="divide-y divide-outline/20 rounded-3xl border border-outline/20 bg-surface">
+            {resourcePages.map((resource) => {
+              const publishedLabel = resource.isPublished ? 'Published' : 'Draft';
+              const updatedDisplay = new Date(resource.updatedAt).toLocaleDateString('en-CA', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              });
+              return (
+                <div
+                  key={resource.id}
+                  className="flex flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-on-surface">{resource.title}</p>
+                    <p className="text-sm text-on-surface/70">
+                      {RESOURCE_KIND_LABELS[resource.kind]} • Published {formatResourceDate(resource.datePublished)}
+                    </p>
+                    <p className="text-xs uppercase tracking-wide text-on-surface/50">
+                      {publishedLabel} • Updated {updatedDisplay}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={resource.isPublished ? 'secondary' : 'outline'}
+                      className={resource.isPublished ? '' : 'border-outline/40 text-on-surface/70'}
+                    >
+                      {publishedLabel}
+                    </Badge>
+                    <Button asChild size="sm" variant="secondary">
+                      <Link href={`/command-center/admin/resources/${resource.slug}`}>Edit</Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/resources/${resource.slug}`} target="_blank" rel="noreferrer">
+                        View
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-muted">
+            No resources yet. Use “Create resource” to add reports, delegations, or community updates for the marketing site.
+          </p>
+        )}
       </CardContent>
     </Card>
   ) : null;
