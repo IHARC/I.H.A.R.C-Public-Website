@@ -59,7 +59,7 @@ export default async function ResourcesPage({
   } as const;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-16 text-on-surface">
+    <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
       <header className="space-y-4 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Reports & Resources</p>
         <h1 className="text-4xl font-bold tracking-tight">Documenting the collaborative response to housing and overdose emergencies</h1>
@@ -73,7 +73,7 @@ export default async function ResourcesPage({
       <section aria-live="polite" className="space-y-6">
         <h2 className="text-xl font-semibold text-on-surface">{items.length} resource{items.length === 1 ? '' : 's'}</h2>
         {items.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {items.map((resource) => (
               <ResourceCard key={resource.slug} resource={resource} />
             ))}

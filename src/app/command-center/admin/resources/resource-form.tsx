@@ -27,6 +27,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
   const summaryDefault = resource?.summary ?? '';
   const locationDefault = resource?.location ?? '';
   const publishDefault = resource?.isPublished ?? true;
+  const embedPlacementDefault = resource?.embedPlacement ?? 'above';
 
   return (
     <div className="space-y-6">
@@ -46,7 +47,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
           </>
         ) : null}
 
-        <fieldset className="grid gap-4 md:grid-cols-2">
+        <fieldset className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="grid gap-2">
             <Label htmlFor="resource_title">Title</Label>
             <Input
@@ -139,7 +140,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
           </div>
         </fieldset>
 
-        <fieldset className="grid gap-4 md:grid-cols-2">
+        <fieldset className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="grid gap-2">
             <Label htmlFor="resource_embed_type">Embed</Label>
             <Select name="embed_type" defaultValue={embedDefaults.type}>
@@ -156,6 +157,19 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
               </SelectContent>
             </Select>
             <p className="text-xs text-on-surface/60">Only trusted hosts are allowed. Snippets are sanitized before publishing.</p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="resource_embed_placement">Embed placement</Label>
+            <Select name="embed_placement" defaultValue={embedPlacementDefault}>
+              <SelectTrigger id="resource_embed_placement">
+                <SelectValue placeholder="Select placement" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="above">Above body content</SelectItem>
+                <SelectItem value="below">Below body content</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-on-surface/60">Choose how the embed anchors alongside the written summary.</p>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="resource_embed_url">Embed URL</Label>
@@ -188,7 +202,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
               placeholder="Open resource"
             />
           </div>
-          <div className="grid gap-2 md:col-span-2">
+          <div className="grid gap-2 md:col-span-2 lg:col-span-3">
             <Label htmlFor="resource_embed_html">Custom HTML snippet</Label>
             <Textarea
               id="resource_embed_html"

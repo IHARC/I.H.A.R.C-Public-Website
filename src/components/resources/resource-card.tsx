@@ -8,7 +8,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
   const formattedDate = formatResourceDate(resource.datePublished);
 
   return (
-    <article className="rounded-3xl border border-outline/20 bg-surface p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md focus-within:border-primary/60">
+    <article className="flex h-full flex-col rounded-3xl border border-outline/20 bg-surface p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md focus-within:border-primary/60">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Badge variant="outline" className="border-primary/60 bg-primary/10 text-primary">
           {kindLabel}
@@ -37,7 +37,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           </span>
         ))}
       </div>
-      <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+      <div className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
         <Link
           href={`/resources/${resource.slug}`}
           className="inline-flex items-center gap-2 rounded-full px-4 py-2 transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"

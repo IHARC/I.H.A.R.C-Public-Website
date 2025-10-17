@@ -1990,6 +1990,7 @@ export type Database = {
           tags: string[];
           attachments: Json;
           embed: Json | null;
+          embed_placement: Database["portal"]["Enums"]["resource_embed_placement"];
           body_html: string;
           is_published: boolean;
           cover_image: string | null;
@@ -2009,6 +2010,7 @@ export type Database = {
           tags?: string[];
           attachments?: Json;
           embed?: Json | null;
+          embed_placement?: Database["portal"]["Enums"]["resource_embed_placement"];
           body_html?: string;
           is_published?: boolean;
           cover_image?: string | null;
@@ -2028,6 +2030,7 @@ export type Database = {
           tags?: string[];
           attachments?: Json;
           embed?: Json | null;
+          embed_placement?: Database["portal"]["Enums"]["resource_embed_placement"];
           body_html?: string;
           is_published?: boolean;
           cover_image?: string | null;
@@ -2581,6 +2584,7 @@ export type Database = {
         | "press"
         | "dataset"
         | "other";
+      resource_embed_placement: "above" | "below";
       petition_display_preference:
         | "anonymous"
         | "first_name_last_initial"

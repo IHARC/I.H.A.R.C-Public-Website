@@ -18,13 +18,15 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
       assertAllowedEmbedUrl(embed.url, resource.slug);
       return (
         <EmbedContainer>
-          <iframe
-            src={embed.url}
-            title={`${resource.title} — Google Document`}
-            loading="lazy"
-            className="h-[720px] w-full border-0"
-            allow="clipboard-write"
-          />
+          <FramedEmbed>
+            <iframe
+              src={embed.url}
+              title={`${resource.title} — Google Document`}
+              loading="lazy"
+              className="h-[min(75vh,720px)] w-full border-0"
+              allow="clipboard-write"
+            />
+          </FramedEmbed>
           <Actions>
             <Button asChild variant="outline">
               <Link href={embed.url} target="_blank" rel="noopener noreferrer">
@@ -38,12 +40,14 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
       assertAllowedEmbedUrl(embed.url, resource.slug);
       return (
         <EmbedContainer>
-          <iframe
-            src={embed.url}
-            title={`${resource.title} — PDF viewer`}
-            className="h-[720px] w-full border-0"
-            loading="lazy"
-          />
+          <FramedEmbed>
+            <iframe
+              src={embed.url}
+              title={`${resource.title} — PDF viewer`}
+              className="h-[min(75vh,720px)] w-full border-0"
+              loading="lazy"
+            />
+          </FramedEmbed>
           <Actions>
             <Button asChild variant="outline">
               <Link href={embed.url} target="_blank" rel="noopener noreferrer">
@@ -57,16 +61,18 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
       assertAllowedEmbedUrl(embed.url, resource.slug);
       return (
         <EmbedContainer>
-          <AspectRatio ratio={16 / 9}>
-            <iframe
-              src={embed.url}
-              title={`${resource.title} — ${getKindLabel(resource.kind)}`}
-              loading="lazy"
-              className="h-full w-full rounded-3xl border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </AspectRatio>
+          <FramedEmbed>
+            <AspectRatio ratio={16 / 9}>
+              <iframe
+                src={embed.url}
+                title={`${resource.title} — ${getKindLabel(resource.kind)}`}
+                loading="lazy"
+                className="h-full w-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </AspectRatio>
+          </FramedEmbed>
           <Actions>
             <Button asChild variant="outline">
               <Link href={embed.url} target="_blank" rel="noopener noreferrer">
@@ -79,7 +85,7 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
     case 'external':
       return (
         <EmbedContainer>
-          <div className="flex flex-col items-start gap-4 rounded-3xl bg-surface-container p-8 text-on-surface">
+          <div className="flex flex-col items-start gap-4 rounded-3xl border border-outline/15 bg-surface-container-high p-8 text-on-surface shadow-sm">
             <p className="text-base font-medium text-on-surface/80">
               This resource opens in a new tab.
             </p>
@@ -94,10 +100,12 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
     case 'html':
       return (
         <EmbedContainer>
-          <div
-            className="prose max-w-none rounded-3xl border border-outline/20 bg-surface p-6"
-            dangerouslySetInnerHTML={{ __html: sanitizeEmbedHtml(embed.html) }}
-          />
+          <FramedEmbed>
+            <div
+              className="prose max-w-none bg-surface p-6 text-on-surface prose-headings:text-on-surface prose-strong:text-on-surface prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+              dangerouslySetInnerHTML={{ __html: sanitizeEmbedHtml(embed.html) }}
+            />
+          </FramedEmbed>
         </EmbedContainer>
       );
     default:
@@ -107,6 +115,14 @@ export function ResourceEmbed({ resource }: { resource: Resource }) {
 
 function EmbedContainer({ children }: { children: ReactNode }) {
   return <div className="space-y-4">{children}</div>;
+}
+
+function FramedEmbed({ children }: { children: ReactNode }) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-outline/15 bg-surface-container-high shadow-sm">
+      {children}
+    </div>
+  );
 }
 
 function Actions({ children }: { children: ReactNode }) {

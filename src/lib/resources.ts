@@ -28,6 +28,7 @@ export type ResourceEmbed =
   | { type: 'html'; html: string };
 
 type ResourceRow = Database['portal']['Tables']['resource_pages']['Row'];
+export type ResourceEmbedPlacement = Database['portal']['Enums']['resource_embed_placement'];
 
 export type Resource = {
   id: string;
@@ -40,6 +41,7 @@ export type Resource = {
   tags: string[];
   attachments: ResourceAttachment[];
   embed: ResourceEmbed | null;
+  embedPlacement: ResourceEmbedPlacement;
   bodyHtml: string;
   isPublished: boolean;
   coverImage?: string | null;
@@ -89,6 +91,7 @@ export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<
         tags,
         attachments,
         embed,
+        embed_placement,
         body_html,
         is_published,
         cover_image,
@@ -143,6 +146,7 @@ export async function getResourceBySlug(
         tags,
         attachments,
         embed,
+        embed_placement,
         body_html,
         is_published,
         cover_image,
@@ -315,6 +319,7 @@ function mapResourceRow(row: ResourceRow): Resource {
     tags: Array.isArray(row.tags) ? row.tags : [],
     attachments: normalizeAttachmentList(row.attachments),
     embed: normalizeEmbed(row.embed),
+    embedPlacement: (row.embed_placement as ResourceEmbedPlacement) ?? 'above',
     bodyHtml: row.body_html ?? '',
     isPublished: row.is_published,
     coverImage: row.cover_image,

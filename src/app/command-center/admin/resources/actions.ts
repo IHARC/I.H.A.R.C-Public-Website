@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
-import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource } from '@/lib/resources';
+import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type ResourceEmbedPlacement } from '@/lib/resources';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 
@@ -69,6 +69,8 @@ export async function createResourcePage(formData: FormData) {
     label: (formData.get('embed_label') as string | null) ?? '',
     html: (formData.get('embed_html') as string | null) ?? '',
   });
+  const embedPlacementInput = (formData.get('embed_placement') as string | null)?.trim() ?? 'above';
+  const embedPlacement: ResourceEmbedPlacement = embedPlacementInput === 'below' ? 'below' : 'above';
 
   const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
   const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
@@ -86,6 +88,7 @@ export async function createResourcePage(formData: FormData) {
       tags,
       attachments,
       embed: embedPayload,
+      embed_placement: embedPlacement,
       body_html: bodyHtml,
       is_published: isPublished,
       created_by_profile_id: actorProfileId,
@@ -192,6 +195,8 @@ export async function updateResourcePage(formData: FormData) {
     label: (formData.get('embed_label') as string | null) ?? '',
     html: (formData.get('embed_html') as string | null) ?? '',
   });
+  const embedPlacementInput = (formData.get('embed_placement') as string | null)?.trim() ?? 'above';
+  const embedPlacement: ResourceEmbedPlacement = embedPlacementInput === 'below' ? 'below' : 'above';
 
   const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
   const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
@@ -209,6 +214,7 @@ export async function updateResourcePage(formData: FormData) {
       tags,
       attachments,
       embed: embedPayload,
+      embed_placement: embedPlacement,
       body_html: bodyHtml,
       is_published: isPublished,
       updated_by_profile_id: actorProfileId,

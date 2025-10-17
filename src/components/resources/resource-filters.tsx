@@ -62,8 +62,8 @@ export function ResourceFiltersControls({
 
   return (
     <div className="rounded-3xl border border-outline/10 bg-surface p-6 shadow-sm">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <label htmlFor="resource-search" className="text-sm font-medium text-on-surface">
             Search resources
           </label>
@@ -81,13 +81,13 @@ export function ResourceFiltersControls({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-3">
             <Select
               value={filters.kind ?? ALL_VALUE}
               onValueChange={(value) => updateParam('kind', value)}
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
@@ -101,7 +101,7 @@ export function ResourceFiltersControls({
             </Select>
 
             <Select value={filters.tag ?? ALL_VALUE} onValueChange={(value) => updateParam('tag', value)}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="All tags" />
               </SelectTrigger>
               <SelectContent>
@@ -115,7 +115,7 @@ export function ResourceFiltersControls({
             </Select>
 
             <Select value={filters.year ?? ALL_VALUE} onValueChange={(value) => updateParam('year', value)}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-full sm:w-36">
                 <SelectValue placeholder="All years" />
               </SelectTrigger>
               <SelectContent>
@@ -129,11 +129,11 @@ export function ResourceFiltersControls({
             </Select>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button type="submit" variant="secondary">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button type="submit" variant="secondary" className="w-full sm:w-auto">
               Apply search
             </Button>
-            <Button type="button" variant="ghost" onClick={handleReset}>
+            <Button type="button" variant="ghost" onClick={handleReset} className="w-full sm:w-auto">
               Reset filters
             </Button>
           </div>
