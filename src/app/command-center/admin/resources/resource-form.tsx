@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
 import { RESOURCE_KIND_LABELS, type Resource } from '@/lib/resources';
-import { attachmentsToTextarea, getResourceEmbedDefaults } from './actions';
+import { attachmentsToTextarea, getResourceEmbedDefaults } from './resource-utils';
 
 type ResourceFormProps = {
   mode: 'create' | 'edit';
