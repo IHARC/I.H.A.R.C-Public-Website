@@ -114,7 +114,10 @@ export async function createResourcePage(formData: FormData) {
     },
   });
 
+  const adminResourcePath = `/command-center/admin/resources/${slug}`;
+
   revalidatePath('/command-center/admin');
+  revalidatePath(adminResourcePath);
   revalidatePath('/resources');
   revalidatePath(`/resources/${slug}`);
   revalidatePath('/sitemap.xml');
@@ -238,11 +241,15 @@ export async function updateResourcePage(formData: FormData) {
     },
   });
 
+  const adminResourcePath = `/command-center/admin/resources/${slug}`;
+
   revalidatePath('/command-center/admin');
+  revalidatePath(adminResourcePath);
   revalidatePath('/resources');
   revalidatePath(`/resources/${slug}`);
   if (currentSlug && currentSlug !== slug) {
     revalidatePath(`/resources/${currentSlug}`);
+    revalidatePath(`/command-center/admin/resources/${currentSlug}`);
   }
   revalidatePath('/sitemap.xml');
 }
