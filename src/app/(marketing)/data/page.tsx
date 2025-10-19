@@ -172,7 +172,7 @@ export default async function DataPage() {
             />
             <BreakdownChart
               title="Substance use needs shared"
-              description="Guides naloxone, harm reduction, and RAAM referrals while keeping individual stories private."
+              description="Guides naloxone, medical needs, and RAAM referrals while keeping individual stories private."
               data={addictionChart}
             />
             <BreakdownChart

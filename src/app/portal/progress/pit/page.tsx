@@ -96,7 +96,7 @@ export default async function PitProgressPage() {
                 />
                 <BreakdownChart
                   title="Substance use supports"
-                  description="Counts guide naloxone drops, RAAM clinic referrals, and harm reduction supply planning."
+                  description="Counts guide naloxone drops, RAAM clinic referrals, and medical planning."
                   data={chart('addiction_severity')}
                 />
                 <BreakdownChart
