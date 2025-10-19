@@ -2500,6 +2500,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      pit_public_breakdowns: {
+        Row: {
+          pit_count_id: string;
+          dimension: string;
+          dimension_label: string;
+          dimension_sort: number;
+          bucket: string;
+          bucket_label: string;
+          bucket_sort: number;
+          total: number | null;
+          percentage: number | null;
+          suppressed: boolean;
+          suppressed_reason: string | null;
+          total_encounters: number;
+          last_observation_at: string | null;
+        };
+        Relationships: [];
+      };
+      pit_public_summary: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          description: string | null;
+          status: "planned" | "active" | "closed";
+          is_active: boolean;
+          observed_start: string | null;
+          observed_end: string | null;
+          municipality: string | null;
+          methodology: string | null;
+          updated_at: string;
+          last_observation_at: string | null;
+          total_encounters: number;
+          ready_for_support_count: number;
+          follow_up_count: number;
+          declined_support_count: number;
+          not_suitable_count: number;
+          unknown_support_count: number;
+          addiction_positive_count: number;
+          mental_health_positive_count: number;
+          homelessness_confirmed_count: number;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       add_guest_petition_signature: {

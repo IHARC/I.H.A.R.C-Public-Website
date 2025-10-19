@@ -76,6 +76,7 @@ All `/portal/*` routes export `dynamic = 'force-dynamic'` to read fresh Supabase
 - `/portal/plans` – Working Plan directory with focus-area chips, next key date, and CTA into each plan.
 - `/portal/plans/[slug]` – Plan detail with tabs (Overview | Updates | Decisions | Timeline), update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
 - `/portal/progress` – 30-day metric summary with navigation back to stats and plans.
+- `/portal/progress/pit` – Weekly point-in-time dashboard with anonymised aggregates for each outreach count.
 - `/portal/about` – Plain-language commitments outlining safety, privacy, and strengths-based storytelling expectations.
 - `/portal/petition/[slug]` – Petition campaigns with signature tracking, opt-in partner contact permissions, and post-sign sharing options.
 - `/portal/profile` – Profile management, affiliation context, and petition signature history for authenticated neighbours.

@@ -1,0 +1,196 @@
+import { BreakdownChart } from '@/components/pit/breakdown-chart';
+import { TrendChart } from '@/components/portal/trend-chart';
+import {
+  formatCount,
+  formatSupportRate,
+  groupBreakdownsForCount,
+  loadPitPublicDataset,
+  pickFeaturedSummary,
+  sortSummariesByWindow,
+  toChartData,
+} from '@/lib/pit/public';
+import type { PitSummaryRow } from '@/lib/pit/public';
+import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+
+export const dynamic = 'force-dynamic';
+
+export default async function PitProgressPage() {
+  const supabase = await createSupabaseRSCClient();
+  const dataset = await loadPitPublicDataset(supabase);
+
+  const summaries = sortSummariesByWindow(dataset.summaries);
+  const breakdowns = dataset.breakdowns;
+  const trendSeries = summaries.map((summary) => ({ date: formatTrendPoint(summary), value: summary.total_encounters }));
+  const trendRangeLabel = buildTrendRangeLabel(summaries);
+  const latest = pickFeaturedSummary(summaries);
+
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10 text-on-surface">
+      <header className="space-y-4 rounded-3xl border border-outline/10 bg-surface p-8 shadow-sm">
+        <p className="text-sm font-semibold uppercase tracking-wide text-primary">Point-in-Time Outreach</p>
+        <h1 className="text-3xl font-bold tracking-tight">Weekly point-in-time counts</h1>
+        <p className="text-sm text-on-surface-variant">
+          IHARC coordinates point-in-time counts with neighbours, outreach teams, and municipal staff. Every entry is anonymized before it reaches this dashboard. Use these charts to plan staffing, follow-up visits, and overdose response coverage.
+        </p>
+        <p className="text-sm font-semibold text-error">
+          In an emergency call 911. The Good Samaritan Drug Overdose Act protects you and the person you&apos;re helping when you call for an overdose.
+        </p>
+        <p className="text-sm text-on-surface-variant">
+          Need to coordinate outside the count window? Email <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a> so the outreach lead can loop you in.
+        </p>
+      </header>
+
+      {trendSeries.length ? (
+        <TrendChart
+          title="Neighbours counted across point-in-time windows"
+          description="Totals help partners see whether weekly canvasses are reaching consistent numbers of neighbours."
+          data={trendSeries}
+          rangeLabel={trendRangeLabel}
+        />
+      ) : null}
+
+      {summaries.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-outline/40 bg-surface p-8 text-sm text-on-surface-variant">
+          The first point-in-time count is being validated and will appear here once stewards finish the quality review.
+        </div>
+      ) : null}
+
+      <div className="space-y-10">
+        {summaries.map((summary) => {
+          const groups = groupBreakdownsForCount(breakdowns, summary.id);
+          const chart = (dimension: string) => toChartData(groups.find((group) => group.dimension === dimension)?.rows ?? []);
+
+          return (
+            <section key={summary.id} className="space-y-6 rounded-3xl border border-outline/10 bg-surface p-8 shadow-sm">
+              <header className="flex flex-col gap-3 text-balance lg:flex-row lg:items-center lg:justify-between">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold text-on-surface">{formatRange(summary)}</h2>
+                  <p className="text-sm text-on-surface-variant">
+                    {summary.description ??
+                      'Partners completed canvasses across Northumberland communities and logged each encounter once the neighbour consented.'}
+                  </p>
+                </div>
+                <StatusBadge status={summary.status} isActive={summary.is_active} />
+              </header>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {buildMetricCards(summary).map((card) => (
+                  <div key={card.label} className="rounded-2xl border border-outline/20 bg-surface-container-high p-5 shadow-sm">
+                    <p className="text-xs uppercase tracking-wide text-on-surface-variant/80">{card.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-on-surface">{card.value}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant/90">{card.caption}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <BreakdownChart
+                  title="Support readiness"
+                  description="Shows how many neighbours were ready to connect immediately, needed extra support, or declined for now."
+                  data={chart('willing_to_engage')}
+                />
+                <BreakdownChart
+                  title="Age distribution"
+                  description="Age categories help us match warming centres, shelter beds, and case work to the right demographics."
+                  data={chart('age_bracket')}
+                />
+                <BreakdownChart
+                  title="Substance use supports"
+                  description="Counts guide naloxone drops, RAAM clinic referrals, and harm reduction supply planning."
+                  data={chart('addiction_severity')}
+                />
+                <BreakdownChart
+                  title="Mental health supports"
+                  description="Helps NHH Community Mental Health Services and partners schedule clinicians alongside outreach teams."
+                  data={chart('mental_health_severity')}
+                />
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {latest ? (
+        <footer className="rounded-3xl border border-outline/10 bg-surface p-6 text-sm text-on-surface-variant">
+          <p className="font-semibold text-on-surface">
+            Quick contacts
+          </p>
+          <ul className="mt-2 space-y-1">
+            <li>In an emergency call 911 immediately.</li>
+            <li>RAAM Clinic: Tuesdays, 12–3&nbsp;pm, 1011 Elgin St. W.</li>
+            <li>Outreach coordination: <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a></li>
+          </ul>
+        </footer>
+      ) : null}
+    </div>
+  );
+}
+
+function buildMetricCards(summary: PitSummaryRow) {
+  return [
+    {
+      label: 'Neighbours counted',
+      value: formatCount(summary.total_encounters),
+      caption: formatRange(summary),
+    },
+    {
+      label: 'Ready to connect',
+      value: formatCount(summary.ready_for_support_count),
+      caption: `${formatSupportRate(summary.ready_for_support_count, summary.total_encounters)} of responses`,
+    },
+    {
+      label: 'Follow-up requested',
+      value: formatCount(summary.follow_up_count),
+      caption: 'Logged for warm hand-offs',
+    },
+    {
+      label: 'Substance use supports',
+      value: formatCount(summary.addiction_positive_count),
+      caption: 'Plan RAAM + naloxone coverage',
+    },
+    {
+      label: 'Mental health supports',
+      value: formatCount(summary.mental_health_positive_count),
+      caption: 'Coordinate with clinicians',
+    },
+  ];
+}
+
+function formatRange(summary: PitSummaryRow): string {
+  const start = formatDate(summary.observed_start);
+  if (summary.is_active) {
+    return `${start ?? 'Start'} → today`;
+  }
+  const end = formatDate(summary.observed_end ?? summary.last_observation_at);
+  return `${start ?? 'Start'} → ${end ?? 'recently'}`;
+}
+
+function formatTrendPoint(summary: PitSummaryRow): string {
+  const candidate = summary.observed_end ?? summary.last_observation_at ?? summary.observed_start;
+  return formatDate(candidate, { month: 'short', day: 'numeric' }) ?? 'TBD';
+}
+
+function buildTrendRangeLabel(entries: PitSummaryRow[]): string {
+  if (!entries.length) return 'Awaiting first count';
+  const first = entries[0];
+  const last = entries[entries.length - 1];
+  const start = formatDate(first.observed_start ?? first.last_observation_at, { month: 'short', year: 'numeric' }) ?? 'start';
+  const end = formatDate(last.observed_end ?? last.last_observation_at, { month: 'short', year: 'numeric' }) ?? 'present';
+  return start === end ? `${start} count` : `${start} – ${end}`;
+}
+
+function formatDate(value: string | null | undefined, options?: Intl.DateTimeFormatOptions): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('en-CA', options ?? { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+}
+
+function StatusBadge({ status, isActive }: { status: PitSummaryRow['status']; isActive: boolean }) {
+  const label = isActive ? 'Active this week' : status === 'closed' ? 'Closed' : 'Planned';
+  const background = isActive ? 'bg-primary/10 text-primary' : 'bg-outline/10 text-on-surface-variant';
+
+  return (
+    <span className={`inline-flex items-center rounded-full px-4 py-1 text-sm font-semibold ${background}`}>{label}</span>
+  );
+}
