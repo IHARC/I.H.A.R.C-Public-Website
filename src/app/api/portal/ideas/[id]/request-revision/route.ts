@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile, getUserEmailForProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
+import { invalidateIdeaCaches } from '@/lib/cache/invalidate';
 
 export async function POST(
   req: NextRequest,
@@ -126,6 +127,11 @@ export async function POST(
       console.error('Failed to queue revision notification', notifyError);
     }
   }
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', `/portal/ideas/${ideaId}`, '/command-center/admin'],
+  });
 
   return NextResponse.json({ status: 'revision_requested' });
 }

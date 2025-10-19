@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getPublishedMythEntries } from '@/data/myths';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { MYTH_STATUS_BADGE_STYLES, MYTH_STATUS_CONFIG, mythSourcesFromJson } from '@/lib/myth-busting';
-import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,19 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
-type MythEntryRow = Database['public']['Tables']['myth_busting_entries']['Row'];
-
 export default async function MythBustingPage() {
-  const supabase = await createSupabaseRSCClient();
-
-  const { data } = await supabase
-    .from('myth_busting_entries')
-    .select('id, slug, title, myth_statement, fact_statement, status, analysis, sources, tags, updated_at')
-    .eq('is_published', true)
-    .order('order_index', { ascending: false })
-    .order('created_at', { ascending: false });
-
-  const entries = (data ?? []) as MythEntryRow[];
+  const entries = await getPublishedMythEntries();
 
   return (
     <article className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">

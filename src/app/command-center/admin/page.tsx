@@ -2,6 +2,7 @@ import { Fragment, type ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { invalidateMythCaches } from '@/lib/cache/invalidate';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
@@ -853,7 +854,7 @@ async function createMythEntry(formData: FormData) {
   });
 
   revalidatePath('/command-center/admin');
-  revalidatePath('/myth-busting');
+  await invalidateMythCaches({ paths: ['/myth-busting'] });
 }
 
 async function updateMythEntry(formData: FormData) {
@@ -975,7 +976,7 @@ async function updateMythEntry(formData: FormData) {
   });
 
   revalidatePath('/command-center/admin');
-  revalidatePath('/myth-busting');
+  await invalidateMythCaches({ paths: ['/myth-busting'] });
 }
 
 async function deleteMythEntry(formData: FormData) {
@@ -1039,7 +1040,7 @@ async function deleteMythEntry(formData: FormData) {
   });
 
   revalidatePath('/command-center/admin');
-  revalidatePath('/myth-busting');
+  await invalidateMythCaches({ paths: ['/myth-busting'] });
 }
 
 async function createOrganization(formData: FormData) {

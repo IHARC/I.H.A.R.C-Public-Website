@@ -9,6 +9,7 @@ import {
   isPortalReactionType,
   type PortalReactionType,
 } from '@/lib/reactions';
+import { invalidateIdeaCaches } from '@/lib/cache/invalidate';
 
 type IdeaReactionAuditAction =
   | 'idea_reaction_added'
@@ -180,6 +181,11 @@ export async function POST(
       },
     });
   }
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', `/portal/ideas/${ideaId}`],
+  });
 
   return NextResponse.json({
     activeReaction: viewerReaction,

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { SupportDeclarationLink } from '@/components/site/support-declaration-link';
 import type { Database } from '@/types/supabase';
+import { getPetitionPublicSummary, getPetitionSigners } from '@/data/petition';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,27 +52,20 @@ export default async function PetitionSignersPage({
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const supabase = await createSupabaseRSCClient();
-  const portal = supabase.schema('portal');
-
-  const { data: petition } = await portal
-    .from('petition_public_summary')
-    .select('id, title, signature_count')
-    .eq('slug', PETITION_SLUG)
-    .maybeSingle();
+  const petition = await getPetitionPublicSummary(PETITION_SLUG);
 
   if (!petition) {
     notFound();
   }
 
-  const { data: signers, count } = await portal
-    .from('petition_public_signers')
-    .select('display_name, created_at, display_preference', { count: 'exact' })
-    .eq('petition_id', petition.id)
-    .order('created_at', { ascending: false })
-    .range(from, to);
+  const { signers, total } = await getPetitionSigners({
+    petitionId: petition.id,
+    slug: PETITION_SLUG,
+    from,
+    to,
+  });
 
-  const totalSigners = count ?? petition.signature_count ?? 0;
+  const totalSigners = total || petition.signature_count || 0;
   const totalPages = Math.max(1, Math.ceil(totalSigners / PAGE_SIZE));
   const hasNextPage = currentPage < totalPages;
 
@@ -99,7 +92,7 @@ export default async function PetitionSignersPage({
           Total signatures: <strong>{new Intl.NumberFormat('en-CA').format(totalSigners)}</strong>
         </p>
         <ol className="space-y-3" start={from + 1}>
-          {(signers ?? []).map((signer, index) => {
+          {signers.map((signer, index) => {
             const position = from + index + 1;
             return (
               <li
@@ -125,7 +118,7 @@ export default async function PetitionSignersPage({
             );
           })}
         </ol>
-        {signers?.length === 0 ? (
+        {signers.length === 0 ? (
           <p className="rounded-2xl border border-outline/20 bg-surface p-4 text-sm text-on-surface/70">
             Signatures will appear here once the petition receives public support.
           </p>

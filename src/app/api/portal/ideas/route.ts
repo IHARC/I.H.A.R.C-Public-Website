@@ -7,6 +7,7 @@ import { scanContentForSafety } from '@/lib/safety';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logAuditEvent } from '@/lib/audit';
 import { hashValue } from '@/lib/hash';
+import { invalidateIdeaCaches } from '@/lib/cache/invalidate';
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/png',
@@ -219,6 +220,11 @@ export async function POST(req: NextRequest) {
         ip_hash: ipHash,
         user_agent: userAgent ?? null,
       },
+    });
+
+    await invalidateIdeaCaches({
+      ideaId,
+      paths: ['/portal/ideas', '/command-center/admin'],
     });
 
     return NextResponse.json({ id: ideaId, draft: true });
@@ -473,6 +479,11 @@ export async function POST(req: NextRequest) {
       ip_hash: ipHash,
       user_agent: userAgent ?? null,
     },
+  });
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', '/command-center/admin'],
   });
 
   return NextResponse.json({ id: ideaId });

@@ -7,6 +7,7 @@ import {
   isPortalReactionType,
   type PortalReactionType,
 } from '@/lib/reactions';
+import { invalidatePlanCaches } from '@/lib/cache/invalidate';
 
 export async function POST(
   req: NextRequest,
@@ -59,6 +60,24 @@ export async function POST(
   }
 
   const portal = supabase.schema('portal');
+
+  const { data: updateMeta, error: updateMetaError } = await portal
+    .from('plan_updates')
+    .select('plan_id, plan:plan_id(slug)')
+    .eq('id', updateId)
+    .maybeSingle();
+
+  if (updateMetaError) {
+    console.error('Failed to load plan metadata for reaction', updateMetaError);
+    return NextResponse.json({ error: 'Unable to process reaction' }, { status: 500 });
+  }
+
+  if (!updateMeta) {
+    return NextResponse.json({ error: 'Plan update not found.' }, { status: 404 });
+  }
+
+  const planSlug = (updateMeta.plan as { slug?: string } | null)?.slug ?? null;
+  const revalidatePaths = planSlug ? ['/portal/plans', `/portal/plans/${planSlug}`] : ['/portal/plans'];
 
   const { data: existingVote, error: existingVoteError } = await portal
     .from('plan_update_votes')
@@ -131,6 +150,8 @@ export async function POST(
   }
 
   const supportCount = countSupportReactions(reactionTotals);
+
+  await invalidatePlanCaches({ planSlug: planSlug ?? undefined, paths: revalidatePaths });
 
   return NextResponse.json({
     activeReaction: viewerReaction,

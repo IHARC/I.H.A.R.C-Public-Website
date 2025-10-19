@@ -1,10 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizeNamePart } from '@/lib/names';
 import { normalizeEmail } from '@/lib/email';
 import { scanContentForSafety } from '@/lib/safety';
+import { invalidatePetitionCaches } from '@/lib/cache/invalidate';
 
 export type GuestPetitionFormState = {
   status: 'idle' | 'success' | 'error';
@@ -135,7 +135,7 @@ export async function signPetitionGuest(
   paths.add('/petition/signers');
   paths.add('/portal/progress');
 
-  await Promise.all(Array.from(paths).map((path) => revalidatePath(path)));
+  await invalidatePetitionCaches(petitionSlug, { paths: Array.from(paths) });
 
   return { status: 'success', message: SUCCESS_MESSAGE };
 }

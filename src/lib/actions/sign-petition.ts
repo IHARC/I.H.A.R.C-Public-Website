@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { scanContentForSafety } from '@/lib/safety';
@@ -10,6 +9,7 @@ import { deriveSignerDefaults } from '@/lib/petition/signature';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePhoneNumber } from '@/lib/phone';
 import type { Database } from '@/types/supabase';
+import { invalidatePetitionCaches } from '@/lib/cache/invalidate';
 
 export type PetitionActionResult = {
   status: 'idle' | 'success' | 'error';
@@ -19,6 +19,7 @@ export type PetitionActionResult = {
 
 type SignPetitionOptions = {
   petitionId: string;
+  petitionSlug: string;
   revalidatePaths?: string[];
 };
 
@@ -32,7 +33,7 @@ function validateEmail(email: string): boolean {
 
 export async function signPetition(
   formData: FormData,
-  { petitionId, revalidatePaths = [] }: SignPetitionOptions,
+  { petitionId, petitionSlug, revalidatePaths = [] }: SignPetitionOptions,
 ): Promise<PetitionActionResult> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -218,7 +219,7 @@ export async function signPetition(
     });
 
     const pathsToRevalidate = Array.from(new Set(revalidatePaths));
-    await Promise.all(pathsToRevalidate.map((path) => revalidatePath(path)));
+    await invalidatePetitionCaches(petitionSlug, { paths: pathsToRevalidate });
 
     return { status: 'success', message: 'Thanks for supporting the declaration.' };
   } catch (error) {

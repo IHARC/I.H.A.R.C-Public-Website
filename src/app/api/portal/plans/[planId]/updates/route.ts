@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { invalidatePlanCaches } from '@/lib/cache/invalidate';
 
 const REQUIRED_FIELDS: Array<{ key: keyof PlanUpdatePayload; label: string }> = [
   { key: 'problem', label: 'Problem' },
@@ -74,7 +75,7 @@ export async function POST(
 
   const { data: plan, error: planError } = await portal
     .from('plans')
-    .select('id')
+    .select('id, slug')
     .eq('id', planId)
     .maybeSingle();
 
@@ -119,6 +120,11 @@ export async function POST(
     meta: {
       plan_update_id: update.id,
     },
+  });
+
+  await invalidatePlanCaches({
+    planSlug: plan.slug ?? '',
+    paths: ['/portal/plans', plan.slug ? `/portal/plans/${plan.slug}` : undefined].filter(Boolean) as string[],
   });
 
   return NextResponse.json({ id: update.id, created_at: update.created_at });

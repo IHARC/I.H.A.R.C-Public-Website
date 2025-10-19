@@ -6,6 +6,7 @@ import { scanContentForSafety } from '@/lib/safety';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logAuditEvent } from '@/lib/audit';
 import { hashValue } from '@/lib/hash';
+import { invalidateIdeaCaches } from '@/lib/cache/invalidate';
 
 const IDEA_COOLDOWN_MS = 2 * 60 * 1000;
 const MAX_METRICS = 6;
@@ -318,6 +319,11 @@ export async function PATCH(
       user_agent: userAgent ?? null,
       publication_status: 'published',
     },
+  });
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', `/portal/ideas/${ideaId}`, '/command-center/admin'],
   });
 
   return NextResponse.json({ id: ideaId });

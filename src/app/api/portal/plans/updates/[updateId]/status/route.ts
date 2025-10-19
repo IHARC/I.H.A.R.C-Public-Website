@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { invalidatePlanCaches } from '@/lib/cache/invalidate';
 
 const MODERATOR_ROLES = new Set(['moderator', 'admin']);
 const ALLOWED_STATUSES = new Set(['open', 'accepted', 'not_moving_forward', 'added_to_plan']);
@@ -59,7 +60,7 @@ export async function POST(
   const { data: update, error: updateError } = await portal
     .from('plan_updates')
     .select(
-      `id, status, plan_id, plan:plan_id(title, canonical_summary), problem, evidence, proposed_change, impact, risks, measurement`
+      `id, status, plan_id, plan:plan_id(title, canonical_summary, slug), problem, evidence, proposed_change, impact, risks, measurement`
     )
     .eq('id', updateId)
     .maybeSingle();
@@ -72,6 +73,9 @@ export async function POST(
   if (!update) {
     return NextResponse.json({ error: 'Plan update not found.' }, { status: 404 });
   }
+
+  const planSlug = (update.plan as { slug?: string } | null)?.slug ?? null;
+  const revalidatePaths = planSlug ? ['/portal/plans', `/portal/plans/${planSlug}`] : ['/portal/plans'];
 
   const now = new Date().toISOString();
 
@@ -93,6 +97,8 @@ export async function POST(
       entityId: update.plan_id,
       meta: { plan_update_id: updateId },
     });
+
+    await invalidatePlanCaches({ planSlug: planSlug ?? undefined, paths: revalidatePaths });
 
     return NextResponse.json({ status: 'open' });
   }
@@ -141,6 +147,8 @@ export async function POST(
       meta: { plan_update_id: updateId },
     });
 
+    await invalidatePlanCaches({ planSlug: planSlug ?? undefined, paths: revalidatePaths });
+
     return NextResponse.json({ status });
   }
 
@@ -185,8 +193,12 @@ export async function POST(
       meta: { plan_update_id: updateId, overview_updated: true },
     });
 
+    await invalidatePlanCaches({ planSlug: planSlug ?? undefined, paths: revalidatePaths });
+
     return NextResponse.json({ status });
   }
+
+  await invalidatePlanCaches({ planSlug: planSlug ?? undefined, paths: revalidatePaths });
 
   return NextResponse.json({ status: update.status });
 }

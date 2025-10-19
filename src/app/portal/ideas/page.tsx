@@ -1,10 +1,8 @@
 import Link from 'next/link';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { Info } from 'lucide-react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { copyDeck } from '@/lib/copy';
-import type { IdeaSummary } from '@/components/portal/idea-card';
 import { IdeaCard } from '@/components/portal/idea-card';
 import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { SearchBar } from '@/components/portal/search-bar';
@@ -12,20 +10,9 @@ import { Filters } from '@/components/portal/filters';
 import { EmptyState } from '@/components/portal/empty-state';
 import { KanbanBoard } from '@/components/portal/kanban-board';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { Database } from '@/types/supabase';
-import { createReactionTally, type ReactionSummary, type PortalReactionType } from '@/lib/reactions';
 import { isIdeaStatusKey, type IdeaStatusKey } from '@/lib/idea-status';
-
-const numberFormatter = new Intl.NumberFormat('en-CA', { maximumFractionDigits: 1 });
-
-function formatMetricValue(value: number, unit?: string | null) {
-  const formatted = Number.isInteger(value) ? value.toLocaleString('en-CA') : numberFormatter.format(value);
-  return unit ? `${formatted} ${unit}` : formatted;
-}
-
-function formatMetricDate(value: string) {
-  return new Date(value).toLocaleDateString('en-CA');
-}
+import { getMetricCards, getMetricSummary } from '@/data/metrics';
+import { getIdeaBoard } from '@/data/ideas';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,12 +34,26 @@ export default async function IdeasPage({
 
   const viewerProfile = user ? await ensurePortalProfile(supabase, user.id) : null;
 
-  const metricCards = await loadMetricHighlights(supabase, metricRange);
+  const metricCards = await getMetricCards(metricRange, user?.id ?? null);
   const metricSummary = metricCards.length
-    ? buildMetricSummary(metricCards)
+    ? await getMetricSummary(metricRange, user?.id ?? null)
     : 'Metric data will surface here once partners publish updates.';
 
-  const ideaBoard = await loadIdeaBoard({ supabase, resolvedParams });
+  const categoryParam = resolvedParams.category;
+  const statusParam = resolvedParams.status;
+  const tagParam = resolvedParams.tag;
+  const sortParam = resolvedParams.sort;
+  const queryParam = resolvedParams.q;
+
+  const filters = {
+    category: categoryParam ? (Array.isArray(categoryParam) ? categoryParam[0] : categoryParam) : null,
+    status: statusParam ? (Array.isArray(statusParam) ? statusParam[0] : statusParam) : null,
+    tag: tagParam ? (Array.isArray(tagParam) ? tagParam[0] : tagParam) : null,
+    sort: sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : 'active',
+    query: queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null,
+  } as const;
+
+  const ideaBoard = await getIdeaBoard(filters, viewerProfile?.id ?? user?.id ?? null);
   const viewerRole = viewerProfile?.role ?? null;
   const spotlightIdeas = ideaBoard.slice(0, 4);
 
@@ -258,283 +259,6 @@ export default async function IdeasPage({
     </div>
   );
 }
-
-async function loadMetricHighlights(client: SupabaseClient<Database>, range: number) {
-  const portal = client.schema('portal');
-  try {
-    const { data, error } = await portal
-      .from('metric_daily')
-      .select('metric_date, metric_id, value, value_status, metric_catalog:metric_id(id, slug, label, unit, sort_order, is_active)')
-      .gte('metric_date', new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
-      .order('metric_date', { ascending: true });
-
-    if (error) {
-      console.error('Failed to load metric highlights', error);
-      return [];
-    }
-
-    const rows: MetricRow[] = ((data ?? []) as unknown as MetricDailyRow[])
-      .map((row) => ({
-        metric_id: row.metric_id,
-        metric_date: row.metric_date,
-        value: row.value,
-        value_status: row.value_status,
-        metric_catalog: resolveMetricCatalogRelation(row.metric_catalog),
-      }))
-      .filter((row) => row.metric_catalog?.is_active !== false);
-    const grouped = groupMetrics(rows);
-    const cards = buildCardData(grouped);
-    return cards.slice(0, 4);
-  } catch (error) {
-    console.error('Failed to load metric highlights', error);
-    return [];
-  }
-}
-
-async function loadIdeaBoard({
-  supabase,
-  resolvedParams,
-}: {
-  supabase: SupabaseClient<Database>;
-  resolvedParams: Record<string, string | string[] | undefined>;
-}) {
-  const portal = supabase.schema('portal');
-  const categoryParam = resolvedParams.category;
-  const statusParam = resolvedParams.status;
-  const tagParam = resolvedParams.tag;
-  const sortParam = resolvedParams.sort;
-  const queryParam = resolvedParams.q;
-
-  const category = categoryParam ? (Array.isArray(categoryParam) ? categoryParam[0] : categoryParam) : null;
-  const status = statusParam ? (Array.isArray(statusParam) ? statusParam[0] : statusParam) : null;
-  const tag = tagParam ? (Array.isArray(tagParam) ? tagParam[0] : tagParam) : null;
-  const sort = sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : 'active';
-  const q = queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null;
-
-  let query = portal
-    .from('ideas')
-    .select('*', { count: 'exact' })
-    .range(0, 199);
-
-  if (category) query = query.eq('category', category);
-  if (status) query = query.eq('status', status);
-  if (tag) query = query.contains('tags', [tag]);
-  if (q) query = query.textSearch('search_vector', q, { type: 'websearch' });
-
-  switch (sort) {
-    case 'newest':
-      query = query.order('created_at', { ascending: false });
-      break;
-    case 'top':
-      query = query.order('vote_count', { ascending: false });
-      break;
-    default:
-      query = query.order('last_activity_at', { ascending: false });
-      break;
-  }
-
-  const { data: ideas, error } = await query;
-  if (error) {
-    console.error('Unable to load ideas', error);
-    throw new Error('Unable to load ideas');
-  }
-
-  const ideaList = ideas ?? [];
-  if (!ideaList.length) {
-    return [];
-  }
-
-  const ideaIds = ideaList.map((idea) => idea.id);
-  const reactionMap = new Map<string, ReactionSummary>();
-
-  if (ideaIds.length) {
-    const { data: reactionRows, error: reactionError } = await portal
-      .from('idea_reaction_totals')
-      .select('idea_id, reaction, reaction_count')
-      .in('idea_id', ideaIds)
-      .returns<{ idea_id: string; reaction: PortalReactionType; reaction_count: number }[]>();
-
-    if (reactionError) {
-      console.error('Failed to load idea reaction totals', reactionError);
-    } else {
-      for (const row of reactionRows ?? []) {
-        let summary = reactionMap.get(row.idea_id);
-        if (!summary) {
-          summary = createReactionTally();
-          reactionMap.set(row.idea_id, summary);
-        }
-        const count = Number(row.reaction_count ?? 0);
-        summary[row.reaction] = Number.isFinite(count) ? count : 0;
-      }
-    }
-  }
-
-  const profileIds = Array.from(new Set(ideaList.map((idea) => idea.author_profile_id)));
-
-  const { data: profiles } = await portal
-    .from('profiles')
-    .select('id, display_name, organization_id, position_title, affiliation_status, role, homelessness_experience, substance_use_experience')
-    .in('id', profileIds.length ? profileIds : ['00000000-0000-0000-0000-000000000000']);
-
-  const organizationIds = Array.from(
-    new Set((profiles ?? []).map((profile) => profile.organization_id).filter(Boolean)),
-  ) as string[];
-
-  const { data: organizations } = await portal
-    .from('organizations')
-    .select('id, name, verified')
-    .in('id', organizationIds.length ? organizationIds : ['00000000-0000-0000-0000-000000000000']);
-
-  const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
-  const organizationMap = new Map((organizations ?? []).map((org) => [org.id, org]));
-
-  const ideaSummaries: IdeaSummary[] = ideaList.map((idea) => {
-    const profile = profileMap.get(idea.author_profile_id);
-    const organization = profile?.organization_id ? organizationMap.get(profile.organization_id) : null;
-    const approvedPosition =
-      profile && profile.affiliation_status === 'approved' && profile.position_title ? profile.position_title : null;
-
-    return {
-      id: idea.id,
-      title: idea.title,
-      body: idea.proposal_summary ?? idea.problem_statement ?? idea.body,
-      problemStatement: idea.problem_statement ?? null,
-      proposalSummary: idea.proposal_summary ?? null,
-      category: idea.category,
-      status: idea.status,
-      publicationStatus: idea.publication_status,
-      tags: idea.tags ?? [],
-      reactions: reactionMap.get(idea.id) ?? createReactionTally(),
-      commentCount: idea.comment_count ?? 0,
-      lastActivityAt: idea.last_activity_at,
-      createdAt: idea.created_at,
-      isAnonymous: idea.is_anonymous,
-      authorDisplayName: profile?.display_name ?? 'Community Member',
-      positionTitle: approvedPosition,
-      organizationName: organization?.name ?? null,
-      orgVerified: organization?.verified ?? false,
-      officialCount: undefined,
-      homelessnessExperience: profile?.homelessness_experience ?? null,
-      substanceUseExperience: profile?.substance_use_experience ?? null,
-    };
-  });
-
-  return ideaSummaries;
-}
-
-type MetricRow = {
-  metric_id: string;
-  metric_date: string;
-  value: number | null;
-  value_status: Database['portal']['Enums']['metric_value_status'];
-  metric_catalog: MetricDefinition | null;
-};
-
-type MetricSeries = Record<string, MetricRow[]>;
-
-type MetricCard = {
-  key: string;
-  label: string;
-  value: string;
-  caption?: string;
-  description?: string;
-  status: Database['portal']['Enums']['metric_value_status'];
-  sortOrder: number;
-};
-
-type MetricDefinition = Database['portal']['Tables']['metric_catalog']['Row'];
-
-type MetricDailyRow = Database['portal']['Tables']['metric_daily']['Row'] & {
-  metric_catalog: MetricDefinition | MetricDefinition[] | null;
-};
-
-function resolveMetricCatalogRelation(
-  relation: MetricDefinition | MetricDefinition[] | null,
-): MetricDefinition | null {
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null;
-  }
-  return relation;
-}
-
-function groupMetrics(rows: MetricRow[]): MetricSeries {
-  return rows.reduce<MetricSeries>((acc, row) => {
-    if (!acc[row.metric_id]) acc[row.metric_id] = [];
-    acc[row.metric_id].push(row);
-    return acc;
-  }, {});
-}
-
-function buildCardData(grouped: MetricSeries): MetricCard[] {
-  const result: MetricCard[] = [];
-
-  for (const series of Object.values(grouped)) {
-    const ordered = [...series].sort((a, b) => a.metric_date.localeCompare(b.metric_date));
-    const latest = ordered.at(-1);
-    if (!latest) continue;
-
-    const definition = latest.metric_catalog;
-    const label = definition?.label ?? definition?.slug ?? 'Metric';
-    const unit = definition?.unit ?? null;
-    const sortOrder = definition?.sort_order ?? 0;
-
-    let value = 'Pending update';
-    let description: string | undefined;
-
-    if (latest.value_status === 'reported' && typeof latest.value === 'number') {
-      value = formatMetricValue(latest.value, unit);
-      description = `Reported on ${formatMetricDate(latest.metric_date)}`;
-    } else {
-      const latestReported = ordered
-        .filter((entry) => entry.value_status === 'reported' && typeof entry.value === 'number')
-        .slice(-1)[0];
-      if (latestReported && typeof latestReported.value === 'number') {
-        description = `Last reported ${formatMetricValue(
-          latestReported.value,
-          unit,
-        )} on ${formatMetricDate(latestReported.metric_date)}`;
-      } else {
-        description = 'Awaiting first reported value';
-      }
-    }
-
-    result.push({
-      key: definition?.id ?? latest.metric_id,
-      label,
-      value,
-      caption: `Updated ${formatMetricDate(latest.metric_date)}`,
-      description,
-      status: latest.value_status,
-      sortOrder,
-    });
-  }
-
-  return result.sort((a, b) => a.sortOrder - b.sortOrder);
-}
-
-function buildMetricSummary(cards: MetricCard[]) {
-  if (!cards.length) {
-    return 'Metric data will surface here once partners publish updates.';
-  }
-
-  return cards
-    .map((card) => {
-      if (card.status === 'pending') {
-        const detail = card.description ? withPeriod(card.description) : '';
-        return `${card.label} awaiting update.${detail ? ` ${detail}` : ''}`;
-      }
-
-      const detail = card.description ? withPeriod(card.description) : '';
-      return `${card.label} reported ${card.value}.${detail ? ` ${detail}` : ''}`;
-    })
-    .join(' ');
-}
-
-function withPeriod(text?: string) {
-  if (!text) return '';
-  return text.endsWith('.') ? text : `${text}.`;
-}
-
 
 function RangeSelector({
   active,

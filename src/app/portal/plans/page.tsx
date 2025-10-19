@@ -1,45 +1,12 @@
 import Link from 'next/link';
 import { Info } from 'lucide-react';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import type { Database } from '@/types/supabase';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getPlanList } from '@/data/plans';
 
 export const dynamic = 'force-dynamic';
 
-type PlanRow = Database['portal']['Tables']['plans']['Row'];
-type FocusAreaRow = Database['portal']['Tables']['plan_focus_areas']['Row'];
-type KeyDateRow = Database['portal']['Tables']['plan_key_dates']['Row'];
-
-type PlanListItem = PlanRow & {
-  focus_areas: FocusAreaRow[];
-  key_dates: KeyDateRow[];
-};
-
 export default async function PlansPage() {
-  const supabase = await createSupabaseRSCClient();
-  const portal = supabase.schema('portal');
-
-  const { data: planRows, error } = await portal
-    .from('plans')
-    .select(
-      `*,
-       focus_areas:plan_focus_areas(id, name, summary, created_at),
-       key_dates:plan_key_dates(id, title, scheduled_for, notes, created_at)`
-    )
-    .order('promoted_at', { ascending: false })
-    .returns<PlanListItem[]>();
-
-  if (error) {
-    console.error('Unable to load plans', error);
-  }
-
-  const plans = (planRows ?? []).map((plan) => ({
-    ...plan,
-    nextKeyDate: plan.key_dates
-      .map((entry) => ({ ...entry, scheduled_at: new Date(entry.scheduled_for) }))
-      .filter((entry) => !Number.isNaN(entry.scheduled_at.valueOf()))
-      .sort((a, b) => a.scheduled_at.getTime() - b.scheduled_at.getTime())[0] ?? null,
-  }));
+  const plans = await getPlanList(null);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">

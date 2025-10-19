@@ -1,17 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import type { PitSummaryRow } from '@/lib/pit/public';
 import {
   buildTreatmentSummary,
   formatCount,
   formatPitDateRange,
   formatSupportRate,
   isPitCountInProgress,
-  loadPitPublicDataset,
   sortSummariesByWindow,
 } from '@/lib/pit/public';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getPitPublicDataset } from '@/data/pit';
 
 const datasets = [
   {
@@ -70,16 +68,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function DataPage() {
-  const supabase = await createSupabaseRSCClient();
-
-  let summaries: PitSummaryRow[] = [];
-
-  try {
-    const dataset = await loadPitPublicDataset(supabase);
-    summaries = dataset.summaries;
-  } catch (error) {
-    console.error('Unable to load point-in-time dataset', error);
-  }
+  const { summaries } = await getPitPublicDataset();
 
   const orderedSummaries = sortSummariesByWindow(summaries).reverse();
   const activeSummary = orderedSummaries.find((summary) => isPitCountInProgress(summary));

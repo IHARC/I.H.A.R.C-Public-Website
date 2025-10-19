@@ -632,6 +632,7 @@ function PetitionSignSection({ petition, viewerProfile, existingSignature, isAut
 
     const result = await signPetition(formData, {
       petitionId: petition.id,
+      petitionSlug: petition.slug,
       revalidatePaths: [petitionPath, '/petition', '/petition/signers'],
     });
 

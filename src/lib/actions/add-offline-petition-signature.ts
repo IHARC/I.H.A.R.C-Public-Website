@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { scanContentForSafety } from '@/lib/safety';
@@ -9,6 +8,7 @@ import { normalizeEmail } from '@/lib/email';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
+import { invalidatePetitionCaches } from '@/lib/cache/invalidate';
 
 export type OfflinePetitionSignatureState = {
   status: 'idle' | 'success' | 'error';
@@ -274,7 +274,7 @@ export async function addOfflinePetitionSignature(
     paths.add('/petition/signers');
     paths.add('/portal/progress');
 
-    await Promise.all(Array.from(paths).map((path) => revalidatePath(path)));
+    await invalidatePetitionCaches(petition.slug, { paths: Array.from(paths) });
 
     return {
       status: 'success',

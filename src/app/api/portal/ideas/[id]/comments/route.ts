@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { scanContentForSafety } from '@/lib/safety';
 import { logAuditEvent } from '@/lib/audit';
 import { hashValue } from '@/lib/hash';
+import { invalidateIdeaCaches } from '@/lib/cache/invalidate';
 
 const OFFICIAL_ROLES = new Set(['org_rep', 'moderator', 'admin']);
 const COMMENT_COOLDOWN_MS = 30 * 1000;
@@ -250,6 +251,11 @@ export async function POST(req: NextRequest) {
       ip_hash: ipHash,
       user_agent: userAgent ?? null,
     },
+  });
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', `/portal/ideas/${ideaId}`],
   });
 
   return NextResponse.json({

@@ -9,10 +9,9 @@ import {
   formatSupportRate,
   groupBreakdownsForCount,
   isPitCountInProgress,
-  loadPitCountBySlug,
   toChartData,
 } from '@/lib/pit/public';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getPitCountBySlug } from '@/data/pit';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +25,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
     notFound();
   }
 
-  const supabase = await createSupabaseRSCClient();
-  const { summary, breakdowns } = await loadPitCountBySlug(supabase, slug);
+  const { summary, breakdowns } = await getPitCountBySlug(slug);
 
   if (!summary) {
     notFound();

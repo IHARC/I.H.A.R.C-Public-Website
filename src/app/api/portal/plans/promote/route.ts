@@ -4,6 +4,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
 import { PLAN_SUPPORT_THRESHOLD, slugifyPlanSlug } from '@/lib/plans';
 import type { Database } from '@/types/supabase';
+import { invalidateIdeaCaches, invalidatePlanCaches } from '@/lib/cache/invalidate';
 
 type IdeaPromotionRecord = Database['portal']['Tables']['ideas']['Row'] & {
   assignee: {
@@ -244,6 +245,16 @@ export async function POST(req: NextRequest) {
       title: keyDateTitle,
       scheduled_for: keyDateValue,
     },
+  });
+
+  await invalidatePlanCaches({
+    planSlug: candidateSlug,
+    paths: ['/portal/plans', `/portal/plans/${candidateSlug}`],
+  });
+
+  await invalidateIdeaCaches({
+    ideaId,
+    paths: ['/portal/ideas', '/command-center/admin'],
   });
 
   return NextResponse.json({ plan_id: plan.id, slug: candidateSlug });
