@@ -1,9 +1,12 @@
 import { BreakdownChart } from '@/components/pit/breakdown-chart';
 import { TrendChart } from '@/components/portal/trend-chart';
 import {
+  buildTreatmentSummary,
   formatCount,
+  formatPitDateRange,
   formatSupportRate,
   groupBreakdownsForCount,
+  isPitCountInProgress,
   loadPitPublicDataset,
   pickFeaturedSummary,
   sortSummariesByWindow,
@@ -70,7 +73,7 @@ export default async function PitProgressPage() {
                       'Partners completed canvasses across Northumberland communities and logged each encounter once the neighbour consented.'}
                   </p>
                 </div>
-                <StatusBadge status={summary.status} isActive={summary.is_active} />
+                <StatusBadge summary={summary} />
               </header>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -85,9 +88,9 @@ export default async function PitProgressPage() {
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <BreakdownChart
-                  title="Support readiness"
+                  title="Wants treatment"
                   description="Shows how many neighbours were ready to connect immediately, needed extra support, or declined for now."
-                  data={chart('willing_to_engage')}
+                  data={chart('wants_treatment')}
                 />
                 <BreakdownChart
                   title="Age distribution"
@@ -127,26 +130,39 @@ export default async function PitProgressPage() {
 }
 
 function buildMetricCards(summary: PitSummaryRow) {
+  const treatment = buildTreatmentSummary(summary);
+  const total = summary.total_encounters || 0;
+
   return [
     {
       label: 'Neighbours counted',
-      value: formatCount(summary.total_encounters),
-      caption: formatRange(summary),
+      value: formatCount(total),
+      caption: formatPitDateRange(summary),
     },
     {
-      label: 'Ready to connect',
-      value: formatCount(summary.ready_for_support_count),
-      caption: `${formatSupportRate(summary.ready_for_support_count, summary.total_encounters)} of responses`,
+      label: 'Ready for treatment now',
+      value: formatCount(treatment.readyNow),
+      caption: formatSupportRate(treatment.readyNow, total),
     },
     {
-      label: 'Follow-up requested',
-      value: formatCount(summary.follow_up_count),
-      caption: 'Logged for warm hand-offs',
+      label: 'Ready with supports',
+      value: formatCount(treatment.readyWithSupports),
+      caption: formatSupportRate(treatment.readyWithSupports, total),
+    },
+    {
+      label: 'Needs follow-up',
+      value: formatCount(treatment.needsFollowUp),
+      caption: formatSupportRate(treatment.needsFollowUp, total),
+    },
+    {
+      label: 'Declined today',
+      value: formatCount(treatment.declined),
+      caption: formatSupportRate(treatment.declined, total),
     },
     {
       label: 'Substance use supports',
       value: formatCount(summary.addiction_positive_count),
-      caption: 'Plan RAAM + naloxone coverage',
+      caption: 'Inform naloxone + RAAM coverage',
     },
     {
       label: 'Mental health supports',
@@ -157,12 +173,8 @@ function buildMetricCards(summary: PitSummaryRow) {
 }
 
 function formatRange(summary: PitSummaryRow): string {
-  const start = formatDate(summary.observed_start);
-  if (summary.is_active) {
-    return `${start ?? 'Start'} → today`;
-  }
-  const end = formatDate(summary.observed_end ?? summary.last_observation_at);
-  return `${start ?? 'Start'} → ${end ?? 'recently'}`;
+  const label = formatPitDateRange(summary);
+  return isPitCountInProgress(summary) ? `${label} (in progress)` : label;
 }
 
 function formatTrendPoint(summary: PitSummaryRow): string {
@@ -186,9 +198,10 @@ function formatDate(value: string | null | undefined, options?: Intl.DateTimeFor
   return new Intl.DateTimeFormat('en-CA', options ?? { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 }
 
-function StatusBadge({ status, isActive }: { status: PitSummaryRow['status']; isActive: boolean }) {
-  const label = isActive ? 'Active this week' : status === 'closed' ? 'Closed' : 'Planned';
-  const background = isActive ? 'bg-primary/10 text-primary' : 'bg-outline/10 text-on-surface-variant';
+function StatusBadge({ summary }: { summary: PitSummaryRow }) {
+  const inProgress = isPitCountInProgress(summary);
+  const label = inProgress ? 'In progress' : summary.status === 'closed' ? 'Closed' : 'Planned';
+  const background = inProgress ? 'bg-primary/10 text-primary' : 'bg-outline/10 text-on-surface-variant';
 
   return (
     <span className={`inline-flex items-center rounded-full px-4 py-1 text-sm font-semibold ${background}`}>{label}</span>

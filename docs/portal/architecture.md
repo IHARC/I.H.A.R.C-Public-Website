@@ -42,7 +42,7 @@
 
 ### 5.1 Point-in-Time Counts
 - `core.pit_counts` stores each point-in-time window (slug, title, observed start/end, methodology, lead profile). Status values (`planned`, `active`, `closed`) drive whether the marketing site advertises a live count.
-- `core.pit_count_observations` captures anonymised encounter data with enums for age bracket, support readiness, substance use severity, and mental health needs. `external_id` keeps imports idempotent; optional `person_id` links only when neighbours opt in.
+- `core.pit_count_observations` captures anonymised encounter data with enums for age bracket, gender, wants treatment (`core.pit_treatment_interest`), location type, and severity values that support `not_applicable` when a need is not disclosed. `external_id` keeps imports idempotent; optional `person_id` links only when neighbours opt in.
 - RLS mirrors other core tables: `authenticated` users who satisfy `is_iharc_user()` can read and write, while deletes require an admin permission. Audit logging flows through existing Supabase triggers.
 - Views `portal.pit_public_summary` and `portal.pit_public_breakdowns` roll observations into suppressed aggregates (cells < 3 hide counts). Both marketing `/data` and portal `/portal/progress/pit` rely on these views so anonymous readers never touch raw tables.
 - Integration details for external ingestion apps live in `docs/pit/README.md` (enum mapping, retry strategy, and linkage guidance).

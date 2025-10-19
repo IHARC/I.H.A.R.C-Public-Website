@@ -77,7 +77,7 @@ Each encounter during the count is stored in `core.pit_count_observations`. Colu
 | `gender` | Re-uses `core.gender_enum`. |
 | `addiction_response`, `mental_health_response`, `homelessness_response` | Enum: `yes`, `no`, `maybe`, `unknown`, `not_answered`. |
 | `addiction_severity`, `mental_health_severity` | Enum: `none`, `mild`, `moderate`, `severe`, `critical`, `unknown`, `not_recorded`. |
-| `willing_to_engage` | Enum: `ready_now`, `ready_with_supports`, `needs_follow_up`, `declined`, `not_suitable`, `not_assessed`, `unknown`. |
+| `wants_treatment` | Enum: `ready_now`, `ready_with_supports`, `needs_follow_up`, `declined`, `not_suitable`, `not_assessed`, `unknown`. |
 | `metadata` | JSONB for instrument-specific extras (must be structured, no raw PII). |
 
 Example insert:
@@ -94,7 +94,7 @@ insert into core.pit_count_observations (
   mental_health_response,
   mental_health_severity,
   homelessness_response,
-  willing_to_engage,
+  wants_treatment,
   metadata
 ) values (
   '00000000-0000-0000-0000-000000000000',
@@ -116,7 +116,7 @@ on conflict (pit_count_id, external_id) do update set
   mental_health_response = excluded.mental_health_response,
   mental_health_severity = excluded.mental_health_severity,
   homelessness_response = excluded.homelessness_response,
-  willing_to_engage = excluded.willing_to_engage,
+  wants_treatment = excluded.wants_treatment,
   metadata = excluded.metadata,
   updated_at = timezone('utc', now());
 ```
@@ -126,6 +126,7 @@ on conflict (pit_count_id, external_id) do update set
 - Only set `person_id` when the individual has opted in to ongoing support and the linkage is necessary for case coordination.
 - If you provide `person_id`, ensure the ingestion account also has permissions to read that `core.people` row; otherwise the insert will fail due to RLS.
 - Never store names, initials, phone numbers, or other direct identifiers in `pit_count_observations` columns.
+- When `addiction_response` or `mental_health_response` is not `yes`, set the paired severity column to `not_applicable`.
 
 ## Enumerations Reference
 

@@ -12,6 +12,35 @@ export type PitPublicDataset = {
   breakdowns: PitBreakdownRow[];
 };
 
+export async function loadPitCountBySlug(
+  client: SupabaseClient<Database>,
+  slug: string,
+): Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[] }> {
+  const portal = client.schema('portal');
+
+  const { data: summaryData, error: summaryError } = await portal
+    .from('pit_public_summary')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (summaryError) throw summaryError;
+
+  const summary = (summaryData ?? null) as PitSummaryRow | null;
+  if (!summary) {
+    return { summary: null, breakdowns: [] };
+  }
+
+  const { data: breakdownData, error: breakdownError } = await portal
+    .from('pit_public_breakdowns')
+    .select('*')
+    .eq('pit_count_id', summary.id);
+
+  if (breakdownError) throw breakdownError;
+
+  return { summary, breakdowns: (breakdownData ?? []) as PitBreakdownRow[] };
+}
+
 export async function loadPitPublicDataset(client: SupabaseClient<Database>): Promise<PitPublicDataset> {
   const portal = client.schema('portal');
 
@@ -104,21 +133,25 @@ export function toChartData(rows: PitBreakdownRow[]): ChartDatum[] {
   }));
 }
 
-export type SupportSummary = {
-  ready: number;
+export type TreatmentInterestSummary = {
+  readyNow: number;
+  readyWithSupports: number;
   needsFollowUp: number;
   declined: number;
   notSuitable: number;
   notAssessed: number;
+  unknown: number;
 };
 
-export function buildSupportSummary(summary: PitSummaryRow): SupportSummary {
+export function buildTreatmentSummary(summary: PitSummaryRow): TreatmentInterestSummary {
   return {
-    ready: summary.ready_for_support_count,
-    needsFollowUp: summary.follow_up_count,
-    declined: summary.declined_support_count,
-    notSuitable: summary.not_suitable_count,
-    notAssessed: summary.unknown_support_count,
+    readyNow: summary.wants_treatment_ready_now_count,
+    readyWithSupports: summary.wants_treatment_ready_with_supports_count,
+    needsFollowUp: summary.wants_treatment_follow_up_count,
+    declined: summary.wants_treatment_declined_count,
+    notSuitable: summary.wants_treatment_not_suitable_count,
+    notAssessed: summary.wants_treatment_not_assessed_count,
+    unknown: summary.wants_treatment_unknown_count,
   };
 }
 
@@ -132,3 +165,26 @@ export function formatCount(value: number): string {
 }
 
 export const MIN_PUBLIC_CELL = 3;
+
+export function formatPitDateRange(summary: Pick<PitSummaryRow, 'observed_start' | 'observed_end' | 'last_observation_at'>): string {
+  const start = formatDate(summary.observed_start ?? summary.last_observation_at);
+  const end = summary.observed_end ? formatDate(summary.observed_end) : null;
+  if (!start && !end) return 'Date to be confirmed';
+  if (start && !end) return `${start} onward`;
+  if (!start && end) return `through ${end}`;
+  return `${start} – ${end}`;
+}
+
+export function isPitCountInProgress(summary: PitSummaryRow): boolean {
+  if (summary.is_active) return true;
+  if (!summary.observed_end) return true;
+  const endDate = new Date(summary.observed_end);
+  return Number.isFinite(endDate.getTime()) && endDate.getTime() > Date.now();
+}
+
+function formatDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return new Intl.DateTimeFormat('en-CA', { month: 'long', day: 'numeric', year: 'numeric' }).format(parsed);
+}
