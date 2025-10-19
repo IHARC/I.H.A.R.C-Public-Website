@@ -12,7 +12,7 @@ import { KanbanBoard } from '@/components/portal/kanban-board';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { isIdeaStatusKey, type IdeaStatusKey } from '@/lib/idea-status';
 import { getMetricCards, getMetricSummary } from '@/data/metrics';
-import { getIdeaBoard } from '@/data/ideas';
+import { getIdeaBoard, type IdeaBoardFilters } from '@/data/ideas';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,13 +45,20 @@ export default async function IdeasPage({
   const sortParam = resolvedParams.sort;
   const queryParam = resolvedParams.q;
 
-  const filters = {
-    category: categoryParam ? (Array.isArray(categoryParam) ? categoryParam[0] : categoryParam) : null,
-    status: statusParam ? (Array.isArray(statusParam) ? statusParam[0] : statusParam) : null,
-    tag: tagParam ? (Array.isArray(tagParam) ? tagParam[0] : tagParam) : null,
-    sort: sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : 'active',
-    query: queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null,
-  } as const;
+  const category = categoryParam ? (Array.isArray(categoryParam) ? categoryParam[0] : categoryParam) : null;
+  const status = statusParam ? (Array.isArray(statusParam) ? statusParam[0] : statusParam) : null;
+  const tag = tagParam ? (Array.isArray(tagParam) ? tagParam[0] : tagParam) : null;
+  const rawSort = sortParam ? (Array.isArray(sortParam) ? sortParam[0] : sortParam) : null;
+  const sort: IdeaBoardFilters['sort'] = rawSort === 'newest' || rawSort === 'top' ? rawSort : 'active';
+  const query = queryParam ? (Array.isArray(queryParam) ? queryParam[0] : queryParam) : null;
+
+  const filters: IdeaBoardFilters = {
+    category,
+    status,
+    tag,
+    sort,
+    query,
+  };
 
   const ideaBoard = await getIdeaBoard(filters, viewerProfile?.id ?? user?.id ?? null);
   const viewerRole = viewerProfile?.role ?? null;

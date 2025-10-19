@@ -5,7 +5,7 @@ import type { IdeaSummary } from '@/components/portal/idea-card';
 import type { Database } from '@/types/supabase';
 import { createReactionTally, type ReactionSummary, type PortalReactionType } from '@/lib/reactions';
 
-type IdeaBoardFilters = {
+export type IdeaBoardFilters = {
   category?: string | null;
   status?: string | null;
   tag?: string | null;

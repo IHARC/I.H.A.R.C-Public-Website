@@ -9,31 +9,30 @@ type InvalidateOptions = {
   extraTags?: string[];
   paths?: string[];
 };
-
 export async function invalidateIdeaCaches(options: InvalidateOptions = {}) {
-  const tasks: Array<Promise<void>> = [
-    revalidateTag(CACHE_TAGS.ideasList),
-  ];
+  const tags = new Set<string>([CACHE_TAGS.ideasList]);
 
   if (options.ideaId) {
-    tasks.push(revalidateTag(CACHE_TAGS.idea(options.ideaId)));
-    tasks.push(revalidateTag(CACHE_TAGS.ideaComments(options.ideaId)));
-    tasks.push(revalidateTag(CACHE_TAGS.ideaReactions(options.ideaId)));
+    tags.add(CACHE_TAGS.idea(options.ideaId));
+    tags.add(CACHE_TAGS.ideaComments(options.ideaId));
+    tags.add(CACHE_TAGS.ideaReactions(options.ideaId));
   }
 
   if (options.extraTags) {
     for (const tag of options.extraTags) {
-      tasks.push(revalidateTag(tag));
+      if (tag) tags.add(tag);
     }
+  }
+
+  for (const tag of tags) {
+    await revalidateTag(tag);
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      tasks.push(revalidatePath(path));
+      if (path) await revalidatePath(path);
     }
   }
-
-  await Promise.all(tasks);
 }
 
 export async function invalidateMetricCaches() {
@@ -41,83 +40,89 @@ export async function invalidateMetricCaches() {
 }
 
 export async function invalidatePlanCaches(options: InvalidateOptions = {}) {
-  const tasks: Array<Promise<void>> = [revalidateTag(CACHE_TAGS.plansList)];
-  if (options.planSlug) {
-    tasks.push(revalidateTag(CACHE_TAGS.plan(options.planSlug)));
-  }
+  const tags = new Set<string>([CACHE_TAGS.plansList]);
 
-  if (options.paths) {
-    for (const path of options.paths) {
-      tasks.push(revalidatePath(path));
-    }
+  if (options.planSlug) {
+    tags.add(CACHE_TAGS.plan(options.planSlug));
   }
 
   if (options.extraTags) {
     for (const tag of options.extraTags) {
-      tasks.push(revalidateTag(tag));
+      if (tag) tags.add(tag);
     }
   }
 
-  await Promise.all(tasks);
+  for (const tag of tags) {
+    await revalidateTag(tag);
+  }
+
+  if (options.paths) {
+    for (const path of options.paths) {
+      if (path) await revalidatePath(path);
+    }
+  }
 }
 
 export async function invalidateMythCaches(options: Omit<InvalidateOptions, 'ideaId' | 'planSlug' | 'petitionSlug' | 'pitSlug'> = {}) {
-  const tasks: Array<Promise<void>> = [revalidateTag(CACHE_TAGS.mythEntries)];
-
-  if (options.paths) {
-    for (const path of options.paths) {
-      tasks.push(revalidatePath(path));
-    }
-  }
+  const tags = new Set<string>([CACHE_TAGS.mythEntries]);
 
   if (options.extraTags) {
     for (const tag of options.extraTags) {
-      tasks.push(revalidateTag(tag));
+      if (tag) tags.add(tag);
     }
   }
 
-  await Promise.all(tasks);
+  for (const tag of tags) {
+    await revalidateTag(tag);
+  }
+
+  if (options.paths) {
+    for (const path of options.paths) {
+      if (path) await revalidatePath(path);
+    }
+  }
 }
 
 export async function invalidatePitCaches(options: Omit<InvalidateOptions, 'ideaId' | 'planSlug' | 'petitionSlug'> = {}) {
-  const tasks: Array<Promise<void>> = [revalidateTag(CACHE_TAGS.pitSummary)];
+  const tags = new Set<string>([CACHE_TAGS.pitSummary]);
 
   if (options.pitSlug) {
-    tasks.push(revalidateTag(CACHE_TAGS.pitCount(options.pitSlug)));
-  }
-
-  if (options.paths) {
-    for (const path of options.paths) {
-      tasks.push(revalidatePath(path));
-    }
+    tags.add(CACHE_TAGS.pitCount(options.pitSlug));
   }
 
   if (options.extraTags) {
     for (const tag of options.extraTags) {
-      tasks.push(revalidateTag(tag));
+      if (tag) tags.add(tag);
     }
   }
 
-  await Promise.all(tasks);
+  for (const tag of tags) {
+    await revalidateTag(tag);
+  }
+
+  if (options.paths) {
+    for (const path of options.paths) {
+      if (path) await revalidatePath(path);
+    }
+  }
 }
 
 export async function invalidatePetitionCaches(slug: string, options: Omit<InvalidateOptions, 'petitionSlug' | 'planSlug' | 'ideaId'> = {}) {
-  const tasks: Array<Promise<void>> = [
-    revalidateTag(CACHE_TAGS.petition(slug)),
-    revalidateTag(CACHE_TAGS.petitionSigners(slug)),
-  ];
-
-  if (options.paths) {
-    for (const path of options.paths) {
-      tasks.push(revalidatePath(path));
-    }
-  }
+  const tags = new Set<string>([CACHE_TAGS.petition(slug), CACHE_TAGS.petitionSigners(slug)]);
 
   if (options.extraTags) {
     for (const tag of options.extraTags) {
-      tasks.push(revalidateTag(tag));
+      if (tag) tags.add(tag);
     }
   }
 
-  await Promise.all(tasks);
+  for (const tag of tags) {
+    await revalidateTag(tag);
+  }
+
+  if (options.paths) {
+    for (const path of options.paths) {
+      if (path) await revalidatePath(path);
+    }
+  }
 }

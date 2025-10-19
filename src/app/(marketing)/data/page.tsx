@@ -10,6 +10,7 @@ import {
   sortSummariesByWindow,
 } from '@/lib/pit/public';
 import { getPitPublicDataset } from '@/data/pit';
+import type { PitSummaryRow } from '@/lib/pit/public';
 
 const datasets = [
   {
