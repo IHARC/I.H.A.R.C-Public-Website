@@ -16,9 +16,18 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PitCountPage({ params }: { params: { slug: string } }) {
+type RouteParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function PitCountPage({ params }: { params: RouteParams }) {
+  const resolved = await params;
+  const slugParam = resolved.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
+  if (!slug) {
+    notFound();
+  }
+
   const supabase = await createSupabaseRSCClient();
-  const { summary, breakdowns } = await loadPitCountBySlug(supabase, params.slug);
+  const { summary, breakdowns } = await loadPitCountBySlug(supabase, slug);
 
   if (!summary) {
     notFound();
@@ -84,7 +93,7 @@ export default async function PitCountPage({ params }: { params: { slug: string 
             <h1 className="text-3xl font-bold tracking-tight text-on-surface">{summary.title || 'Point-in-time outreach count'}</h1>
             <p className="text-sm text-on-surface-variant">
               {summary.description ??
-                'Neighbours volunteered anonymised responses while outreach teams offered supports across Northumberland County.'}
+                'Neighbours volunteered anonymised responses while outreach teams offered supports across Cobourg outdoor routes. Totals exclude Transition House shelter residents and neighbours couch surfing or temporarily staying with friends or family.'}
             </p>
           </div>
           <span

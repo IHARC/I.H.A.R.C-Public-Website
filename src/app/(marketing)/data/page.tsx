@@ -102,7 +102,7 @@ export default async function DataPage() {
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">Point-in-Time Outreach</p>
           <h2 className="text-3xl font-semibold text-on-surface">Latest community counts</h2>
           <p className="text-sm text-on-surface-variant">
-            IHARC, municipal partners, and peer outreach teams walk shared routes so we understand who is outside right now and what supports feel safe. Everything published here is anonymised trend data.
+            IHARC and peer outreach teams walk Cobourg routes so we understand who is sleeping outdoors right now and what supports feel safe. Counts do not include Transition House shelter residents or neighbours couch surfing or doubling up with friends. Everything published here is anonymised trend data.
           </p>
           <p className="text-sm font-semibold text-error">
             In an emergency call 911. The Good Samaritan Drug Overdose Act protects the caller and the person experiencing an overdose.
@@ -224,7 +224,10 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
       <div className="max-w-xl space-y-2">
         <h3 className="text-xl font-semibold text-on-surface">{summary.title || 'Point-in-time outreach count'}</h3>
         <p className="text-xs uppercase tracking-wide text-on-surface-variant/80">{formatPitDateRange(summary)}</p>
-        <p className="text-sm text-on-surface-variant">{summary.description ?? 'Outreach teams gathered voluntary responses from neighbours across Northumberland County.'}</p>
+        <p className="text-sm text-on-surface-variant">
+          {summary.description ??
+            'Outreach teams gathered voluntary outdoor responses within Cobourg. Totals do not reflect Transition House shelter residents or neighbours temporarily staying with friends or family.'}
+        </p>
       </div>
         <span
           className={`inline-flex items-center whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold ${

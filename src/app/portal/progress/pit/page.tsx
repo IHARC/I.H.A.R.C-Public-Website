@@ -33,7 +33,7 @@ export default async function PitProgressPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Point-in-Time Outreach</p>
         <h1 className="text-3xl font-bold tracking-tight">Weekly point-in-time counts</h1>
         <p className="text-sm text-on-surface-variant">
-          IHARC coordinates point-in-time counts with neighbours, outreach teams, and municipal staff. Every entry is anonymized before it reaches this dashboard. Use these charts to plan staffing, follow-up visits, and overdose response coverage.
+          IHARC coordinates Cobourg point-in-time counts with neighbours and our outreach teams. These outreach snapshots focus on people sleeping outdoors—they do not include Transition House shelter residents or neighbours couch surfing or doubling up with friends. Every entry is anonymized before it reaches this dashboard so you can plan staffing, follow-up visits, and overdose response coverage.
         </p>
         <p className="text-sm font-semibold text-error">
           In an emergency call 911. The Good Samaritan Drug Overdose Act protects you and the person you&apos;re helping when you call for an overdose.
@@ -45,8 +45,8 @@ export default async function PitProgressPage() {
 
       {trendSeries.length ? (
         <TrendChart
-          title="Neighbours counted across point-in-time windows"
-          description="Totals help partners see whether weekly canvasses are reaching consistent numbers of neighbours."
+          title="Neighbours counted across Cobourg point-in-time windows"
+          description="Totals reflect Cobourg outdoor encounters only, helping partners see whether weekly canvasses are reaching consistent numbers of neighbours."
           data={trendSeries}
           rangeLabel={trendRangeLabel}
         />
@@ -70,7 +70,7 @@ export default async function PitProgressPage() {
                   <h2 className="text-2xl font-semibold text-on-surface">{formatRange(summary)}</h2>
                   <p className="text-sm text-on-surface-variant">
                     {summary.description ??
-                      'Partners completed canvasses across Northumberland communities and logged each encounter once the neighbour consented.'}
+                      'Partners completed Cobourg canvasses and logged each outdoor encounter once the neighbour consented. Totals exclude Transition House residents and neighbours staying temporarily with friends or family.'}
                   </p>
                 </div>
                 <StatusBadge summary={summary} />
