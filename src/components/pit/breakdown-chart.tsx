@@ -31,7 +31,6 @@ export function BreakdownChart({ title, description, data }: BreakdownChartProps
   const tooltipBackground = 'rgb(var(--md-sys-color-surface-container-highest) / 0.92)';
   const tooltipBorder = 'rgb(var(--md-sys-color-outline-variant) / 0.6)';
   const tooltipText = 'rgb(var(--md-sys-color-on-surface) / 0.94)';
-  const hasData = points.some((item) => item.chartValue > 0);
   const longLabels = hasLongLabel(points);
 
   return (
