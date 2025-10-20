@@ -199,11 +199,11 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
       hint: formatSupportRate(treatment.notSuitable + treatment.notAssessed + treatment.unknown, total),
     },
     {
-      label: 'Substance use supports flagged',
+      label: 'Addiction severity flagged',
       value: formatCount(summary.addiction_positive_count),
     },
     {
-      label: 'Mental health follow-ups',
+      label: 'Mental health severity flagged',
       value: formatCount(summary.mental_health_positive_count),
     },
   ];

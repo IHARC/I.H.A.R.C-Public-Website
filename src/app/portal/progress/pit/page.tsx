@@ -98,13 +98,13 @@ export default async function PitProgressPage() {
                   data={chart('age_bracket')}
                 />
                 <BreakdownChart
-                  title="Substance use supports"
-                  description="Counts guide naloxone drops, RAAM clinic referrals, and medical planning."
+                  title="Addiction severity"
+                  description="Outreach teams note when neighbours share higher-risk substance use so we can prioritise naloxone drops and warm referrals."
                   data={chart('addiction_severity')}
                 />
                 <BreakdownChart
-                  title="Mental health supports"
-                  description="Helps NHH Community Mental Health Services and partners schedule clinicians alongside outreach teams."
+                  title="Mental health severity"
+                  description="Flags help outreach leads line up next visits where neighbours described acute mental health concerns."
                   data={chart('mental_health_severity')}
                 />
               </div>
@@ -160,14 +160,14 @@ function buildMetricCards(summary: PitSummaryRow) {
       caption: formatSupportRate(treatment.declined, total),
     },
     {
-      label: 'Substance use supports',
+      label: 'Addiction severity flagged',
       value: formatCount(summary.addiction_positive_count),
       caption: 'Inform naloxone + RAAM coverage',
     },
     {
-      label: 'Mental health supports',
+      label: 'Mental health severity flagged',
       value: formatCount(summary.mental_health_positive_count),
-      caption: 'Coordinate with clinicians',
+      caption: 'Guide follow-up outreach visits',
     },
   ];
 }

@@ -120,11 +120,11 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
             <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(total)}</dd>
           </div>
           <div className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Substance use supports flagged</dt>
+            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Addiction severity flagged</dt>
             <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(summary.addiction_positive_count)}</dd>
           </div>
           <div className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Mental health follow-ups</dt>
+            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Mental health severity flagged</dt>
             <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(summary.mental_health_positive_count)}</dd>
           </div>
           {stats.map((stat) => (
@@ -163,13 +163,13 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
             data={locationChart}
           />
           <BreakdownChart
-            title="Substance use supports"
-            description="Severity is only logged when a neighbour requests or accepts substance use support; other encounters are marked as not applicable."
+            title="Addiction severity"
+            description="Flags indicate when outreach teams observe or neighbours share high addiction risks that require rapid follow-up."
             data={addictionChart}
           />
           <BreakdownChart
-            title="Mental health supports"
-            description="Help planning ensures clinical partners focus their warm hand-offs where neighbours asked for it."
+            title="Mental health severity"
+            description="Flags show when neighbours share acute mental health concerns so outreach leads can coordinate timely check-ins."
             data={mentalHealthChart}
           />
         </div>
