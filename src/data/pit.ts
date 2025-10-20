@@ -18,7 +18,7 @@ const fetchPitDataset = unstable_cache(
       return await loadPitPublicDataset(supabase);
     } catch (error) {
       console.error('Failed to load point-in-time dataset', error);
-      return { summaries: [], breakdowns: [] };
+      return { summaries: [], breakdowns: [], refreshedAt: new Date().toISOString() };
     }
   },
   ['marketing:pit:dataset'],
@@ -30,7 +30,7 @@ const fetchPitDataset = unstable_cache(
 
 const pitCountCache = new Map<
   string,
-  () => Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[] }>
+  () => Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[]; refreshedAt: string }>
 >();
 
 export async function getPitPublicDataset(): Promise<PitPublicDataset> {
@@ -39,7 +39,7 @@ export async function getPitPublicDataset(): Promise<PitPublicDataset> {
 
 export async function getPitCountBySlug(
   slug: string,
-): Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[] }> {
+): Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[]; refreshedAt: string }> {
   let cached = pitCountCache.get(slug);
 
   if (!cached) {
@@ -50,7 +50,7 @@ export async function getPitCountBySlug(
           return await loadPitCountBySlug(supabase, slug);
         } catch (error) {
           console.error(`Failed to load point-in-time count for slug ${slug}`, error);
-          return { summary: null, breakdowns: [] };
+          return { summary: null, breakdowns: [], refreshedAt: new Date().toISOString() };
         }
       },
       ['marketing:pit:count', slug],

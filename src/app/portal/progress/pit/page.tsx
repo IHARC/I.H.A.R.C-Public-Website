@@ -23,6 +23,7 @@ export default async function PitProgressPage() {
 
   const summaries = sortSummariesByWindow(dataset.summaries);
   const breakdowns = dataset.breakdowns;
+  const refreshedAt = dataset.refreshedAt ?? new Date().toISOString();
   const trendSeries = summaries.map((summary) => ({ date: formatTrendPoint(summary), value: summary.total_encounters }));
   const trendRangeLabel = buildTrendRangeLabel(summaries);
   const latest = pickFeaturedSummary(summaries);
@@ -76,7 +77,7 @@ export default async function PitProgressPage() {
                 <div className="flex flex-col items-start gap-2 text-sm text-on-surface-variant lg:items-end">
                   <StatusBadge summary={summary} />
                   <span className="inline-flex items-center whitespace-nowrap rounded-full bg-surface-container px-4 py-1 text-xs font-medium">
-                    Updated {formatLastUpdated(summary.last_observation_at ?? summary.updated_at)}
+                    Updated {formatLastUpdated(refreshedAt)}
                   </span>
                 </div>
               </header>

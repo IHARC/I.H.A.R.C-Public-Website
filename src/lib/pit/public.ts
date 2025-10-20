@@ -10,12 +10,13 @@ export type PitBreakdownRow = PortalSchema['Views']['pit_public_breakdowns']['Ro
 export type PitPublicDataset = {
   summaries: PitSummaryRow[];
   breakdowns: PitBreakdownRow[];
+  refreshedAt: string;
 };
 
 export async function loadPitCountBySlug(
   client: SupabaseClient<Database>,
   slug: string,
-): Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[] }> {
+): Promise<{ summary: PitSummaryRow | null; breakdowns: PitBreakdownRow[]; refreshedAt: string }> {
   const portal = client.schema('portal');
 
   const { data: summaryData, error: summaryError } = await portal
@@ -28,7 +29,7 @@ export async function loadPitCountBySlug(
 
   const summary = (summaryData ?? null) as PitSummaryRow | null;
   if (!summary) {
-    return { summary: null, breakdowns: [] };
+    return { summary: null, breakdowns: [], refreshedAt: new Date().toISOString() };
   }
 
   const { data: breakdownData, error: breakdownError } = await portal
@@ -38,7 +39,11 @@ export async function loadPitCountBySlug(
 
   if (breakdownError) throw breakdownError;
 
-  return { summary, breakdowns: (breakdownData ?? []) as PitBreakdownRow[] };
+  return {
+    summary,
+    breakdowns: (breakdownData ?? []) as PitBreakdownRow[],
+    refreshedAt: new Date().toISOString(),
+  };
 }
 
 export async function loadPitPublicDataset(client: SupabaseClient<Database>): Promise<PitPublicDataset> {
@@ -60,6 +65,7 @@ export async function loadPitPublicDataset(client: SupabaseClient<Database>): Pr
   return {
     summaries: (summaryResult.data ?? []) as PitSummaryRow[],
     breakdowns: (breakdownResult.data ?? []) as PitBreakdownRow[],
+    refreshedAt: new Date().toISOString(),
   };
 }
 

@@ -17,7 +17,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
     notFound();
   }
 
-  const { summary, breakdowns } = await getPitCountBySlug(slug);
+  const { summary, breakdowns, refreshedAt } = await getPitCountBySlug(slug);
 
   if (!summary) {
     notFound();
@@ -46,7 +46,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
       value: formatCount(summary.mental_health_positive_count),
     },
   ];
-  const lastUpdated = formatLastUpdated(summary.last_observation_at ?? summary.updated_at);
+  const lastUpdated = formatLastUpdated(refreshedAt);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
