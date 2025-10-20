@@ -168,18 +168,18 @@ export default async function DataPage() {
 }
 
 function PitCountCard({ summary }: { summary: PitSummaryRow }) {
-  const stats = [
+  const stats: Array<{ label: string; value: string; hint?: string }> = [
     {
       label: 'Actively living outside',
-      value: formatCount(summary.homelessness_confirmed_count || 0),
+      value: formatCount(summary.homelessness_confirmed_count ?? 0),
     },
     {
       label: 'Identified substance use / addictions',
-      value: formatCount(summary.addiction_positive_count),
+      value: formatCount(summary.addiction_positive_count ?? 0),
     },
     {
       label: 'Severe mental health conditions',
-      value: formatCount(summary.mental_health_positive_count),
+      value: formatCount(summary.mental_health_positive_count ?? 0),
     },
   ];
 
