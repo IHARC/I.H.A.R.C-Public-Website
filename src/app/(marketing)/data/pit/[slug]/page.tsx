@@ -137,6 +137,89 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
         </div>
       </section>
 
+      <section className="space-y-6 rounded-3xl border border-outline/10 bg-surface p-8 text-on-surface">
+        <header className="space-y-2">
+          <h2 className="text-2xl font-semibold">How to read these metrics</h2>
+          <p className="text-sm text-on-surface-variant">
+            Outreach navigators use these plain-language descriptions to guide rapid responses during the count. They are not clinical
+            assessments and simply help teams coordinate supports with dignity and care.
+          </p>
+        </header>
+
+        <div className="space-y-5 text-sm">
+          <article className="space-y-3">
+            <h3 className="text-lg font-semibold">Addiction severity</h3>
+            <p className="text-on-surface-variant">
+              These should not be construed as a medical opinion. The scale simplifies complex experiences for situational assessments only.
+            </p>
+            <dl className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Mild</dt>
+                <dd>
+                  Includes stimulant and/or alcohol use only, with no known overdoses and no witnessed incidents of severe public intoxication.
+                </dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Moderate</dt>
+                <dd>Includes opioid and/or mixed substance use with no known overdoses and no witnessed public intoxication.</dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Severe</dt>
+                <dd>
+                  Known overdose(s) and/or witnessed public intoxication due to opioid use. Always call 911 immediately and remember the Good
+                  Samaritan Drug Overdose Act protects the caller and the person experiencing an overdose.
+                </dd>
+              </div>
+            </dl>
+          </article>
+
+          <article className="space-y-3">
+            <h3 className="text-lg font-semibold">Mental health severity</h3>
+            <p className="text-on-surface-variant">
+              These should not be construed as a medical opinion. The scale simplifies complex experiences for situational assessments only.
+            </p>
+            <dl className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Mild</dt>
+                <dd>Does not impact day-to-day functioning or the ability to practice self-care.</dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Moderate</dt>
+                <dd>
+                  Some impacts on daily functioning, including sporadic episodes (for example, delusions) and confirmed diagnoses requiring
+                  medication.
+                </dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Severe</dt>
+                <dd>Consistent impacts on daily functioning, persistent inability to demonstrate self-care, and regularly witnessed episodes.</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article className="space-y-3">
+            <h3 className="text-lg font-semibold">Treatment response</h3>
+            <dl className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Yes</dt>
+                <dd>Willing to immediately enter a treatment program with adequate supports and the intention of ending substance use.</dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">No</dt>
+                <dd>Currently unwilling to enter a treatment program or cease substance use.</dd>
+              </div>
+              <div className="space-y-1 rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+                <dt className="text-xs uppercase tracking-wide text-on-surface-variant/80">Not suitable</dt>
+                <dd>
+                  Identified complex mental health concerns that may be better supported through inpatient psychiatric care. This is an educated
+                  outreach assessment and not a medical opinion.
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-outline/10 bg-surface-container p-6 text-sm text-on-surface-variant">
         <p className="font-semibold text-on-surface">Need follow-up data?</p>
         <p className="mt-2">
