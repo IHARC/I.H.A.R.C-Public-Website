@@ -134,24 +134,18 @@ export function toChartData(rows: PitBreakdownRow[]): ChartDatum[] {
 }
 
 export type TreatmentInterestSummary = {
-  readyNow: number;
-  readyWithSupports: number;
-  needsFollowUp: number;
-  declined: number;
+  yes: number;
+  no: number;
   notSuitable: number;
-  notAssessed: number;
-  unknown: number;
+  notApplicable: number;
 };
 
 export function buildTreatmentSummary(summary: PitSummaryRow): TreatmentInterestSummary {
   return {
-    readyNow: summary.wants_treatment_ready_now_count,
-    readyWithSupports: summary.wants_treatment_ready_with_supports_count,
-    needsFollowUp: summary.wants_treatment_follow_up_count,
-    declined: summary.wants_treatment_declined_count,
+    yes: summary.wants_treatment_yes_count,
+    no: summary.wants_treatment_no_count,
     notSuitable: summary.wants_treatment_not_suitable_count,
-    notAssessed: summary.wants_treatment_not_assessed_count,
-    unknown: summary.wants_treatment_unknown_count,
+    notApplicable: summary.wants_treatment_not_applicable_count,
   };
 }
 

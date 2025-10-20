@@ -2533,13 +2533,10 @@ export type Database = {
           updated_at: string;
           last_observation_at: string | null;
           total_encounters: number;
-          wants_treatment_ready_now_count: number;
-          wants_treatment_ready_with_supports_count: number;
-          wants_treatment_follow_up_count: number;
-          wants_treatment_declined_count: number;
-          wants_treatment_not_assessed_count: number;
+          wants_treatment_yes_count: number;
+          wants_treatment_no_count: number;
           wants_treatment_not_suitable_count: number;
-          wants_treatment_unknown_count: number;
+          wants_treatment_not_applicable_count: number;
           addiction_positive_count: number;
           mental_health_positive_count: number;
           homelessness_confirmed_count: number;

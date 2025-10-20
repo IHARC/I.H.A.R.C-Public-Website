@@ -43,36 +43,54 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
   const mentalHealthChart = chartFor('mental_health_severity');
   const treatmentChart = chartFor('wants_treatment');
 
-  const stats = [
+  const unsheltered = summary.homelessness_confirmed_count || 0;
+  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
+  const shareOfUnsheltered = (value: number) => (unsheltered ? formatSupportRate(value, unsheltered) : '0%');
+
+  const cards = [
     {
-      label: 'Ready for treatment now',
-      value: treatment.readyNow,
-      rate: formatSupportRate(treatment.readyNow, total),
+      label: 'Neighbours counted',
+      value: formatCount(total),
     },
     {
-      label: 'Ready with supports',
-      value: treatment.readyWithSupports,
-      rate: formatSupportRate(treatment.readyWithSupports, total),
+      label: 'Said yes to treatment',
+      value: formatCount(treatment.yes),
+      rate: formatSupportRate(treatment.yes, total),
     },
     {
-      label: 'Needs follow-up',
-      value: treatment.needsFollowUp,
-      rate: formatSupportRate(treatment.needsFollowUp, total),
+      label: 'Said no to treatment',
+      value: formatCount(treatment.no),
+      rate: formatSupportRate(treatment.no, total),
     },
     {
-      label: 'Declined today',
-      value: treatment.declined,
-      rate: formatSupportRate(treatment.declined, total),
-    },
-    {
-      label: 'Not suitable',
-      value: treatment.notSuitable,
+      label: 'Not suitable for treatment',
+      value: formatCount(treatment.notSuitable),
       rate: formatSupportRate(treatment.notSuitable, total),
     },
     {
-      label: 'Not yet assessed / unknown',
-      value: treatment.notAssessed + treatment.unknown,
-      rate: formatSupportRate(treatment.notAssessed + treatment.unknown, total),
+      label: 'Not applicable (no addiction risk)',
+      value: formatCount(treatment.notApplicable),
+      rate: formatSupportRate(treatment.notApplicable, total),
+    },
+    {
+      label: 'Confirmed unsheltered neighbours',
+      value: formatCount(unsheltered),
+      rate: formatSupportRate(unsheltered, total),
+    },
+    {
+      label: 'Unsheltered without addiction severity flag',
+      value: formatCount(withoutSevereAddiction),
+      rate: shareOfUnsheltered(withoutSevereAddiction),
+    },
+    {
+      label: 'Addiction severity flagged',
+      value: formatCount(summary.addiction_positive_count),
+      rate: shareOfUnsheltered(summary.addiction_positive_count),
+    },
+    {
+      label: 'Mental health severity flagged',
+      value: formatCount(summary.mental_health_positive_count),
+      rate: shareOfUnsheltered(summary.mental_health_positive_count),
     },
   ];
 
@@ -115,24 +133,12 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
           Totals below represent the {formatCount(total)} neighbours encountered during this count window. Percentages reflect each group&apos;s share of those encounters.
         </p>
         <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Neighbours counted</dt>
-            <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(total)}</dd>
-          </div>
-          <div className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Addiction severity flagged</dt>
-            <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(summary.addiction_positive_count)}</dd>
-          </div>
-          <div className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-            <dt className="text-xs uppercase tracking-wide text-on-surface-variant">Mental health severity flagged</dt>
-            <dd className="mt-2 text-lg font-semibold text-on-surface">{formatCount(summary.mental_health_positive_count)}</dd>
-          </div>
-          {stats.map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
-              <dt className="text-xs uppercase tracking-wide text-on-surface-variant">{stat.label}</dt>
+          {cards.map((card) => (
+            <div key={card.label} className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
+              <dt className="text-xs uppercase tracking-wide text-on-surface-variant">{card.label}</dt>
               <dd className="mt-2 text-lg font-semibold text-on-surface">
-                {formatCount(stat.value)}
-                <span className="ml-2 text-xs font-normal text-on-surface-variant">{stat.rate}</span>
+                {card.value}
+                {card.rate ? <span className="ml-2 text-xs font-normal text-on-surface-variant">{card.rate}</span> : null}
               </dd>
             </div>
           ))}
@@ -154,7 +160,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
           />
           <BreakdownChart
             title="Wants treatment"
-            description="Shows how many neighbours wanted treatment now, with supports, or preferred a follow-up later."
+            description="Shows how many neighbours said yes, no, were not suitable, or did not require treatment during this count."
             data={treatmentChart}
           />
           <BreakdownChart

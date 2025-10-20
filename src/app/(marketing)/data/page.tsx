@@ -168,43 +168,55 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
   const treatment = buildTreatmentSummary(summary);
   const total = summary.total_encounters || 0;
 
+  const unsheltered = summary.homelessness_confirmed_count || 0;
+  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
+
+  const shareOfUnsheltered = unsheltered ? (value: number) => formatSupportRate(value, unsheltered) : () => '0%';
+
   const stats = [
     {
       label: 'Neighbours counted',
       value: formatCount(total),
     },
     {
-      label: 'Ready for treatment now',
-      value: formatCount(treatment.readyNow),
-      hint: formatSupportRate(treatment.readyNow, total),
+      label: 'Said yes to treatment',
+      value: formatCount(treatment.yes),
+      hint: formatSupportRate(treatment.yes, total),
     },
     {
-      label: 'Ready with supports',
-      value: formatCount(treatment.readyWithSupports),
-      hint: formatSupportRate(treatment.readyWithSupports, total),
+      label: 'Said no to treatment',
+      value: formatCount(treatment.no),
+      hint: formatSupportRate(treatment.no, total),
     },
     {
-      label: 'Needs follow-up',
-      value: formatCount(treatment.needsFollowUp),
-      hint: formatSupportRate(treatment.needsFollowUp, total),
+      label: 'Not suitable for treatment',
+      value: formatCount(treatment.notSuitable),
+      hint: formatSupportRate(treatment.notSuitable, total),
     },
     {
-      label: 'Declined today',
-      value: formatCount(treatment.declined),
-      hint: formatSupportRate(treatment.declined, total),
+      label: 'Not applicable (no addiction risk)',
+      value: formatCount(treatment.notApplicable),
+      hint: formatSupportRate(treatment.notApplicable, total),
     },
     {
-      label: 'Not suitable / not yet assessed',
-      value: formatCount(treatment.notSuitable + treatment.notAssessed + treatment.unknown),
-      hint: formatSupportRate(treatment.notSuitable + treatment.notAssessed + treatment.unknown, total),
+      label: 'Confirmed unsheltered neighbours',
+      value: formatCount(unsheltered),
+      hint: formatSupportRate(unsheltered, total),
     },
     {
       label: 'Addiction severity flagged',
       value: formatCount(summary.addiction_positive_count),
+      hint: shareOfUnsheltered(summary.addiction_positive_count),
     },
     {
       label: 'Mental health severity flagged',
       value: formatCount(summary.mental_health_positive_count),
+      hint: shareOfUnsheltered(summary.mental_health_positive_count),
+    },
+    {
+      label: 'Unsheltered without addiction severity flag',
+      value: formatCount(withoutSevereAddiction),
+      hint: shareOfUnsheltered(withoutSevereAddiction),
     },
   ];
 

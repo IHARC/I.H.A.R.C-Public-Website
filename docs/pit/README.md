@@ -77,7 +77,7 @@ Each encounter during the count is stored in `core.pit_count_observations`. Colu
 | `gender` | Re-uses `core.gender_enum`. |
 | `addiction_response`, `mental_health_response`, `homelessness_response` | Enum: `yes`, `no`, `maybe`, `unknown`, `not_answered`. |
 | `addiction_severity`, `mental_health_severity` | Enum: `none`, `mild`, `moderate`, `severe`, `critical`, `unknown`, `not_recorded`. |
-| `wants_treatment` | Enum: `ready_now`, `ready_with_supports`, `needs_follow_up`, `declined`, `not_suitable`, `not_assessed`, `unknown`. |
+| `wants_treatment` | Enum: `yes`, `no`, `not_suitable`, `not_applicable`. |
 | `metadata` | JSONB for instrument-specific extras (must be structured, no raw PII). |
 
 Example insert:
@@ -107,7 +107,7 @@ insert into core.pit_count_observations (
   'no',
   'not_recorded',
   'yes',
-  'ready_with_supports',
+  'yes',
   jsonb_build_object('notes', 'Requested RAAM follow-up and warming supplies')
 )
 on conflict (pit_count_id, external_id) do update set

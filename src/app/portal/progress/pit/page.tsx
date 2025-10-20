@@ -76,7 +76,7 @@ export default async function PitProgressPage() {
                 <StatusBadge summary={summary} />
               </header>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 {buildMetricCards(summary).map((card) => (
                   <div key={card.label} className="rounded-2xl border border-outline/20 bg-surface-container-high p-5 shadow-sm">
                     <p className="text-xs uppercase tracking-wide text-on-surface-variant/80">{card.label}</p>
@@ -89,7 +89,7 @@ export default async function PitProgressPage() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <BreakdownChart
                   title="Wants treatment"
-                  description="Shows how many neighbours were ready to connect immediately, needed extra support, or declined for now."
+                  description="Shows how many neighbours said yes, no, were not suitable, or did not require treatment during the outreach window."
                   data={chart('wants_treatment')}
                 />
                 <BreakdownChart
@@ -132,6 +132,9 @@ export default async function PitProgressPage() {
 function buildMetricCards(summary: PitSummaryRow) {
   const treatment = buildTreatmentSummary(summary);
   const total = summary.total_encounters || 0;
+  const unsheltered = summary.homelessness_confirmed_count || 0;
+  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
+  const shareOfUnsheltered = unsheltered ? (value: number) => formatSupportRate(value, unsheltered) : () => '0%';
 
   return [
     {
@@ -140,34 +143,44 @@ function buildMetricCards(summary: PitSummaryRow) {
       caption: formatPitDateRange(summary),
     },
     {
-      label: 'Ready for treatment now',
-      value: formatCount(treatment.readyNow),
-      caption: formatSupportRate(treatment.readyNow, total),
+      label: 'Said yes to treatment',
+      value: formatCount(treatment.yes),
+      caption: formatSupportRate(treatment.yes, total),
     },
     {
-      label: 'Ready with supports',
-      value: formatCount(treatment.readyWithSupports),
-      caption: formatSupportRate(treatment.readyWithSupports, total),
+      label: 'Said no to treatment',
+      value: formatCount(treatment.no),
+      caption: formatSupportRate(treatment.no, total),
     },
     {
-      label: 'Needs follow-up',
-      value: formatCount(treatment.needsFollowUp),
-      caption: formatSupportRate(treatment.needsFollowUp, total),
+      label: 'Not suitable for treatment',
+      value: formatCount(treatment.notSuitable),
+      caption: formatSupportRate(treatment.notSuitable, total),
     },
     {
-      label: 'Declined today',
-      value: formatCount(treatment.declined),
-      caption: formatSupportRate(treatment.declined, total),
+      label: 'Not applicable (no addiction risk)',
+      value: formatCount(treatment.notApplicable),
+      caption: formatSupportRate(treatment.notApplicable, total),
+    },
+    {
+      label: 'Confirmed unsheltered neighbours',
+      value: formatCount(unsheltered),
+      caption: formatSupportRate(unsheltered, total),
+    },
+    {
+      label: 'Unsheltered without addiction severity flag',
+      value: formatCount(withoutSevereAddiction),
+      caption: shareOfUnsheltered(withoutSevereAddiction),
     },
     {
       label: 'Addiction severity flagged',
       value: formatCount(summary.addiction_positive_count),
-      caption: 'Inform naloxone + RAAM coverage',
+      caption: shareOfUnsheltered(summary.addiction_positive_count),
     },
     {
       label: 'Mental health severity flagged',
       value: formatCount(summary.mental_health_positive_count),
-      caption: 'Guide follow-up outreach visits',
+      caption: shareOfUnsheltered(summary.mental_health_positive_count),
     },
   ];
 }
