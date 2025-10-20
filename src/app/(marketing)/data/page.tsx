@@ -1,14 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import {
-  buildTreatmentSummary,
-  formatCount,
-  formatPitDateRange,
-  formatSupportRate,
-  isPitCountInProgress,
-  sortSummariesByWindow,
-} from '@/lib/pit/public';
+import { formatCount, formatPitDateRange, isPitCountInProgress, sortSummariesByWindow } from '@/lib/pit/public';
 import { getPitPublicDataset } from '@/data/pit';
 import type { PitSummaryRow } from '@/lib/pit/public';
 
@@ -16,7 +9,7 @@ const datasets = [
   {
     title: 'Daily housing indicators',
     description:
-      'Shelter occupancy, motel overflow usage, and the number of neighbours recorded outdoors or in encampments. Updated by County housing staff with on-call validation from outreach teams.',
+      'Shelter occupancy, motel overflow usage, and the number of people recorded outdoors or in encampments. Updated by County housing staff with on-call validation from outreach teams.',
   },
   {
     title: 'Overdose response signals',
@@ -40,7 +33,7 @@ const dataPrinciples = [
 export const metadata: Metadata = {
   title: 'Community Data & Metrics — IHARC',
   description:
-    'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+    'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
   alternates: {
     canonical: '/data',
   },
@@ -48,7 +41,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+      'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
     url: '/data',
     images: [
       {
@@ -61,7 +54,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the IHARC Portal and how neighbours can request new metrics.',
+      'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
     images: ['/logo.png'],
   },
 };
@@ -80,7 +73,7 @@ export default async function DataPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Community Data</p>
         <h1 className="text-4xl font-bold tracking-tight">Metrics that keep the response accountable</h1>
         <p className="text-base text-on-surface/80">
-          IHARC shares the data neighbours asked for most often. Each dataset is stewarded by a public agency or trusted partner, and every chart links back to the responsible team so you can ask questions or suggest new measures.
+          IHARC shares the data people asked for most often. Each dataset is stewarded by a public agency or trusted partner, and every chart links back to the responsible team so you can ask questions or suggest new measures.
         </p>
         <p className="text-sm text-on-surface/70">
           We timestamp every update and link to the stewarding team so you always know who published the numbers and when.
@@ -92,13 +85,13 @@ export default async function DataPage() {
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">Point-in-Time Outreach</p>
           <h2 className="text-3xl font-semibold text-on-surface">Latest community counts</h2>
           <p className="text-sm text-on-surface-variant">
-            IHARC and peer outreach teams walk Cobourg routes so we understand who is sleeping outdoors right now and what supports feel safe. Counts do not include Transition House shelter residents or neighbours couch surfing or doubling up with friends. Everything published here is anonymised trend data.
+            IHARC and volunteers are collecting data on who is sleeping outdoors right now and what supports feel safe. Counts do not include Transition House shelter residents or people couch surfing or doubling up with friends. Everything published here is anonymised trend data.
           </p>
           <p className="text-sm font-semibold text-error">
             In an emergency call 911. The Good Samaritan Drug Overdose Act protects the caller and the person experiencing an overdose.
           </p>
           <p className="text-sm text-on-surface-variant">
-            Need help between counts? Email <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a> or visit the RAAM clinic on Tuesdays, 12–3 pm at 1011 Elgin St. W.
+            Need help between? Email <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a> or visit the RAAM clinic on Tuesdays, 12–3 pm at 1011 Elgin St. W.
           </p>
         </header>
 
@@ -110,7 +103,7 @@ export default async function DataPage() {
           </div>
         ) : (
           <div className="rounded-3xl border border-outline/20 bg-surface p-8 text-sm text-on-surface-variant">
-            The first community point-in-time count is being finalised. Once data stewards validate every record, anonymised dashboards will appear here along with a downloadable summary.
+            Our first community point-in-time count is being finalised. Live data is available now. Please note, data is still being updated and changes are likely. 
           </div>
         )}
       </section>
@@ -120,10 +113,20 @@ export default async function DataPage() {
           <p className="font-semibold text-on-surface">Active count</p>
           <p className="mt-1 text-on-surface">{formatPitDateRange(activeSummary)}</p>
           <p className="mt-2">
-            Partners are currently gathering observations. Live charts update every few minutes—follow along on the detailed page.
+            We are currently gathering observations. Live charts update every few minutes—follow along on the detailed page.
           </p>
         </aside>
       ) : null}
+
+      <section className="space-y-4 rounded-3xl border border-outline/10 bg-surface p-8">
+        <h2 className="text-2xl font-semibold text-on-surface">What is a PiT count?</h2>
+        <p className="text-sm text-on-surface-variant">
+          A point-in-time (PiT) count is a structured snapshot of everyone sleeping outdoors or in places not meant for housing on a given day. Outreach teams follow a standardised route, ask each person a short set of questions about housing status, health and safety concerns, and treatment interest, and log responses anonymously. The data helps provide public insight into the current trends and can help guide the creation of new solutions that address the actual needs. Because a PiT is a single moment, it does not replace ongoing case work or daily outreach notes—it simply gives the community a shared baseline for rapid planning.
+        </p>
+        <p className="text-sm text-on-surface-variant">
+          The IHARC PiT workflow follows the Canadian Observatory on Homelessness methodology, adapts it for Cobourg’s outreach routes, and suppresses any cell smaller than three responses to protect dignity and privacy.
+        </p>
+      </section>
 
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold">What we publish today</h2>
@@ -165,58 +168,18 @@ export default async function DataPage() {
 }
 
 function PitCountCard({ summary }: { summary: PitSummaryRow }) {
-  const treatment = buildTreatmentSummary(summary);
-  const total = summary.total_encounters || 0;
-
-  const unsheltered = summary.homelessness_confirmed_count || 0;
-  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
-
-  const shareOfUnsheltered = unsheltered ? (value: number) => formatSupportRate(value, unsheltered) : () => '0%';
-
   const stats = [
     {
-      label: 'Neighbours counted',
-      value: formatCount(total),
+      label: 'Actively living outside',
+      value: formatCount(summary.homelessness_confirmed_count || 0),
     },
     {
-      label: 'Said yes to treatment',
-      value: formatCount(treatment.yes),
-      hint: formatSupportRate(treatment.yes, total),
-    },
-    {
-      label: 'Said no to treatment',
-      value: formatCount(treatment.no),
-      hint: formatSupportRate(treatment.no, total),
-    },
-    {
-      label: 'Not suitable for treatment',
-      value: formatCount(treatment.notSuitable),
-      hint: formatSupportRate(treatment.notSuitable, total),
-    },
-    {
-      label: 'Not applicable (no addiction risk)',
-      value: formatCount(treatment.notApplicable),
-      hint: formatSupportRate(treatment.notApplicable, total),
-    },
-    {
-      label: 'Confirmed unsheltered neighbours',
-      value: formatCount(unsheltered),
-      hint: formatSupportRate(unsheltered, total),
-    },
-    {
-      label: 'Addiction severity flagged',
+      label: 'Identified substance use / addictions',
       value: formatCount(summary.addiction_positive_count),
-      hint: shareOfUnsheltered(summary.addiction_positive_count),
     },
     {
-      label: 'Mental health severity flagged',
+      label: 'Severe mental health conditions',
       value: formatCount(summary.mental_health_positive_count),
-      hint: shareOfUnsheltered(summary.mental_health_positive_count),
-    },
-    {
-      label: 'Unsheltered without addiction severity flag',
-      value: formatCount(withoutSevereAddiction),
-      hint: shareOfUnsheltered(withoutSevereAddiction),
     },
   ];
 
@@ -228,7 +191,7 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
         <p className="text-xs uppercase tracking-wide text-on-surface-variant/80">{formatPitDateRange(summary)}</p>
         <p className="text-sm text-on-surface-variant">
           {summary.description ??
-            'Outreach teams gathered voluntary outdoor responses within Cobourg. Totals do not reflect Transition House shelter residents or neighbours temporarily staying with friends or family.'}
+            'Outreach teams gathered voluntary outdoor responses within Cobourg. Totals do not reflect Transition House shelter residents or people temporarily staying with friends or family.'}
         </p>
       </div>
         <span
@@ -242,7 +205,7 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
         </span>
       </div>
 
-      <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="grid gap-3 text-sm sm:grid-cols-3">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
             <dt className="text-xs uppercase tracking-wide text-on-surface-variant">{stat.label}</dt>

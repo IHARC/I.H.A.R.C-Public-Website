@@ -2,15 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { BreakdownChart } from '@/components/pit/breakdown-chart';
-import {
-  buildTreatmentSummary,
-  formatCount,
-  formatPitDateRange,
-  formatSupportRate,
-  groupBreakdownsForCount,
-  isPitCountInProgress,
-  toChartData,
-} from '@/lib/pit/public';
+import { formatCount, formatPitDateRange, groupBreakdownsForCount, isPitCountInProgress, toChartData } from '@/lib/pit/public';
 import { getPitCountBySlug } from '@/data/pit';
 
 export const dynamic = 'force-dynamic';
@@ -30,9 +22,6 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
   if (!summary) {
     notFound();
   }
-
-  const treatment = buildTreatmentSummary(summary);
-  const total = summary.total_encounters || 0;
   const breakdownGroups = groupBreakdownsForCount(breakdowns, summary.id);
   const chartFor = (dimension: string) => toChartData(breakdownGroups.find((group) => group.dimension === dimension)?.rows ?? []);
 
@@ -43,56 +32,21 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
   const mentalHealthChart = chartFor('mental_health_severity');
   const treatmentChart = chartFor('wants_treatment');
 
-  const unsheltered = summary.homelessness_confirmed_count || 0;
-  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
-  const shareOfUnsheltered = (value: number) => (unsheltered ? formatSupportRate(value, unsheltered) : '0%');
-
-  const cards = [
+  const summaryCards = [
     {
-      label: 'Neighbours counted',
-      value: formatCount(total),
+      label: 'Actively living outside',
+      value: formatCount(summary.homelessness_confirmed_count || 0),
     },
     {
-      label: 'Said yes to treatment',
-      value: formatCount(treatment.yes),
-      rate: formatSupportRate(treatment.yes, total),
-    },
-    {
-      label: 'Said no to treatment',
-      value: formatCount(treatment.no),
-      rate: formatSupportRate(treatment.no, total),
-    },
-    {
-      label: 'Not suitable for treatment',
-      value: formatCount(treatment.notSuitable),
-      rate: formatSupportRate(treatment.notSuitable, total),
-    },
-    {
-      label: 'Not applicable (no addiction risk)',
-      value: formatCount(treatment.notApplicable),
-      rate: formatSupportRate(treatment.notApplicable, total),
-    },
-    {
-      label: 'Confirmed unsheltered neighbours',
-      value: formatCount(unsheltered),
-      rate: formatSupportRate(unsheltered, total),
-    },
-    {
-      label: 'Unsheltered without addiction severity flag',
-      value: formatCount(withoutSevereAddiction),
-      rate: shareOfUnsheltered(withoutSevereAddiction),
-    },
-    {
-      label: 'Addiction severity flagged',
+      label: 'Identified substance use / addictions',
       value: formatCount(summary.addiction_positive_count),
-      rate: shareOfUnsheltered(summary.addiction_positive_count),
     },
     {
-      label: 'Mental health severity flagged',
+      label: 'Severe mental health conditions',
       value: formatCount(summary.mental_health_positive_count),
-      rate: shareOfUnsheltered(summary.mental_health_positive_count),
     },
   ];
+  const lastUpdated = formatLastUpdated(summary.last_observation_at ?? summary.updated_at);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
@@ -109,18 +63,23 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
             <h1 className="text-3xl font-bold tracking-tight text-on-surface">{summary.title || 'Point-in-time outreach count'}</h1>
             <p className="text-sm text-on-surface-variant">
               {summary.description ??
-                'Neighbours volunteered anonymised responses while outreach teams offered supports across Cobourg outdoor routes. Totals exclude Transition House shelter residents and neighbours couch surfing or temporarily staying with friends or family.'}
+                'People volunteered anonymised responses while outreach teams offered supports across Cobourg outdoor routes. Totals exclude Transition House shelter residents and those couch surfing or temporarily staying with friends or family.'}
             </p>
           </div>
-          <span
-            className={`inline-flex items-center whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold ${
-              isPitCountInProgress(summary)
-                ? 'bg-primary/10 text-primary'
-                : 'bg-outline/10 text-on-surface-variant'
-            }`}
-          >
-            {isPitCountInProgress(summary) ? 'In Progress' : 'Completed'}
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span
+              className={`inline-flex items-center whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold ${
+                isPitCountInProgress(summary)
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-outline/10 text-on-surface-variant'
+              }`}
+            >
+              {isPitCountInProgress(summary) ? 'In Progress' : 'Completed'}
+            </span>
+            <span className="inline-flex items-center whitespace-nowrap rounded-full bg-surface-container px-4 py-1 text-xs font-medium text-on-surface-variant">
+              Updated {lastUpdated}
+            </span>
+          </div>
         </div>
         <p className="text-sm font-semibold text-error">
           In an emergency call 911. The Good Samaritan Drug Overdose Act protects the caller and the person experiencing an overdose.
@@ -130,16 +89,13 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold">Treatment interest snapshot</h2>
         <p className="text-sm text-on-surface-variant">
-          Totals below represent the {formatCount(total)} neighbours encountered during this count window. Percentages reflect each group&apos;s share of those encounters.
+          Snapshot below highlights who outreach staff connected with during this count window. Visit the portal dashboard for deeper drill-downs.
         </p>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map((card) => (
+        <dl className="grid gap-3 text-sm sm:grid-cols-3">
+          {summaryCards.map((card) => (
             <div key={card.label} className="rounded-2xl border border-outline/10 bg-surface-container-low p-4">
               <dt className="text-xs uppercase tracking-wide text-on-surface-variant">{card.label}</dt>
-              <dd className="mt-2 text-lg font-semibold text-on-surface">
-                {card.value}
-                {card.rate ? <span className="ml-2 text-xs font-normal text-on-surface-variant">{card.rate}</span> : null}
-              </dd>
+              <dd className="mt-2 text-lg font-semibold text-on-surface">{card.value}</dd>
             </div>
           ))}
         </dl>
@@ -150,32 +106,32 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
         <div className="grid gap-6 lg:grid-cols-2">
           <BreakdownChart
             title="Age distribution"
-            description="Counts reflect neighbours who consented to share their age bracket during the outreach window."
+            description="Counts reflect people who consented to share their age bracket during the outreach window."
             data={ageChart}
           />
           <BreakdownChart
             title="Gender identity"
-            description="Neighbours self-identify, and outreach teams only log what people are comfortable sharing."
+            description="People self-identify, and outreach teams only log what respondents are comfortable sharing."
             data={genderChart}
           />
           <BreakdownChart
             title="Wants treatment"
-            description="Shows how many neighbours said yes, no, were not suitable, or did not require treatment during this count."
+            description="Shows how many respondents said yes, no, were not suitable, or did not require treatment during this count."
             data={treatmentChart}
           />
           <BreakdownChart
             title="Where we connected"
-            description="Location types guide canopy routes, motel supports, and shelter co-ordination."
+            description="Location types guide canopy routes, motel supports, and shelter coordination."
             data={locationChart}
           />
           <BreakdownChart
             title="Addiction severity"
-            description="Flags indicate when outreach teams observe or neighbours share high addiction risks that require rapid follow-up."
+            description="Flags indicate when outreach teams observe or respondents share high addiction risks that require rapid follow-up."
             data={addictionChart}
           />
           <BreakdownChart
             title="Mental health severity"
-            description="Flags show when neighbours share acute mental health concerns so outreach leads can coordinate timely check-ins."
+            description="Flags show when respondents share acute mental health concerns so outreach leads can coordinate timely check-ins."
             data={mentalHealthChart}
           />
         </div>
@@ -189,4 +145,18 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
       </section>
     </div>
   );
+}
+
+function formatLastUpdated(value: string | null): string {
+  if (!value) return 'recently';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'recently';
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(parsed);
 }

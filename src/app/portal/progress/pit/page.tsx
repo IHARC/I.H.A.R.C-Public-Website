@@ -33,7 +33,7 @@ export default async function PitProgressPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Point-in-Time Outreach</p>
         <h1 className="text-3xl font-bold tracking-tight">Weekly point-in-time counts</h1>
         <p className="text-sm text-on-surface-variant">
-          IHARC coordinates Cobourg point-in-time counts with neighbours and our outreach teams. These outreach snapshots focus on people sleeping outdoors—they do not include Transition House shelter residents or neighbours couch surfing or doubling up with friends. Every entry is anonymized before it reaches this dashboard so you can plan staffing, follow-up visits, and overdose response coverage.
+          IHARC coordinates Cobourg point-in-time counts alongside volunteers. These outreach snapshots focus on people sleeping outdoors—they do not include Transition House shelter residents or people couch surfing or doubling up with friends. Every entry is anonymized before it reaches this dashboard. 
         </p>
         <p className="text-sm font-semibold text-error">
           In an emergency call 911. The Good Samaritan Drug Overdose Act protects you and the person you&apos;re helping when you call for an overdose.
@@ -46,7 +46,7 @@ export default async function PitProgressPage() {
       {trendSeries.length ? (
         <TrendChart
           title="Neighbours counted across Cobourg point-in-time windows"
-          description="Totals reflect Cobourg outdoor encounters only, helping partners see whether weekly canvasses are reaching consistent numbers of neighbours."
+          description="Totals reflect Cobourg outdoor encounters only, helping partners see whether weekly canvasses are reaching consistent numbers of people."
           data={trendSeries}
           rangeLabel={trendRangeLabel}
         />
@@ -54,7 +54,7 @@ export default async function PitProgressPage() {
 
       {summaries.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-outline/40 bg-surface p-8 text-sm text-on-surface-variant">
-          The first point-in-time count is being validated and will appear here once stewards finish the quality review.
+          The first point-in-time count is being validated and will appear here.
         </div>
       ) : null}
 
@@ -70,13 +70,18 @@ export default async function PitProgressPage() {
                   <h2 className="text-2xl font-semibold text-on-surface">{formatRange(summary)}</h2>
                   <p className="text-sm text-on-surface-variant">
                     {summary.description ??
-                      'Partners completed Cobourg canvasses and logged each outdoor encounter once the neighbour consented. Totals exclude Transition House residents and neighbours staying temporarily with friends or family.'}
+                      'Partners completed Cobourg canvasses and logged each outdoor encounter once people consented. Totals exclude Transition House residents and individuals staying temporarily with friends or family.'}
                   </p>
                 </div>
-                <StatusBadge summary={summary} />
+                <div className="flex flex-col items-start gap-2 text-sm text-on-surface-variant lg:items-end">
+                  <StatusBadge summary={summary} />
+                  <span className="inline-flex items-center whitespace-nowrap rounded-full bg-surface-container px-4 py-1 text-xs font-medium">
+                    Updated {formatLastUpdated(summary.last_observation_at ?? summary.updated_at)}
+                  </span>
+                </div>
               </header>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {buildMetricCards(summary).map((card) => (
                   <div key={card.label} className="rounded-2xl border border-outline/20 bg-surface-container-high p-5 shadow-sm">
                     <p className="text-xs uppercase tracking-wide text-on-surface-variant/80">{card.label}</p>
@@ -89,7 +94,7 @@ export default async function PitProgressPage() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <BreakdownChart
                   title="Wants treatment"
-                  description="Shows how many neighbours said yes, no, were not suitable, or did not require treatment during the outreach window."
+                  description="Shows how many respondents said yes, no, were not suitable, or did not require treatment during the outreach window."
                   data={chart('wants_treatment')}
                 />
                 <BreakdownChart
@@ -99,12 +104,12 @@ export default async function PitProgressPage() {
                 />
                 <BreakdownChart
                   title="Addiction severity"
-                  description="Outreach teams note when neighbours share higher-risk substance use so we can prioritise naloxone drops and warm referrals."
+                  description="Outreach teams note when respondents share higher-risk substance use so naloxone drops and warm referrals can be prioritised."
                   data={chart('addiction_severity')}
                 />
                 <BreakdownChart
                   title="Mental health severity"
-                  description="Flags help outreach leads line up next visits where neighbours described acute mental health concerns."
+                  description="Flags help outreach leads line up next visits where respondents described acute mental health concerns."
                   data={chart('mental_health_severity')}
                 />
               </div>
@@ -133,14 +138,27 @@ function buildMetricCards(summary: PitSummaryRow) {
   const treatment = buildTreatmentSummary(summary);
   const total = summary.total_encounters || 0;
   const unsheltered = summary.homelessness_confirmed_count || 0;
-  const withoutSevereAddiction = Math.max(unsheltered - summary.addiction_positive_count, 0);
-  const shareOfUnsheltered = unsheltered ? (value: number) => formatSupportRate(value, unsheltered) : () => '0%';
 
   return [
     {
-      label: 'Neighbours counted',
+      label: 'People engaged',
       value: formatCount(total),
       caption: formatPitDateRange(summary),
+    },
+    {
+      label: 'Actively living outside',
+      value: formatCount(unsheltered),
+      caption: formatSupportRate(unsheltered, total),
+    },
+    {
+      label: 'Identified substance use / addictions',
+      value: formatCount(summary.addiction_positive_count),
+      caption: formatSupportRate(summary.addiction_positive_count, total),
+    },
+    {
+      label: 'Severe mental health conditions',
+      value: formatCount(summary.mental_health_positive_count),
+      caption: formatSupportRate(summary.mental_health_positive_count, total),
     },
     {
       label: 'Said yes to treatment',
@@ -161,26 +179,6 @@ function buildMetricCards(summary: PitSummaryRow) {
       label: 'Not applicable (no addiction risk)',
       value: formatCount(treatment.notApplicable),
       caption: formatSupportRate(treatment.notApplicable, total),
-    },
-    {
-      label: 'Confirmed unsheltered neighbours',
-      value: formatCount(unsheltered),
-      caption: formatSupportRate(unsheltered, total),
-    },
-    {
-      label: 'Unsheltered without addiction severity flag',
-      value: formatCount(withoutSevereAddiction),
-      caption: shareOfUnsheltered(withoutSevereAddiction),
-    },
-    {
-      label: 'Addiction severity flagged',
-      value: formatCount(summary.addiction_positive_count),
-      caption: shareOfUnsheltered(summary.addiction_positive_count),
-    },
-    {
-      label: 'Mental health severity flagged',
-      value: formatCount(summary.mental_health_positive_count),
-      caption: shareOfUnsheltered(summary.mental_health_positive_count),
     },
   ];
 }
@@ -209,6 +207,20 @@ function formatDate(value: string | null | undefined, options?: Intl.DateTimeFor
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return new Intl.DateTimeFormat('en-CA', options ?? { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+}
+
+function formatLastUpdated(value: string | null): string {
+  if (!value) return 'recently';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'recently';
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(parsed);
 }
 
 function StatusBadge({ summary }: { summary: PitSummaryRow }) {

@@ -125,7 +125,7 @@ describe('PIT helpers', () => {
             total: 2,
             percentage: null,
             suppressed: true,
-            suppressed_reason: 'Less than 3 neighbours responded',
+            suppressed_reason: 'Suppressed: fewer than 3 responses',
             total_encounters: 2,
             last_observation_at: '2024-10-21',
           },
