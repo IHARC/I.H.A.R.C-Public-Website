@@ -1,5 +1,4 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 import {
   loadPitCountBySlug,
@@ -8,12 +7,13 @@ import {
   type PitPublicDataset,
   type PitSummaryRow,
 } from '@/lib/pit/public';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 
 const PIT_REVALIDATE_SECONDS = 120;
 
 const fetchPitDataset = unstable_cache(
   async (): Promise<PitPublicDataset> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     try {
       return await loadPitPublicDataset(supabase);
     } catch (error) {
@@ -45,7 +45,7 @@ export async function getPitCountBySlug(
   if (!cached) {
     cached = unstable_cache(
       async () => {
-        const supabase = await createSupabaseRSCClient();
+        const supabase = getSupabasePublicClient();
         try {
           return await loadPitCountBySlug(supabase, slug);
         } catch (error) {

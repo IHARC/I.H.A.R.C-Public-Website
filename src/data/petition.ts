@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import type { Database } from '@/types/supabase';
 import { CACHE_TAGS } from '@/lib/cache/tags';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 
 type PetitionSummaryRow = Database['portal']['Views']['petition_public_summary']['Row'];
 type PetitionSignerRow = Database['portal']['Views']['petition_public_signers']['Row'];
@@ -15,8 +15,8 @@ export async function getPetitionPublicSummary(slug: string): Promise<PetitionSu
   if (!cached) {
     cached = unstable_cache(
       async () => {
-        const supabase = await createSupabaseRSCClient();
-        const portal = supabase.schema('portal');
+    const supabase = getSupabasePublicClient();
+    const portal = supabase.schema('portal');
 
         const { data, error } = await portal
           .from('petition_public_summary')
@@ -67,7 +67,7 @@ export async function getPetitionSigners({
   if (!cached) {
     cached = unstable_cache(
       async () => {
-        const supabase = await createSupabaseRSCClient();
+        const supabase = getSupabasePublicClient();
         const portal = supabase.schema('portal');
 
         const { data, count, error } = await portal

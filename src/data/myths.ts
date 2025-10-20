@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import type { Database } from '@/types/supabase';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 
 type MythEntryRow = Database['public']['Tables']['myth_busting_entries']['Row'];
@@ -9,7 +9,7 @@ const MYTH_REVALIDATE_SECONDS = 120;
 
 const fetchPublishedMyths = unstable_cache(
   async (): Promise<MythEntryRow[]> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     const { data, error } = await supabase
       .from('myth_busting_entries')
       .select('id, slug, title, myth_statement, fact_statement, status, analysis, sources, tags, updated_at')
