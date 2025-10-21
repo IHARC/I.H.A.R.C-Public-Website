@@ -33,7 +33,13 @@
 - Styling: Tailwind CSS with shared tokens in `src/styles/main.css`; design system enforced via Tailwind config.
 - Data: Supabase schema `portal` covers ideas (`ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`), working plans (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`), petitions (`petitions`, `petition_signatures`, `petition_public_summary`, `petition_public_signers`, `petition_signature_totals`), and metrics (`metric_daily`). All reads and mutations depend on RLS, RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.), and Edge Functions.
 - Components: Idea cards, plan composer, moderation queue, kanban board, petition sign form, and helper rails live in `src/components/portal/`.
+- Caching: All read funnels use tag-aware cached loaders in `src/data/*` backed by `unstable_cache`. Mutation routes and server actions must invalidate via `src/lib/cache/invalidate.ts` instead of calling `revalidatePath` directly. Do not add compatibility shims or fallbacks—new code must follow the tagged cache contract.
 - Storage: Private `portal-attachments` bucket accessed through signed URLs after server-side validation.
+
+### Future Routes & Data Fetching
+- Create new cached data accessors under `src/data/` when adding Supabase reads. Each accessor must declare tags from `src/lib/cache/tags.ts` and an explicit revalidation window (default 120 seconds unless operational requirements demand otherwise).
+- Any mutation (API route, server action, Edge Function) affecting cached tables must call the appropriate helper in `src/lib/cache/invalidate.ts`. Pass explicit paths only when a page needs path-level revalidation; never rely on implicit behaviour.
+- Do not introduce legacy fallbacks (e.g., optional direct Supabase fetches alongside cached helpers) or conditional paths that bypass cache invalidation. All code must assume the tagged cache is authoritative.
 
 ## Development Workflow
 1. Node.js ≥ 18.18 and npm 9+ are required. Install dependencies with `npm install`.
@@ -59,3 +65,4 @@
 - `docs/portal/architecture.md` – schema, RLS, edge function contracts, portal flows.
 - `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
 - `INTEGRATIONS.md` – analytics/live chat configuration toggles.
+
