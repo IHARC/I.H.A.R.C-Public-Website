@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Roboto, Roboto_Flex } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import './globals.css';
+import '@/styles/main.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
 import { ConsentBanner } from '@/components/providers/consent-banner';
