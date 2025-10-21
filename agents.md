@@ -65,3 +65,6 @@
 - `docs/portal/architecture.md` – schema, RLS, edge function contracts, portal flows.
 - `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
 - `INTEGRATIONS.md` – analytics/live chat configuration toggles.
+
+test fix
+
