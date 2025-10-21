@@ -66,5 +66,3 @@
 - `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
 - `INTEGRATIONS.md` – analytics/live chat configuration toggles.
 
-test fix
-
