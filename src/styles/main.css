@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   color-scheme: light;
   --md-sys-color-primary: 210 35 77;
