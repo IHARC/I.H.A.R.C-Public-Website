@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { formatCount, formatPitDateRange, sortSummariesByWindow } from '@/lib/pit/public';
+import { describePitStatus, formatCount, formatPitDateRange, sortSummariesByWindow } from '@/lib/pit/public';
 import { getPitPublicDataset } from '@/data/pit';
 import type { PitSummaryRow } from '@/lib/pit/public';
 import { PitStatusBadge } from '@/components/pit/status-badge';
@@ -66,6 +66,7 @@ export default async function DataPage() {
   const { summaries } = await getPitPublicDataset();
 
   const orderedSummaries = sortSummariesByWindow(summaries).reverse();
+  const activeSummary = orderedSummaries.find((entry) => describePitStatus(entry).code === 'active');
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
