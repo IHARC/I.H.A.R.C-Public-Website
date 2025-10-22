@@ -155,6 +155,20 @@ export function buildTreatmentSummary(summary: PitSummaryRow): TreatmentInterest
   };
 }
 
+export type PitStatusCode = 'active' | 'scheduled' | 'completed';
+
+export function describePitStatus(summary: PitSummaryRow): { code: PitStatusCode; label: string } {
+  if (isPitCountInProgress(summary) || summary.status === 'active') {
+    return { code: 'active', label: 'Active' };
+  }
+
+  if (summary.status === 'planned') {
+    return { code: 'scheduled', label: 'Scheduled' };
+  }
+
+  return { code: 'completed', label: 'Completed' };
+}
+
 export function formatSupportRate(value: number, total: number): string {
   if (!total) return '0%';
   return `${Math.round((value / total) * 100)}%`;

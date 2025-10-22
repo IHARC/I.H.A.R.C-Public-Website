@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { formatCount, formatPitDateRange, isPitCountInProgress, sortSummariesByWindow } from '@/lib/pit/public';
+import { formatCount, formatPitDateRange, sortSummariesByWindow } from '@/lib/pit/public';
 import { getPitPublicDataset } from '@/data/pit';
 import type { PitSummaryRow } from '@/lib/pit/public';
+import { PitStatusBadge } from '@/components/pit/status-badge';
 
 const datasets = [
   {
@@ -65,7 +66,6 @@ export default async function DataPage() {
   const { summaries } = await getPitPublicDataset();
 
   const orderedSummaries = sortSummariesByWindow(summaries).reverse();
-  const activeSummary = orderedSummaries.find((summary) => isPitCountInProgress(summary));
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
@@ -194,15 +194,7 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
             'Outreach teams gathered voluntary outdoor responses within Cobourg. Totals do not reflect Transition House shelter residents or people temporarily staying with friends or family.'}
         </p>
       </div>
-        <span
-          className={`inline-flex items-center whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold ${
-            isPitCountInProgress(summary)
-              ? 'bg-primary/10 text-primary'
-              : 'bg-outline/10 text-on-surface-variant'
-          }`}
-        >
-          {isPitCountInProgress(summary) ? 'In Progress' : 'Completed'}
-        </span>
+        <PitStatusBadge summary={summary} />
       </div>
 
       <dl className="grid gap-3 text-sm sm:grid-cols-3">
