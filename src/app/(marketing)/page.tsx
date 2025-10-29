@@ -43,9 +43,6 @@ export default function MarketingHomePage() {
             <StayInvolvedLink href="/portal/plans" label="Track plan progress">
               Follow Working Plans, decision notes, and key dates in one place.
             </StayInvolvedLink>
-            <StayInvolvedLink href="/emergency#petition-support" label="Support the declaration">
-              Add your name to the community petition. It is a public show of support, not a legal referendum.
-            </StayInvolvedLink>
           </div>
         </div>
       </section>

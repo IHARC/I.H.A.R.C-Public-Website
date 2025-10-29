@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
-import { SupportDeclarationLink } from '@/components/site/support-declaration-link';
 
 export function Hero() {
   return (
@@ -28,13 +27,6 @@ export function Hero() {
           >
             Get Help Now
           </Link>
-          <SupportDeclarationLink
-            href="/emergency#petition-support"
-            source="home_hero"
-            className="rounded-full border border-outline/40 px-6 py-3 text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            Support the declaration
-          </SupportDeclarationLink>
         </div>
         <div className="text-sm font-semibold">
           <Link
