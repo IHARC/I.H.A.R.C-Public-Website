@@ -57,7 +57,8 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
       >
         <nav aria-label={label} className="flex flex-col gap-1">
           {items.map((item) => {
-            const itemActive = pathname.startsWith(item.href);
+            const isExternal = /^https?:\/\//.test(item.href);
+            const itemActive = !isExternal && pathname.startsWith(item.href);
 
             return (
               <DropdownMenuItem
@@ -68,7 +69,13 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
                   itemActive ? 'bg-primary/15 text-primary' : 'hover:bg-surface-container-high'
                 )}
               >
-                <Link href={item.href} aria-current={itemActive ? 'page' : undefined} className="flex flex-col">
+                <Link
+                  href={item.href}
+                  aria-current={itemActive ? 'page' : undefined}
+                  className="flex flex-col"
+                  prefetch={!isExternal}
+                  rel={isExternal ? 'noreferrer' : undefined}
+                >
                   <span className="text-sm font-semibold">{item.label}</span>
                   {item.description ? (
                     <span className="text-xs text-on-surface/70">{item.description}</span>

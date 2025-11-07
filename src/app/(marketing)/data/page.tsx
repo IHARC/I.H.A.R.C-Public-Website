@@ -5,6 +5,7 @@ import { describePitStatus, formatCount, formatPitDateRange, sortSummariesByWind
 import { getPitPublicDataset } from '@/data/pit';
 import type { PitSummaryRow } from '@/lib/pit/public';
 import { PitStatusBadge } from '@/components/pit/status-badge';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 const datasets = [
   {
@@ -34,7 +35,7 @@ const dataPrinciples = [
 export const metadata: Metadata = {
   title: 'Community Data & Metrics — IHARC',
   description:
-    'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
+    'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
   alternates: {
     canonical: '/data',
   },
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
+      'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
     url: '/data',
     images: [
       {
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the IHARC Portal and how residents can request new metrics.',
+      'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
     images: ['/logo.png'],
   },
 };
@@ -64,6 +65,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function DataPage() {
   const { summaries } = await getPitPublicDataset();
+  const steviHomeUrl = steviPortalUrl('/');
 
   const orderedSummaries = sortSummariesByWindow(summaries).reverse();
   const activeSummary = orderedSummaries.find((entry) => describePitStatus(entry).code === 'active');
@@ -155,13 +157,14 @@ export default async function DataPage() {
       <section className="rounded-3xl border border-outline/20 bg-surface p-8 text-sm text-on-surface/80">
         <h2 className="text-2xl font-semibold text-on-surface">Want to explore the latest numbers?</h2>
         <p className="mt-2">
-          The portal&apos;s Progress view summarises the last 30 days. For deeper analysis, partners can request access to the underlying tables through the moderation team.
+          STEVI summarises the last 30 days for outreach teams and clients. For deeper analysis, partners can request access to the underlying tables through the moderation team.
         </p>
         <Link
-          href="/portal/progress"
+          href={steviHomeUrl}
+          prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          View the 30-day snapshot
+          Open STEVI
         </Link>
       </section>
     </div>

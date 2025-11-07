@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 const updates = [
   {
-    title: 'Weekly collaboration digest',
+    title: 'Weekly STEVI digest',
     date: 'Every Monday',
     summary:
-      'Moderators publish a roundup of new ideas, Working Plan updates, and urgent metrics shifts. Subscribe to stay in the loop without logging in daily.',
+      'Outreach leads publish a roundup of new STEVI plan updates, service changes, and urgent metrics so you can stay informed without logging in daily.',
   },
   {
     title: 'Emergency declaration briefing',
@@ -18,7 +19,7 @@ const updates = [
     title: 'Community debrief sessions',
     date: 'Next session: Last Thursday of the month',
     summary:
-      'Neighbours, agencies, and municipal staff review progress together. Notes and action items are posted in the portal immediately after each session.',
+      'Neighbours, agencies, and municipal staff review progress together. Notes and action items are posted to STEVI for clients and outreach teams immediately after each session.',
   },
 ];
 
@@ -29,13 +30,15 @@ export const metadata: Metadata = {
 };
 
 export default function NewsPage() {
+  const steviHomeUrl = steviPortalUrl('/');
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">News & Updates</p>
         <h1 className="text-4xl font-bold tracking-tight">Follow the collaborative work in real time</h1>
         <p className="text-base text-on-surface/80">
-          IHARC keeps announcements brief and action-oriented. Each update links back to the portal so you can see the evidence, discussion, and decisions behind the headline.
+          IHARC keeps announcements brief and action-oriented. Updates highlight the STEVI work underway so anyone can see the evidence, discussion, and decisions behind each headline.
         </p>
       </header>
 
@@ -54,13 +57,14 @@ export default function NewsPage() {
       <section className="rounded-3xl border border-outline/20 bg-surface-container p-8 text-sm text-on-surface/80">
         <h2 className="text-2xl font-semibold text-on-surface">Want a deeper dive?</h2>
         <p className="mt-2">
-          The portal records every Working Plan update, decision, and metric adjustment. Subscribe inside the portal to receive notifications or export public RSS feeds.
+          STEVI records every plan update, decision, and metric adjustment. Subscribe inside STEVI to receive notifications or export public RSS feeds.
         </p>
         <Link
-          href="/portal/plans"
+          href={steviHomeUrl}
+          prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Browse Working Plans
+          Open STEVI
         </Link>
       </section>
     </div>

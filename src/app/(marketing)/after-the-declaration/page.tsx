@@ -56,13 +56,13 @@ export default function AfterTheDeclarationPage() {
         <Section
           title="Step 3: Integrate community input"
           description={[
-            'Review collaboration portal ideas through the Planning section of the IMS',
+            'Review STEVI plan updates and partner feedback through the Planning section of the IMS',
             'Prioritize rapid pilots grounded in local evidence',
             'Scale successful initiatives—coordinated transport, safe-camp frameworks, real-time outreach data—within the emergency response',
           ]}
         >
           <p className="text-base text-on-surface/80">
-            The <strong>IHARC Collaboration Portal</strong> already hosts local solutions. Incorporating them keeps the emergency
+            The <strong>STEVI portal</strong> already hosts local solutions. Incorporating them keeps the emergency
             response rooted in what neighbours, front-line workers, and agencies know works.
           </p>
         </Section>

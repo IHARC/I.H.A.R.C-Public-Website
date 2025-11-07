@@ -13,7 +13,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { portalLinks } from '@/components/layout/portal-nav';
 import { cn } from '@/lib/utils';
 import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
@@ -40,7 +39,6 @@ type TopNavMobileProps = {
 export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobileProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const onPortalRoute = pathname.startsWith('/portal');
 
   type MobileMenuItem = {
     type: 'menu';
@@ -58,8 +56,8 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
 
   type MobileNavItem = MobileLinkItem | MobileMenuItem;
 
-  const navSections = useMemo(
-    () => [
+  const navSections = useMemo(() => {
+    return [
       {
         id: 'marketing',
         title: 'Explore IHARC',
@@ -91,27 +89,8 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
           };
         }),
       },
-      ...(onPortalRoute
-        ? [
-            {
-              id: 'portal',
-              title: 'Collaboration Portal',
-              items: portalLinks.map((link) => {
-                const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href);
-
-                return {
-                  type: 'link' as const,
-                  href: link.href,
-                  label: link.label,
-                  isActive,
-                };
-              }),
-            },
-          ]
-        : []),
-    ],
-    [links, onPortalRoute, pathname]
-  );
+    ];
+  }, [links, pathname]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -201,7 +180,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
             }}
           >
             <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
-              Account
+              STEVI portal access
             </p>
             {accountSection}
           </div>

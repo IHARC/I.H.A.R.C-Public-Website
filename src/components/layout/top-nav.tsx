@@ -5,6 +5,7 @@ import { TopNavLink } from '@/components/layout/top-nav-link';
 import { getUserNavigation } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { TopNavDropdown, type TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 const emergencyNavigation: TopNavDropdownItem[] = [
   {
@@ -13,7 +14,7 @@ const emergencyNavigation: TopNavDropdownItem[] = [
     description: 'Understand why partners declared a housing and overdose emergency.',
   },
   {
-    href: '/portal/petition/state-of-emergency',
+    href: steviPortalUrl('/portal/petition/state-of-emergency'),
     label: 'Sign the Petition',
     description: 'Add your support so neighbours and Council advance emergency responses.',
   },
@@ -37,22 +38,25 @@ const marketingNavigation: MarketingNavItem[] = [
 
 export async function TopNav() {
   const { desktop: userNavigation, mobile: mobileUserNavigation } = await getUserNavigation();
+  const steviHomeUrl = steviPortalUrl('/');
 
   const portalCtaDesktop = (
     <Link
-      href="/portal/ideas"
+      href={steviHomeUrl}
       className="hidden items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      prefetch={false}
     >
-      Open Collaboration Portal
+      Open STEVI Portal
     </Link>
   );
 
   const portalCtaMobile = (
     <Link
-      href="/portal/ideas"
+      href={steviHomeUrl}
       className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-base font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      prefetch={false}
     >
-      Open Collaboration Portal
+      Open STEVI Portal
     </Link>
   );
 

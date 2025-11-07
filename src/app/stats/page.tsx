@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { DashboardCards } from '@/components/portal/dashboard-cards';
 import { TrendChart } from '@/components/portal/trend-chart';
 import { getMetricRows, getMetricCards, getMetricSummary, groupMetricRows } from '@/data/metrics';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 export const dynamic = 'force-dynamic';
+
+const STEVI_HOME_URL = steviPortalUrl('/');
 
 export default async function StatsDashboardPage({
   searchParams,
@@ -105,16 +108,17 @@ function DashboardPlaceholder() {
         </p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link
-            href="/portal/ideas"
+            href={STEVI_HOME_URL}
+            prefetch={false}
             className="inline-flex items-center rounded-full bg-brand px-4 py-2 font-medium text-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            Go to the collaboration portal
+            Visit the STEVI portal
           </Link>
           <Link
-            href="/portal/ideas?status=under_review"
+            href="/news"
             className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Review project board candidates
+            Read the latest updates
           </Link>
         </div>
       </section>
@@ -122,13 +126,17 @@ function DashboardPlaceholder() {
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">Current focus</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            We are co-designing rapid-response ideas with partners in housing, health, and drug poisoning response so the dashboard reflects what matters on the ground.
+            Outreach teams publish new STEVI plan updates every week so these dashboards reflect what matters on the ground.
           </p>
         </div>
         <div className="rounded-lg border border-dashed border-slate-200 bg-white p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">How to contribute</h4>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Share solution ideas, react to promising approaches, and flag content needing moderator attention. Official agency responses are labelled for clarity, and proposals must align with humane, evidence-based care.
+            If you&apos;re supporting someone connected to IHARC, request STEVI credentials. Everyone else can follow public updates here and email{' '}
+            <a href="mailto:outreach@iharc.ca" className="text-brand underline">
+              outreach@iharc.ca
+            </a>{' '}
+            with urgent tips.
           </p>
         </div>
       </section>

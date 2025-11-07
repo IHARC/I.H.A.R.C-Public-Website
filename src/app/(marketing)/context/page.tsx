@@ -65,7 +65,7 @@ export default function ContextPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Shared context</p>
         <h1 className="text-4xl font-bold tracking-tight">Why IHARC focuses on these four areas</h1>
         <p className="text-lg text-on-surface/80">
-          These notes summarize what neighbours, outreach teams, and partner agencies surfaced while building the collaboration portal.
+          These notes summarize what neighbours, outreach teams, and partner agencies surfaced while shaping STEVI, the shared support portal backing every IHARC plan.
         </p>
       </header>
 

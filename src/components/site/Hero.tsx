@@ -14,7 +14,7 @@ export function Hero() {
           Northumberland neighbours working for housing stability and overdose prevention.
         </h1>
         <p className="max-w-xl text-lg text-on-surface/80">
-          IHARC is the Integrated Homelessness and Addictions Response Centre, a non-profit working across Northumberland County. This main site keeps neighbours, service agencies, and local government aligned on the story, while the IHARC Portal hosts live collaboration and crisis management.
+          IHARC is the Integrated Homelessness and Addictions Response Centre, a non-profit working across Northumberland County. This main site keeps neighbours, service agencies, and local government aligned on the story, while STEVI (Supportive Technology to Enable Vulnerable Individuals) hosts secure outreach plans and crisis coordination.
         </p>
         <p className="max-w-xl text-sm text-on-surface/70">
           Together we co-design rapid responses that centre housing stability, overdose prevention, and accountable public reporting.
@@ -51,8 +51,8 @@ export function Hero() {
             <dd>Coordinated tasks with tracked follow-through.</dd>
           </div>
           <div className="rounded-xl bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Community solutions.</dt>
-            <dd>A public portal for ideas and plan tracking.</dd>
+            <dt className="font-semibold text-on-surface">Secure STEVI portal.</dt>
+            <dd>Clients and staff manage appointments, plans, and documents together.</dd>
           </div>
         </dl>
       </div>

@@ -66,3 +66,10 @@
 - `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
 - `INTEGRATIONS.md` – analytics/live chat configuration toggles.
 
+
+NOTES: 
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
+
+Always use the supabase mcp tool to view existing implementation. Follow existing patterns already implemented, i.e use of schemas outside of "public" such as "core", "inventory", "justice", etc. Always check first and do not rely on migration files as a reference. 

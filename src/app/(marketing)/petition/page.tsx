@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 const PETITION_CANONICAL_PATH = '/petition';
 const PETITION_DESCRIPTION =
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   },
 };
 
-const PETITION_PORTAL_PATH = '/portal/petition/state-of-emergency';
+const PETITION_PORTAL_PATH = steviPortalUrl('/portal/petition/state-of-emergency');
 
 export default function PetitionPage() {
   redirect(PETITION_PORTAL_PATH);

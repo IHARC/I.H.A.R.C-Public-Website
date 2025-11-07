@@ -89,7 +89,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold">Treatment interest snapshot</h2>
         <p className="text-sm text-on-surface-variant">
-          Snapshot below highlights who outreach staff connected with during this count window. Visit the portal dashboard for deeper drill-downs.
+          Snapshot below highlights who outreach staff connected with during this count window. Visit the STEVI dashboard for deeper drill-downs.
         </p>
         <dl className="grid gap-3 text-sm sm:grid-cols-3">
           {summaryCards.map((card) => (

@@ -1,32 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-
-const DEFAULT_NEXT = '/portal/ideas';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 type AuthLinksProps = {
   layout?: 'inline' | 'stacked';
 };
 
+const SIGN_IN_URL = steviPortalUrl('/login');
+const SIGN_UP_URL = steviPortalUrl('/register');
+
 export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const nextParam = useMemo(() => {
-    const searchString = searchParams.toString();
-    const path = pathname ? `${pathname}${searchString ? `?${searchString}` : ''}` : DEFAULT_NEXT;
-
-    if (!path.startsWith('/')) {
-      return DEFAULT_NEXT;
-    }
-
-    return path || DEFAULT_NEXT;
-  }, [pathname, searchParams]);
-
-  const encodedNext = encodeURIComponent(nextParam);
   const isStacked = layout === 'stacked';
 
   return (
@@ -37,7 +22,8 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
       )}
     >
       <Link
-        href={`/login?next=${encodedNext}`}
+        href={SIGN_IN_URL}
+        prefetch={false}
         className={cn(
           'inline-flex items-center justify-center rounded-full border border-outline/40 bg-surface text-on-surface/80 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
@@ -46,13 +32,14 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
         Sign in
       </Link>
       <Link
-        href={`/register?next=${encodedNext}`}
+        href={SIGN_UP_URL}
+        prefetch={false}
         className={cn(
           'inline-flex items-center justify-center rounded-full bg-primary text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
         )}
       >
-        Sign up
+        Request access
       </Link>
     </div>
   );

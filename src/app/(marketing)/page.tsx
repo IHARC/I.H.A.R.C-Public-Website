@@ -3,14 +3,18 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ContextCards } from '@/components/site/ContextCards';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 export const metadata: Metadata = {
   title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
-    'Discover how the Integrated Homelessness and Addictions Response Centre supports neighbours across Northumberland and how the IHARC Portal coordinates urgent housing and overdose response.',
+    'Discover how the Integrated Homelessness and Addictions Response Centre supports neighbours across Northumberland and how the STEVI portal keeps IHARC clients connected to outreach teams.',
 };
 
 export default function MarketingHomePage() {
+  const steviHomeUrl = steviPortalUrl('/');
+  const steviRegisterUrl = steviPortalUrl('/register');
+
   return (
     <div className="space-y-20 pb-16">
       <Hero />
@@ -19,7 +23,7 @@ export default function MarketingHomePage() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 text-balance">
           <h2 className="text-3xl font-semibold text-on-surface">How we got here</h2>
           <p className="max-w-3xl text-on-surface/80">
-            Community members asked for one shared picture of what is happening. These focus areas ground the work happening inside the collaboration portal.
+            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal for neighbours and outreach teams.
           </p>
         </div>
         <ContextCards />
@@ -30,18 +34,18 @@ export default function MarketingHomePage() {
           <div>
             <h2 className="text-2xl font-semibold text-on-surface">Stay involved</h2>
             <p className="mt-2 max-w-xl text-on-surface/80">
-              Join neighbours, agencies, and Town staff in shaping rapid responses. Every proposal includes evidence, community support, and clear accountability notes.
+              This site shares public data while STEVI keeps IHARC&apos;s clients and staff connected. Choose what you need today.
             </p>
           </div>
           <div className="grid w-full gap-4 sm:max-w-2xl md:max-w-none md:grid-cols-2">
-            <StayInvolvedLink href="/portal/ideas" label="Propose a solution">
-              Document the problem, evidence, and metrics so moderators can advance it.
+            <StayInvolvedLink href={steviHomeUrl} label="Sign in to STEVI">
+              Review your IHARC plan, appointments, secure documents, and outreach updates.
             </StayInvolvedLink>
-            <StayInvolvedLink href="/portal/ideas?sort=top" label="Comment and react to ideas">
-              Share respectful feedback and support proposals that align with community care.
+            <StayInvolvedLink href={steviRegisterUrl} label="Request STEVI access">
+              Working with IHARC? Request credentials so we can coordinate care in one place.
             </StayInvolvedLink>
-            <StayInvolvedLink href="/portal/plans" label="Track plan progress">
-              Follow Working Plans, decision notes, and key dates in one place.
+            <StayInvolvedLink href="/data" label="Explore live data">
+              Supabase-powered stats keep neighbours informed about shelter, overdose, and outreach trends.
             </StayInvolvedLink>
           </div>
         </div>
@@ -93,9 +97,13 @@ type StayInvolvedLinkProps = {
 };
 
 function StayInvolvedLink({ href, label, children }: StayInvolvedLinkProps) {
+  const isExternal = /^https?:\/\//.test(href);
+
   return (
     <Link
       href={href}
+      prefetch={!isExternal}
+      rel={isExternal ? 'noreferrer' : undefined}
       className="group flex h-full w-full flex-col rounded-3xl border border-outline/30 bg-surface px-6 py-5 text-left text-sm transition hover:border-outline hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container sm:text-base md:px-7"
     >
       <span className="block font-semibold text-on-surface">{label}</span>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 interface PetitionPostSignActionsProps {
   petitionUrl: string;
@@ -12,6 +13,7 @@ interface PetitionPostSignActionsProps {
 export function PetitionPostSignActions({ petitionUrl }: PetitionPostSignActionsProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(petitionUrl)}`;
+  const steviHomeUrl = steviPortalUrl('/');
 
   async function handleShare() {
     trackEvent('petition_share_clicked');
@@ -44,9 +46,9 @@ export function PetitionPostSignActions({ petitionUrl }: PetitionPostSignActions
 
   return (
     <div className="space-y-4 rounded-2xl border border-outline/20 bg-surface-container p-5">
-      <h3 className="text-lg font-semibold text-on-surface">Start collaborating</h3>
+      <h3 className="text-lg font-semibold text-on-surface">Stay connected with STEVI</h3>
       <p className="text-sm text-on-surface/70">
-        Explore current plans, read the emergency brief, and invite neighbours to add their names.
+        Sign in to STEVI for secure plan updates, documents, and outreach coordination, then keep sharing the declaration.
       </p>
       <div className="flex flex-wrap gap-3">
         <Button
@@ -54,7 +56,9 @@ export function PetitionPostSignActions({ petitionUrl }: PetitionPostSignActions
           className="bg-primary text-on-primary hover:bg-primary/90"
           onClick={() => trackEvent('portal_open_after_petition')}
         >
-          <Link href="/portal/ideas">Open Collaboration Portal</Link>
+          <Link href={steviHomeUrl} prefetch={false}>
+            Open STEVI Portal
+          </Link>
         </Button>
         <Button
           variant="outline"

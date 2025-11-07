@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { steviPortalUrl } from '@/lib/stevi-portal';
 
 type UrgentSupport = {
   title: string;
@@ -62,6 +63,8 @@ export const metadata: Metadata = {
 };
 
 export default function GetHelpPage() {
+  const steviHomeUrl = steviPortalUrl('/');
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">
@@ -106,15 +109,16 @@ export default function GetHelpPage() {
       </section>
 
       <section className="rounded-3xl border border-outline/10 bg-surface p-8 text-sm text-on-surface/80">
-        <h2 className="text-2xl font-semibold text-on-surface">When to use the portal</h2>
+        <h2 className="text-2xl font-semibold text-on-surface">When to use STEVI</h2>
         <p className="mt-2">
-          If you see a pattern that needs a coordinated response—like repeated evictions, encampments facing enforcement, or increased overdose calls—propose an idea in the portal. Moderators will help gather evidence and loop in the right partners.
+          STEVI (stevi.iharc.ca) is the secure IHARC portal for neighbours already working with outreach teams. Use it to request appointments, share updates, download letters, and see upcoming visits without repeating your story.
         </p>
         <Link
-          href="/portal/ideas/submit"
+          href={steviHomeUrl}
+          prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Share a community idea
+          Open STEVI
         </Link>
       </section>
     </div>
