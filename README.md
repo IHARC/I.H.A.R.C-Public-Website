@@ -1,130 +1,75 @@
-# IHARC Portal & Main Site
+## Mission & Audience Context
+- The portal is the public-facing IHARC Portal MVP, centring compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
+- Content must emphasise collaboration, dignity, and community care. Avoid deficit framing and maintain trust with service users, neighbours, and agency partners.
+- Every iteration advances two intents: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative IHARC Portal where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
+- Always refer to the organization as the **Integrated Homelessness and Addictions Response Centre (IHARC)**. Use “and” (not “&”) in formal copy, metadata, and footers.
 
-The Integrated Homelessness and Addictions Response Centre (IHARC) is a non-profit delivering outreach and wraparound supports with neighbours across Northumberland County. This project powers both the public iharc.ca marketing site and the IHARC Portal—the collaboration and crisis management workspace where community partners co-design housing and overdose responses. The portal pairs real-time metrics, working plans, and petitions so neighbours, peer workers, agencies, and municipal partners stay aligned through a dignified, strengths-based workflow.
+### Marketing Content Guardrails
+- **Get Help** must list verified numbers only: 2-1-1, Transition House coordinated entry **905-376-9562**, 9-8-8, and NHH Community Mental Health Services **905-377-9891**. Note that the IHARC text line is under maintenance—direct people to `outreach@iharc.ca` instead. Keep the Good Samaritan Drug Overdose Act reminder and RAAM clinic hours (Tuesdays, 12–3 pm at 1011 Elgin St. W.).
+- Repeat the emergency call-to-action “In an emergency call 911” wherever urgent supports are listed.
+- Footer copy on every page: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” plus the descriptive line “Inclusive, accessible, community-first data platform.”
+- Site-wide `<title>` and meta description:  
+  - `IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County`  
+  - `IHARC coordinates housing stability and overdose response with neighbours, agencies and local government in Northumberland County. Co-design plans, track data, get help.`
+- Emergency brief language must pluralise petition signatures correctly (“1 neighbour has signed” vs “0/2+ neighbours have signed”) and link to press coverage for context.
+- When referencing overdose response, remind readers to call 911 immediately and note Good Samaritan protections.
 
-## Requirements
-- Node.js 18.18.0 or newer
-- npm 9+
-- Supabase project with the `portal` schema (ideas, working plans, petitions) and edge functions deployed. See `docs/portal/architecture.md` for required functions and policies.
+## Product Snapshot
+- `/portal/ideas` is the public proposal queue with 1-2-3 workflow guidance, guest tooltips for locked actions, authenticated comments with enforced types, and the six-step submit form at `/portal/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submissions require evidence and at least one metric.
+- `/portal/ideas/[id]` presents the canonical summary, metrics, typed comments, timeline, and “How to help” rail. Moderators and verified org reps post official responses, while the Promote to Working Plan card enforces support and sponsor thresholds.
+- `/portal/plans` lists Working Plans with focus-area chips, next key date, and CTA. `/portal/plans/[slug]` delivers tabbed detail (Overview | Updates | Decisions | Timeline), plan-update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
+- `/portal/progress` summarises 30-day metrics alongside quick navigation back to stats and plans. `/portal/about` documents plain-language commitments and privacy safeguards.
+- `/portal/petition/[slug]` hosts petition campaigns with signature tracking, display preferences, and post-sign actions. Marketing surfaces (`/petition`, `/portal/about` preview content) link back into portal experiences.
+- Legacy `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` routes (plus `/command-center` admin tools) now redirect into `/portal/*` while preserving search params. Marketing content lives in `/(marketing)`.
 
-## Environment Variables
-Create a `.env.local` for local development and configure the same values in Azure Static Web Apps and Supabase function environments.
+## Operating Rules for Codex
+- Always inspect the live schema through the Supabase MCP tool (or Supabase CLI). Do **not** rely on migration files to determine what exists in the database.
+- Avoid running git commands unless they are absolutely necessary to complete a task the user has requested.
+- Keep edits in ASCII unless a file already uses other characters; favour `apply_patch` for concise modifications.
+- Never introduce service-role keys into the Next.js runtime. Privileged actions must run via Supabase Edge Functions or authenticated server clients.
 
-### Next.js runtime
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
+## Current Tech & Architecture
+- Framework: Next.js 15 App Router with React Server Components. All `/portal/*` routes export `dynamic = 'force-dynamic'` to fetch fresh Supabase data.
+- Styling: Tailwind CSS with shared tokens in `src/styles/main.css`; design system enforced via Tailwind config.
+- Data: Supabase schema `portal` covers ideas (`ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`), working plans (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`), petitions (`petitions`, `petition_signatures`, `petition_public_summary`, `petition_public_signers`, `petition_signature_totals`), and metrics (`metric_daily`). All reads and mutations depend on RLS, RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.), and Edge Functions.
+- Components: Idea cards, plan composer, moderation queue, kanban board, petition sign form, and helper rails live in `src/components/portal/`.
+- Caching: All read funnels use tag-aware cached loaders in `src/data/*` backed by `unstable_cache`. Mutation routes and server actions must invalidate via `src/lib/cache/invalidate.ts` instead of calling `revalidatePath` directly. Do not add compatibility shims or fallbacks—new code must follow the tagged cache contract.
+- Storage: Private `portal-attachments` bucket accessed through signed URLs after server-side validation.
 
-These are the only variables that ship to the client. They power the authenticated Supabase browser client and server actions.
+### Future Routes & Data Fetching
+- Create new cached data accessors under `src/data/` when adding Supabase reads. Each accessor must declare tags from `src/lib/cache/tags.ts` and an explicit revalidation window (default 120 seconds unless operational requirements demand otherwise).
+- Any mutation (API route, server action, Edge Function) affecting cached tables must call the appropriate helper in `src/lib/cache/invalidate.ts`. Pass explicit paths only when a page needs path-level revalidation; never rely on implicit behaviour.
+- Do not introduce legacy fallbacks (e.g., optional direct Supabase fetches alongside cached helpers) or conditional paths that bypass cache invalidation. All code must assume the tagged cache is authoritative.
 
-### Supabase Edge Functions and secure automation
-Store the following in environment settings managed by Supabase or Azure Functions. They must never be included in the client bundle or committed to source control.
+## Development Workflow
+1. Node.js ≥ 18.18 and npm 9+ are required. Install dependencies with `npm install`.
+2. Run `npm run dev` (default port 3000). Supply Supabase credentials for live data; fallback keys point to placeholder projects.
+3. Type checking: `npm run typecheck`. Linting: `npm run lint`. Build verification: `npm run build`.
+4. Vitest requires `jsdom` (`npm install --save-dev jsdom`) before `npm run test`. Playwright e2e tests require a build via `npm run build`.
 
-```
-SUPABASE_SERVICE_ROLE_KEY=...
-PORTAL_INGEST_SECRET=...
-PORTAL_ALERTS_SECRET=...
-PORTAL_EMAIL_FROM=...
-PORTAL_SMTP_HOST=...
-PORTAL_SMTP_PORT=587
-PORTAL_SMTP_USERNAME=...
-PORTAL_SMTP_PASSWORD=...
-PORTAL_SMTP_SECURE=true
-```
+## Data, Safety & Moderation
+- Maintain accessible semantics (landmarks, heading order, labelled inputs, focus-visible states, SR-only descriptions for metrics/timelines).
+- Idea submission enforces evidence plus ≥1 metric; comment composer respects type and evidence requirements.
+- Working Plan lifecycle logs audit events (`plan_promoted`, `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, `key_date_set`). Plan updates must populate all six fields and default to `open`.
+- Rate limiting uses `checkRateLimit`/`portal_check_rate_limit` RPCs with `retry_in_ms` surfaced in UI. All mutations log via `logAuditEvent`.
+- Moderation queue actions continue to route through the `portal-moderate` Edge Function. Attachments are signed through `portal-attachments` after role checks. Notifications, board role rules, and cooldown messaging remain unchanged.
 
-`SUPABASE_SERVICE_ROLE_KEY` is required only for Supabase-managed Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`). Local development should access privileged operations via the Supabase CLI or MCP tool, never by embedding service-role keys in the Next.js runtime.
+## Deployment Notes
+- Azure Static Web Apps deploys the `.next` artifact generated by `npm run build` (via `build.js`, which runs lint + build).
+- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; keep service-role keys only in Supabase-managed environments and edge functions.
+- Use the Supabase CLI or Codex Supabase tool for migrations and seeds; avoid committing raw seed SQL files.
+- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) are redeployed after schema changes.
 
-GitHub Actions expects `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` repository secrets so CI builds can initialise Supabase clients without a checked-in `.env` file.
+## Documentation
+- `README.md` – setup, environment, portal overview.
+- `docs/portal/architecture.md` – schema, RLS, edge function contracts, portal flows.
+- `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
+- `INTEGRATIONS.md` – analytics/live chat configuration toggles.
 
-## Getting Started
-```bash
-npm install
-npm run dev
-```
-Local development runs at `http://localhost:3000`.
 
-### Useful Scripts
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the Next.js dev server |
-| `npm run lint` | ESLint (required before deploying) |
-| `npm run typecheck` | TypeScript project check |
-| `npm run test` | Vitest unit tests (requires `jsdom` as a dev dependency) |
-| `npm run e2e` | Playwright end-to-end smoke tests (after `npm run build`) |
-| `npm run build` | Production build orchestrated by `build.js` (lint + build) |
-| `npm run start` | Preview the production build locally |
-| `npm run preview` | Start the production build on port 4321 for Playwright |
+NOTES: 
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
 
-`npm run build` executes `build.js`, mirroring the Azure Static Web Apps pipeline. The output is a standalone Next.js bundle under `.next/` that Azure serves with SSR/API integration.
-
-## Reports & Resources Hub
-- Marketing resources live at `/resources` with detail pages at `/resources/[slug]`. Content is sourced from the typed catalog in [`src/data/resources.ts`](./src/data/resources.ts).
-- Each resource entry supports the following fields: `slug`, `title`, `kind`, `datePublished`, optional `summary`, optional `location`, `tags`, an `embed` union (Google Doc, PDF, video, external link, or sanitized HTML), optional `attachments`, and optional `coverImage` for future social previews.
-- Embeds are restricted to an allowlist defined in [`src/lib/resources.ts`](./src/lib/resources.ts). Approved hosts include `docs.google.com`, `drive.google.com`, `www.youtube.com`, `youtube.com`, `youtu.be`, `player.vimeo.com`, `vimeo.com`, and `iharc.ca`. Update the allowlist before introducing a new host.
-- Raw HTML embeds are cleaned with [`sanitizeEmbedHtml`](./src/lib/sanitize-embed.ts), which strips scripts, enforces safe iframe attributes, and blocks non-allowlisted hosts.
-- Add attachments by providing `{ label, url }` pairs in the `attachments` array. Attachments render as download buttons beneath the primary embed on the detail page.
-- To add a new resource, update the catalog file, ensure the embed host is allowed, and optionally supply a `coverImage` URL for metadata. Query parameters on `/resources` (`q`, `kind`, `tag`, `year`) power search, type, tag, and year filtering automatically.
-
-## Portal Overview
-All `/portal/*` routes export `dynamic = 'force-dynamic'` to read fresh Supabase data on every request. Authenticated and guest states are handled via Supabase's RLS policies and RPC helpers.
-
-### Primary Routes
-- `/portal/ideas` – Public proposal queue with the 1-2-3 idea workflow, filters, and tooltips explaining locked actions for guests.
-- `/portal/ideas/submit` – Six-step idea form (Problem → Evidence → Proposed change → Steps → Risks → Metrics) that enforces evidence and at least one metric before submission. Cooldown messaging explains rate limits.
-- `/portal/ideas/[id]` – Canonical idea summary, metrics, typed comments, timeline entries, “How to help” rail, and moderator/org official responses. Moderators can promote eligible ideas to plans once support and sponsor criteria are met.
-- `/portal/plans` – Working Plan directory with focus-area chips, next key date, and CTA into each plan.
-- `/portal/plans/[slug]` – Plan detail with tabs (Overview | Updates | Decisions | Timeline), update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
-- `/portal/progress` – 30-day metric summary with navigation back to stats and plans.
-- `/portal/progress/pit` – Weekly point-in-time dashboard with anonymised aggregates for each outreach count (mirrors the public detail view at `/data/pit/[slug]`).
-- `/portal/about` – Plain-language commitments outlining safety, privacy, and strengths-based storytelling expectations.
-- `/portal/petition/[slug]` – Petition campaigns with signature tracking, opt-in partner contact permissions, and post-sign sharing options.
-- `/portal/profile` – Profile management, affiliation context, and petition signature history for authenticated neighbours.
-- Legacy `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` routes redirect to their `/portal/*` counterparts while preserving query parameters. Marketing content remains under `/(marketing)`.
-
-### Collaborative Workflow
-1. Community members share proposals through the `/portal/ideas/submit` wizard.
-2. Moderators validate content, apply evidence or type requirements, and surface official agency responses.
-3. Ideas that meet support thresholds and sponsor requirements are promoted to Working Plans, logging `plan_promoted` and seeding focus areas plus first key date.
-4. Plan owners publish six-field updates that start in `draft` and move through `open`, `accepted`, `not_moving_forward`, or `added_to_plan`, each emitting audit events (`update_opened`, `update_accepted`, `update_declined`, `added_to_plan`).
-5. Community members support plans with a single vote, and moderators post decision notes or adjust status via the plan tabs.
-6. `/portal/progress` aggregates 30-day metrics so neighbours can see how ideas, plans, and petition energy influence frontline response.
-
-### Petition Campaigns
-The petition component powers both marketing (`/petition`) and portal (`/portal/petition/[slug]`) signatures. It verifies supporter defaults, honours display preferences (`anonymous`, `first_name_last_initial`, `full_name`), and logs uptake through `petition_public_summary` and `petition_signature_totals` views. Community partners can invite supporters to collaboration sessions when they opt in.
-
-## Data & Services
-- Supabase JS v2 handles data across React Server Components, route handlers, and client components. No service-role keys are bundled with the app.
-- The `portal` schema includes ideas (`ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`), working plan tables (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`), and petition resources (`petitions`, `petition_signatures`, `petition_public_summary`, `petition_public_signers`, `petition_signature_totals`).
-- All mutations execute through authenticated Supabase clients plus RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.) and record audit events.
-- Private attachments live in the `portal-attachments` storage bucket. Signed URL generation happens server-side after validation.
-- Notifications, cooldowns, and moderation queue actions rely on existing edge functions and RLS-aware API routes.
-
-## Azure Static Web Apps Deployment
-1. Ensure required environment variables are defined in Azure Static Web Apps (`NEXT_PUBLIC_*` for the app, Supabase + SMTP secrets for Functions).
-2. The GitHub workflow runs `npm install` and `npm run build`; `build.js` guarantees lint + build parity with Azure.
-3. Deploy the generated `.next/` output. Azure maps Next.js SSR and API routes automatically.
-4. Deploy Supabase Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) via the Supabase CLI after schema changes.
-
-## Working with Supabase
-- Use the Supabase MCP tool (or the Supabase CLI) to inspect tables, views, policies, and functions. Do **not** rely on migration files as the source of truth for the current schema.
-- Keep Supabase migrations in `supabase/migrations/` aligned with schema changes and update `docs/portal/` when new tables, enums, or policies are introduced.
-- Rotate secrets through Supabase and Azure portals; never commit keys to the repository.
-
-## Testing & QA
-- `npm run lint` and `npm run typecheck` must pass before merging.
-- Add unit tests alongside non-trivial utilities (rate limiting, safety checks, Supabase RPC wrappers).
-- Install `jsdom` locally (`npm install --save-dev jsdom`) before running `npm run test`.
-- Use `npm run e2e` for Playwright smoke tests after building the app.
-- When adding Supabase migrations or policies, run `supabase db diff` to validate changes and document impacts in `docs/portal/`.
-
-## Additional References
-- `docs/portal/architecture.md` – Deep dive into schema, RLS policies, edge functions, and portal flows.
-- `docs/portal/mvp-plan.md` – Product delivery notes, current iteration focus, and future backlog.
-- `AGENTS.md` – Contributor guidance, tone, and operational constraints.
-
-## Accessibility & Language
-- Pages follow IHARC’s strengths-based language guidelines; headings and CTAs reinforce dignity-first storytelling.
-- Metric dashboards include screen reader summaries describing current values and trend directions.
-- Forms provide descriptive labels, inline guidance, and accessible validation feedback. Petition consent messaging reiterates anonymisation commitments.
-- Moderator tooling preserves audit trails and reminds stewards about privacy before publishing official responses.
+Always use the supabase mcp tool to view existing implementation. Follow existing patterns already implemented, i.e use of schemas outside of "public" such as "core", "inventory", "justice", etc. Always check first and do not rely on migration files as a reference. 
