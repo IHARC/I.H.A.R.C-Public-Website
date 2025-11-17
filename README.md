@@ -1,75 +1,75 @@
 ## Mission & Audience Context
-- The portal is the public-facing IHARC Portal MVP, centring compassionate, strengths-based storytelling for Northumberland residents navigating housing instability and substance use.
-- Content must emphasise collaboration, dignity, and community care. Avoid deficit framing and maintain trust with service users, neighbours, and agency partners.
-- Every iteration advances two intents: (1) surface real-time community statistics on homelessness and overdose response, and (2) provide a collaborative IHARC Portal where neighbours, agencies, and government co-design rapid solutions in plain, accessible language.
-- Always refer to the organization as the **Integrated Homelessness and Addictions Response Centre (IHARC)**. Use “and” (not “&”) in formal copy, metadata, and footers.
+- This repository now powers the public-facing IHARC marketing site. It tells the Integrated Homelessness and Addictions Response Centre (IHARC) story, surfaces trusted data, and points visitors to STEVI (Supportive Technology to Enable Vulnerable Individuals) for all secure collaboration.
+- Content must emphasise collaboration, dignity, and community care. Avoid deficit framing and maintain trust with neighbours, agency partners, and local government.
+- Use the full organization name — **Integrated Homelessness and Addictions Response Centre** — in formal copy, metadata, and footers. STEVI should always be described as the secure IHARC portal for clients, staff, volunteers, and community partners.
+- Every iteration should (1) keep real-time housing/overdose metrics easy to scan and (2) make it obvious that deeper collaboration now happens inside STEVI.
 
 ### Marketing Content Guardrails
-- **Get Help** must list verified numbers only: 2-1-1, Transition House coordinated entry **905-376-9562**, 9-8-8, and NHH Community Mental Health Services **905-377-9891**. Note that the IHARC text line is under maintenance—direct people to `outreach@iharc.ca` instead. Keep the Good Samaritan Drug Overdose Act reminder and RAAM clinic hours (Tuesdays, 12–3 pm at 1011 Elgin St. W.).
-- Repeat the emergency call-to-action “In an emergency call 911” wherever urgent supports are listed.
-- Footer copy on every page: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” plus the descriptive line “Inclusive, accessible, community-first data platform.”
-- Site-wide `<title>` and meta description:  
-  - `IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County`  
+- **Get Help** must list verified numbers only: 2-1-1, Transition House coordinated entry **905-376-9562**, 9-8-8, and NHH Community Mental Health Services **905-377-9891**. The IHARC text line is offline; direct people to `outreach@iharc.ca`. Keep the Good Samaritan Drug Overdose Act reminder and RAAM clinic hours (Tuesdays, 12–3 pm at 1011 Elgin St. W.). Repeat “In an emergency call 911” anywhere urgent supports are listed.
+- Footer copy on every page: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” plus “Inclusive, accessible, community-first data platform.”
+- Site-wide `<title>` and meta description must remain:
+  - `IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County`
   - `IHARC coordinates housing stability and overdose response with neighbours, agencies and local government in Northumberland County. Co-design plans, track data, get help.`
-- Emergency brief language must pluralise petition signatures correctly (“1 neighbour has signed” vs “0/2+ neighbours have signed”) and link to press coverage for context.
-- When referencing overdose response, remind readers to call 911 immediately and note Good Samaritan protections.
+- Whenever STEVI is referenced, clarify that it is the secure workspace for clients, IHARC outreach staff, volunteers, and community partners. All login/account flows should link there instead of rendering local auth forms.
+- When mentioning overdose response or emergency declarations, remind readers to call 911 immediately and note Good Samaritan protections.
 
 ## Product Snapshot
-- `/portal/ideas` is the public proposal queue with 1-2-3 workflow guidance, guest tooltips for locked actions, authenticated comments with enforced types, and the six-step submit form at `/portal/ideas/submit` (Problem → Evidence → Proposed change → Steps → Risks → Metrics). Submissions require evidence and at least one metric.
-- `/portal/ideas/[id]` presents the canonical summary, metrics, typed comments, timeline, and “How to help” rail. Moderators and verified org reps post official responses, while the Promote to Working Plan card enforces support and sponsor thresholds.
-- `/portal/plans` lists Working Plans with focus-area chips, next key date, and CTA. `/portal/plans/[slug]` delivers tabbed detail (Overview | Updates | Decisions | Timeline), plan-update composer, community support buttons (one-person-one-vote), and moderator actions (reopen, accept, not moving forward, added to plan).
-- `/portal/progress` summarises 30-day metrics alongside quick navigation back to stats and plans. `/portal/about` documents plain-language commitments and privacy safeguards.
-- `/portal/petition/[slug]` hosts petition campaigns with signature tracking, display preferences, and post-sign actions. Marketing surfaces (`/petition`, `/portal/about` preview content) link back into portal experiences.
-- Legacy `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` routes (plus `/command-center` admin tools) now redirect into `/portal/*` while preserving search params. Marketing content lives in `/(marketing)`.
+- Marketing routes live under `/(marketing)` and include the home page, About, Programs, Get Help, News, Data, Myth Busting, PIT detail pages, and the Supabase-backed Resources library. `src/app/stats` remains a dedicated metrics dashboard that reads from Supabase in real time.
+- The site no longer renders `/portal/*`, `/login`, `/register`, `/reset-password`, `/petition`, `/command-center`, or `/solutions/*`. `middleware.ts` redirects any legacy path or auth flow to the STEVI host (default `https://stevi.iharc.ca`) while preserving query strings.
+- Supabase-backed surfaces:
+  - `/stats` and `/data` use `src/data/metrics.ts` plus `src/data/pit.ts` to display live indicators and point-in-time summaries.
+  - `/resources` and `/resources/[slug]` use `src/lib/resources.ts` to list, filter, and render entries stored in `portal.resource_pages`.
+  - Myth busting content uses cached loaders under `src/data/myths.ts`.
+- Navigation/components now link to STEVI for sign-in/sign-up and highlight that portal plans, petitions, idea submissions, and admin tooling live there.
+- Reusable layout pieces live in `src/components/layout` and `src/components/site`. Metrics visualisations moved to `src/components/metrics`.
 
 ## Operating Rules for Codex
 - Always inspect the live schema through the Supabase MCP tool (or Supabase CLI). Do **not** rely on migration files to determine what exists in the database.
-- Avoid running git commands unless they are absolutely necessary to complete a task the user has requested.
+- Avoid running git commands unless they are absolutely necessary to complete a requested task.
 - Keep edits in ASCII unless a file already uses other characters; favour `apply_patch` for concise modifications.
-- Never introduce service-role keys into the Next.js runtime. Privileged actions must run via Supabase Edge Functions or authenticated server clients.
+- Never introduce service-role keys into the Next.js runtime. All reads must use the public anon key via the server-side Supabase client.
 
 ## Current Tech & Architecture
-- Framework: Next.js 15 App Router with React Server Components. All `/portal/*` routes export `dynamic = 'force-dynamic'` to fetch fresh Supabase data.
-- Styling: Tailwind CSS with shared tokens in `src/styles/main.css`; design system enforced via Tailwind config.
-- Data: Supabase schema `portal` covers ideas (`ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`), working plans (`plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, `plan_updates_v`), petitions (`petitions`, `petition_signatures`, `petition_public_summary`, `petition_public_signers`, `petition_signature_totals`), and metrics (`metric_daily`). All reads and mutations depend on RLS, RPC helpers (`portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, etc.), and Edge Functions.
-- Components: Idea cards, plan composer, moderation queue, kanban board, petition sign form, and helper rails live in `src/components/portal/`.
-- Caching: All read funnels use tag-aware cached loaders in `src/data/*` backed by `unstable_cache`. Mutation routes and server actions must invalidate via `src/lib/cache/invalidate.ts` instead of calling `revalidatePath` directly. Do not add compatibility shims or fallbacks—new code must follow the tagged cache contract.
-- Storage: Private `portal-attachments` bucket accessed through signed URLs after server-side validation.
+- Framework: Next.js 15 App Router with React Server Components. Marketing routes primarily render static/streamed content while `/stats` remains `dynamic = 'force-dynamic'` to ensure fresh Supabase reads.
+- Styling: Tailwind CSS with shared tokens in `src/styles/main.css`. Components expect the design tokens defined in `tailwind.config.ts`.
+- Data access:
+  - `src/lib/supabase/rsc.ts` creates the read-only server client using the anon key.
+  - `src/data/metrics.ts`, `src/data/pit.ts`, and `src/data/myths.ts` wrap Supabase reads with `unstable_cache` plus tags from `src/lib/cache/tags.ts`.
+  - `src/lib/resources.ts` centralises resource queries, filtering, and embed sanitisation.
+- Middleware: `middleware.ts` first checks for legacy `/portal`, `/login`, `/register`, etc. paths and issues a 307 redirect to STEVI. All other requests pass through `updateSession` so Supabase cookies stay in sync for read-only access.
+- Components dedicated to the retired portal (idea cards, submission forms, petition UI, moderation queue, etc.) have been removed. Keep all new shared UI in `src/components` scoped by feature (e.g., `metrics`, `site`, `resources`).
 
-### Future Routes & Data Fetching
-- Create new cached data accessors under `src/data/` when adding Supabase reads. Each accessor must declare tags from `src/lib/cache/tags.ts` and an explicit revalidation window (default 120 seconds unless operational requirements demand otherwise).
-- Any mutation (API route, server action, Edge Function) affecting cached tables must call the appropriate helper in `src/lib/cache/invalidate.ts`. Pass explicit paths only when a page needs path-level revalidation; never rely on implicit behaviour.
-- Do not introduce legacy fallbacks (e.g., optional direct Supabase fetches alongside cached helpers) or conditional paths that bypass cache invalidation. All code must assume the tagged cache is authoritative.
+### Data Loading & Caching
+- Add new Supabase fetchers inside `src/data/` with explicit `CACHE_TAGS` entries and a revalidation window (default 120 s). Use `unstable_cache` to coalesce requests.
+- `src/lib/cache/invalidate.ts` now exposes helpers for metrics, myth entries, and PIT summaries only. Use them inside future mutations or background jobs that change those tables.
+- Never bypass the cached loaders with ad-hoc Supabase queries inside components. Consistency comes from the cache layers + invalidation helpers.
 
 ## Development Workflow
-1. Node.js ≥ 18.18 and npm 9+ are required. Install dependencies with `npm install`.
-2. Run `npm run dev` (default port 3000). Supply Supabase credentials for live data; fallback keys point to placeholder projects.
+1. Node.js ≥ 18.18 and npm 9+. Install dependencies with `npm install`.
+2. Run `npm run dev` (port 3000). Supply `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` so Supabase reads succeed locally.
 3. Type checking: `npm run typecheck`. Linting: `npm run lint`. Build verification: `npm run build`.
-4. Vitest requires `jsdom` (`npm install --save-dev jsdom`) before `npm run test`. Playwright e2e tests require a build via `npm run build`.
+4. Vitest/playwright tooling remains in `package.json`, but the marketing app currently relies on manual verification. Add focused tests when building new data fetchers or components.
 
 ## Data, Safety & Moderation
-- Maintain accessible semantics (landmarks, heading order, labelled inputs, focus-visible states, SR-only descriptions for metrics/timelines).
-- Idea submission enforces evidence plus ≥1 metric; comment composer respects type and evidence requirements.
-- Working Plan lifecycle logs audit events (`plan_promoted`, `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, `key_date_set`). Plan updates must populate all six fields and default to `open`.
-- Rate limiting uses `checkRateLimit`/`portal_check_rate_limit` RPCs with `retry_in_ms` surfaced in UI. All mutations log via `logAuditEvent`.
-- Moderation queue actions continue to route through the `portal-moderate` Edge Function. Attachments are signed through `portal-attachments` after role checks. Notifications, board role rules, and cooldown messaging remain unchanged.
+- Marketing copy still must follow accessibility best practices (landmarks, heading order, focus-visible styles, labelled inputs, SR-only descriptions for metric context).
+- Crisis/support content must keep the verified numbers above, reinforce Good Samaritan protections, and direct urgent matters to 911.
+- Only fetch, store, and display public-safe data on this site. Any mutations, attachments, and sensitive workflows belong inside STEVI or Supabase Edge Functions.
 
 ## Deployment Notes
-- Azure Static Web Apps deploys the `.next` artifact generated by `npm run build` (via `build.js`, which runs lint + build).
-- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; keep service-role keys only in Supabase-managed environments and edge functions.
-- Use the Supabase CLI or Codex Supabase tool for migrations and seeds; avoid committing raw seed SQL files.
-- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) are redeployed after schema changes.
+- Azure Static Web Apps deploys the `.next` artifact from `npm run build` (via `build.js`, which runs lint + build).
+- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
+- Edge Functions that ingest metrics or support STEVI (e.g., `portal-ingest-metrics`, `portal-attachments`) must be redeployed separately through the Supabase CLI if their code changes.
 
 ## Documentation
-- `README.md` – setup, environment, portal overview.
-- `docs/portal/architecture.md` – schema, RLS, edge function contracts, portal flows.
-- `docs/portal/mvp-plan.md` – current iteration focus and future backlog.
-- `INTEGRATIONS.md` – analytics/live chat configuration toggles.
+- `README.md` – overview of the marketing site, guardrails, and developer workflow.
+- `docs/portal/architecture.md` – updated architecture reference describing how the public site reads Supabase data and hands off portal work to STEVI.
+- `docs/portal/mvp-plan.md` – marketing roadmap and iteration focus for public data surfaces.
+- `INTEGRATIONS.md` – analytics and live chat configuration.
 
 
-NOTES: 
-Always use context7 when I need code generation, setup or configuration steps, or
+NOTES:
+Always use context7 when you need code generation, setup or configuration steps, or
 library/API documentation. This means you should automatically use the Context7 MCP
-tools to resolve library id and get library docs without me having to explicitly ask.
+tools to resolve library id and get library docs without being asked.
 
-Always use the supabase mcp tool to view existing implementation. Follow existing patterns already implemented, i.e use of schemas outside of "public" such as "core", "inventory", "justice", etc. Always check first and do not rely on migration files as a reference. 
+Always use the Supabase MCP tool to view existing implementation. Follow existing patterns already implemented, especially schema names outside of `public` such as `portal`, `core`, `inventory`, `justice`, etc. Inspect the live schema first and do not rely on migration files.

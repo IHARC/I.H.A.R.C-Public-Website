@@ -30,11 +30,11 @@ export function Hero() {
         </div>
         <div className="text-sm font-semibold">
           <Link
-            href="/emergency"
+            href="/news"
             className="inline-flex items-center gap-1 text-on-surface/80 underline-offset-4 transition hover:text-on-surface hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={() => trackEvent('hero_click', { cta: 'state_of_emergency' })}
+            onClick={() => trackEvent('hero_click', { cta: 'latest_updates' })}
           >
-            Why a State of Emergency
+            Read the latest updates
             <span aria-hidden>→</span>
           </Link>
         </div>

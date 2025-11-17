@@ -10,10 +10,7 @@ const marketingPaths = [
   '/data',
   '/get-help',
   '/news',
-  '/petition',
   '/context',
-  '/emergency',
-  '/after-the-declaration',
   '/myth-busting',
   '/resources',
 ];

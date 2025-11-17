@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { DashboardCards } from '@/components/portal/dashboard-cards';
-import { TrendChart } from '@/components/portal/trend-chart';
+import { DashboardCards } from '@/components/metrics/dashboard-cards';
+import { TrendChart } from '@/components/metrics/trend-chart';
 import { getMetricRows, getMetricCards, getMetricSummary, groupMetricRows } from '@/data/metrics';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 

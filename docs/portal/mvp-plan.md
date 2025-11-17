@@ -1,28 +1,28 @@
-# Portal Delivery Notes
+# Public Website Delivery Notes
 
-This document tracks the current state of the public-facing IHARC Portal MVP and the near-term priorities that keep the workspace evolving in step with community needs.
+This document replaces the legacy portal MVP plan. It now tracks the state of the IHARC marketing site and the priorities that keep public storytelling connected to the STEVI workspace.
 
 ## Delivered Capabilities
-- **Idea collaboration**: `/portal/ideas` queue with filters, guest tooltips, and six-step submission (`/portal/ideas/submit`). Canonical idea pages include metrics, typed comments, timeline history, and the moderator-only “Promote to Working Plan” workflow.
-- **Working Plans**: `/portal/plans` directory and `/portal/plans/[slug]` tabs (Overview | Updates | Decisions | Timeline) with update composer, plan support voting, decision notes, and moderator actions (`reopen`, `accept`, `not moving forward`, `added to plan`).
-- **Progress dashboard**: `/portal/progress` summarises 30-day metrics with navigation back to stats, ideas, and plans. Audit events power update streaks and decision logs.
-- **Petition campaigns**: `/portal/petition/[slug]` (and marketing `/petition`) capture signatures, statements, partner consent, and display preferences, all backed by `petition_public_summary` views.
-- **Safety & governance**: RLS-enforced Supabase schema, audit logging for every mutation, moderation queue handled via `portal-moderate`, private attachments bucket, and cooldown messaging backed by `portal_check_rate_limit`.
+- **Marketing shell**: All primary content (Home, About, Programs, Get Help, News, Myth Busting, Context) lives under `/(marketing)` with shared layout, analytics consent, and STEVI CTAs.
+- **Real-time metrics**: `/stats` renders cards and charts from `portal.metric_daily`. `/data` summarises those metrics alongside PIT rollups.
+- **Resource library**: `/resources` and `/resources/[slug]` pull from `portal.resource_pages` with sanitised embeds, tags, and attachments.
+- **STEVI handoff**: `middleware.ts` and layout components route `/portal/*`, `/login`, `/register`, `/petition`, `/command-center`, `/solutions`, and other legacy paths to the STEVI origin while keeping query parameters intact.
+- **Accessibility guardrails**: Emergency numbers, Good Samaritan reminders, and consistent footers are enforced across the marketing pages.
 
 ## Current Iteration Focus
-- Harden the idea → plan promotion flow by verifying sponsor/support thresholds, seeding focus areas, and logging `plan_promoted` plus `key_date_set` events.
-- Ensure plan updates include all six required fields, respect `plan_update_status` transitions, and emit `update_opened`, `update_accepted`, `update_declined`, and `added_to_plan` audit events.
-- Persist filters and search parameters when moving between `/portal/ideas`, `/portal/plans`, and `/portal/progress`, including legacy redirects.
-- Fine-tune petition storytelling so marketing and portal surfaces stay aligned, highlight anonymisation guidance, and reinforce partner follow-up consent.
+- Keep Supabase reads healthy by monitoring the `portal` schema views the marketing site depends on (`metric_daily`, PIT summaries, `resource_pages`, myth busting tables). Update `src/data/*` loaders and cache tags when schemas evolve.
+- Ensure every marketing CTA that suggests signing in or submitting information links directly to STEVI (`steviPortalUrl`). Avoid reintroducing local auth or submission flows.
+- Refresh copy blocks when IHARC partners provide new hotline numbers, RAAM info, or STEVI messaging. Coordinate with outreach staff before making changes to Get Help or emergency copy.
+- Audit remaining dependencies periodically and remove libraries that were only needed for the deprecated portal UI.
 
 ## Near-Term Opportunities
-- Expand `/portal/progress` with additional plan outcome metrics and petition signature rollups once enough history exists.
-- Introduce notification templates that reference petition involvement and plan support votes while respecting opt-out preferences.
-- Explore light-touch analytics overlays (e.g., spark lines) that stay accessible and respect real-time data constraints.
-- Continue deprecating references to legacy `/command-center` UI in favour of `/portal/*` components, ensuring search params remain intact.
+- Extend `/data` with additional Supabase-driven trend explanations or partner spotlights (e.g., overdose prevention, community collaborations) while keeping the experience read-only.
+- Explore lightweight historical comparisons on `/stats` (e.g., previous week vs. current week) without storing extra data locally.
+- Add filters or search across `/resources` if the library continues to grow.
+- Document any new STEVI workflows on `iharc.ca` via static content (e.g., “How STEVI works”) instead of embedding login forms.
 
 ## Collaboration Checklist
-- Coordinate schema changes through Supabase migrations and immediately update `docs/portal/architecture.md`.
-- Use the Supabase MCP tool (or CLI) to verify policies, enums, and views before shipping features that depend on them.
-- Confirm Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) are redeployed after schema or environment updates.
-- Validate language and accessibility requirements with community partners before publishing new petition content or plan narratives.
+- Continue to verify schema changes through the Supabase MCP tool before coding against tables or views.
+- When adding new data loaders, create accompanying cache tags in `src/lib/cache/tags.ts` and invalidation helpers in `src/lib/cache/invalidate.ts`.
+- Keep `README.md` and `agents.md` aligned so future contributors know this repo is marketing-only.
+- Redeploy Supabase Edge Functions (`portal-ingest-metrics`, etc.) via the Supabase CLI whenever their code changes, even if the Next.js app didn’t.

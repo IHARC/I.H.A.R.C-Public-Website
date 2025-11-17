@@ -1,61 +1,55 @@
-# IHARC Portal Architecture Overview
+# IHARC Public Website Architecture
+
+The legacy portal experience now lives entirely inside STEVI. This document explains how the marketing site is structured so that public storytelling stays aligned with STEVI while still surfacing Supabase-backed data such as resources, metrics, and point-in-time (PIT) counts.
 
 ## Guiding Principles
-- Extend the existing Supabase project strictly within the `portal` schema. Preserve auth configuration and enforce least-privilege with RLS, policies, and role-aware logic.
-- Keep every portal route strengths-based, accessibility-aware, and ready to serve dynamic data. All `/portal/*` pages remain fully dynamic (`export const dynamic = 'force-dynamic'`).
-- Maintain compassionate storytelling and privacy: anonymise neighbours by default, surface opt-in controls, and ensure audit logging for sensitive actions.
-- Normalise time handling around `America/Toronto` for analytics, plan timelines, and petition milestones.
+- Keep `/` and `/(marketing)` routes strengths-based, accessible, and ready to tell the IHARC story without recreating secure workflows.
+- Treat STEVI as the single source of truth for authentication, client work, idea submission, plan updates, and petitions. The marketing site should only link to STEVI for those flows.
+- Continue to use Supabase (`portal` schema) for read-only datasets that power marketing pages (metrics, resources, PIT summaries, myth busters). Respect all RLS policies and never bypass cached loaders.
+- Normalise all timestamps to `America/Toronto` when rendering Supabase data.
 
 ## Application Layers
 
 ### 1. Next.js 15 App Router Frontend
-- Routes are split between marketing content (`/(marketing)`) and the authenticated collaboration surface (`/portal/*`). Legacy `/command-center` and `/solutions/*` paths redirect into the portal while preserving search parameters.
-- `/portal/ideas` provides the proposal queue with filters, search, locked-action tooltips for guests, and a six-step submit wizard at `/portal/ideas/submit`. `/portal/ideas/[id]` shows summaries, metrics, typed comments, timelines, and “How to help” prompts, plus moderator-only promotion workflows.
-- `/portal/plans` enumerates Working Plans; `/portal/plans/[slug]` offers tabs (Overview | Updates | Decisions | Timeline), a six-field plan update composer, decision notes, per-person support votes, and moderator actions (reopen, accept, not moving forward, added to plan).
-- `/portal/progress` aggregates 30-day metrics and links back into stats and plans. `/portal/about` anchors commitments, privacy, and anonymisation guidelines.
-- `/portal/petition/[slug]` and marketing `/petition` share the petition component, capturing signatures, display preferences, statements, and partner contact consent. Petition call-to-actions route supporters back into portal collaboration.
-- Shared components (idea/plan cards, update composer, moderation queue, petition forms) live under `src/components/portal/`. Supabase data fetching uses server actions, RSC loaders, and client hooks with consistent caching strategies.
+- Routes live under `/(marketing)` plus `/stats`. There are no `/portal/*`, `/login`, `/register`, or `/petition` pages in this repo anymore.
+- `/stats` is the Community Status Dashboard. It keeps `export const dynamic = 'force-dynamic'` so each request fetches fresh Supabase metrics.
+- `/data` combines PIT summaries with the latest metrics to tell the story of housing support and overdose response trends.
+- `/resources` lists, filters, and renders Supabase-managed resources (reports, delegations, presentations, etc.). Embeds are sanitised before rendering.
+- Navigation (`TopNav`, `SiteFooter`, `AuthLinks`) links to STEVI for any login/request-access CTA.
+- `middleware.ts` intercepts legacy portal paths (e.g., `/portal`, `/ideas`, `/plans`, `/progress`, `/command-center`, `/solutions`, `/login`, `/register`, `/reset-password`, `/api/portal`) and redirects them to the STEVI origin with a 307 status.
 
-### 2. Supabase Schema (`portal` Namespace)
-- **Profiles & Organisations**: `profiles`, `organizations`, `profile_contacts`, and enums (`profile_role`, `affiliation_type`, etc.) connect portal roles to `auth.users`.
-- **Ideas**: `ideas`, `idea_metrics`, `idea_decisions`, `comments`, `votes`, `flags`, `attachments`. Denormalised counts and search vectors keep listings responsive.
-- **Working Plans**: `plans`, `plan_focus_areas`, `plan_key_dates`, `plan_updates`, `plan_decision_notes`, `plan_update_votes`, plus `plan_updates_v` for efficient tab views.
-- **Petitions**: `petitions`, `petition_signatures`, views `petition_public_summary`, `petition_public_signers`, and `petition_signature_totals` for public display and analytics.
-- **Metrics & Notifications**: `metric_daily`, `notifications`, `audit_log`, along with helper functions (`current_profile_id`, `current_role`, `normalize_phone`).
+### 2. Supabase Reads
+- `src/lib/supabase/rsc.ts` uses `@supabase/ssr` with the anon key to build the server-side client. There is no browser client because the site is read-only.
+- Data modules:
+  - `src/data/metrics.ts` – queries `portal.metric_daily` and related `metric_catalog` rows, groups them, and powers both cards (`DashboardCards`) and charts (`TrendChart`).
+  - `src/data/pit.ts` – reads PIT rollups (summary counts plus community breakdowns) exposed via Supabase views.
+  - `src/data/myths.ts` – loads myth-busting content curated in Supabase tables.
+  - `src/lib/resources.ts` – fetches `portal.resource_pages`, normalises attachments, and sanitises embedded HTML before passing data to Next.js routes.
+- Each module wraps Supabase reads with `unstable_cache` and tags from `src/lib/cache/tags.ts`. The only active tags after the portal removal are `metrics`, `mythEntries`, `pitSummary`, and per-PIT `pitCount`.
 
-### 3. Database Views, Enums & Functions
-- Enums include `idea_category`, `idea_status`, `idea_publication_status`, `comment_type`, `flag_reason`, `flag_status`, `plan_update_status`, `petition_display_preference`, `reaction_type`, and metric keys.
-- Views (`idea_reaction_totals`, `plan_update_reaction_totals`, `petition_public_summary`, `petition_signature_totals`) power dashboard summaries without bypassing RLS.
-- Core functions: `portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit` (via RPC wrappers), `portal.ensure_profile`, `portal.petition_signature_totals_public`, and `portal.normalize_phone`.
+### 3. Components
+- Marketing UI lives in `src/components/site`, `src/components/layout`, and `src/components/resources`.
+- Metrics-specific charts/cards now live under `src/components/metrics`.
+- Providers (`ThemeProvider`, `AnalyticsProvider`, `ConsentBanner`) sit in `src/app/layout.tsx` so every page honours analytics consent and theming.
 
 ### 4. Access Control & Safety
-- Every table defaults to `REVOKE ALL`; RLS policies whitelist reads/writes by role. Public reads are limited to safe views. Moderators/admins gain elevated policies for promotion, status changes, decisions, and moderation queue actions.
-- Mutations run through RPC helpers to guarantee audit logging and rate limiting. `portal_check_rate_limit` returns `retry_in_ms` for UI messaging.
-- Official responses, plan updates, and petition statements all generate audit events (`plan_promoted`, `update_opened`, `update_accepted`, `update_declined`, `decision_posted`, `key_date_set`) to support accountability reporting.
+- No authentication is performed inside this app. All requests run with Supabase anon credentials; RLS restricts reads to public-safe views.
+- Middleware keeps Supabase session cookies aligned with the anon client by calling `updateSession`, but no user identities are exposed.
+- Any mutations or sensitive storage (attachments, notifications, petitions, plan updates, etc.) are handled by STEVI or Supabase Edge Functions. Do not add server actions or `/api/*` routes that bypass that boundary.
 
-### 5. Edge Functions & Server Actions
-- `portal-moderate`: Handles idea status changes, official response tagging, moderation queue actions, and plan lifecycle events under moderator/admin authentication.
-- `portal-ingest-metrics`: Authenticated via `PORTAL_INGEST_SECRET`, upserts `metric_daily` records, and logs ingestion events.
-- `portal-attachments`: Issues signed URLs after verifying role-based access.
-- `portal-admin-invite`: Processes administrative invites, ensuring Supabase Auth + audit instrumentation stays server-side.
-- Server actions within Next.js wrap Supabase clients, enforce RLS-aware queries, and centralise rate checks.
+### 5. Edge Functions & Background Jobs
+- Functions under `supabase/functions` remain available for ingestion and STEVI support. The marketing site primarily depends on `portal-ingest-metrics` to keep `metric_daily` fresh and `portal-attachments` for resource collateral managed in Supabase.
+- If you modify any function, redeploy it using the Supabase CLI so the shared Supabase project stays in sync.
 
-### 5.1 Point-in-Time Counts
-- `core.pit_counts` stores each point-in-time window (slug, title, observed start/end, methodology, lead profile). Status values (`planned`, `active`, `closed`) drive whether the marketing site advertises a live count.
-- `core.pit_count_observations` captures anonymised encounter data with enums for age bracket, gender, wants treatment (`core.pit_treatment_interest`), location type, and severity values that support `not_applicable` when a need is not disclosed. `external_id` keeps imports idempotent; optional `person_id` links only when neighbours opt in.
-- RLS mirrors other core tables: `authenticated` users who satisfy `is_iharc_user()` can read and write, while deletes require an admin permission. Audit logging flows through existing Supabase triggers.
-- Views `portal.pit_public_summary` and `portal.pit_public_breakdowns` roll observations into suppressed aggregates (cells < 3 hide counts). Both marketing `/data` and portal `/portal/progress/pit` rely on these views so anonymous readers never touch raw tables.
-- Integration details for external ingestion apps live in `docs/pit/README.md` (enum mapping, retry strategy, and linkage guidance).
+### 6. Point-in-Time Counts
+- PIT counts are stored in the shared Supabase project. `src/data/pit.ts` reads public-friendly summaries (ensuring small cells are suppressed) and powers the `/data` page.
+- If you add new PIT displays, respect the existing suppression rules and reuse the cache helpers in `src/lib/cache/invalidate.ts`.
 
-### 6. Storage & Attachments
-- Private bucket `portal-attachments` stores files (`idea/{idea_uuid}/{attachment_uuid}.{ext}`). Upload flow issues signed URLs only after MIME/type validation and size checks (≤ 8 MB). Metadata persists in `portal.attachments`.
-- Petition collateral leverages the same storage patterns when campaigns include downloadable resources.
+### 7. Middleware Redirects
+- `middleware.ts` maps the following legacy paths to STEVI: `/portal`, `/auth`, `/login`, `/register`, `/reset-password`, `/ideas`, `/plans`, `/progress`, `/command-center`, `/solutions`, and `/api/portal`. It preserves query strings and returns a 307 redirect.
+- After this redirect check, `updateSession` ensures Supabase cookies are refreshed so anonymous Supabase reads continue to work on marketing pages.
 
-### 7. Authentication & Middleware
-- Supabase Auth handles registration (`/register`), login, and session management. Middleware gates moderator-only routes and ensures portal profiles exist (`portal.ensure_profile`) upon first login.
-- Profiles track petition opt-ins (`has_signed_petition`, `petition_signed_at`) and affiliations. Role claims steer UI states and RLS decisions.
-
-### 8. Telemetry & Audit Logging
-- Every mutation triggers `portal_log_audit_event`, capturing actor (profile/user), action, entity, and hashed IP/User-Agent metadata.
-- Reaction totals, plan updates, and petition signatures roll up into materialised views for `/portal/progress` and marketing pages.
-- Notifications queue emails/SMS via `portal_queue_notification`, with SMTP credentials managed in Azure Functions.
+### 8. Future Enhancements
+- Add new Supabase-backed stories under `src/data/` and surface them inside `/(marketing)` pages. Make sure to create accompanying cache tags + invalidation helpers.
+- If STEVI introduces new public dashboards, expose them here by building RSC loaders and read-only components—never copy the authenticated experience.
+- Keep documentation current when marketing copy or data sources change so other agents understand that this repository is marketing-only.

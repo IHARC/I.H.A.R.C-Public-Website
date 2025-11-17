@@ -2,8 +2,6 @@ export type TelemetryPayload = Record<string, unknown>;
 
 type TelemetryWindow = Window & { dataLayer?: unknown[] };
 
-const TELEMETRY_ENDPOINT = '/api/portal/telemetry';
-
 export function trackClientEvent(event: string, payload: TelemetryPayload = {}): void {
   if (typeof window === 'undefined') {
     return;
@@ -22,22 +20,5 @@ export function trackClientEvent(event: string, payload: TelemetryPayload = {}):
     }
   }
 
-  try {
-    const body = JSON.stringify({ event, payload, ts: Date.now() });
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      navigator.sendBeacon(TELEMETRY_ENDPOINT, body);
-      return;
-    }
-
-    void fetch(TELEMETRY_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-      keepalive: true,
-    });
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug('Telemetry dispatch skipped', error);
-    }
-  }
+  // Network telemetry was only needed for the retired portal. Marketing pages rely on analytics scripts instead.
 }

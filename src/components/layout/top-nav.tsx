@@ -4,26 +4,7 @@ import { TopNavMobile, type MarketingNavItem } from '@/components/layout/top-nav
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { getUserNavigation } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { TopNavDropdown, type TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 import { steviPortalUrl } from '@/lib/stevi-portal';
-
-const emergencyNavigation: TopNavDropdownItem[] = [
-  {
-    href: '/emergency',
-    label: 'Emergency Declaration Brief',
-    description: 'Understand why partners declared a housing and overdose emergency.',
-  },
-  {
-    href: steviPortalUrl('/portal/petition/state-of-emergency'),
-    label: 'Sign the Petition',
-    description: 'Add your support so neighbours and Council advance emergency responses.',
-  },
-  {
-    href: '/after-the-declaration',
-    label: 'After the Declaration',
-    description: 'See how Cobourg residents, agencies, and Council are collaborating now.',
-  },
-];
 
 const marketingNavigation: MarketingNavItem[] = [
   { type: 'link', href: '/', label: 'Home' },
@@ -33,7 +14,6 @@ const marketingNavigation: MarketingNavItem[] = [
   { type: 'link', href: '/resources', label: 'Reports & Resources' },
   { type: 'link', href: '/get-help', label: 'Get Help' },
   { type: 'link', href: '/news', label: 'News' },
-  { type: 'menu', label: 'Emergency Response', items: emergencyNavigation },
 ];
 
 export async function TopNav() {
@@ -88,15 +68,13 @@ export async function TopNav() {
               />
             </Link>
             <nav aria-label="Marketing pages" className="hidden flex-1 flex-wrap items-center gap-1.5 lg:flex">
-              {marketingNavigation.map((item) =>
-                item.type === 'link' ? (
+              {marketingNavigation
+                .filter((item): item is Extract<MarketingNavItem, { type: 'link' }> => item.type === 'link')
+                .map((item) => (
                   <TopNavLink key={item.href} href={item.href}>
                     {item.label}
                   </TopNavLink>
-                ) : (
-                  <TopNavDropdown key={item.label} label={item.label} items={item.items} />
-                )
-              )}
+                ))}
             </nav>
           </div>
           <div className="hidden items-center gap-3 md:flex">
