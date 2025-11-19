@@ -2043,11 +2043,60 @@ export type Database = {
           {
             foreignKeyName: "resource_pages_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
+          referencedRelation: "profiles";
+          referencedColumns: ["id"];
+        }?,
+        {
+          foreignKeyName: "resource_pages_updated_by_profile_id_fkey";
+          columns: ["updated_by_profile_id"];
+          referencedRelation: "profiles";
+          referencedColumns: ["id"];
+        }?,
+      ];
+    };
+      site_footer_settings: {
+        Row: {
+          id: string;
+          slot: string;
+          primary_text: string;
+          secondary_text: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          slot?: string;
+          primary_text: string;
+          secondary_text?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          slot?: string;
+          primary_text?: string;
+          secondary_text?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "site_footer_settings_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           }?,
           {
-            foreignKeyName: "resource_pages_updated_by_profile_id_fkey";
+            foreignKeyName: "site_footer_settings_updated_by_profile_id_fkey";
             columns: ["updated_by_profile_id"];
             referencedRelation: "profiles";
             referencedColumns: ["id"];

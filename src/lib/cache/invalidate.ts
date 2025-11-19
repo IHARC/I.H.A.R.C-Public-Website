@@ -20,3 +20,7 @@ export async function invalidatePitCaches(slug?: string) {
     await revalidateTag(tag);
   }
 }
+
+export async function invalidateSiteFooter() {
+  await revalidateTag(CACHE_TAGS.siteFooter);
+}
