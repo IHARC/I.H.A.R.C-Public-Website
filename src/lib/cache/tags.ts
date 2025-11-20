@@ -3,6 +3,7 @@ export const CACHE_TAGS = {
   mythEntries: 'marketing:myths',
   pitSummary: 'marketing:pit:summary',
   siteFooter: 'marketing:site-footer',
+  policies: 'marketing:policies',
   pitCount(slug: string) {
     return `marketing:pit:count:${slug}`;
   },

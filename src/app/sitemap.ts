@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { fetchResourceLibrary } from '@/lib/resources';
+import { fetchPublishedPolicies } from '@/data/policies';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
 
@@ -8,6 +9,8 @@ const marketingPaths = [
   '/about',
   '/programs',
   '/data',
+  '/transparency',
+  '/policies',
   '/get-help',
   '/news',
   '/context',
@@ -19,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const generatedAt = new Date().toISOString();
 
   const resources = await fetchResourceLibrary();
+  const policies = await fetchPublishedPolicies();
 
   const staticEntries = marketingPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
@@ -34,5 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...resourceEntries];
+  const policyEntries = policies.map((policy) => ({
+    url: `${SITE_URL}/policies/${policy.slug}`,
+    lastModified: policy.updatedAt ?? policy.lastReviewedAt,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  return [...staticEntries, ...resourceEntries, ...policyEntries];
 }
