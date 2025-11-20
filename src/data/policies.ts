@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import type { Database } from '@/types/supabase';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
@@ -54,7 +54,7 @@ const POLICY_SELECT = `
 
 const fetchPublishedPoliciesCached = unstable_cache(
   async (): Promise<Policy[]> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     const portal = supabase.schema('portal');
 
     const { data, error } = await portal
@@ -80,7 +80,7 @@ export async function fetchPublishedPolicies(): Promise<Policy[]> {
 
 const fetchPolicyBySlugCached = unstable_cache(
   async (slug: string): Promise<Policy | null> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     const portal = supabase.schema('portal');
 
     const { data, error } = await portal
