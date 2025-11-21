@@ -16,16 +16,14 @@ const fetchSiteFooter = unstable_cache(
   async (): Promise<SiteFooterContent> => {
     try {
       const supabase = await createSupabaseRSCClient();
-      const portal = supabase.schema('portal');
+      // core schema is shared but not yet reflected in generated types
+      // @ts-expect-error core schema typings not generated yet
+      const core = supabase.schema('core');
 
-      const { data, error } = await portal
-        .from('site_footer_settings')
-        .select('primary_text, secondary_text')
-        .eq('slot', 'public_marketing')
-        .eq('is_active', true)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await core
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['marketing.footer.primary_text', 'marketing.footer.secondary_text']);
 
       if (error || !data) {
         if (error) {
@@ -34,8 +32,11 @@ const fetchSiteFooter = unstable_cache(
         return DEFAULT_FOOTER;
       }
 
-      const primaryText = data.primary_text?.trim() || DEFAULT_FOOTER.primaryText;
-      const secondaryTextRaw = data.secondary_text?.trim() ?? null;
+      const primaryText =
+        data.find((row) => row.setting_key === 'marketing.footer.primary_text')?.setting_value?.trim() ||
+        DEFAULT_FOOTER.primaryText;
+      const secondaryTextRaw =
+        data.find((row) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value?.trim() ?? null;
 
       return {
         primaryText,
