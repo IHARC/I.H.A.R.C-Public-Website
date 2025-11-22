@@ -7,6 +7,9 @@ type SiteFooterContent = {
   secondaryText: string | null;
 };
 
+const PRIMARY_KEY = 'marketing.footer.primary_text';
+const SECONDARY_KEY = 'marketing.footer.secondary_text';
+
 const DEFAULT_FOOTER: SiteFooterContent = {
   primaryText: 'IHARC — Integrated Homelessness and Addictions Response Centre.',
   secondaryText: 'Inclusive, accessible, community-first data platform.',
@@ -16,14 +19,13 @@ const fetchSiteFooter = unstable_cache(
   async (): Promise<SiteFooterContent> => {
     try {
       const supabase = await createSupabaseRSCClient();
-      // core schema is shared but not yet reflected in generated types
-      // @ts-expect-error core schema typings not generated yet
-      const core = supabase.schema('core');
+      const portal = supabase.schema('portal');
 
-      const { data, error } = await core
-        .from('system_settings')
+      const { data, error } = await portal
+        .from('public_settings')
         .select('setting_key, setting_value')
-        .in('setting_key', ['marketing.footer.primary_text', 'marketing.footer.secondary_text']);
+        .eq('is_public', true)
+        .in('setting_key', [PRIMARY_KEY, SECONDARY_KEY]);
 
       if (error || !data) {
         if (error) {
@@ -33,10 +35,10 @@ const fetchSiteFooter = unstable_cache(
       }
 
       const primaryText =
-        data.find((row) => row.setting_key === 'marketing.footer.primary_text')?.setting_value?.trim() ||
+        data.find((row) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ||
         DEFAULT_FOOTER.primaryText;
       const secondaryTextRaw =
-        data.find((row) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value?.trim() ?? null;
+        data.find((row) => row.setting_key === SECONDARY_KEY)?.setting_value?.trim() ?? null;
 
       return {
         primaryText,

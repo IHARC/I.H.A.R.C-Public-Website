@@ -10,6 +10,7 @@ const marketingNavigation: MarketingNavItem[] = [
   { type: 'link', href: '/', label: 'Home' },
   { type: 'link', href: '/about', label: 'About' },
   { type: 'link', href: '/programs', label: 'Programs' },
+  { type: 'link', href: '/donate', label: 'Donate' },
   { type: 'link', href: '/data', label: 'Data' },
   { type: 'link', href: '/transparency', label: 'Transparency' },
   { type: 'link', href: '/resources', label: 'Reports & Resources' },

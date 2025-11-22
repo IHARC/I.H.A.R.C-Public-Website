@@ -28,3 +28,7 @@ export async function invalidateSiteFooter() {
 export async function invalidatePolicies() {
   await revalidateTag(CACHE_TAGS.policies);
 }
+
+export async function invalidateDonationCatalog() {
+  await revalidateTag(CACHE_TAGS.donationCatalog);
+}

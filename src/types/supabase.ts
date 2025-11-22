@@ -2176,6 +2176,58 @@ export type Database = {
           }?,
         ];
       };
+      public_settings: {
+        Row: {
+          id: string;
+          setting_key: string;
+          setting_value: string | null;
+          setting_type: string;
+          description: string | null;
+          is_public: boolean;
+          created_at: string;
+          updated_at: string;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          setting_key: string;
+          setting_value?: string | null;
+          setting_type?: string;
+          description?: string | null;
+          is_public?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          setting_key?: string;
+          setting_value?: string | null;
+          setting_type?: string;
+          description?: string | null;
+          is_public?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_settings_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "public_settings_updated_by_profile_id_fkey";
+            columns: ["updated_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       comments: {
         Row: {
           id: string;
@@ -2619,6 +2671,26 @@ export type Database = {
           signature_count: number;
           first_signed_at: string | null;
           last_signed_at: string | null;
+        };
+        Relationships: [];
+      };
+      donation_catalog_public: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          short_description: string | null;
+          long_description: string | null;
+          category: string | null;
+          unit_cost_cents: number | null;
+          currency: string;
+          default_quantity: number;
+          priority: number;
+          image_url: string | null;
+          target_buffer: number | null;
+          current_stock: number | null;
+          distributed_last_30_days: number | null;
+          distributed_last_365_days: number | null;
         };
         Relationships: [];
       };

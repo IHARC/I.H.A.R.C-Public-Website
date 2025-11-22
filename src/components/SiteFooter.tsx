@@ -22,6 +22,12 @@ export async function SiteFooter() {
         >
           Reports & Resources
         </Link>
+        <Link
+          href="/donate"
+          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Donate
+        </Link>
       </nav>
     </footer>
   );
