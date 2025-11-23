@@ -18,6 +18,8 @@ export type HeroContent = {
   headline: string;
   body: string;
   supporting: string;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
   primaryCta: CtaLink;
   secondaryLink: CtaLink | null;
 };

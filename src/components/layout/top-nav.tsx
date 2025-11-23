@@ -108,14 +108,16 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
 
 export async function TopNav() {
   const { items, portalCtaLabel: portalCtaLabelSetting } = await getMarketingNavigation();
-  const marketingNavigation = buildGroupedNavigation(items);
+  const donateNavItem = items.find((item) => item.href === '/donate');
+  const marketingNavigation = buildGroupedNavigation(items.filter((item) => item.href !== '/donate'));
   const steviHomeUrl = steviPortalUrl('/');
   const portalCtaLabel = portalCtaLabelSetting || 'Access S.T.E.V.I.';
+  const donateCtaLabel = donateNavItem?.label || 'Donate';
 
   const portalCtaDesktop = (
     <Link
       href={steviHomeUrl}
-      className="hidden items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-md transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
     >
       {portalCtaLabel}
@@ -125,16 +127,36 @@ export async function TopNav() {
   const portalCtaMobile = (
     <Link
       href={steviHomeUrl}
-      className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-base font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      className="inline-flex w-full items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-primary px-4 py-3 text-base font-semibold text-on-primary shadow-md transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       prefetch={false}
     >
       {portalCtaLabel}
     </Link>
   );
 
+  const donateCtaDesktop = (
+    <Link
+      href="/donate"
+      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-tertiary px-4 py-2 text-sm font-semibold text-on-tertiary shadow-md shadow-tertiary/30 transition hover:bg-tertiary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      prefetch={false}
+    >
+      {donateCtaLabel}
+    </Link>
+  );
+
+  const donateCtaMobile = (
+    <Link
+      href="/donate"
+      className="inline-flex w-full items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-tertiary px-4 py-3 text-base font-semibold text-on-tertiary shadow-md transition hover:bg-tertiary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      prefetch={false}
+    >
+      {donateCtaLabel}
+    </Link>
+  );
+
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-      <div className="mx-auto w-full max-w-6xl px-4 py-4">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4">
         <div className="flex items-center gap-3">
           <div className="flex flex-1 items-center gap-3">
             <Link
@@ -172,6 +194,7 @@ export async function TopNav() {
             </nav>
           </div>
           <div className="hidden items-center gap-3 md:flex">
+            {donateCtaDesktop}
             {portalCtaDesktop}
             <ThemeToggle />
           </div>
@@ -179,7 +202,12 @@ export async function TopNav() {
             <ThemeToggle />
             <TopNavMobile
               links={marketingNavigation}
-              quickAction={portalCtaMobile}
+              quickAction={
+                <div className="flex flex-col gap-2">
+                  {donateCtaMobile}
+                  {portalCtaMobile}
+                </div>
+              }
             />
           </div>
         </div>

@@ -98,7 +98,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-transparent text-on-surface hover:bg-surface-container"
+          className="h-10 w-10 rounded-[var(--md-sys-shape-corner-small)] bg-transparent text-on-surface hover:bg-surface-container"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" aria-hidden />
@@ -127,7 +127,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                       href={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        'flex items-center justify-between rounded-full px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+                        'flex items-center justify-between rounded-[var(--md-sys-shape-corner-small)] px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
                         item.isActive
                           ? 'bg-secondary-container text-on-secondary-container'
                           : 'text-on-surface hover:bg-surface-container-highest'
@@ -209,12 +209,12 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
   }, [item.isActive]);
 
   return (
-    <div className={cn('rounded-2xl border border-outline/15 bg-surface-container-low shadow-sm')}>
+    <div className={cn('rounded-[var(--md-sys-shape-corner-large)] border border-outline/15 bg-surface-container-low shadow-sm')}>
       <button
         type="button"
         onClick={() => setExpanded((previous) => !previous)}
         className={cn(
-          'flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          'flex w-full items-center justify-between rounded-[var(--md-sys-shape-corner-large)] px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
           item.isActive || expanded
             ? 'bg-secondary-container text-on-secondary-container'
             : 'text-on-surface hover:bg-surface-container-high'
@@ -244,7 +244,7 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
             href={child.href}
             onClick={closeSheet}
             className={cn(
-              'rounded-xl px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+              'rounded-[var(--md-sys-shape-corner-medium)] px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
               child.isActive
                 ? 'bg-primary/15 text-primary'
                 : 'text-on-surface hover:bg-surface-container-high'

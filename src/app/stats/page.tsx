@@ -31,11 +31,11 @@ export default async function StatsDashboardPage({
     : 'Metric data will surface here once partners publish updates.';
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-balance">
-          <h2 className="text-3xl font-semibold tracking-tight text-on-surface">Community Status Dashboard</h2>
-          <p className="text-sm text-on-surface/80">
+          <h2 className="type-headline-medium text-on-surface">Community Status Dashboard</h2>
+          <p className="type-body-medium text-on-surface/80">
             Real-time indicators from partners focused on housing stability, drug poisoning response, and outreach efforts.
           </p>
         </div>
@@ -89,7 +89,7 @@ function LinkRange({ target, active }: { target: number; active: boolean }) {
   return (
     <Link
       href={params.toString() ? `?${params.toString()}` : '?'}
-      className={`rounded-full px-3 py-1 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+      className={`rounded-[var(--md-sys-shape-corner-small)] px-3 py-1 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
         active
           ? 'bg-primary text-on-primary shadow-subtle'
           : 'border border-outline/40 bg-surface text-on-surface-variant hover:bg-surface-container-high'

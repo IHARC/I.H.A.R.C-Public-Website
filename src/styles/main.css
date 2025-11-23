@@ -170,11 +170,11 @@
 @layer components {
   .container {
     @apply mx-auto px-4 sm:px-6 lg:px-8;
-    max-width: theme('screens.2xl');
+    max-width: 1320px;
   }
 
   .btn-base {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-medium transition-all duration-250 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center rounded-[var(--md-sys-shape-corner-small)] px-6 py-3 text-base font-medium transition-all duration-250 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
     font-family: var(--md-sys-typescale-body-font);
   }
 
@@ -219,7 +219,7 @@
   }
 
   .card {
-    @apply rounded-xl border p-6 transition-all duration-250 ease-out;
+    @apply rounded-[var(--md-sys-shape-corner-medium)] border p-6 transition-all duration-200 ease-out;
     background-color: rgb(var(--md-sys-color-surface-container-high) / 1);
     border-color: rgb(var(--md-sys-color-outline-variant) / 1);
     color: rgb(var(--md-sys-color-on-surface) / 1);
@@ -227,7 +227,7 @@
   }
 
   .card-hover {
-    @apply hover:scale-101 transform;
+    @apply transform;
     box-shadow: var(--shadow-level-1);
   }
 
@@ -390,6 +390,56 @@
   .hover\:shadow-md:hover,
   .hover\:shadow-lg:hover {
     box-shadow: var(--shadow-level-2);
+  }
+
+  /* Material type scale utilities */
+  .type-headline-large {
+    font-family: var(--md-sys-typescale-headline-font);
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 2.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .type-headline-medium {
+    font-family: var(--md-sys-typescale-headline-font);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+    letter-spacing: -0.008em;
+  }
+
+  .type-title-large {
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1.75rem;
+    letter-spacing: -0.006em;
+  }
+
+  .type-title-medium {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    letter-spacing: 0;
+  }
+
+  .type-body-large {
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    letter-spacing: 0.01em;
+  }
+
+  .type-body-medium {
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* Material state layers */
+  .state-surface-hover {
+    background-color: rgb(var(--md-sys-color-primary) / 0.08);
   }
 
   .rounded-md {

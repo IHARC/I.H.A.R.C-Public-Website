@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export type TrendPoint = {
   date: string;
@@ -35,6 +36,7 @@ export function TrendChart({
   const tooltipBackground = 'rgb(var(--md-sys-color-surface-container-highest) / 0.92)';
   const tooltipBorder = 'rgb(var(--md-sys-color-outline-variant) / 0.6)';
   const tooltipText = 'rgb(var(--md-sys-color-on-surface) / 0.94)';
+  const csvContent = React.useMemo(() => buildCsv(data), [data]);
 
   return (
     <Card>
@@ -81,6 +83,46 @@ export function TrendChart({
             </AreaChart>
           </ResponsiveContainer>
         </div>
+        <div className="mt-4 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => downloadCsv(csvContent, title)}
+              className="inline-flex items-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 bg-surface px-3 py-2 text-xs font-semibold text-on-surface transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            >
+              Download CSV
+            </button>
+            <span className="text-xs text-on-surface-variant">Data table included for keyboard and screen-reader use.</span>
+          </div>
+          <div className="overflow-auto rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low">
+            <table className="min-w-full text-left text-xs text-on-surface">
+              <thead className="bg-surface-container-high text-on-surface-variant">
+                <tr>
+                  <th scope="col" className="px-3 py-2 font-semibold">Date</th>
+                  <th scope="col" className="px-3 py-2 font-semibold">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((point, index) => (
+                  <tr
+                    key={`${point.date}-${index}`}
+                    className={cn(index % 2 === 0 ? 'bg-surface' : 'bg-surface-container')}
+                  >
+                    <td className="px-3 py-2 text-on-surface/80">{point.date}</td>
+                    <td className="px-3 py-2 font-semibold text-on-surface">{point.value}</td>
+                  </tr>
+                ))}
+                {!data.length ? (
+                  <tr>
+                    <td colSpan={2} className="px-3 py-3 text-on-surface-variant">
+                      No reported values for this range yet.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -95,4 +137,20 @@ function buildSummary(data: TrendPoint[]): string {
   const direction = delta > 0 ? 'increased' : delta < 0 ? 'decreased' : 'remained steady';
 
   return `Trend summary: value ${direction} from ${first.value} on ${first.date} to ${last.value} on ${last.date}.`;
+}
+
+function buildCsv(data: TrendPoint[]): string {
+  const header = 'date,value';
+  const rows = data.map((point) => `${point.date},${point.value}`);
+  return [header, ...rows].join('\n');
+}
+
+function downloadCsv(content: string, title: string) {
+  const blob = new Blob([content], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${title.replace(/\s+/g, '-').toLowerCase()}-trend.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }
