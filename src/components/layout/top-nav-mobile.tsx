@@ -32,7 +32,7 @@ export type MarketingNavItem = MarketingLink | MarketingMenu;
 
 type TopNavMobileProps = {
   links: MarketingNavItem[];
-  accountSection: ReactNode;
+  accountSection?: ReactNode;
   quickAction?: ReactNode;
 };
 
@@ -167,23 +167,25 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
               {quickAction}
             </div>
           ) : null}
-          <div
-            className="flex flex-col gap-2"
-            onClickCapture={(event) => {
-              const target = event.target as HTMLElement | null;
-              if (!target) {
-                return;
-              }
-              if (target.closest('a[href],button')) {
-                setOpen(false);
-              }
-            }}
-          >
-            <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
-              STEVI portal access
-            </p>
-            {accountSection}
-          </div>
+          {accountSection ? (
+            <div
+              className="flex flex-col gap-2"
+              onClickCapture={(event) => {
+                const target = event.target as HTMLElement | null;
+                if (!target) {
+                  return;
+                }
+                if (target.closest('a[href],button')) {
+                  setOpen(false);
+                }
+              }}
+            >
+              <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
+                STEVI portal access
+              </p>
+              {accountSection}
+            </div>
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>

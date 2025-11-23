@@ -2,20 +2,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TopNavMobile, type MarketingNavItem } from '@/components/layout/top-nav-mobile';
 import { TopNavLink } from '@/components/layout/top-nav-link';
-import { getUserNavigation } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { getMarketingNavigation } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
 export async function TopNav() {
-  const { items, portalCtaLabel } = await getMarketingNavigation();
+  const { items } = await getMarketingNavigation();
   const marketingNavigation: MarketingNavItem[] = items.map((item) => ({
     type: 'link',
     href: item.href,
     label: item.label,
   }));
-  const { desktop: userNavigation, mobile: mobileUserNavigation } = await getUserNavigation();
   const steviHomeUrl = steviPortalUrl('/');
+  const portalCtaLabel = 'Access S.T.E.V.I.';
 
   const portalCtaDesktop = (
     <Link
@@ -23,7 +22,7 @@ export async function TopNav() {
       className="hidden items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
     >
-      {portalCtaLabel || 'STEVI'}
+      {portalCtaLabel}
     </Link>
   );
 
@@ -33,7 +32,7 @@ export async function TopNav() {
       className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-base font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       prefetch={false}
     >
-      {portalCtaLabel || 'STEVI'}
+      {portalCtaLabel}
     </Link>
   );
 
@@ -77,13 +76,11 @@ export async function TopNav() {
           <div className="hidden items-center gap-3 md:flex">
             {portalCtaDesktop}
             <ThemeToggle />
-            {userNavigation}
           </div>
           <div className="flex items-center gap-2 md:hidden">
             <ThemeToggle />
             <TopNavMobile
               links={marketingNavigation}
-              accountSection={mobileUserNavigation}
               quickAction={portalCtaMobile}
             />
           </div>
