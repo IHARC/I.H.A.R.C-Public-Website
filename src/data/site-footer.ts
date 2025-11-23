@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 
 type SiteFooterContent = {
@@ -13,7 +13,7 @@ const SECONDARY_KEY = 'marketing.footer.secondary_text';
 const fetchSiteFooter = unstable_cache(
   async (): Promise<SiteFooterContent> => {
     try {
-      const supabase = await createSupabaseRSCClient();
+      const supabase = getSupabasePublicClient();
       const portal = supabase.schema('portal');
 
       const { data, error } = await portal
