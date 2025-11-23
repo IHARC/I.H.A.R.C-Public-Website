@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 
 type NavItem = {
@@ -69,7 +69,7 @@ const SETTING_KEYS: SettingsKey[] = [
 
 const fetchSettings = unstable_cache(
   async (): Promise<Record<SettingsKey, string | null>> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     const portal = supabase.schema('portal');
 
     const { data, error } = await portal
