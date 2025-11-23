@@ -10,11 +10,6 @@ type SiteFooterContent = {
 const PRIMARY_KEY = 'marketing.footer.primary_text';
 const SECONDARY_KEY = 'marketing.footer.secondary_text';
 
-const DEFAULT_FOOTER: SiteFooterContent = {
-  primaryText: 'IHARC — Integrated Homelessness and Addictions Response Centre.',
-  secondaryText: 'Inclusive, accessible, community-first data platform.',
-};
-
 const fetchSiteFooter = unstable_cache(
   async (): Promise<SiteFooterContent> => {
     try {
@@ -27,16 +22,16 @@ const fetchSiteFooter = unstable_cache(
         .eq('is_public', true)
         .in('setting_key', [PRIMARY_KEY, SECONDARY_KEY]);
 
-      if (error || !data) {
-        if (error) {
-          console.error('Failed to load site footer from Supabase', error);
-        }
-        return DEFAULT_FOOTER;
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No footer settings returned from Supabase');
       }
 
       const primaryText =
-        data.find((row) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ||
-        DEFAULT_FOOTER.primaryText;
+        data.find((row) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ?? '';
       const secondaryTextRaw =
         data.find((row) => row.setting_key === SECONDARY_KEY)?.setting_value?.trim() ?? null;
 
@@ -46,7 +41,7 @@ const fetchSiteFooter = unstable_cache(
       };
     } catch (error) {
       console.error('Unable to query site footer content', error);
-      return DEFAULT_FOOTER;
+      return { primaryText: '', secondaryText: null };
     }
   },
   ['marketing:footer:public'],

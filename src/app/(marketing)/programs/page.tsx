@@ -1,37 +1,5 @@
 import type { Metadata } from 'next';
-
-const programAreas = [
-  {
-    title: 'Street Outreach',
-    description:
-      'Multi-agency teams share health and safety supplies, coordinate warm hand-offs to housing support, and check in on wellness goals neighbours set for themselves.',
-  },
-  {
-    title: 'Shelter & Stabilization',
-    description:
-      'Housing staff navigate intake, coordinate hotel overflow when shelters are full, and aim to publish near real-time availability wherever partners share data.',
-  },
-  {
-    title: 'Overdose Prevention',
-    description:
-      'Peer responders and health partners align kit distribution, CPR refreshers, and post-overdose follow-up so nobody is left alone after a poisoning.',
-  },
-  {
-    title: 'Community Safety',
-    description:
-      'Neighbours, business owners, and by-law collaborate on compassionate stewardship—clean-ups, sharps disposal, and addressing safety concerns without displacement.',
-  },
-  {
-    title: 'Systems Navigation',
-    description:
-      'Support workers help people replace lost ID, access income supports, and connect to trauma-informed health care while reducing paperwork duplication.',
-  },
-  {
-    title: 'Learning & Evaluation',
-    description:
-      'Partners share what is working, where the data has gaps, and how to adjust supports quickly. Each Working Plan lists the metrics community members want to see.',
-  },
-];
+import { getProgramEntries } from '@/data/marketing-content';
 
 export const metadata: Metadata = {
   title: 'Programs & Collaborative Supports — IHARC',
@@ -62,7 +30,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProgramsPage() {
+export default async function ProgramsPage() {
+  const programAreas = await getProgramEntries();
   return (
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">

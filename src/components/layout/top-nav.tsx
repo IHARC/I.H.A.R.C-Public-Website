@@ -4,21 +4,16 @@ import { TopNavMobile, type MarketingNavItem } from '@/components/layout/top-nav
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { getUserNavigation } from '@/components/layout/user-nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { getMarketingNavigation } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
-const marketingNavigation: MarketingNavItem[] = [
-  { type: 'link', href: '/', label: 'Home' },
-  { type: 'link', href: '/about', label: 'About' },
-  { type: 'link', href: '/programs', label: 'Programs' },
-  { type: 'link', href: '/donate', label: 'Donate' },
-  { type: 'link', href: '/data', label: 'Data' },
-  { type: 'link', href: '/transparency', label: 'Transparency' },
-  { type: 'link', href: '/resources', label: 'Reports & Resources' },
-  { type: 'link', href: '/get-help', label: 'Get Help' },
-  { type: 'link', href: '/news', label: 'News' },
-];
-
 export async function TopNav() {
+  const { items, portalCtaLabel } = await getMarketingNavigation();
+  const marketingNavigation: MarketingNavItem[] = items.map((item) => ({
+    type: 'link',
+    href: item.href,
+    label: item.label,
+  }));
   const { desktop: userNavigation, mobile: mobileUserNavigation } = await getUserNavigation();
   const steviHomeUrl = steviPortalUrl('/');
 
@@ -28,7 +23,7 @@ export async function TopNav() {
       className="hidden items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
     >
-      Open STEVI Portal
+      {portalCtaLabel || 'STEVI'}
     </Link>
   );
 
@@ -38,7 +33,7 @@ export async function TopNav() {
       className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-base font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       prefetch={false}
     >
-      Open STEVI Portal
+      {portalCtaLabel || 'STEVI'}
     </Link>
   );
 

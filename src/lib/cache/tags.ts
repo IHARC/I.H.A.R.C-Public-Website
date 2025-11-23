@@ -5,6 +5,12 @@ export const CACHE_TAGS = {
   siteFooter: 'marketing:site-footer',
   policies: 'marketing:policies',
   donationCatalog: 'marketing:donation-catalog',
+  marketingContent: 'marketing:content',
+  navigation: 'marketing:navigation',
+  supports: 'marketing:supports',
+  programs: 'marketing:programs',
+  hero: 'marketing:hero',
+  context: 'marketing:context',
   pitCount(slug: string) {
     return `marketing:pit:count:${slug}`;
   },

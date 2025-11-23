@@ -1,60 +1,7 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { getSupportEntries } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
-
-type UrgentSupport = {
-  title: string;
-  description: string;
-  contact: ReactNode;
-};
-
-const urgentSupports: UrgentSupport[] = [
-  {
-    title: 'Shelter placement and warming sites',
-    description:
-      'Call 2-1-1 or Transition House coordinated entry so staff can arrange placement, transportation, and motel overflow when beds are full. Transition House operates at 310 Division Street, Cobourg.',
-    contact: (
-      <>
-        Dial <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
-        <Link href="tel:19053769562" className="text-primary underline">905-376-9562</Link>
-      </>
-    ),
-  },
-  {
-    title: 'Overdose response and essential health supplies',
-    description:
-      'If someone is unresponsive or turning blue, call 911 and start naloxone or rescue breathing. The Good Samaritan Drug Overdose Act protects callers from possession charges. After the emergency, IHARC outreach staff can coordinate follow-up and distribute naloxone, sharps kits, and other health supplies.',
-    contact: (
-      <>
-        Email{' '}
-        <Link href="mailto:outreach@iharc.ca" className="text-primary underline">
-          outreach@iharc.ca
-        </Link>{' '}
-        while the IHARC text line is under maintenance. We respond within one business day.
-      </>
-    ),
-  },
-  {
-    title: 'Mental health crisis support',
-    description:
-      'Use 9-8-8 for immediate counselling. For local follow-up, Northumberland Hills Hospital Community Mental Health Services provides crisis assessment and short-term supports. The Rapid Access Addiction Medicine (RAAM) clinic welcomes appointments and walk-ins when time permits.',
-    contact: (
-      <>
-        Call or text <Link href="tel:988" className="text-primary underline">9-8-8</Link>. Locally, contact{' '}
-        <Link href="tel:19053779891" className="text-primary underline">905-377-9891</Link>. The RAAM clinic runs Tuesdays, 12–3
-        {'\u00a0'}
-        pm at 1011 Elgin St. W., 2nd floor.
-      </>
-    ),
-  },
-];
-
-const mutualAid = [
-  'Cobourg Mutual Aid: direct outreach, supplies, and accompaniment for appointments.',
-  'Northumberland Paramedics: wellness checks and overdose post-response follow-up teams.',
-  'Local Indigenous partners hosting weekly circles focused on cultural safety and belonging.',
-];
 
 export const metadata: Metadata = {
   title: 'Get Help Now — IHARC',
@@ -62,7 +9,8 @@ export const metadata: Metadata = {
     'Find immediate housing, health, and overdose prevention supports across Northumberland County. Contact information is provided without collecting personal data.',
 };
 
-export default function GetHelpPage() {
+export default async function GetHelpPage() {
+  const { urgent, mutualAid } = await getSupportEntries();
   const steviHomeUrl = steviPortalUrl('/');
 
   return (
@@ -82,11 +30,23 @@ export default function GetHelpPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        {urgentSupports.map((support) => (
+        {urgent.map((support) => (
           <article key={support.title} className="rounded-3xl border border-outline/10 bg-surface p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-on-surface">{support.title}</h2>
-            <p className="mt-2 text-sm text-on-surface/80">{support.description}</p>
-            <p className="mt-4 text-sm font-semibold text-primary">{support.contact}</p>
+            <p className="mt-2 text-sm text-on-surface/80 whitespace-pre-line">{support.body}</p>
+            <div className="mt-4 space-y-1 text-sm font-semibold text-primary">
+              {support.contacts.map((contact) =>
+                contact.href ? (
+                  <p key={`${support.title}-${contact.label}`}>
+                    <Link href={contact.href} className="underline">
+                      {contact.label}
+                    </Link>
+                  </p>
+                ) : (
+                  <p key={`${support.title}-${contact.label}`}>{contact.label}</p>
+                ),
+              )}
+            </div>
           </article>
         ))}
       </section>

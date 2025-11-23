@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ContextCards } from '@/components/site/ContextCards';
+import { getContextCards, getHeroContent, getSupportEntries } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
 export const metadata: Metadata = {
@@ -11,13 +12,19 @@ export const metadata: Metadata = {
     'Discover how the Integrated Homelessness and Addictions Response Centre supports neighbours across Northumberland and how the STEVI portal keeps IHARC clients connected to outreach teams.',
 };
 
-export default function MarketingHomePage() {
+export default async function MarketingHomePage() {
+  const [heroContent, contextCards, supports] = await Promise.all([
+    getHeroContent(),
+    getContextCards(),
+    getSupportEntries(),
+  ]);
   const steviHomeUrl = steviPortalUrl('/');
   const steviRegisterUrl = steviPortalUrl('/register');
+  const urgentSupports = supports.urgent;
 
   return (
     <div className="space-y-20 pb-16">
-      <Hero />
+      <Hero content={heroContent} />
 
       <section className="space-y-8">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 text-balance">
@@ -26,7 +33,7 @@ export default function MarketingHomePage() {
             Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal for neighbours and outreach teams.
           </p>
         </div>
-        <ContextCards />
+        <ContextCards topics={contextCards} />
       </section>
 
       <section className="bg-surface-container py-12">
@@ -57,33 +64,9 @@ export default function MarketingHomePage() {
           Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. In an emergency call 911 and stay with the person until responders arrive. Moderators keep this list current.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
-          <HelpCard
-            title="Shelter placement and warming sites"
-            description={
-              <>
-                Call <Link href="tel:211" className="text-primary underline">2-1-1</Link> or{' '}
-                <Link href="tel:19053769562" className="text-primary underline">905-376-9562</Link> for Transition House coordinated entry.
-              </>
-            }
-          />
-          <HelpCard
-            title="Overdose response and essential health supplies"
-            description={
-              <>
-                Call 911 if someone is unresponsive. For naloxone and follow-up while our text system is offline, email{' '}
-                <Link href="mailto:outreach@iharc.ca" className="text-primary underline">outreach@iharc.ca</Link>.
-              </>
-            }
-          />
-          <HelpCard
-            title="Mental health crisis support"
-            description={
-              <>
-                Call or text <Link href="tel:988" className="text-primary underline">9-8-8</Link>. Locally, contact{' '}
-                <Link href="tel:19053779891" className="text-primary underline">905-377-9891</Link> for NHH Community Mental Health Services.
-              </>
-            }
-          />
+          {urgentSupports.map((support) => (
+            <HelpCard key={support.title} support={support} />
+          ))}
         </div>
       </section>
     </div>
@@ -113,15 +96,27 @@ function StayInvolvedLink({ href, label, children }: StayInvolvedLinkProps) {
 }
 
 type HelpCardProps = {
-  title: string;
-  description: ReactNode;
+  support: Awaited<ReturnType<typeof getSupportEntries>>['urgent'][number];
 };
 
-function HelpCard({ title, description }: HelpCardProps) {
+function HelpCard({ support }: HelpCardProps) {
   return (
     <div className="rounded-3xl border border-outline/20 bg-surface p-6">
-      <h3 className="text-lg font-semibold text-on-surface">{title}</h3>
-      <p className="mt-2 text-sm text-on-surface/80">{description}</p>
+      <h3 className="text-lg font-semibold text-on-surface">{support.title}</h3>
+      <p className="mt-2 text-sm text-on-surface/80">{support.summary}</p>
+      <ul className="mt-3 space-y-1 text-sm font-semibold text-primary">
+        {support.contacts.map((contact) =>
+          contact.href ? (
+            <li key={`${support.title}-${contact.label}`}>
+              <Link href={contact.href} className="underline">
+                {contact.label}
+              </Link>
+            </li>
+          ) : (
+            <li key={`${support.title}-${contact.label}`}>{contact.label}</li>
+          ),
+        )}
+      </ul>
     </div>
   );
 }

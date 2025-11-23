@@ -2,38 +2,20 @@
 
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import type { ContextCard } from '@/data/marketing-content';
 
-const TOPICS = [
-  {
-    id: 'housing',
-    title: 'Housing shortage',
-    description: 'Rents keep rising faster than incomes, leaving neighbours without stable options.',
-  },
-  {
-    id: 'supply',
-    title: 'Toxic drug supply',
-    description: 'Unpredictable street supply drives overdose emergencies and long-term health risks.',
-  },
-  {
-    id: 'justice',
-    title: 'Justice churn',
-    description: 'Frequent release and short stays create gaps in care and disrupt healing plans.',
-  },
-  {
-    id: 'support',
-    title: 'Fragmented support',
-    description: 'Services are spread across agencies, making it hard to navigate help in real time.',
-  },
-] as const;
+type ContextCardsProps = {
+  topics: ContextCard[];
+};
 
-export function ContextCards() {
+export function ContextCards({ topics }: ContextCardsProps) {
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
       <div className="grid gap-6 md:grid-cols-2">
-        {TOPICS.map((topic) => (
+        {topics.map((topic) => (
           <Link
             key={topic.id}
-            href={`/context#${topic.id}`}
+            href={topic.href}
             className="group flex h-full flex-col justify-between rounded-3xl border border-outline/20 bg-surface p-6 transition hover:-translate-y-1 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={() => trackEvent('context_read_more', { topic: topic.id })}
           >
