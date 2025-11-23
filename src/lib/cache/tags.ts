@@ -10,6 +10,7 @@ export const CACHE_TAGS = {
   supports: 'marketing:supports',
   programs: 'marketing:programs',
   hero: 'marketing:hero',
+  branding: 'marketing:branding',
   context: 'marketing:context',
   pitCount(slug: string) {
     return `marketing:pit:count:${slug}`;

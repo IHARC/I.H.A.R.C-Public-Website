@@ -24,6 +24,12 @@ export type HeroContent = {
   secondaryLink: CtaLink | null;
 };
 
+export type BrandingAssets = {
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  faviconUrl: string | null;
+};
+
 export type ContextCard = {
   id: string;
   title: string;
@@ -51,6 +57,7 @@ export type ProgramEntry = {
 type SettingsKey =
   | 'marketing.nav.items'
   | 'marketing.nav.portal_cta_label'
+  | 'marketing.branding'
   | 'marketing.hero'
   | 'marketing.home.context_cards'
   | 'marketing.supports.urgent'
@@ -62,6 +69,7 @@ type SettingsRow = { setting_key: string; setting_value: string | null };
 const SETTING_KEYS: SettingsKey[] = [
   'marketing.nav.items',
   'marketing.nav.portal_cta_label',
+  'marketing.branding',
   'marketing.hero',
   'marketing.home.context_cards',
   'marketing.supports.urgent',
@@ -103,6 +111,7 @@ const fetchSettings = unstable_cache(
       CACHE_TAGS.marketingContent,
       CACHE_TAGS.navigation,
       CACHE_TAGS.hero,
+      CACHE_TAGS.branding,
       CACHE_TAGS.context,
       CACHE_TAGS.supports,
       CACHE_TAGS.programs,
@@ -131,6 +140,13 @@ export async function getMarketingNavigation(): Promise<{
   const portalCtaLabel = settings['marketing.nav.portal_cta_label'] ?? '';
 
   return { items, portalCtaLabel };
+}
+
+export async function getBrandingAssets(): Promise<BrandingAssets | null> {
+  const settings = await fetchSettings();
+  const raw = settings['marketing.branding'];
+  if (!raw) return null;
+  return parseJson<BrandingAssets>(raw, 'marketing.branding');
 }
 
 export async function getHeroContent(): Promise<HeroContent> {

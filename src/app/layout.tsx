@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Roboto, Roboto_Flex } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { getBrandingAssets } from '@/data/marketing-content';
 import '@/styles/main.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -63,7 +64,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const branding = await getBrandingAssets();
+  const favicon = branding?.faviconUrl || '/favicon.svg';
+
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
@@ -74,6 +78,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           'font-sans'
         )}
       >
+        <head>
+          <link rel="icon" href={favicon} />
+        </head>
         <ThemeProvider>
           <a href="#main-content" className="skip-link">
             Skip to main content

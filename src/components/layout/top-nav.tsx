@@ -4,7 +4,7 @@ import { TopNavDropdown, type TopNavDropdownItem } from '@/components/layout/top
 import { TopNavMobile, type MarketingNavItem } from '@/components/layout/top-nav-mobile';
 import { TopNavLink } from '@/components/layout/top-nav-link';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { getMarketingNavigation } from '@/data/marketing-content';
+import { getMarketingNavigation, getBrandingAssets } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
 type NavItem = {
@@ -108,6 +108,9 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
 
 export async function TopNav() {
   const { items, portalCtaLabel: portalCtaLabelSetting } = await getMarketingNavigation();
+  const branding = await getBrandingAssets();
+  const lightLogo = branding?.logoLightUrl || '/logos/logo-default.png';
+  const darkLogo = branding?.logoDarkUrl || '/logos/logoinverted.png';
   const donateNavItem = items.find((item) => item.href === '/donate');
   const marketingNavigation = buildGroupedNavigation(items.filter((item) => item.href !== '/donate'));
   const steviHomeUrl = steviPortalUrl('/');
@@ -165,7 +168,7 @@ export async function TopNav() {
               aria-label="IHARC home"
             >
               <Image
-                src="/logos/logo-default.png"
+                src={lightLogo}
                 alt="IHARC"
                 width={160}
                 height={48}
@@ -173,7 +176,7 @@ export async function TopNav() {
                 className="dark:hidden"
               />
               <Image
-                src="/logos/logoinverted.png"
+                src={darkLogo}
                 alt="IHARC"
                 width={160}
                 height={48}
