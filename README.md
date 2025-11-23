@@ -45,7 +45,7 @@
 - Never bypass the cached loaders with ad-hoc Supabase queries inside components. Consistency comes from the cache layers + invalidation helpers.
 
 ## Development Workflow
-1. Node.js ≥ 18.18 and npm 9+. Install dependencies with `npm install`.
+1. Node.js 20.x (npm 10+). Install dependencies with `npm install`.
 2. Run `npm run dev` (port 3000). Supply `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` so Supabase reads succeed locally.
 3. Type checking: `npm run typecheck`. Linting: `npm run lint`. Build verification: `npm run build`.
 4. Vitest/playwright tooling remains in `package.json`, but the marketing app currently relies on manual verification. Add focused tests when building new data fetchers or components.

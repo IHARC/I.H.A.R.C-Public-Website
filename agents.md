@@ -28,7 +28,7 @@
 - Middleware intercepts `/portal`, `/auth`, `/login`, `/register`, `/reset-password`, `/api/portal`, `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` and issues 307 redirects to `steviPortalUrl`.
 
 ## Development Workflow
-1. Install deps with `npm install` (Node ≥ 18.18).
+1. Install deps with `npm install` (Node 20.x LTS).
 2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for Supabase reads.
 3. `npm run dev` to develop, `npm run lint`, `npm run typecheck`, `npm run build` to validate.
 4. Keep analytics + consent logic intact (`ThemeProvider`, `AnalyticsProvider`, `ConsentBanner`).
