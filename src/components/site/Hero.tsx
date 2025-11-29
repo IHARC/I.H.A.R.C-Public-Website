@@ -69,8 +69,8 @@ export function Hero({ content }: HeroProps) {
             <dd>One public picture to guide action.</dd>
           </div>
           <div className="rounded-[var(--md-sys-shape-corner-medium)] bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Rapid response.</dt>
-            <dd>Coordinated tasks with tracked follow-through.</dd>
+            <dt className="font-semibold text-on-surface">Outreach and navigation.</dt>
+            <dd>Coordinated visits, warm referrals, and follow-through with partners.</dd>
           </div>
           <div className="rounded-[var(--md-sys-shape-corner-medium)] bg-surface-container p-4">
             <dt className="font-semibold text-on-surface">Secure STEVI portal.</dt>

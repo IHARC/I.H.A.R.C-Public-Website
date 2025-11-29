@@ -4,7 +4,7 @@ import { getProgramEntries } from '@/data/marketing-content';
 export const metadata: Metadata = {
   title: 'Programs & Collaborative Supports — IHARC',
   description:
-    'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the STEVI portal.',
+    'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
   alternates: {
     canonical: '/programs',
   },
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Programs & Collaborative Supports — IHARC',
     description:
-      'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the STEVI portal.',
+      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
     url: '/programs',
     images: [
       {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Programs & Collaborative Supports — IHARC',
     description:
-      'Explore how Integrated Homelessness and Addictions Response Centre partners coordinate across outreach, shelter, and overdose prevention through the STEVI portal.',
+      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
     images: ['/logo.png'],
   },
 };
@@ -36,9 +36,9 @@ export default async function ProgramsPage() {
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Programs & Supports</p>
-        <h1 className="text-4xl font-bold tracking-tight">Community teams coordinating through STEVI</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Outreach and navigation alongside community partners</h1>
         <p className="text-base text-on-surface/80">
-          IHARC does not replace frontline programs—it gives them a shared STEVI workspace to stay organized. These focus areas describe how partners use STEVI to move faster, close gaps, and honour lived experience.
+          IHARC does not operate its own shelters, treatment programs, or permanent housing. We work alongside the teams who do, coordinating outreach visits, safety checks, and navigation so people can access those services sooner. STEVI gives clients and participating organizations a secure place to track plans and follow-through together.
         </p>
       </header>
 

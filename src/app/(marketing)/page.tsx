@@ -30,7 +30,7 @@ export default async function MarketingHomePage() {
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 text-balance">
           <h2 className="type-headline-medium text-on-surface">How we got here</h2>
           <p className="max-w-3xl type-body-large text-on-surface/80">
-            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal for neighbours and outreach teams.
+            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal used by clients and outreach partners—not a public forum.
           </p>
         </div>
         <ContextCards topics={contextCards} />

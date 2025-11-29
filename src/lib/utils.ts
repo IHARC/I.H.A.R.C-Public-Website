@@ -5,5 +5,5 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const APP_NAME = 'IHARC Portal';
+export const APP_NAME = 'IHARC — Integrated Homelessness and Addictions Response Centre';
 export const DEFAULT_TIMEZONE = 'America/Toronto';

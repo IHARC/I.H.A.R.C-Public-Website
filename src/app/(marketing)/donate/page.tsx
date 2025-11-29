@@ -18,7 +18,7 @@ function formatCurrency(amountCents: number | null | undefined, currency = 'CAD'
 
 export default async function DonatePage() {
   const catalog = await getDonationCatalog();
-  const mailtoUrl = 'mailto:outreach@iharc.ca?subject=IHARC%20donation%20support';
+  const mailtoUrl = 'mailto:donations@iharc.ca?subject=IHARC%20donation%20support';
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-12 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
@@ -28,9 +28,16 @@ export default async function DonatePage() {
           Fuel the frontline with the items neighbours need most
         </h1>
         <p className="text-base text-on-surface/80 sm:text-lg">
-          IHARC outreach teams distribute medical, warmth, and nutrition supplies every day. This page shows
-          live needs from our inventory so you can direct your support where it has the most impact. Payments stay
-          secure in STEVI and Supabase; we never collect card details on the marketing site.
+          IHARC outreach teams distribute health, warmth, and nutrition supplies every day. This page shows live needs from our inventory so you can direct your support where it has the most impact.
+        </p>
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm text-on-surface/80 sm:text-base">
+          <p className="font-semibold text-on-surface">Primary way to give: e-transfer</p>
+          <p className="mt-1">
+            Send an e-transfer to <a href="mailto:donations@iharc.ca" className="font-semibold text-primary underline">donations@iharc.ca</a>. Auto-deposit is enabled. Please include your name and contact details in the message if you would like a receipt when we are able to issue them.
+          </p>
+        </div>
+        <p className="text-sm text-on-surface/70 sm:text-base">
+          Secure online payment options are in development. If you need another method, email us and we will arrange it safely.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <Link
@@ -41,7 +48,7 @@ export default async function DonatePage() {
             Talk to the team about a donation
           </Link>
           <p className="text-sm text-on-surface/70">
-            Prefer to help in another way? Email outreach@iharc.ca and we will coordinate safely.
+            Prefer to help in another way? Email donations@iharc.ca and we will coordinate safely.
           </p>
         </div>
       </header>
@@ -126,7 +133,7 @@ export default async function DonatePage() {
 
                   <div className="flex flex-col gap-3 rounded-xl bg-surface px-4 py-3 text-sm text-on-surface/80">
                     <p className="font-semibold text-on-surface">
-                      Want to fund this item? We will set up a secure checkout and send you the link.
+                      Want to fund this item? We can confirm e-transfer details now and send a secure checkout link as soon as online payments go live.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Link
@@ -138,7 +145,7 @@ export default async function DonatePage() {
                       </Link>
                     </div>
                     <p className="text-xs text-on-surface/70">
-                      We coordinate through STEVI to keep payment details and impact tracking secure.
+                      We coordinate through STEVI to keep client plans, receipts, and impact tracking secure for participating partners.
                     </p>
                   </div>
                 </article>

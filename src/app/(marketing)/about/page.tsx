@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
 const commitments = [
-  'Neighbours participate as storytellers and co-designers, not data points.',
+  'Neighbours shape decisions through their stories and consented feedback, never as data points.',
   'Evidence is shared in plain language and updated as soon as partners publish it.',
   'Decisions acknowledge risks, mitigation steps, and who is accountable for action.',
   'Respectful moderation keeps stigmatizing or punitive ideas from moving forward.',
@@ -12,26 +12,26 @@ const commitments = [
 
 const collaborationLoops = [
   {
-    title: 'Listen and surface needs',
+    title: 'Reach and check in',
     description:
-      'Street outreach, shelter teams, and neighbours flag urgent issues alongside daily indicators in STEVI. Moderators capture themes without publishing identifying information.',
+      'Street outreach teams across Northumberland complete wellness checks, respond to safety concerns, and log consented needs in STEVI without publishing identifying details.',
   },
   {
-    title: 'Co-design rapid responses',
+    title: 'Navigate to services',
     description:
-      'Support plans capture the problem, shared evidence, proposed changes, and respectful risk mitigation before new actions launch.',
+      'IHARC coordinators help people connect to shelter, health care, income supports, and transportation. Referrals and appointments are tracked securely in STEVI for participating organizations.',
   },
   {
-    title: 'Measure and adapt together',
+    title: 'Follow through together',
     description:
-      'Working Plans publish updates, decisions, and key dates inside STEVI so everyone can see what shifted, what needs support, and how to help in real time.',
+      'Updates inside STEVI keep clients and partners aligned on upcoming visits, documents, and what changed so the next support step is clear.',
   },
 ];
 
 export const metadata: Metadata = {
   title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
-    'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the STEVI portal coordinates community-led crisis response with dignity.',
+    'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
   alternates: {
     canonical: '/about',
   },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the STEVI portal coordinates community-led crisis response with dignity.',
+      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
     url: '/about',
     images: [
       {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'Learn how the Integrated Homelessness and Addictions Response Centre supports outreach today and how the STEVI portal coordinates community-led crisis response with dignity.',
+      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
     images: ['/logo.png'],
   },
 };
@@ -65,12 +65,15 @@ export default function AboutPage() {
     <div className="mx-auto w-full max-w-5xl space-y-12 px-4 py-16 text-on-surface">
       <header className="space-y-4 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">About IHARC</p>
-        <h1 className="text-4xl font-bold tracking-tight">Collaboration built to honour neighbours first</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Frontline outreach and navigation across Northumberland</h1>
         <p className="text-base text-on-surface/80">
-          IHARC, the Integrated Homelessness and Addictions Response Centre, is a non-profit already delivering street outreach and wraparound supports with neighbours across Northumberland. The IHARC Portal extends that work by offering a transparent space where partners can organise crisis response, share evidence, and document next steps together.
+          IHARC, the Integrated Homelessness and Addictions Response Centre, is a frontline non-profit providing street outreach, safety checks, health and basic supplies, and service navigation with neighbours across Northumberland County. We do not operate shelters, treatment programs, or permanent housing; instead, we help people connect to those services and stay supported while they wait.
         </p>
         <p className="text-sm text-on-surface/70">
           We work across Northumberland County alongside partners in Cobourg, Port Hope, Alderville First Nation, and rural townships.
+        </p>
+        <p className="text-sm text-on-surface/70">
+          STEVI (Supportive Technology to Enable Vulnerable Individuals) is our secure portal for clients and participating organizations to manage services, appointments, and documents. It is invitation-only and not a public ideas forum.
         </p>
       </header>
 
@@ -95,9 +98,9 @@ export default function AboutPage() {
       </section>
 
       <section className="space-y-4 rounded-3xl border border-outline/10 bg-surface p-8">
-        <h2 className="text-2xl font-semibold">Ready to collaborate?</h2>
+        <h2 className="text-2xl font-semibold">Need to coordinate care?</h2>
         <p className="text-on-surface/80">
-          Sign in to STEVI to review your plan, upload documents, or confirm outreach visits. Request access if you are working with IHARC or supporting someone who is.
+          Sign in to STEVI to review your plan, upload documents, or confirm outreach visits. Request access if you are already working with IHARC or are a partner organization supporting someone who is.
         </p>
         <div className="flex flex-wrap gap-3 text-sm font-semibold">
           <Link

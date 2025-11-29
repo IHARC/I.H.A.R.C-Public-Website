@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   metadataBase,
   title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
   description:
-    'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
+    'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
   icons: {
     icon: '/favicon.svg',
   },
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: 'IHARC',
     title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
     description:
-      'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
+      'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
     images: [
       {
         url: OG_IMAGE_PATH,
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
     description:
-      'IHARC coordinates housing stability and overdose response with neighbours, agencies, and local government in Northumberland County. Co-design plans, track data, get help.',
+      'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
     images: [OG_IMAGE_PATH],
   },
 };
