@@ -34,7 +34,7 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
 
 ### 4. Access Control & Safety
 - No authentication is performed inside this app. All requests run with Supabase anon credentials; RLS restricts reads to public-safe views.
-- Middleware keeps Supabase session cookies aligned with the anon client by calling `updateSession`, but no user identities are exposed.
+- Middleware exists solely to redirect legacy portal/auth routes to STEVI; no authentication is performed here.
 - Any mutations or sensitive storage (attachments, notifications, petitions, plan updates, etc.) are handled by STEVI or Supabase Edge Functions. Do not add server actions or `/api/*` routes that bypass that boundary.
 
 ### 5. Edge Functions & Background Jobs
@@ -47,7 +47,7 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
 
 ### 7. Middleware Redirects
 - `middleware.ts` maps the following legacy paths to STEVI: `/portal`, `/auth`, `/login`, `/register`, `/reset-password`, `/ideas`, `/plans`, `/progress`, `/command-center`, `/solutions`, and `/api/portal`. It preserves query strings and returns a 307 redirect.
-- After this redirect check, `updateSession` ensures Supabase cookies are refreshed so anonymous Supabase reads continue to work on marketing pages.
+- Middleware is scoped to those legacy paths only and does not run for the marketing routes.
 
 ### 8. Future Enhancements
 - Add new Supabase-backed stories under `src/data/` and surface them inside `/(marketing)` pages. Make sure to create accompanying cache tags + invalidation helpers.

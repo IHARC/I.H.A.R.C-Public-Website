@@ -8,7 +8,7 @@ import { ResourceEmbed } from '@/components/resources/resource-embed';
 import { formatResourceDate, getKindLabel, getResourceBySlug } from '@/lib/resources';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 export const dynamic = 'force-dynamic';
 

@@ -10,7 +10,7 @@
     "dev": "next dev",
     "start": "next start",
     "preview": "next start -p 4321",
-    "build": "node build.js",
+    "build": "next build",
     "lint": "next lint",
     "lint:copy": "node scripts/check-copy.mjs",
     "typecheck": "tsc --noEmit",

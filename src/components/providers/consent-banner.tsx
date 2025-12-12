@@ -3,78 +3,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
-
-type ConsentState = 'granted' | 'denied';
-
-const STORAGE_KEY = 'iharc-consent-preference';
-const GRANTED_FLAGS = {
-  ad_storage: 'granted',
-  analytics_storage: 'granted',
-  ad_user_data: 'granted',
-  ad_personalization: 'granted',
-} as const;
-const DENIED_FLAGS = {
-  ad_storage: 'denied',
-  analytics_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied',
-} as const;
-
-function updateConsentFlags(state: ConsentState) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const consentFlags = state === 'granted' ? GRANTED_FLAGS : DENIED_FLAGS;
-  const globalWindow = window as Window & {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  };
-  const gtag =
-    globalWindow.gtag ??
-    function gtagFallback(...args: unknown[]) {
-      globalWindow.dataLayer = globalWindow.dataLayer ?? [];
-      (globalWindow.dataLayer as unknown[]).push(args);
-    };
-
-  gtag('consent', 'update', consentFlags);
-  gtag('set', 'ads_data_redaction', state === 'denied');
-
-  if (state === 'granted') {
-    const pagePath = `${window.location.pathname}${window.location.search}`;
-    gtag('event', 'page_view', {
-      page_location: window.location.href,
-      page_path: pagePath,
-      page_title: document.title,
-    });
-  }
-}
-
-function persistPreference(state: ConsentState) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, state);
-  } catch {
-    // Ignore storage errors (e.g., private browsing)
-  }
-}
+import {
+  dispatchConsentChanged,
+  isDoNotTrackEnabled,
+  readConsentState,
+  writeConsentState,
+  type ConsentState,
+} from '@/lib/consent';
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    const stored = readConsentState();
+    if (stored) {
       return;
     }
 
-    let stored: ConsentState | null = null;
-    try {
-      const value = window.localStorage.getItem(STORAGE_KEY);
-      stored = value === 'granted' || value === 'denied' ? value : null;
-    } catch {
-      stored = null;
-    }
-
-    if (stored) {
+    if (isDoNotTrackEnabled()) {
+      writeConsentState('denied');
+      dispatchConsentChanged('denied');
       return;
     }
 
@@ -82,9 +30,13 @@ export function ConsentBanner() {
   }, []);
 
   const handleChoice = useCallback((state: ConsentState) => {
-    persistPreference(state);
-    updateConsentFlags(state);
-    trackEvent('consent_preference_saved', { state });
+    writeConsentState(state);
+    dispatchConsentChanged(state);
+
+    if (state === 'granted') {
+      trackEvent('consent_preference_saved', { state });
+    }
+
     setVisible(false);
   }, []);
 

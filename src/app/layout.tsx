@@ -34,40 +34,43 @@ const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
 const OG_IMAGE_PATH = '/logo.png';
 const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response Centre';
 
-export const metadata: Metadata = {
-  metadataBase,
-  title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
-  description:
-    'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
-  icons: {
-    icon: '/favicon.svg',
-  },
-  openGraph: {
-    type: 'website',
-    siteName: 'IHARC',
-    title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
-    description:
-      'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
-    images: [
-      {
-        url: OG_IMAGE_PATH,
-        alt: OG_IMAGE_ALT,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County',
-    description:
-      'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.',
-    images: [OG_IMAGE_PATH],
-  },
-};
+const SITE_TITLE = 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County';
+const SITE_DESCRIPTION =
+  'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.';
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export async function generateMetadata(): Promise<Metadata> {
   const branding = await getBrandingAssets();
   const favicon = branding?.faviconUrl || '/favicon.svg';
 
+  return {
+    metadataBase,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    icons: {
+      icon: favicon,
+    },
+    openGraph: {
+      type: 'website',
+      siteName: 'IHARC',
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      images: [
+        {
+          url: OG_IMAGE_PATH,
+          alt: OG_IMAGE_ALT,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      images: [OG_IMAGE_PATH],
+    },
+  };
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
@@ -78,9 +81,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           'font-sans'
         )}
       >
-        <head>
-          <link rel="icon" href={favicon} />
-        </head>
         <ThemeProvider>
           <a href="#main-content" className="skip-link">
             Skip to main content

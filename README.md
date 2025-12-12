@@ -36,7 +36,7 @@
   - `src/lib/supabase/rsc.ts` creates the read-only server client using the anon key.
   - `src/data/metrics.ts`, `src/data/pit.ts`, and `src/data/myths.ts` wrap Supabase reads with `unstable_cache` plus tags from `src/lib/cache/tags.ts`.
   - `src/lib/resources.ts` centralises resource queries, filtering, and embed sanitisation.
-- Middleware: `middleware.ts` first checks for legacy `/portal`, `/login`, `/register`, etc. paths and issues a 307 redirect to STEVI. All other requests pass through `updateSession` so Supabase cookies stay in sync for read-only access.
+- Middleware: `middleware.ts` maps legacy `/portal`, `/login`, `/register`, etc. paths to STEVI and issues a 307 redirect while preserving query strings.
 - Components dedicated to the retired portal (idea cards, submission forms, petition UI, moderation queue, etc.) have been removed. Keep all new shared UI in `src/components` scoped by feature (e.g., `metrics`, `site`, `resources`).
 
 ### Data Loading & Caching
@@ -56,7 +56,7 @@
 - Only fetch, store, and display public-safe data on this site. Any mutations, attachments, and sensitive workflows belong inside STEVI or Supabase Edge Functions.
 
 ## Deployment Notes
-- Azure Static Web Apps deploys the `.next` artifact from `npm run build` (via `build.js`, which runs lint + build).
+- Azure Static Web Apps deploys the `.next` artifact from `npm run build` (`next build`).
 - Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
 - Edge Functions that ingest metrics or support STEVI (e.g., `portal-ingest-metrics`, `portal-attachments`) must be redeployed separately through the Supabase CLI if their code changes.
 

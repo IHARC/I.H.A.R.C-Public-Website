@@ -1,19 +1,28 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware';
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const redirectUrl = getSteviRedirectUrl(request);
   if (redirectUrl) {
     return NextResponse.redirect(redirectUrl, { status: 307 });
   }
 
-  return updateSession(request);
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/portal/:path*',
+    '/auth/:path*',
+    '/login/:path*',
+    '/register/:path*',
+    '/reset-password/:path*',
+    '/api/portal/:path*',
+    '/ideas/:path*',
+    '/plans/:path*',
+    '/progress/:path*',
+    '/command-center/:path*',
+    '/solutions/:path*',
   ],
 };
 

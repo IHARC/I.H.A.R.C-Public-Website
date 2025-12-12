@@ -1,9 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { trackClientEvent } from '@/lib/telemetry';
+import {
+  CONSENT_CHANGED_EVENT,
+  CONSENT_STORAGE_KEY,
+  isDoNotTrackEnabled,
+  readConsentState,
+  type ConsentState,
+} from '@/lib/consent';
 
 type AnalyticsProviderProps = {
   measurementId?: string | null;
@@ -20,9 +27,33 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const lastTrackedPathRef = useRef<string | null>(null);
+  const [consentState, setConsentState] = useState<ConsentState | null>(null);
 
   useEffect(() => {
-    if (!enabled || !measurementId || typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    setConsentState(readConsentState());
+
+    function handleConsentChanged(event: Event) {
+      const detail = (event as CustomEvent).detail;
+      if (detail === 'granted' || detail === 'denied') {
+        setConsentState(detail);
+      }
+    }
+
+    window.addEventListener(CONSENT_CHANGED_EVENT, handleConsentChanged);
+    return () => {
+      window.removeEventListener(CONSENT_CHANGED_EVENT, handleConsentChanged);
+    };
+  }, []);
+
+  const canLoadAnalytics =
+    enabled && Boolean(measurementId) && consentState === 'granted' && !isDoNotTrackEnabled();
+
+  useEffect(() => {
+    if (!canLoadAnalytics || !measurementId || typeof window === 'undefined') {
       return;
     }
 
@@ -63,9 +94,9 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
     });
 
     trackClientEvent('page_view', payload);
-  }, [enabled, measurementId, pathname, search]);
+  }, [canLoadAnalytics, measurementId, pathname, search]);
 
-  if (!enabled || !measurementId) {
+  if (!canLoadAnalytics || !measurementId) {
     return null;
   }
 
@@ -83,16 +114,16 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
           __html: `
             (function () {
               var measurementId = ${JSON.stringify(measurementId)};
-              var consentKey = 'iharc-consent-preference';
+              var consentKey = ${JSON.stringify(CONSENT_STORAGE_KEY)};
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               window.gtag = window.gtag || gtag;
 
               var consentDefaults = {
-                ad_storage: 'granted',
-                analytics_storage: 'granted',
-                ad_user_data: 'granted',
-                ad_personalization: 'granted',
+                ad_storage: 'denied',
+                analytics_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
                 wait_for_update: 500,
               };
 
@@ -104,14 +135,6 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
                     analytics_storage: 'granted',
                     ad_user_data: 'granted',
                     ad_personalization: 'granted',
-                    wait_for_update: 500,
-                  };
-                } else if (storedConsent === 'denied') {
-                  consentDefaults = {
-                    ad_storage: 'denied',
-                    analytics_storage: 'denied',
-                    ad_user_data: 'denied',
-                    ad_personalization: 'denied',
                     wait_for_update: 500,
                   };
                 }

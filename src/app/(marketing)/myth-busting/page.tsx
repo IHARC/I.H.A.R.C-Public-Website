@@ -99,7 +99,7 @@ export default async function MythBustingPage() {
                                 <a
                                   href={source.url}
                                   target="_blank"
-                                  rel="noreferrer"
+                                  rel="noopener noreferrer"
                                   className="font-semibold text-primary underline-offset-4 hover:underline"
                                 >
                                   {source.label}

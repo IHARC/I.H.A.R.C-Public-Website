@@ -1,4 +1,5 @@
 import { trackClientEvent } from './telemetry';
+import { analyticsAllowedByConsent } from './consent';
 
 type AnalyticsWindow = Window & {
   dataLayer?: unknown[];
@@ -17,7 +18,7 @@ export function trackEvent(name: string, data: Record<string, unknown> = {}) {
     return;
   }
 
-  if (ANALYTICS_DISABLED || !GA4_ID) {
+  if (ANALYTICS_DISABLED || !GA4_ID || !analyticsAllowedByConsent()) {
     if (process.env.NODE_ENV !== 'production') {
       console.debug('[analytics] Tracking disabled; event skipped', name, data);
     }

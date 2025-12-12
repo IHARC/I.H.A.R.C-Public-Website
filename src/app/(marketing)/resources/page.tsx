@@ -12,7 +12,7 @@ import {
   type ResourceFilters,
 } from '@/lib/resources';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 export const metadata: Metadata = {
   title: 'Reports & Resources — IHARC',

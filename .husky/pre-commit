@@ -1,2 +1,25 @@
 #!/bin/sh
-npm run lint:copy
+set -eu
+
+repo_root="$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)"
+script_path="$repo_root/scripts/check-copy.mjs"
+
+if command -v node >/dev/null 2>&1; then
+  node "$script_path"
+  exit 0
+fi
+
+nvm_node="$(ls -1 "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | sort -V | tail -n 1 || true)"
+if [ -n "${nvm_node:-}" ] && [ -x "$nvm_node" ]; then
+  "$nvm_node" "$script_path"
+  exit 0
+fi
+
+cat >&2 <<'EOF'
+pre-commit: 'node' not found on PATH.
+
+Fix options (recommended first):
+- Install Node inside WSL (so `node` is available under /usr/bin or via nvm).
+- If you use nvm, ensure your Git hook environment can see Node (e.g. add the Node bin dir to PATH in your shell init).
+EOF
+exit 127

@@ -35,7 +35,7 @@
 - When editing Supabase-backed content (metrics, PIT, resources), invalidate caches through the helpers in `src/lib/cache/invalidate.ts`.
 
 ## Deployment & Docs
-- Azure Static Web Apps deploys from `npm run build` (see `build.js`).
+- Azure Static Web Apps deploys from `npm run build`.
 - Supabase public env vars must exist in Azure; do not commit service-role keys.
 - Edge Functions such as `portal-ingest-metrics` remain in `supabase/functions` to keep stats fresh for this site and STEVI. Redeploy via the Supabase CLI if they change.
 - Reference docs:

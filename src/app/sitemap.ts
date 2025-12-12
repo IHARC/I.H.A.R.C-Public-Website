@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { fetchResourceLibrary } from '@/lib/resources';
 import { fetchPublishedPolicies } from '@/data/policies';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 const marketingPaths = [
   '/',

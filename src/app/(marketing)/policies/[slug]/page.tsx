@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { getPublishedPolicyBySlug, POLICY_CATEGORY_LABELS } from '@/data/policies';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharcc.ca';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 export const dynamic = 'force-dynamic';
 
