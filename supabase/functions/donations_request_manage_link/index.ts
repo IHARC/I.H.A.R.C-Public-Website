@@ -56,14 +56,14 @@ serve(async (req) => {
   const emailHash = await sha256Hex(email);
 
   const [rlIp, rlEmail] = await Promise.all([
-    supabase.rpc('donations_check_rate_limit', {
+    supabase.schema('donations').rpc('donations_check_rate_limit', {
       p_event: 'donations:manage_link:ip',
       p_identifier: ipHash,
       p_limit: 6,
       p_window_ms: 10 * 60 * 1000,
       p_cooldown_ms: 2_000,
     }),
-    supabase.rpc('donations_check_rate_limit', {
+    supabase.schema('donations').rpc('donations_check_rate_limit', {
       p_event: 'donations:manage_link:email',
       p_identifier: emailHash,
       p_limit: 3,

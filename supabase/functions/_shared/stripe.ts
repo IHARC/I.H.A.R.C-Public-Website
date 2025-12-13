@@ -22,7 +22,7 @@ export function createServiceClient() {
 
 export async function loadStripeConfig() : Promise<StripeConfig> {
   const supabase = createServiceClient();
-  const { data, error } = await supabase.rpc('donations_get_stripe_config');
+  const { data, error } = await supabase.schema('donations').rpc('donations_get_stripe_config');
   if (error) {
     throw new Error(error.message || 'Unable to load Stripe configuration');
   }
@@ -50,4 +50,3 @@ export async function createStripeClient(): Promise<{ stripe: Stripe; config: St
   const stripe = new Stripe(config.secretKey, { apiVersion: '2024-06-20' });
   return { stripe, config };
 }
-

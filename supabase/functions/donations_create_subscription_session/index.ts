@@ -31,7 +31,7 @@ serve(async (req) => {
   const ip = readClientIp(req);
   const ipHash = await sha256Hex(ip ?? 'unknown');
 
-  const rl = await supabase.rpc('donations_check_rate_limit', {
+  const rl = await supabase.schema('donations').rpc('donations_check_rate_limit', {
     p_event: 'donations:create_subscription_session:ip',
     p_identifier: ipHash,
     p_limit: 6,
