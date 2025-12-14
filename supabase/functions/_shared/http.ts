@@ -1,5 +1,3 @@
-import { requireEnv } from './env.ts';
-
 function normalizeOrigin(raw: string): string | null {
   try {
     return new URL(raw).origin;
@@ -8,11 +6,10 @@ function normalizeOrigin(raw: string): string | null {
   }
 }
 
+const DEFAULT_SITE_ORIGIN = 'https://iharc.ca';
+
 function allowedOrigins(): Set<string> {
-  const siteOrigin = normalizeOrigin(requireEnv('IHARC_SITE_URL'));
-  if (!siteOrigin) {
-    throw new Error('IHARC_SITE_URL must be a valid absolute URL');
-  }
+  const siteOrigin = getSiteOrigin();
 
   const origins = new Set<string>([
     siteOrigin,
@@ -25,11 +22,9 @@ function allowedOrigins(): Set<string> {
 }
 
 export function getSiteOrigin(): string {
-  const origin = normalizeOrigin(requireEnv('IHARC_SITE_URL'));
-  if (!origin) {
-    throw new Error('IHARC_SITE_URL must be a valid absolute URL');
-  }
-  return origin;
+  const envValue = Deno.env.get('IHARC_SITE_URL');
+  const origin = envValue ? normalizeOrigin(envValue) : null;
+  return origin ?? DEFAULT_SITE_ORIGIN;
 }
 
 export function buildCorsHeaders(req: Request): HeadersInit {
@@ -53,4 +48,3 @@ export function json(req: Request, body: unknown, status = 200): Response {
     headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
   });
 }
-

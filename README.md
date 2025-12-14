@@ -60,6 +60,10 @@
 - Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
 - Edge Functions that ingest metrics or support STEVI (e.g., `portal-ingest-metrics`, `portal-attachments`) must be redeployed separately through the Supabase CLI if their code changes.
 
+### Donations
+- The Donate + Manage Donation flows call Supabase donation Edge Functions via same-origin API routes under `src/app/api/donations/*` to avoid browser CORS preflights against `*.supabase.co/functions/v1/*`.
+- If you intentionally want to call Supabase Edge Functions directly from the browser, ensure the relevant donation functions are configured to allow unauthenticated preflights (typically `verify_jwt = false`) and that `IHARC_SITE_URL` is set so `_shared/http.ts` can emit correct CORS headers.
+
 ## Documentation
 - `README.md` – overview of the marketing site, guardrails, and developer workflow.
 - `docs/portal/architecture.md` – updated architecture reference describing how the public site reads Supabase data and hands off portal work to STEVI.

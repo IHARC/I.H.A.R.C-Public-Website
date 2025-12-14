@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import type { DonationCatalogItem } from '@/data/donation-catalog';
 import { cn } from '@/lib/utils';
 
@@ -169,14 +168,19 @@ export function DonateClient({ catalog }: Props) {
         throw new Error('Add an item to your cart or enter a custom amount.');
       }
 
-      const supabase = getSupabasePublicClient();
-      const response = await supabase.functions.invoke('donations_create_checkout_session', {
-        body: { items: cartLines, customAmountCents },
+      const response = await fetch('/api/donations/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartLines, customAmountCents }),
       });
-      if (response.error) {
-        throw new Error(response.error.message || 'Unable to start checkout.');
+
+      const payload = (await response.json().catch(() => null)) as { url?: unknown; error?: unknown } | null;
+      if (!response.ok) {
+        const message = typeof payload?.error === 'string' ? payload.error : 'Unable to start checkout.';
+        throw new Error(message);
       }
-      const url = (response.data as { url?: unknown } | null)?.url;
+
+      const url = payload?.url;
       if (typeof url !== 'string' || !url.startsWith('http')) {
         throw new Error('Checkout did not return a redirect URL.');
       }
@@ -201,14 +205,19 @@ export function DonateClient({ catalog }: Props) {
         throw new Error('Monthly donations must be a whole dollar amount.');
       }
 
-      const supabase = getSupabasePublicClient();
-      const response = await supabase.functions.invoke('donations_create_subscription_session', {
-        body: { monthlyAmountCents: cents },
+      const response = await fetch('/api/donations/create-subscription-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ monthlyAmountCents: cents }),
       });
-      if (response.error) {
-        throw new Error(response.error.message || 'Unable to start checkout.');
+
+      const payload = (await response.json().catch(() => null)) as { url?: unknown; error?: unknown } | null;
+      if (!response.ok) {
+        const message = typeof payload?.error === 'string' ? payload.error : 'Unable to start checkout.';
+        throw new Error(message);
       }
-      const url = (response.data as { url?: unknown } | null)?.url;
+
+      const url = payload?.url;
       if (typeof url !== 'string' || !url.startsWith('http')) {
         throw new Error('Checkout did not return a redirect URL.');
       }

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 
 export function ManageDonationClient() {
   const [email, setEmail] = useState('');
@@ -23,13 +22,19 @@ export function ManageDonationClient() {
       if (!normalized || !normalized.includes('@')) {
         throw new Error('Enter a valid email address.');
       }
-      const supabase = getSupabasePublicClient();
-      const response = await supabase.functions.invoke('donations_request_manage_link', {
-        body: { email: normalized },
+
+      const response = await fetch('/api/donations/request-manage-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalized }),
       });
-      if (response.error) {
-        throw new Error(response.error.message || 'Unable to request a manage link.');
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: unknown } | null;
+        const message = typeof payload?.error === 'string' ? payload.error : 'Unable to request a manage link.';
+        throw new Error(message);
       }
+
       setState({ loading: false, done: true, error: null });
     } catch (error) {
       setState({
@@ -102,4 +107,3 @@ export function ManageDonationClient() {
     </Card>
   );
 }
-
