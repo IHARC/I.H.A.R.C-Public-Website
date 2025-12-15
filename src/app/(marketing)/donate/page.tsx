@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'Make a one-time or monthly donation to support IHARC outreach. Choose symbolic items from our live inventory-backed catalogue or give a custom amount.',
 };
 
-export const revalidate = 600;
+export const revalidate = 60;
 
 export default async function DonatePage() {
   const catalog = await getDonationCatalog();

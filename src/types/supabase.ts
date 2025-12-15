@@ -2691,6 +2691,9 @@ export type Database = {
           current_stock: number | null;
           distributed_last_30_days: number | null;
           distributed_last_365_days: number | null;
+          category_ids: string[];
+          category_slugs: string[];
+          category_labels: string[];
         };
         Relationships: [];
       };

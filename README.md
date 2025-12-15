@@ -62,6 +62,8 @@
 
 ### Donations
 - The Donate + Manage Donation flows call Supabase donation Edge Functions via same-origin API routes under `src/app/api/donations/*` to avoid browser CORS preflights against `*.supabase.co/functions/v1/*`.
+- The public donation catalogue (`/donate`) reads from the Supabase view `portal.donation_catalog_public`, which only includes rows from `donations.catalog_items` where `is_active = true`.
+- Donation catalogue changes are cached briefly in Next.js (see `src/data/donation-catalog.ts` + `src/app/(marketing)/donate/page.tsx`), so new items may take up to ~1 minute to appear after being added.
 - Stripe webhooks should target `https://iharc.ca/api/donations/stripe-webhook` (this forwards the raw webhook payload + `stripe-signature` header to the Supabase `donations_stripe_webhook` function using the anon key, so the Supabase function can keep JWT verification enabled).
 - If your Supabase public key is the newer non-JWT `sb_publishable_*` format, any donation Edge Function you invoke must be deployed with `verify_jwt = false` (otherwise Supabase will return 401 before your function runs).
 - If you intentionally want to call Supabase Edge Functions directly from the browser, ensure the relevant donation functions are configured to allow unauthenticated preflights (typically `verify_jwt = false`) and that `IHARC_SITE_URL` is set so `_shared/http.ts` can emit correct CORS headers.

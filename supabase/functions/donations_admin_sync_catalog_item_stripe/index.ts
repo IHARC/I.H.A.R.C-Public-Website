@@ -66,10 +66,6 @@ serve(async (req) => {
     return json(req, { error: 'Catalog item not found' }, 404);
   }
 
-  if (item.is_active === false) {
-    return json(req, { error: 'Catalog item must be active to sync with Stripe' }, 422);
-  }
-
   const unitCostCents = typeof item.unit_cost_cents === 'number' ? item.unit_cost_cents : null;
   if (!unitCostCents || unitCostCents <= 0) {
     return json(req, { error: 'Catalog item needs a unit cost before creating a Stripe price' }, 422);

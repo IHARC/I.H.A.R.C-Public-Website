@@ -3,6 +3,8 @@ import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 import type { Database } from '@/types/supabase';
 
+const DONATION_CATALOG_REVALIDATE_SECONDS = 60;
+
 export type DonationCatalogItem = {
   id: string;
   slug: string;
@@ -10,6 +12,8 @@ export type DonationCatalogItem = {
   shortDescription: string | null;
   longDescription: string | null;
   category: string | null;
+  categoryLabels: string[];
+  categorySlugs: string[];
   unitCostCents: number | null;
   currency: string;
   defaultQuantity: number;
@@ -28,6 +32,8 @@ const mapDonationRow = (row: Database['portal']['Views']['donation_catalog_publi
   shortDescription: row.short_description ?? null,
   longDescription: row.long_description ?? null,
   category: row.category ?? null,
+  categoryLabels: row.category_labels ?? [],
+  categorySlugs: row.category_slugs ?? [],
   unitCostCents: row.unit_cost_cents ?? null,
   currency: row.currency ?? 'CAD',
   defaultQuantity: row.default_quantity ?? 1,
@@ -57,7 +63,7 @@ const fetchCatalogCached = unstable_cache(
     return (data ?? []).map(mapDonationRow);
   },
   ['donationCatalog'],
-  { tags: [CACHE_TAGS.donationCatalog], revalidate: 900 },
+  { tags: [CACHE_TAGS.donationCatalog], revalidate: DONATION_CATALOG_REVALIDATE_SECONDS },
 );
 
 export async function getDonationCatalog(): Promise<DonationCatalogItem[]> {

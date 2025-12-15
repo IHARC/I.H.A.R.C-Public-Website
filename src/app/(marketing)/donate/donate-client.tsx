@@ -90,19 +90,22 @@ export function DonateClient({ catalog }: Props) {
   const categories = useMemo(() => {
     const set = new Set<string>();
     for (const item of catalog) {
-      if (item.category) set.add(item.category);
+      for (const label of item.categoryLabels ?? []) {
+        if (label) set.add(label);
+      }
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [catalog]);
 
   const filteredCatalog = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
+    const terms = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
     return catalog
       .filter((item) => {
-        if (category !== 'all' && item.category !== category) return false;
-        if (!trimmed) return true;
-        const haystack = `${item.title} ${item.shortDescription ?? ''} ${item.category ?? ''}`.toLowerCase();
-        return haystack.includes(trimmed);
+        if (category !== 'all' && !(item.categoryLabels ?? []).includes(category)) return false;
+        if (terms.length === 0) return true;
+        const haystack = `${item.title} ${item.shortDescription ?? ''} ${(item.categoryLabels ?? []).join(' ')}`.toLowerCase();
+        return terms.every((term) => haystack.includes(term));
       })
       .sort((a, b) => {
         if (sort === 'most_needed') {
@@ -444,12 +447,26 @@ export function DonateClient({ catalog }: Props) {
                             : 'In stock';
 
                     const qty = cart[item.id] ?? 0;
+                    const categoryLabels = item.categoryLabels ?? [];
+                    const displayCategories = categoryLabels.slice(0, 2);
+                    const moreCategories = categoryLabels.length - displayCategories.length;
                     return (
                       <Card key={item.id} className="border-outline-variant bg-surface">
                         <CardHeader className="space-y-2">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge variant="secondary">{item.category ?? 'Priority item'}</Badge>
+                              {displayCategories.length > 0 ? (
+                                <>
+                                  {displayCategories.map((label) => (
+                                    <Badge key={label} variant="secondary">
+                                      {label}
+                                    </Badge>
+                                  ))}
+                                  {moreCategories > 0 ? <Badge variant="outline">+{moreCategories}</Badge> : null}
+                                </>
+                              ) : (
+                                <Badge variant="secondary">Priority item</Badge>
+                              )}
                               {needsLabel ? (
                                 <Badge
                                   variant={needsLabel === 'Most needed' ? 'destructive' : 'outline'}
