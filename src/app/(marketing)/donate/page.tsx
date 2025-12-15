@@ -14,7 +14,7 @@ export default async function DonatePage() {
   const catalog = await getDonationCatalog();
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-12 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-screen-2xl space-y-12 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
       <header className="space-y-5 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Donate</p>
         <h1 className="text-4xl font-bold tracking-tight text-on-surface sm:text-5xl">
