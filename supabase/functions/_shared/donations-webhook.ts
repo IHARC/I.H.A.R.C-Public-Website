@@ -1,6 +1,5 @@
 import type Stripe from 'https://esm.sh/stripe@16?target=deno';
-import { SMTPClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
-import { requireEnv } from './env.ts';
+import { sendDonationsEmail } from './email.ts';
 
 type SupabaseServiceClient = any;
 
@@ -18,17 +17,6 @@ type DonorUpsertArgs = {
   address: unknown;
   stripeCustomerId: string | null;
 };
-
-function requireSmtp() {
-  const from = requireEnv('PORTAL_EMAIL_FROM');
-  const host = requireEnv('PORTAL_SMTP_HOST');
-  const port = Number(requireEnv('PORTAL_SMTP_PORT'));
-  const username = requireEnv('PORTAL_SMTP_USERNAME');
-  const password = requireEnv('PORTAL_SMTP_PASSWORD');
-  const secure = (requireEnv('PORTAL_SMTP_SECURE').toLowerCase() === 'true');
-
-  return { from, host, port, username, password, secure };
-}
 
 function escapeHtml(value: string) {
   return value
@@ -139,6 +127,7 @@ async function handleCheckoutSessionCompleted(
 
     if (insertedPayment?.id && email) {
       await sendReceiptEmail({
+        supabase,
         recipientEmail: email,
         amountCents: amountTotal,
         currency,
@@ -273,6 +262,7 @@ async function handleInvoicePaid(
   const email = invoice.customer_email ? String(invoice.customer_email).trim().toLowerCase() : null;
   if (insertedPayment?.id && email) {
     await sendReceiptEmail({
+      supabase,
       recipientEmail: email,
       amountCents: amountPaid,
       currency,
@@ -452,12 +442,11 @@ async function linkStripeCustomerToDonor(
   });
 }
 
-async function sendReceiptEmail(args: ReceiptArgs) {
+async function sendReceiptEmail(args: ReceiptArgs & { supabase: SupabaseServiceClient }) {
   if (!args.recipientEmail.includes('@')) {
-    throw new Error('Receipt email recipient is invalid');
+    console.warn('donations-webhook skipping receipt email (invalid recipient)', args.recipientEmail);
+    return;
   }
-
-  const smtp = requireSmtp();
 
   const amountLabel = new Intl.NumberFormat('en-CA', {
     style: 'currency',
@@ -496,30 +485,14 @@ async function sendReceiptEmail(args: ReceiptArgs) {
     '<p>In solidarity,<br />IHARC — Integrated Homelessness and Addictions Response Centre</p>',
   ].join('\n');
 
-  let client: SMTPClient | null = null;
   try {
-    client = new SMTPClient({
-      connection: {
-        hostname: smtp.host,
-        port: smtp.port,
-        tls: smtp.secure,
-        auth: {
-          username: smtp.username,
-          password: smtp.password,
-        },
-      },
-    });
-
-    await client.send({
-      from: smtp.from,
+    await sendDonationsEmail(args.supabase, {
       to: args.recipientEmail,
       subject,
       content: lines,
       html,
     });
-  } finally {
-    if (client) {
-      await client.close();
-    }
+  } catch (error) {
+    console.error('donations-webhook receipt email send error', error);
   }
 }

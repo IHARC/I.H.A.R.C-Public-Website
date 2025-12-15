@@ -1,29 +1,15 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { SMTPClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
 import { buildCorsHeaders, getSiteOrigin, json } from '../_shared/http.ts';
+import { sendDonationsEmail } from '../_shared/email.ts';
 
 type Payload = { email?: unknown };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM');
-const SMTP_HOST = Deno.env.get('PORTAL_SMTP_HOST');
-const SMTP_PORT_RAW = Deno.env.get('PORTAL_SMTP_PORT');
-const SMTP_PORT = Number(SMTP_PORT_RAW ?? '');
-const SMTP_USERNAME = Deno.env.get('PORTAL_SMTP_USERNAME');
-const SMTP_PASSWORD = Deno.env.get('PORTAL_SMTP_PASSWORD');
-const SMTP_SECURE_RAW = Deno.env.get('PORTAL_SMTP_SECURE');
-const SMTP_SECURE = (SMTP_SECURE_RAW ?? '').toLowerCase() === 'true';
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Supabase credentials are not configured for donations_request_manage_link');
-}
-if (!EMAIL_FROM || !EMAIL_FROM.includes('@')) {
-  throw new Error('PORTAL_EMAIL_FROM is not configured for donations_request_manage_link');
-}
-if (!SMTP_HOST || !SMTP_PORT_RAW || !SMTP_PORT || !SMTP_USERNAME || !SMTP_PASSWORD || !SMTP_SECURE_RAW) {
-  throw new Error('SMTP credentials are not configured for donations_request_manage_link');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -160,37 +146,15 @@ serve(async (req) => {
     '<p>In solidarity,<br />IHARC — Integrated Homelessness and Addictions Response Centre</p>',
   ].join('\\n');
 
-  let client: SMTPClient | null = null;
   try {
-    client = new SMTPClient({
-      connection: {
-        hostname: SMTP_HOST,
-        port: SMTP_PORT,
-        tls: SMTP_SECURE,
-        auth: {
-          username: SMTP_USERNAME,
-          password: SMTP_PASSWORD,
-        },
-      },
-    });
-
-    await client.send({
-      from: EMAIL_FROM,
+    await sendDonationsEmail(supabase, {
       to: email,
       subject: 'Manage your monthly donation to IHARC',
       content: textBody,
       html: htmlBody,
     });
   } catch (error) {
-    console.error('donations_request_manage_link SMTP send error', error);
-  } finally {
-    if (client) {
-      try {
-        await client.close();
-      } catch {
-        // ignore
-      }
-    }
+    console.error('donations_request_manage_link email send error', error);
   }
 
   return json(req, { ok: true }, 200);
