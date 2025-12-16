@@ -8,11 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { DonationCatalogItem } from '@/data/donation-catalog';
 import { cn } from '@/lib/utils';
+import { computeDonationNeedMetrics } from '@/lib/donations/need-math';
 
 type CartLine = {
   catalogItemId: string;
@@ -26,6 +30,7 @@ type Props = {
 const CART_STORAGE_KEY = 'iharc_donation_cart_v1';
 const ONE_TIME_PRESETS = ['10', '25', '50', '100'] as const;
 const MONTHLY_PRESETS = ['10', '25', '50', '100'] as const;
+const MAX_CART_QUANTITY = 99;
 
 function formatMoney(amountCents: number, currency = 'CAD') {
   return new Intl.NumberFormat('en-CA', {
@@ -45,18 +50,11 @@ function normalizeMoneyInputToCents(raw: string): number | null {
   return Math.round(parsed * 100);
 }
 
-function computeNeedScore(item: DonationCatalogItem): number {
-  const target = item.targetBuffer ?? null;
-  const onHand = item.currentStock ?? null;
-  if (!target || target <= 0 || onHand === null) return -Infinity;
-  const deficit = Math.max(0, target - onHand);
-  return deficit / target;
-}
-
 export function DonateClient({ catalog }: Props) {
   const [tab, setTab] = useState<'one_time' | 'monthly'>('one_time');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
+  const [neededOnly, setNeededOnly] = useState(true);
   const [sort, setSort] = useState<'priority' | 'most_needed'>('most_needed');
   const [cart, setCart] = useState<Record<string, number>>({});
   const [customAmount, setCustomAmount] = useState('');
@@ -73,17 +71,17 @@ export function DonateClient({ catalog }: Props) {
       if (!raw) return;
       const parsed = JSON.parse(raw) as unknown;
       if (!parsed || typeof parsed !== 'object') return;
-      const next: Record<string, number> = {};
-      for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
-        if (typeof key !== 'string') continue;
-        const qty = typeof value === 'number' ? value : Number.parseInt(String(value), 10);
-        if (!Number.isFinite(qty) || qty <= 0) continue;
-        next[key] = Math.min(99, Math.floor(qty));
+        const next: Record<string, number> = {};
+        for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+          if (typeof key !== 'string') continue;
+          const qty = typeof value === 'number' ? value : Number.parseInt(String(value), 10);
+          if (!Number.isFinite(qty) || qty <= 0) continue;
+          next[key] = Math.min(MAX_CART_QUANTITY, Math.floor(qty));
+        }
+        setCart(next);
+      } catch {
+        // ignore
       }
-      setCart(next);
-    } catch {
-      // ignore
-    }
   }, []);
 
   useEffect(() => {
@@ -91,13 +89,20 @@ export function DonateClient({ catalog }: Props) {
   }, [cart]);
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
+    const bySlug = new Map<string, string>();
     for (const item of catalog) {
-      for (const label of item.categoryLabels ?? []) {
-        if (label) set.add(label);
+      const slugs = item.categorySlugs ?? [];
+      const labels = item.categoryLabels ?? [];
+      for (let index = 0; index < slugs.length; index += 1) {
+        const slug = slugs[index];
+        if (!slug) continue;
+        const label = labels[index] || slug;
+        if (!bySlug.has(slug)) {
+          bySlug.set(slug, label);
+        }
       }
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    return Array.from(bySlug, ([slug, label]) => ({ slug, label })).sort((a, b) => a.label.localeCompare(b.label));
   }, [catalog]);
 
   const filteredCatalog = useMemo(() => {
@@ -105,19 +110,45 @@ export function DonateClient({ catalog }: Props) {
     const terms = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
     return catalog
       .filter((item) => {
-        if (category !== 'all' && !(item.categoryLabels ?? []).includes(category)) return false;
+        if (category !== 'all' && !(item.categorySlugs ?? []).includes(category)) return false;
         if (terms.length === 0) return true;
         const haystack = `${item.title} ${item.shortDescription ?? ''} ${(item.categoryLabels ?? []).join(' ')}`.toLowerCase();
         return terms.every((term) => haystack.includes(term));
       })
+      .filter((item) => {
+        if (!neededOnly) return true;
+        const need = computeDonationNeedMetrics({
+          targetBuffer: item.targetBuffer,
+          currentStock: item.currentStock,
+          distributedLast30Days: item.distributedLast30Days,
+        });
+        return need.shortBy !== null && need.shortBy > 0;
+      })
       .sort((a, b) => {
         if (sort === 'most_needed') {
-          const diff = computeNeedScore(b) - computeNeedScore(a);
-          if (diff !== 0) return diff;
+          const needA = computeDonationNeedMetrics({
+            targetBuffer: a.targetBuffer,
+            currentStock: a.currentStock,
+            distributedLast30Days: a.distributedLast30Days,
+          });
+          const needB = computeDonationNeedMetrics({
+            targetBuffer: b.targetBuffer,
+            currentStock: b.currentStock,
+            distributedLast30Days: b.distributedLast30Days,
+          });
+
+          const needPctDiff = (needB.needPct ?? -1) - (needA.needPct ?? -1);
+          if (needPctDiff !== 0) return needPctDiff;
+
+          const shortByDiff = (needB.shortBy ?? -1) - (needA.shortBy ?? -1);
+          if (shortByDiff !== 0) return shortByDiff;
+
+          const burnRateDiff = (needB.burnRatePerDay ?? -1) - (needA.burnRatePerDay ?? -1);
+          if (burnRateDiff !== 0) return burnRateDiff;
         }
         return (a.priority ?? 100) - (b.priority ?? 100) || a.title.localeCompare(b.title);
       });
-  }, [catalog, category, query, sort]);
+  }, [catalog, category, neededOnly, query, sort]);
 
   const cartLines = useMemo((): CartLine[] => {
     const lines: CartLine[] = [];
@@ -158,7 +189,20 @@ export function DonateClient({ catalog }: Props) {
         delete next[itemId];
         return next;
       }
-      next[itemId] = Math.min(99, updated);
+      next[itemId] = Math.min(MAX_CART_QUANTITY, updated);
+      return next;
+    });
+  }
+
+  function setItemQuantity(itemId: string, quantity: number) {
+    setCart((prev) => {
+      const next = { ...prev };
+      const normalized = Math.floor(quantity);
+      if (!Number.isFinite(normalized) || normalized <= 0) {
+        delete next[itemId];
+        return next;
+      }
+      next[itemId] = Math.min(MAX_CART_QUANTITY, normalized);
       return next;
     });
   }
@@ -437,22 +481,6 @@ export function DonateClient({ catalog }: Props) {
                       />
                     </div>
                     <div className="space-y-2 md:col-span-3">
-                      <Label htmlFor="donation-category">Category</Label>
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger id="donation-category">
-                          <SelectValue placeholder="All categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All categories</SelectItem>
-                          {categories.map((value) => (
-                            <SelectItem key={value} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2 md:col-span-3">
                       <Label htmlFor="donation-sort">Sort</Label>
                       <Select value={sort} onValueChange={(value) => setSort(value as typeof sort)}>
                         <SelectTrigger id="donation-sort">
@@ -464,6 +492,36 @@ export function DonateClient({ catalog }: Props) {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="space-y-2 md:col-span-3">
+                      <Label htmlFor="donation-needed-only">Needed only</Label>
+                      <div className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3">
+                        <span className="text-sm text-on-surface-variant">Show shortages first</span>
+                        <Switch id="donation-needed-only" checked={neededOnly} onCheckedChange={setNeededOnly} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-2">
+                    <p className="text-sm font-semibold text-on-surface">Categories</p>
+                    <ToggleGroup
+                      type="single"
+                      value={category}
+                      onValueChange={(value) => {
+                        if (!value) return;
+                        setCategory(value);
+                      }}
+                      aria-label="Categories"
+                      className="flex flex-wrap justify-start"
+                    >
+                      <ToggleGroupItem value="all" aria-label="All categories">
+                        All
+                      </ToggleGroupItem>
+                      {categories.map((entry) => (
+                        <ToggleGroupItem key={entry.slug} value={entry.slug} aria-label={entry.label}>
+                          {entry.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
                   </div>
 
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -471,13 +529,15 @@ export function DonateClient({ catalog }: Props) {
                       Showing <span className="font-semibold text-on-surface">{filteredCatalog.length}</span>{' '}
                       {filteredCatalog.length === 1 ? 'item' : 'items'}
                     </span>
-                    {query.trim() || category !== 'all' ? (
+                    {query.trim() || category !== 'all' || !neededOnly || sort !== 'most_needed' ? (
                       <Button
                         type="button"
                         variant="ghost"
                         onClick={() => {
                           setQuery('');
                           setCategory('all');
+                          setNeededOnly(true);
+                          setSort('most_needed');
                         }}
                       >
                         Clear filters
@@ -493,15 +553,22 @@ export function DonateClient({ catalog }: Props) {
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                     {filteredCatalog.map((item) => {
-                      const target = item.targetBuffer ?? null;
-                      const onHand = item.currentStock ?? 0;
-                      const needScore = computeNeedScore(item);
+                      const need = computeDonationNeedMetrics({
+                        targetBuffer: item.targetBuffer,
+                        currentStock: item.currentStock,
+                        distributedLast30Days: item.distributedLast30Days,
+                      });
+                      const target = need.targetBuffer;
+                      const onHand = need.currentStock;
+                      const progressValue =
+                        target !== null && target > 0 && onHand !== null ? Math.min(100, (onHand / target) * 100) : null;
+
                       const needsLabel =
-                        needScore === -Infinity
+                        need.needPct === null
                           ? null
-                          : needScore >= 0.5
+                          : need.needPct >= 0.5
                             ? 'Most needed'
-                            : needScore >= 0.25
+                            : need.needPct >= 0.25
                               ? 'Needed'
                               : 'In stock';
 
@@ -534,6 +601,9 @@ export function DonateClient({ catalog }: Props) {
                                     {needsLabel}
                                   </Badge>
                                 ) : null}
+                                {need.shortBy !== null && need.shortBy > 0 ? (
+                                  <Badge variant="destructive">Short by {need.shortBy.toLocaleString()}</Badge>
+                                ) : null}
                               </div>
                               {item.unitCostCents ? (
                                 <span className="text-sm font-semibold text-on-surface">
@@ -552,7 +622,7 @@ export function DonateClient({ catalog }: Props) {
                             <div className="grid grid-cols-2 gap-3 text-xs text-on-surface-variant sm:grid-cols-3">
                               <div className="rounded-lg bg-surface-container-low p-3">
                                 <p className="font-semibold text-on-surface">On hand</p>
-                                <p>{onHand}</p>
+                                <p>{onHand === null ? '—' : onHand.toLocaleString()}</p>
                               </div>
                               <div className="rounded-lg bg-surface-container-low p-3">
                                 <p className="font-semibold text-on-surface">Target</p>
@@ -560,13 +630,37 @@ export function DonateClient({ catalog }: Props) {
                               </div>
                               <div className="rounded-lg bg-surface-container-low p-3">
                                 <p className="font-semibold text-on-surface">30 days</p>
-                                <p>{item.distributedLast30Days ?? 0} distributed</p>
+                                <p>
+                                  {item.distributedLast30Days === null
+                                    ? '—'
+                                    : `${item.distributedLast30Days.toLocaleString()} distributed`}
+                                </p>
                               </div>
                             </div>
 
+                            {progressValue !== null ? (
+                              <div className="space-y-2">
+                                <Progress value={progressValue} aria-label="On hand versus target" />
+                                {need.daysOfStock !== null ? (
+                                  <p className="text-xs text-on-surface-variant">~{Math.round(need.daysOfStock)} days left</p>
+                                ) : null}
+                              </div>
+                            ) : null}
+
                             <div className="flex flex-wrap items-center justify-between gap-3">
-                              <div className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-1 text-xs font-semibold text-on-surface-variant">
-                                Qty in cart: <span className="text-on-surface">{qty}</span>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-1 text-xs font-semibold text-on-surface-variant">
+                                  Qty in cart: <span className="text-on-surface">{qty}</span>
+                                </div>
+                                {need.shortBy !== null && need.shortBy > 0 ? (
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => setItemQuantity(item.id, Math.min(MAX_CART_QUANTITY, need.shortBy ?? 0))}
+                                  >
+                                    Fill the gap
+                                  </Button>
+                                ) : null}
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button
