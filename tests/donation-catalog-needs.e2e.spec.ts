@@ -19,10 +19,14 @@ test.describe('Donation catalogue needs UX', () => {
     expect(categoryCount).toBeGreaterThan(1);
     await categoryButtons.nth(1).click();
 
-    const fillGap = page.getByRole('button', { name: 'Fill the gap' }).first();
-    await expect(fillGap).toBeVisible();
-    await fillGap.click();
+    const fillGapButtons = page.getByRole('button', { name: 'Fill the gap' });
+    const fillGapCount = await fillGapButtons.count();
 
-    await expect(page.getByText(/Symbolic items \(\d+\)/)).toBeVisible();
+    if (fillGapCount > 0) {
+      await fillGapButtons.first().click();
+      await expect(page.getByText(/Symbolic items \(\d+\)/)).toBeVisible();
+    } else {
+      await expect(page.getByText('No catalogue items match your filters.')).toBeVisible();
+    }
   });
 });

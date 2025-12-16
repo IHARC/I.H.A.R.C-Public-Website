@@ -49,17 +49,11 @@ Optional improvements (only if desired, may require view updates):
 - Add a public categories view (ordered chips) if we want category chip order to respect admin `sort_order`.
 
 ## Cache revalidation (required for “live” feel)
-The marketing site caches the donation catalogue by tag (`marketing:donation-catalog`).
+The marketing site caches the donation catalogue. Updates propagate automatically via a timed cache (60s).
 
 Plan:
-- Add a secure marketing route handler `POST /api/revalidate/donation-catalog` that calls `invalidateDonationCatalog()`.
-- Have STEVI call this endpoint after:
-  - donation catalogue edits (save listing, category changes, stripe sync)
-  - inventory stock mutations (receive/adjust/transfer)
-
-Environment:
-- Marketing: `MARKETING_REVALIDATE_SECRET`
-- STEVI: `MARKETING_REVALIDATE_DONATION_CATALOG_URL`, `MARKETING_REVALIDATE_SECRET` (must match)
+- Keep the donation catalogue cache TTL at 60 seconds.
+- Do not add cross-app cache invalidation hooks or secrets (pre-production; keep operations simple).
 
 ## Delivery phases
 - Phase 1: iharc.ca UI updates (needed-only, fill-the-gap, progress/shortfall, improved sorting).
