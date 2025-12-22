@@ -40,7 +40,7 @@ serve(async (req) => {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, config.webhookSecret);
+    event = await stripe.webhooks.constructEventAsync(rawBody, signature, config.webhookSecret);
   } catch (error) {
     console.error('donations_stripe_webhook invalid signature', error);
     return json(req, { error: 'Invalid signature' }, 400);
