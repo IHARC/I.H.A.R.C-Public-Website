@@ -25,4 +25,4 @@ This document replaces the legacy portal MVP plan. It now tracks the state of th
 - Continue to verify schema changes through the Supabase MCP tool before coding against tables or views.
 - When adding new data loaders, create accompanying cache tags in `src/lib/cache/tags.ts` and invalidation helpers in `src/lib/cache/invalidate.ts`.
 - Keep `README.md` and `agents.md` aligned so future contributors know this repo is marketing-only.
-- Redeploy Supabase Edge Functions (`portal-ingest-metrics`, etc.) via the Supabase CLI whenever their code changes, even if the Next.js app didn’t.
+- Any ingestion or background jobs should live outside this repo (STEVI or external automation).

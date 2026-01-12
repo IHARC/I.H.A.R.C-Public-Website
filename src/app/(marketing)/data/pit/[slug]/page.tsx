@@ -22,7 +22,8 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
   if (!summary) {
     notFound();
   }
-  const breakdownGroups = groupBreakdownsForCount(breakdowns, summary.id);
+  const summaryId = summary.id ?? '';
+  const breakdownGroups = summaryId ? groupBreakdownsForCount(breakdowns, summaryId) : [];
   const chartFor = (dimension: string) => toChartData(breakdownGroups.find((group) => group.dimension === dimension)?.rows ?? []);
 
   const ageChart = chartFor('age_bracket');
@@ -35,15 +36,15 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
   const summaryCards = [
     {
       label: 'Actively living outside',
-      value: formatCount(summary.homelessness_confirmed_count || 0),
+      value: formatCount(summary.homelessness_confirmed_count ?? 0),
     },
     {
       label: 'Identified substance use / addictions',
-      value: formatCount(summary.addiction_positive_count),
+      value: formatCount(summary.addiction_positive_count ?? 0),
     },
     {
       label: 'Severe mental health conditions',
-      value: formatCount(summary.mental_health_positive_count),
+      value: formatCount(summary.mental_health_positive_count ?? 0),
     },
   ];
   const lastUpdated = formatLastUpdated(refreshedAt);

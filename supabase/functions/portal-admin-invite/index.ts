@@ -176,7 +176,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 
 async function loadOrganizationName(organizationId: string) {
   const { data, error } = await supabase
-    .from('portal.organizations')
+    .from('core.organizations')
     .select('name')
     .eq('id', organizationId)
     .maybeSingle();

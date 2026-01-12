@@ -58,7 +58,7 @@
 ## Deployment Notes
 - Azure Static Web Apps deploys the `.next` artifact from `npm run build` (`next build`).
 - Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
-- Edge Functions that ingest metrics or support STEVI (e.g., `portal-ingest-metrics`, `portal-attachments`) must be redeployed separately through the Supabase CLI if their code changes.
+- Edge Functions are managed outside this repo; any ingestion or STEVI support functions are deployed separately.
 
 ### Donations
 - The Donate + Manage Donation flows call Supabase donation Edge Functions via same-origin API routes under `src/app/api/donations/*` to avoid browser CORS preflights against `*.supabase.co/functions/v1/*`.

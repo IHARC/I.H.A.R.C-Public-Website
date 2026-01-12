@@ -38,8 +38,8 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
 - Any mutations or sensitive storage (attachments, notifications, petitions, plan updates, etc.) are handled by STEVI or Supabase Edge Functions. Do not add server actions or `/api/*` routes that bypass that boundary.
 
 ### 5. Edge Functions & Background Jobs
-- Functions under `supabase/functions` remain available for ingestion and STEVI support. The marketing site primarily depends on `portal-ingest-metrics` to keep `metric_daily` fresh and `portal-attachments` for resource collateral managed in Supabase.
-- If you modify any function, redeploy it using the Supabase CLI so the shared Supabase project stays in sync.
+- This repo is read-only. Any background ingestion (for example, updating `portal.metric_daily`) is handled outside of this codebase.
+- Do not add or maintain Edge Functions here; keep any ingestion logic in STEVI or external automation.
 
 ### 6. Point-in-Time Counts
 - PIT counts are stored in the shared Supabase project. `src/data/pit.ts` reads public-friendly summaries (ensuring small cells are suppressed) and powers the `/data` page.

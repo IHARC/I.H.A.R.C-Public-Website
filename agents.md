@@ -41,7 +41,7 @@
 ## Deployment & Docs
 - Azure Static Web Apps deploys from `npm run build`.
 - Supabase public env vars must exist in Azure; do not commit service-role keys.
-- Edge Functions such as `portal-ingest-metrics` remain in `supabase/functions` to keep stats fresh for this site and STEVI. Redeploy via the Supabase CLI if they change.
+- This repo does not ship Edge Functions. Any ingestion or background jobs live in STEVI or external automation.
 - Reference docs:
   - `README.md` – overview + workflow
   - `docs/portal/architecture.md` – marketing-site architecture + data flow

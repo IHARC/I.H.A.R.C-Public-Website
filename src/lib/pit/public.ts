@@ -31,11 +31,15 @@ export async function loadPitCountBySlug(
   if (!summary) {
     return { summary: null, breakdowns: [], refreshedAt: new Date().toISOString() };
   }
+  const summaryId = summary.id;
+  if (!summaryId) {
+    return { summary, breakdowns: [], refreshedAt: new Date().toISOString() };
+  }
 
   const { data: breakdownData, error: breakdownError } = await portal
     .from('pit_public_breakdowns')
     .select('*')
-    .eq('pit_count_id', summary.id);
+    .eq('pit_count_id', summaryId);
 
   if (breakdownError) throw breakdownError;
 
@@ -87,7 +91,7 @@ export function pickFeaturedSummary(entries: PitSummaryRow[]): PitSummaryRow | n
 }
 
 export type PitDimensionGroup = {
-  dimension: PitBreakdownRow['dimension'];
+  dimension: string;
   label: PitBreakdownRow['dimension_label'];
   rows: PitBreakdownRow[];
 };
@@ -99,24 +103,25 @@ export function groupBreakdownsForCount(
   const scoped = breakdowns.filter((entry) => entry.pit_count_id === pitCountId);
 
   const grouped = scoped.reduce<Record<string, PitDimensionGroup>>((acc, entry) => {
-    if (!acc[entry.dimension]) {
-      acc[entry.dimension] = {
-        dimension: entry.dimension,
+    const dimensionKey = entry.dimension ?? 'unknown';
+    if (!acc[dimensionKey]) {
+      acc[dimensionKey] = {
+        dimension: dimensionKey,
         label: entry.dimension_label,
         rows: [],
       };
     }
 
-    acc[entry.dimension].rows.push(entry);
+    acc[dimensionKey].rows.push(entry);
     return acc;
   }, {});
 
   return Object.values(grouped)
     .map((group) => ({
       ...group,
-      rows: [...group.rows].sort((a, b) => a.bucket_sort - b.bucket_sort),
+      rows: [...group.rows].sort((a, b) => (a.bucket_sort ?? 0) - (b.bucket_sort ?? 0)),
     }))
-    .sort((a, b) => a.rows[0]?.dimension_sort - b.rows[0]?.dimension_sort);
+    .sort((a, b) => (a.rows[0]?.dimension_sort ?? 0) - (b.rows[0]?.dimension_sort ?? 0));
 }
 
 export type ChartDatum = {
@@ -129,14 +134,18 @@ export type ChartDatum = {
 };
 
 export function toChartData(rows: PitBreakdownRow[]): ChartDatum[] {
-  return rows.map((row) => ({
-    key: row.bucket,
-    label: row.bucket_label,
-    value: row.total,
-    percentage: row.percentage,
-    suppressed: row.suppressed,
-    suppressedReason: row.suppressed_reason,
-  }));
+  return rows.map((row) => {
+    const bucketKey = row.bucket ?? 'unknown';
+    const bucketLabel = row.bucket_label ?? bucketKey;
+    return {
+      key: bucketKey,
+      label: bucketLabel,
+      value: row.total,
+      percentage: row.percentage,
+      suppressed: Boolean(row.suppressed),
+      suppressedReason: row.suppressed_reason,
+    };
+  });
 }
 
 export type TreatmentInterestSummary = {
@@ -148,10 +157,10 @@ export type TreatmentInterestSummary = {
 
 export function buildTreatmentSummary(summary: PitSummaryRow): TreatmentInterestSummary {
   return {
-    yes: summary.wants_treatment_yes_count,
-    no: summary.wants_treatment_no_count,
-    notSuitable: summary.wants_treatment_not_suitable_count,
-    notApplicable: summary.wants_treatment_not_applicable_count,
+    yes: summary.wants_treatment_yes_count ?? 0,
+    no: summary.wants_treatment_no_count ?? 0,
+    notSuitable: summary.wants_treatment_not_suitable_count ?? 0,
+    notApplicable: summary.wants_treatment_not_applicable_count ?? 0,
   };
 }
 
