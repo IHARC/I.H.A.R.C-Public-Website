@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { DonationCatalogItem } from '@/data/donation-catalog';
 import { getDonationCatalog } from '@/data/donation-catalog';
 import { DonateClient } from './donate-client';
 
@@ -8,10 +9,18 @@ export const metadata: Metadata = {
     'Make a one-time or monthly donation to support IHARC outreach. Choose symbolic items from our live inventory-backed catalogue or give a custom amount.',
 };
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function DonatePage() {
-  const catalog = await getDonationCatalog();
+  let catalog: DonationCatalogItem[] = [];
+  let catalogUnavailable = false;
+
+  try {
+    catalog = await getDonationCatalog();
+  } catch (error) {
+    catalogUnavailable = true;
+    console.error('Failed to load donation catalog.', error);
+  }
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl space-y-12 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
@@ -32,7 +41,17 @@ export default async function DonatePage() {
         </div>
       </header>
 
-      <DonateClient catalog={catalog} />
+      {catalogUnavailable ? (
+        <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 text-sm text-on-surface-variant">
+          The donation catalogue is temporarily unavailable. Please try again later or email{' '}
+          <a className="font-semibold text-primary underline" href="mailto:donations@iharc.ca">
+            donations@iharc.ca
+          </a>{' '}
+          if you need help right away.
+        </div>
+      ) : (
+        <DonateClient catalog={catalog} />
+      )}
     </div>
   );
 }
