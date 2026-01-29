@@ -30,7 +30,9 @@ export default async function DonatePage() {
           Fuel the frontline with the items neighbours need most
         </h1>
         <p className="text-base text-on-surface/80 sm:text-lg">
-          IHARC outreach teams distribute health, warmth, and nutrition supplies every day. Choose symbolic items from our inventory-backed catalogue, add a custom amount, or set up a monthly donation.
+          IHARC outreach teams distribute health, warmth, and nutrition supplies every day. Choose symbolic items from
+          our inventory-backed catalogue, make a one-time gift with preset or custom amounts, or set up a monthly
+          donation.
         </p>
         <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant sm:text-base">
           <p className="font-semibold text-on-surface">Receipts & tax note</p>
