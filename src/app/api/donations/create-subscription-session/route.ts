@@ -1,4 +1,4 @@
-import { invokeSupabaseEdgeFunction, jsonFromUpstream } from '../_shared/supabase-edge';
+import { invokeSupabaseEdgeFunction, jsonFromUpstream } from '../../_shared/supabase-edge';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { fetchResourceLibrary } from '@/lib/resources';
 import { fetchPublishedPolicies } from '@/data/policies';
+import { fetchVolunteerRoles } from '@/data/volunteers';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
@@ -16,13 +17,17 @@ const marketingPaths = [
   '/context',
   '/myth-busting',
   '/resources',
+  '/volunteer',
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const generatedAt = new Date().toISOString();
 
-  const resources = await fetchResourceLibrary();
-  const policies = await fetchPublishedPolicies();
+  const [resources, policies, volunteerRoles] = await Promise.all([
+    fetchResourceLibrary(),
+    fetchPublishedPolicies(),
+    fetchVolunteerRoles(),
+  ]);
 
   const staticEntries = marketingPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
@@ -45,5 +50,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...resourceEntries, ...policyEntries];
+  const volunteerEntries = volunteerRoles.map((role) => ({
+    url: `${SITE_URL}/volunteer/${role.slug}`,
+    lastModified: role.updatedAt ?? role.publishedAt ?? generatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
+
+  return [...staticEntries, ...resourceEntries, ...policyEntries, ...volunteerEntries];
 }

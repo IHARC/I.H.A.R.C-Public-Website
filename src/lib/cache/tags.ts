@@ -5,6 +5,7 @@ export const CACHE_TAGS = {
   siteFooter: 'marketing:site-footer',
   policies: 'marketing:policies',
   donationCatalog: 'marketing:donation-catalog',
+  volunteerRoles: 'marketing:volunteer-roles',
   marketingContent: 'marketing:content',
   navigation: 'marketing:navigation',
   supports: 'marketing:supports',

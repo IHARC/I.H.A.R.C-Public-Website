@@ -9361,6 +9361,27 @@ export type Database = {
           },
         ]
       }
+      public_rate_limit_logs: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          identifier: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          identifier: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          identifier?: string
+        }
+        Relationships: []
+      }
       registration_flows: {
         Row: {
           chosen_name: string
@@ -9385,6 +9406,7 @@ export type Database = {
           indigenous_identity: string | null
           legal_name: string | null
           metadata: Json
+          organization_id: number | null
           portal_code: string | null
           postal_code: string | null
           profile_id: string | null
@@ -9393,6 +9415,7 @@ export type Database = {
           supabase_user_id: string | null
           updated_at: string
           updated_by_user_id: string | null
+          volunteer_role_id: string | null
         }
         Insert: {
           chosen_name: string
@@ -9417,6 +9440,7 @@ export type Database = {
           indigenous_identity?: string | null
           legal_name?: string | null
           metadata?: Json
+          organization_id?: number | null
           portal_code?: string | null
           postal_code?: string | null
           profile_id?: string | null
@@ -9425,6 +9449,7 @@ export type Database = {
           supabase_user_id?: string | null
           updated_at?: string
           updated_by_user_id?: string | null
+          volunteer_role_id?: string | null
         }
         Update: {
           chosen_name?: string
@@ -9449,6 +9474,7 @@ export type Database = {
           indigenous_identity?: string | null
           legal_name?: string | null
           metadata?: Json
+          organization_id?: number | null
           portal_code?: string | null
           postal_code?: string | null
           profile_id?: string | null
@@ -9457,6 +9483,7 @@ export type Database = {
           supabase_user_id?: string | null
           updated_at?: string
           updated_by_user_id?: string | null
+          volunteer_role_id?: string | null
         }
         Relationships: [
           {
@@ -9464,6 +9491,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_flows_volunteer_role_id_fkey"
+            columns: ["volunteer_role_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_role_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -9539,6 +9573,78 @@ export type Database = {
           },
           {
             foreignKeyName: "resource_pages_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_role_listings: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by_profile_id: string | null
+          description: string
+          id: string
+          is_public: boolean
+          location: string | null
+          organization_id: number
+          published_at: string | null
+          requirements: string | null
+          slug: string
+          summary: string | null
+          time_commitment: string | null
+          title: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          description: string
+          id?: string
+          is_public?: boolean
+          location?: string | null
+          organization_id: number
+          published_at?: string | null
+          requirements?: string | null
+          slug: string
+          summary?: string | null
+          time_commitment?: string | null
+          title: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string
+          id?: string
+          is_public?: boolean
+          location?: string | null
+          organization_id?: number
+          published_at?: string | null
+          requirements?: string | null
+          slug?: string
+          summary?: string | null
+          time_commitment?: string | null
+          title?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_role_listings_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_role_listings_updated_by_profile_id_fkey"
             columns: ["updated_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -9761,6 +9867,19 @@ export type Database = {
           retry_in_ms: number
         }[]
       }
+      portal_check_public_rate_limit: {
+        Args: {
+          p_cooldown_ms?: number
+          p_event: string
+          p_identifier: string
+          p_limit: number
+          p_window_ms?: number
+        }
+        Returns: {
+          allowed: boolean
+          retry_in_ms: number
+        }[]
+      }
       portal_get_user_email: {
         Args: { p_profile_id?: string }
         Returns: string
@@ -9769,6 +9888,15 @@ export type Database = {
         Args: {
           p_action: string
           p_actor_profile_id?: string
+          p_entity_id: string
+          p_entity_type: string
+          p_meta?: Json
+        }
+        Returns: undefined
+      }
+      portal_log_public_audit_event: {
+        Args: {
+          p_action: string
           p_entity_id: string
           p_entity_type: string
           p_meta?: Json
