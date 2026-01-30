@@ -55,6 +55,8 @@ const ROLE_SELECT = `
   updated_at
 `;
 
+const VOLUNTEER_ROLE_REVALIDATE_SECONDS = 60;
+
 const fetchVolunteerRolesCached = unstable_cache(
   async (): Promise<VolunteerRole[]> => {
     const supabase = getSupabasePublicClient();
@@ -73,7 +75,7 @@ const fetchVolunteerRolesCached = unstable_cache(
     return (data ?? []).map(mapRoleRow);
   },
   ['volunteerRoles'],
-  { tags: [CACHE_TAGS.volunteerRoles] },
+  { tags: [CACHE_TAGS.volunteerRoles], revalidate: VOLUNTEER_ROLE_REVALIDATE_SECONDS },
 );
 
 const fetchVolunteerRoleBySlugCached = unstable_cache(
@@ -96,7 +98,7 @@ const fetchVolunteerRoleBySlugCached = unstable_cache(
     return data ? mapRoleRow(data) : null;
   },
   ['volunteerRoleBySlug'],
-  { tags: [CACHE_TAGS.volunteerRoles] },
+  { tags: [CACHE_TAGS.volunteerRoles], revalidate: VOLUNTEER_ROLE_REVALIDATE_SECONDS },
 );
 
 export async function fetchVolunteerRoles(): Promise<VolunteerRole[]> {

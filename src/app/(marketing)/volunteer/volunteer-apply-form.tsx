@@ -87,7 +87,13 @@ export function VolunteerApplyForm({ roleId, organizationId, roleTitle }: Props)
 
       const result = (await response.json().catch(() => null)) as { error?: string; retryInMs?: number } | null;
       if (!response.ok) {
-        const message = typeof result?.error === 'string' ? result.error : 'Unable to submit your application.';
+        const retryInMs = typeof result?.retryInMs === 'number' ? result.retryInMs : null;
+        const message =
+          response.status === 429 && retryInMs !== null
+            ? `Too many requests. Please try again in ${formatRetryTime(retryInMs)}.`
+            : typeof result?.error === 'string'
+              ? result.error
+              : 'Unable to submit your application.';
         setError(message);
         setState('error');
         return;
@@ -113,7 +119,7 @@ export function VolunteerApplyForm({ roleId, organizationId, roleTitle }: Props)
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="volunteer_name">Full name</Label>
-          <Input id="volunteer_name" name="name" placeholder="Your name" required />
+          <Input id="volunteer_name" name="name" placeholder="Your name" autoComplete="name" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="volunteer_preferred_contact">Preferred contact</Label>
@@ -124,11 +130,11 @@ export function VolunteerApplyForm({ roleId, organizationId, roleTitle }: Props)
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="volunteer_email">Email</Label>
-          <Input id="volunteer_email" name="email" type="email" placeholder="you@example.com" />
+          <Input id="volunteer_email" name="email" type="email" autoComplete="email" placeholder="you@example.com" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="volunteer_phone">Phone</Label>
-          <Input id="volunteer_phone" name="phone" type="tel" placeholder="(555) 555-5555" />
+          <Input id="volunteer_phone" name="phone" type="tel" autoComplete="tel" placeholder="(555) 555-5555" />
         </div>
       </div>
 
@@ -183,13 +189,15 @@ export function VolunteerApplyForm({ roleId, organizationId, roleTitle }: Props)
       </div>
 
       {state === 'success' ? (
-        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           Application submitted. Thank you for stepping up—our team will be in touch soon.
         </p>
       ) : null}
 
       {state === 'error' && error ? (
-        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>
+        <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {error}
+        </p>
       ) : null}
 
       <Button type="submit" disabled={state === 'loading'}>
@@ -197,4 +205,12 @@ export function VolunteerApplyForm({ roleId, organizationId, roleTitle }: Props)
       </Button>
     </form>
   );
+}
+
+function formatRetryTime(retryInMs: number) {
+  if (!Number.isFinite(retryInMs) || retryInMs <= 0) return 'a moment';
+  const seconds = Math.ceil(retryInMs / 1000);
+  if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'}`;
+  const minutes = Math.ceil(seconds / 60);
+  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
 }
