@@ -1,16 +1,10 @@
-import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ContextCards } from '@/components/site/ContextCards';
+import { CrisisNotice } from '@/components/site/CrisisNotice';
 import { getContextCards, getHeroContent, getSupportEntries } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
-
-export const metadata: Metadata = {
-  title: 'IHARC — Integrated Homelessness and Addictions Response Centre',
-  description:
-    'Discover how the Integrated Homelessness and Addictions Response Centre supports neighbours across Northumberland and how the STEVI portal keeps IHARC clients connected to outreach teams.',
-};
 
 export default async function MarketingHomePage() {
   const [heroContent, contextCards, supports] = await Promise.all([
@@ -25,6 +19,30 @@ export default async function MarketingHomePage() {
   return (
     <div className="space-y-20 pb-16">
       <Hero content={heroContent} />
+
+      <section id="help" className="mx-auto w-full max-w-7xl space-y-6 px-4">
+        <div className="flex flex-col gap-3 text-balance">
+          <h2 className="type-headline-medium text-on-surface">Need support right now?</h2>
+          <p className="max-w-3xl type-body-large text-on-surface/80">
+            Reach out to partners offering housing navigation, overdose response, and compassionate crisis support.
+            Moderators keep this list current.
+          </p>
+          <div>
+            <Link
+              href="/get-help"
+              className="inline-flex w-fit items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            >
+              Get help
+            </Link>
+          </div>
+        </div>
+        <CrisisNotice variant="card" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {urgentSupports.map((support) => (
+            <HelpCard key={support.title} support={support} />
+          ))}
+        </div>
+      </section>
 
       <section className="space-y-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 text-balance">
@@ -41,7 +59,8 @@ export default async function MarketingHomePage() {
           <div>
             <h2 className="type-title-large text-on-surface">Stay involved</h2>
             <p className="mt-2 max-w-xl type-body-large text-on-surface/80">
-              This site shares public data while STEVI keeps IHARC&apos;s clients and staff connected. Choose what you need today.
+              This site shares public data while STEVI keeps IHARC&apos;s clients and staff connected. If you&apos;re already
+              working with IHARC, STEVI is the secure portal for updates, documents, and outreach coordination.
             </p>
           </div>
           <div className="grid w-full gap-4 sm:max-w-2xl md:max-w-none md:grid-cols-2">
@@ -55,18 +74,6 @@ export default async function MarketingHomePage() {
               Supabase-powered stats keep neighbours informed about shelter, overdose, and outreach trends.
             </StayInvolvedLink>
           </div>
-        </div>
-      </section>
-
-      <section id="help" className="mx-auto w-full max-w-7xl space-y-6 px-4">
-        <h2 className="type-headline-medium text-on-surface">Need support right now?</h2>
-        <p className="max-w-3xl type-body-large text-on-surface/80">
-          Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. In an emergency call 911 and stay with the person until responders arrive. Moderators keep this list current.
-        </p>
-        <div className="grid gap-4 md:grid-cols-3">
-          {urgentSupports.map((support) => (
-            <HelpCard key={support.title} support={support} />
-          ))}
         </div>
       </section>
     </div>

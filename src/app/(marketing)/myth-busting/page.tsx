@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { MYTH_STATUS_BADGE_STYLES, MYTH_STATUS_CONFIG, mythSourcesFromJson } from '@/lib/myth-busting';
+import { CrisisNotice } from '@/components/site/CrisisNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,10 +29,8 @@ export default async function MythBustingPage() {
           The Integrated Homelessness and Addictions Response Centre shares compassionate fact checks so residents, agency partners, and local
           government act on shared evidence. Each entry captures what people are hearing, what the data shows, and where collaboration is already in motion.
         </p>
-        <p className="text-sm font-semibold text-on-surface/70">
-          In an emergency call 911. The Good Samaritan Drug Overdose Act protects anyone providing help during a suspected poisoning.
-        </p>
       </header>
+      <CrisisNotice variant="card" />
 
       {entries.length ? (
         <Accordion

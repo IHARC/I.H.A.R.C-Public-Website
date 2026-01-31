@@ -40,7 +40,7 @@ export default async function VolunteerPage() {
       <header className="space-y-4 text-balance">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Volunteer with IHARC</p>
         <h1 className="text-4xl font-bold tracking-tight">
-          Show up for neighbors navigating housing and overdose crises
+          Show up for neighbours navigating housing and overdose crises
         </h1>
         <p className="text-base text-on-surface/80">
           The Integrated Homelessness and Addictions Response Centre (IHARC) partners with local agencies, municipalities, and volunteers to build coordinated, compassionate responses. Browse open roles and apply to join the team.

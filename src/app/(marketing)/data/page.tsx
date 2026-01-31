@@ -6,6 +6,7 @@ import { getPitPublicDataset } from '@/data/pit';
 import type { PitSummaryRow } from '@/lib/pit/public';
 import { PitStatusBadge } from '@/components/pit/status-badge';
 import { steviPortalUrl } from '@/lib/stevi-portal';
+import { CrisisNotice } from '@/components/site/CrisisNotice';
 
 const datasets = [
   {
@@ -90,13 +91,8 @@ export default async function DataPage() {
           <p className="text-sm text-on-surface-variant">
             IHARC and volunteers are collecting data on who is sleeping outdoors right now and what supports feel safe. Counts do not include Transition House shelter residents or people couch surfing or doubling up with friends. Everything published here is anonymised trend data.
           </p>
-          <p className="text-sm font-semibold text-error">
-            In an emergency call 911. The Good Samaritan Drug Overdose Act protects the caller and the person experiencing an overdose.
-          </p>
-          <p className="text-sm text-on-surface-variant">
-            Need help between? Email <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a> or visit the RAAM clinic on Tuesdays, 12–3 pm at 1011 Elgin St. W.
-          </p>
         </header>
+        <CrisisNotice variant="card" />
 
         {orderedSummaries.length ? (
           <div className="grid gap-6">

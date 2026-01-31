@@ -17,6 +17,12 @@ export async function SiteFooter() {
         className="mt-3 flex items-center justify-center gap-4 text-xs font-semibold"
       >
         <Link
+          href="/get-help"
+          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Get help
+        </Link>
+        <Link
           href="/resources"
           className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
@@ -27,6 +33,12 @@ export async function SiteFooter() {
           className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Donate
+        </Link>
+        <Link
+          href="/policies"
+          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Policies
         </Link>
       </nav>
     </footer>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getSupportEntries } from '@/data/marketing-content';
 import { steviPortalUrl } from '@/lib/stevi-portal';
+import { CrisisNotice } from '@/components/site/CrisisNotice';
 
 export const metadata: Metadata = {
   title: 'Get Help Now — IHARC',
@@ -23,11 +24,7 @@ export default async function GetHelpPage() {
         </p>
       </header>
 
-      <section className="rounded-3xl border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive-foreground">
-        <p>
-          <strong>In an emergency call 911.</strong> Tell dispatch if drugs are involved so responders bring naloxone. You are protected from simple possession charges under the Good Samaritan Drug Overdose Act.
-        </p>
-      </section>
+      <CrisisNotice />
 
       <section className="grid gap-4 md:grid-cols-3">
         {urgent.map((support) => (
@@ -59,12 +56,11 @@ export default async function GetHelpPage() {
           ))}
         </ul>
         <p className="mt-4">
-          Want to add a community resource? Email
-          {' '}
-          <Link href="mailto:portal@iharc.ca" className="font-semibold text-primary underline">
-            portal@iharc.ca
-          </Link>
-          {' '}with details and we will follow up within one business day.
+          Want to add a community resource? Email{' '}
+          <Link href="mailto:outreach@iharc.ca" className="font-semibold text-primary underline">
+            outreach@iharc.ca
+          </Link>{' '}
+          with details and we will follow up within one business day.
         </p>
       </section>
 

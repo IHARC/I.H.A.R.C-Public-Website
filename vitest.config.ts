@@ -13,6 +13,6 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/units.spec.ts', 'tests/resources.lib.spec.ts'], // Only include unit tests, not Playwright
+    include: ['tests/units.spec.ts', 'tests/**/*.lib.spec.ts', 'tests/**/*.test.ts'], // Only include unit tests, not Playwright
   },
 });

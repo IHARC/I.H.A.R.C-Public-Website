@@ -120,6 +120,23 @@ const fetchSettings = unstable_cache(
   },
 );
 
+const ALLOWED_URGENT_CONTACT_HREFS = new Set([
+  'tel:211',
+  'tel:9053769562',
+  'tel:988',
+  'tel:9053779891',
+  'mailto:outreach@iharc.ca',
+]);
+
+const ALLOWED_URGENT_CONTACT_LABELS = [
+  '211',
+  '9053769562',
+  '988',
+  '9053779891',
+  'outreach@iharc.ca',
+  'raamclinictuesdays123pmat1011elginstw2ndfloor',
+];
+
 function parseJson<T>(raw: string | null, context: string): T {
   if (!raw) {
     throw new Error(`Missing required marketing setting: ${context}`);
@@ -128,6 +145,52 @@ function parseJson<T>(raw: string | null, context: string): T {
     return JSON.parse(raw) as T;
   } catch (error) {
     throw new Error(`Invalid JSON for marketing setting ${context}: ${String(error)}`);
+  }
+}
+
+function normalizeContactHref(href: string): string {
+  const trimmed = href.trim().toLowerCase();
+  if (trimmed.startsWith('tel:')) {
+    let digits = trimmed.replace(/^tel:/, '').replace(/[^0-9]/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) {
+      digits = digits.slice(1);
+    }
+    return `tel:${digits.replace(/^0+/, '')}`;
+  }
+  if (trimmed.startsWith('mailto:')) {
+    const email = trimmed.replace(/^mailto:/, '').trim();
+    return `mailto:${email}`;
+  }
+  return trimmed;
+}
+
+function normalizeContactLabel(label: string): string {
+  return label.toLowerCase().replace(/[^0-9a-z@]/g, '');
+}
+
+export function assertUrgentSupportContacts(entries: SupportEntry[]): void {
+  const invalidContacts: string[] = [];
+
+  entries.forEach((entry) => {
+    entry.contacts.forEach((contact) => {
+      if (contact.href) {
+        const normalized = normalizeContactHref(contact.href);
+        if (!ALLOWED_URGENT_CONTACT_HREFS.has(normalized)) {
+          invalidContacts.push(`${entry.title} -> ${contact.label} (${contact.href})`);
+        }
+        return;
+      }
+
+      const normalizedLabel = normalizeContactLabel(contact.label);
+      const matches = ALLOWED_URGENT_CONTACT_LABELS.some((allowed) => normalizedLabel.includes(allowed));
+      if (!matches) {
+        invalidContacts.push(`${entry.title} -> ${contact.label}`);
+      }
+    });
+  });
+
+  if (invalidContacts.length) {
+    throw new Error(`Unapproved urgent support contacts detected: ${invalidContacts.join('; ')}`);
   }
 }
 
@@ -163,6 +226,7 @@ export async function getSupportEntries(): Promise<{ urgent: SupportEntry[]; mut
   const settings = await fetchSettings();
   const urgent = parseJson<SupportEntry[]>(settings['marketing.supports.urgent'], 'marketing.supports.urgent');
   const mutualAid = parseJson<string[]>(settings['marketing.supports.mutual_aid'], 'marketing.supports.mutual_aid');
+  assertUrgentSupportContacts(urgent);
   return { urgent, mutualAid };
 }
 

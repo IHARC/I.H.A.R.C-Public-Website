@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Roboto, Roboto_Flex } from 'next/font/google';
+import Script from 'next/script';
 import { cn } from '@/lib/utils';
 import { getBrandingAssets } from '@/data/marketing-content';
 import '@/styles/main.css';
@@ -37,6 +38,27 @@ const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response 
 const SITE_TITLE = 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County';
 const SITE_DESCRIPTION =
   'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.';
+
+const ORGANIZATION_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Integrated Homelessness and Addictions Response Centre',
+  url: appUrl,
+  description: SITE_DESCRIPTION,
+};
+
+const WEBSITE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_TITLE,
+  url: appUrl,
+  description: SITE_DESCRIPTION,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Integrated Homelessness and Addictions Response Centre',
+    url: appUrl,
+  },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getBrandingAssets();
@@ -85,6 +107,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
+          <Script
+            id="iharc-organization-jsonld"
+            type="application/ld+json"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }}
+          />
+          <Script
+            id="iharc-website-jsonld"
+            type="application/ld+json"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSON_LD) }}
+          />
           <Suspense fallback={null}>
             <AnalyticsProvider
               measurementId={GA_MEASUREMENT_ID}

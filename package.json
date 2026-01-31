@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "preview": "next start -p 4321",
+    "preview": "PORT=4321 node .next/standalone/server.js",
     "build": "next build",
     "lint": "next lint",
     "lint:copy": "node scripts/check-copy.mjs",
@@ -68,6 +68,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.45.0",
     "@types/node": "^22.7.1",
     "@types/react": "^19.2.0",
