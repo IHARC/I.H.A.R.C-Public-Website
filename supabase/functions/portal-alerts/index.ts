@@ -1,6 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { SMTPClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
+import { sendAcsEmail } from '../_shared/acs-email.ts';
+import { requireAuth } from '../_shared/auth.ts';
+import { requireEnv } from '../_shared/env.ts';
 
 type NotificationRecord = {
   id: string;
@@ -14,19 +16,16 @@ type NotificationRecord = {
   notification_type: string;
 };
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const PORTAL_ALERTS_SECRET = Deno.env.get('PORTAL_ALERTS_SECRET');
-const EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM') ?? 'IHARC Portal <notifications@iharc.example>';
-const SMTP_HOST = Deno.env.get('PORTAL_SMTP_HOST');
-const SMTP_PORT = Number(Deno.env.get('PORTAL_SMTP_PORT') ?? '587');
-const SMTP_USERNAME = Deno.env.get('PORTAL_SMTP_USERNAME');
-const SMTP_PASSWORD = Deno.env.get('PORTAL_SMTP_PASSWORD');
-const SMTP_SECURE = (Deno.env.get('PORTAL_SMTP_SECURE') ?? 'true').toLowerCase() === 'true';
+type ActorContext = {
+  userId: string;
+  userEmail: string | null;
+  profileId: string | null;
+  canManageNotifications: boolean;
+};
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('Supabase credentials are not configured for portal-alerts');
-}
+const SUPABASE_URL = requireEnv('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = requireEnv('SUPABASE_SERVICE_ROLE_KEY');
+const PORTAL_EMAIL_SENDER = Deno.env.get('PORTAL_EMAIL_SENDER');
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -44,20 +43,9 @@ serve(async (req) => {
     });
   }
 
-  if (!PORTAL_ALERTS_SECRET) {
-    return new Response(JSON.stringify({ error: 'Alerts secret not configured' }), {
-      status: 500,
-      headers: responseHeaders(),
-    });
-  }
-
-  const authHeader = req.headers.get('authorization') ?? '';
-  const providedSecret = authHeader.startsWith('Bearer ')
-    ? authHeader.slice('Bearer '.length)
-    : authHeader;
-
-  if (providedSecret !== PORTAL_ALERTS_SECRET) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+  const auth = await requireAuth(req);
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.error }), {
       status: 401,
       headers: responseHeaders(),
     });
@@ -110,56 +98,53 @@ serve(async (req) => {
     });
   }
 
+  const actor = await loadActorContext(auth.userId, auth.userEmail);
+  if (!actor) {
+    return new Response(JSON.stringify({ error: 'Unable to verify notification access' }), {
+      status: 500,
+      headers: responseHeaders(),
+    });
+  }
+
+  if (!canSendNotification(actor, notification)) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403,
+      headers: responseHeaders(),
+    });
+  }
+
   const wantsEmail = (notification.channels ?? []).includes('email');
 
   let newStatus = notification.status;
   let sentAt: string | null = null;
 
   if (wantsEmail) {
-    if (!SMTP_HOST) {
-      const errorMessage = 'SMTP host not configured for portal-alerts';
+    if (!PORTAL_EMAIL_SENDER) {
+      const errorMessage = 'Portal email sender not configured for portal-alerts';
       console.error(errorMessage);
       newStatus = 'failed';
       await logNotificationFailure(notification, errorMessage);
     } else {
-      let client: SMTPClient | null = null;
       try {
-        client = new SMTPClient({
-          connection: {
-            hostname: SMTP_HOST,
-            port: SMTP_PORT,
-            tls: SMTP_SECURE,
-            auth: SMTP_USERNAME && SMTP_PASSWORD
-              ? {
-                  username: SMTP_USERNAME,
-                  password: SMTP_PASSWORD,
-                }
-              : undefined,
-          },
-        });
+        const subject = notification.subject?.trim() ?? '';
+        if (!subject) {
+          throw new Error('Notification subject is required');
+        }
 
-        await client.send({
-          from: EMAIL_FROM,
-          to: notification.recipient_email,
-          subject: notification.subject,
-          content: notification.body_text,
+        await sendAcsEmail({
+          senderAddress: PORTAL_EMAIL_SENDER,
+          subject,
+          plainText: notification.body_text,
           html: notification.body_html ?? `<p>${escapeHtml(notification.body_text)}</p>`,
+          to: [{ email: notification.recipient_email }],
         });
 
         newStatus = 'sent';
         sentAt = new Date().toISOString();
       } catch (smtpError) {
-        console.error('Error sending notification email via SMTP', smtpError);
+        console.error('Error sending notification email via ACS', smtpError);
         newStatus = 'failed';
         await logNotificationFailure(notification, smtpError);
-      } finally {
-        if (client) {
-          try {
-            await client.close();
-          } catch (closeError) {
-            console.error('Failed to close SMTP client', closeError);
-          }
-        }
       }
     }
   } else {
@@ -193,6 +178,19 @@ function responseHeaders() {
   };
 }
 
+function canSendNotification(actor: ActorContext, notification: NotificationRecord): boolean {
+  if (actor.canManageNotifications) return true;
+  if (actor.profileId && notification.profile_id && actor.profileId === notification.profile_id) return true;
+  const actorEmail = normalizeEmail(actor.userEmail);
+  const recipientEmail = normalizeEmail(notification.recipient_email);
+  return Boolean(actorEmail && recipientEmail && actorEmail === recipientEmail);
+}
+
+function normalizeEmail(value: string | null): string | null {
+  if (!value) return null;
+  return value.trim().toLowerCase();
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -224,4 +222,34 @@ async function logNotificationFailure(notification: NotificationRecord, error: u
   } catch (auditError) {
     console.error('Failed to log notification failure audit event', auditError);
   }
+}
+
+async function loadActorContext(userId: string, userEmail: string | null): Promise<ActorContext | null> {
+  const [profileResult, adminResult, permissionResult] = await Promise.all([
+    supabase.schema('portal').from('profiles').select('id').eq('user_id', userId).maybeSingle(),
+    supabase.schema('core').rpc('is_global_admin', { p_user: userId }),
+    supabase.schema('core').rpc('has_iharc_permission', { permission_name: 'portal.manage_notifications', p_user: userId }),
+  ]);
+
+  if (profileResult.error) {
+    console.error('portal-alerts failed to load actor profile', profileResult.error);
+    return null;
+  }
+
+  if (adminResult.error) {
+    console.error('portal-alerts failed to check global admin', adminResult.error);
+    return null;
+  }
+
+  if (permissionResult.error) {
+    console.error('portal-alerts failed to check notifications permission', permissionResult.error);
+    return null;
+  }
+
+  return {
+    userId,
+    userEmail,
+    profileId: profileResult.data?.id ?? null,
+    canManageNotifications: Boolean(adminResult.data) || Boolean(permissionResult.data),
+  };
 }

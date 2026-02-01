@@ -1,15 +1,16 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { requireAuth } from '../_shared/auth.ts';
 import { buildCorsHeaders, json } from '../_shared/http.ts';
 import { createStripeClient } from '../_shared/stripe.ts';
+import { requireIharcAdmin } from '../_shared/permissions.ts';
 
 type Payload = { catalogItemId?: unknown };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Supabase credentials are not configured for donations_admin_sync_catalog_item_stripe');
 }
 
@@ -23,24 +24,14 @@ serve(async (req) => {
     return json(req, { error: 'Method not allowed' }, 405);
   }
 
-  const authHeader = req.headers.get('authorization') ?? '';
-  const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice('Bearer '.length) : null;
-  if (!accessToken) {
-    return json(req, { error: 'Missing bearer token' }, 401);
+  const auth = await requireAuth(req);
+  if (!auth.ok) {
+    return json(req, { error: auth.error }, 401);
   }
 
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false },
-    global: { headers: { Authorization: `Bearer ${accessToken}` } },
-  });
-
-  const { data: isAdmin, error: adminError } = await userClient.rpc('check_iharc_admin_role');
-  if (adminError) {
-    console.error('donations_admin_sync_catalog_item_stripe admin check error', adminError);
-    return json(req, { error: 'Unauthorized' }, 403);
-  }
-  if (isAdmin !== true) {
-    return json(req, { error: 'Insufficient permissions' }, 403);
+  const adminCheck = await requireIharcAdmin(serviceClient, auth.userId, 'donations_admin_sync_catalog_item_stripe');
+  if (!adminCheck.ok) {
+    return json(req, { error: adminCheck.error }, adminCheck.status);
   }
 
   let payload: Payload;

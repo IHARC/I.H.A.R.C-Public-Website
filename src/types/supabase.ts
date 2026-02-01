@@ -8057,7 +8057,6 @@ export type Database = {
         Args: {
           p_actor_profile_id: string
           p_email_from: string
-          p_sendgrid_api_key: string
         }
         Returns: undefined
       }
@@ -8088,7 +8087,6 @@ export type Database = {
         Returns: {
           email_from: string
           provider: string
-          sendgrid_api_key: string
         }[]
       }
       donations_get_stripe_config: {

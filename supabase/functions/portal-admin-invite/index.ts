@@ -1,6 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { SMTPClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
+import { sendAcsEmail } from '../_shared/acs-email.ts';
+import { requireAuth } from '../_shared/auth.ts';
+import { requireIharcAdmin } from '../_shared/permissions.ts';
 
 type InvitePayload = {
   email?: unknown;
@@ -14,12 +16,7 @@ type InvitePayload = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const PORTAL_EMAIL_FROM = Deno.env.get('PORTAL_EMAIL_FROM') ?? 'IHARC Portal <notifications@iharc.example>';
-const SMTP_HOST = Deno.env.get('PORTAL_SMTP_HOST');
-const SMTP_PORT = Number(Deno.env.get('PORTAL_SMTP_PORT') ?? '587');
-const SMTP_USERNAME = Deno.env.get('PORTAL_SMTP_USERNAME');
-const SMTP_PASSWORD = Deno.env.get('PORTAL_SMTP_PASSWORD');
-const SMTP_SECURE = (Deno.env.get('PORTAL_SMTP_SECURE') ?? 'true').toLowerCase() === 'true';
+const PORTAL_EMAIL_SENDER = Deno.env.get('PORTAL_EMAIL_SENDER');
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Supabase credentials are not configured for portal-admin-invite');
@@ -36,29 +33,23 @@ serve(async (req) => {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ error: 'Missing bearer token' }, 401);
+  const auth = await requireAuth(req);
+  if (!auth.ok) {
+    return jsonResponse({ error: auth.error }, 401);
   }
 
-  const accessToken = authHeader.slice('Bearer '.length);
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(accessToken);
-
-  if (userError || !user) {
-    return jsonResponse({ error: 'Invalid token' }, 401);
+  const adminCheck = await requireIharcAdmin(supabase, auth.userId, 'portal-admin-invite');
+  if (!adminCheck.ok) {
+    return jsonResponse({ error: adminCheck.error }, adminCheck.status);
   }
 
   const { data: profile, error: profileError } = await supabase
     .from('portal.profiles')
-    .select('id, role, display_name')
-    .eq('user_id', user.id)
+    .select('id, display_name')
+    .eq('user_id', auth.userId)
     .maybeSingle();
 
-  if (profileError || !profile || profile.role !== 'admin') {
+  if (profileError || !profile) {
     return jsonResponse({ error: 'Insufficient permissions' }, 403);
   }
 
@@ -113,7 +104,7 @@ serve(async (req) => {
       organization_id: orgId,
       message,
       invited_by_profile_id: actorProfileId,
-      invited_by_user_id: user.id,
+      invited_by_user_id: auth.userId,
     })
     .select('id')
     .single();
@@ -201,12 +192,10 @@ type SendPortalInviteArgs = {
 };
 
 async function sendPortalInviteEmail(args: SendPortalInviteArgs) {
-  if (!SMTP_HOST) {
-    await logInviteEmailFailure(args, 'SMTP host not configured for portal-admin-invite');
+  if (!PORTAL_EMAIL_SENDER) {
+    await logInviteEmailFailure(args, 'Portal email sender not configured for portal-admin-invite');
     return { ok: false } as const;
   }
-
-  let client: SMTPClient | null = null;
 
   const inviterName = args.inviterDisplayName ?? 'the IHARC Portal team';
   const greetingName = args.recipientDisplayName ?? null;
@@ -242,37 +231,18 @@ async function sendPortalInviteEmail(args: SendPortalInviteArgs) {
   });
 
   try {
-    client = new SMTPClient({
-      connection: {
-        hostname: SMTP_HOST,
-        port: SMTP_PORT,
-        tls: SMTP_SECURE,
-        auth: SMTP_USERNAME && SMTP_PASSWORD
-          ? { username: SMTP_USERNAME, password: SMTP_PASSWORD }
-          : undefined,
-      },
-    });
-
-    await client.send({
-      from: PORTAL_EMAIL_FROM,
-      to: args.recipientEmail,
+    await sendAcsEmail({
+      senderAddress: PORTAL_EMAIL_SENDER,
       subject: 'Invitation to join the IHARC Portal',
-      content: textBody,
+      plainText: textBody,
       html: htmlBody,
+      to: [{ email: args.recipientEmail }],
     });
     return { ok: true } as const;
   } catch (error) {
-    console.error('portal-admin-invite failed to send SMTP email', error);
+    console.error('portal-admin-invite failed to send ACS email', error);
     await logInviteEmailFailure(args, error);
     return { ok: false } as const;
-  } finally {
-    if (client) {
-      try {
-        await client.close();
-      } catch (closeError) {
-        console.error('portal-admin-invite failed to close SMTP client', closeError);
-      }
-    }
   }
 }
 
