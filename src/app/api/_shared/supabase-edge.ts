@@ -16,14 +16,14 @@ function requirePublicEnv(name: string): string {
 
 export async function invokeSupabaseEdgeFunction<T>(functionName: string, body: unknown): Promise<InvokeResult<T>> {
   const supabaseUrl = requirePublicEnv('NEXT_PUBLIC_SUPABASE_URL');
-  const supabaseAnonKey = requirePublicEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const supabasePublishableKey = requirePublicEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
 
   const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+      apikey: supabasePublishableKey,
+      Authorization: `Bearer ${supabasePublishableKey}`,
     },
     body: JSON.stringify(body ?? {}),
   });
@@ -44,4 +44,3 @@ export async function invokeSupabaseEdgeFunction<T>(functionName: string, body: 
 export function jsonFromUpstream<T>(result: InvokeResult<T>) {
   return NextResponse.json(result.data ?? { error: 'Upstream did not return JSON' }, { status: result.status });
 }
-

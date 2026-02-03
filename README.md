@@ -27,13 +27,13 @@
 - Always inspect the live schema through the Supabase MCP tool (or Supabase CLI). Do **not** rely on migration files to determine what exists in the database.
 - Avoid running git commands unless they are absolutely necessary to complete a requested task.
 - Keep edits in ASCII unless a file already uses other characters; favour `apply_patch` for concise modifications.
-- Never introduce service-role keys into the Next.js runtime. All reads must use the public anon key via the server-side Supabase client.
+- Never introduce service-role keys into the Next.js runtime. All reads must use the public publishable key via the server-side Supabase client.
 
 ## Current Tech & Architecture
 - Framework: Next.js 15 App Router with React Server Components. Marketing routes primarily render static/streamed content while `/stats` remains `dynamic = 'force-dynamic'` to ensure fresh Supabase reads.
 - Styling: Tailwind CSS with shared tokens in `src/styles/main.css`. Components expect the design tokens defined in `tailwind.config.ts`.
 - Data access:
-  - `src/lib/supabase/rsc.ts` creates the read-only server client using the anon key.
+  - `src/lib/supabase/rsc.ts` creates the read-only server client using the publishable key.
   - `src/data/metrics.ts`, `src/data/pit.ts`, and `src/data/myths.ts` wrap Supabase reads with `unstable_cache` plus tags from `src/lib/cache/tags.ts`.
   - `src/lib/resources.ts` centralises resource queries, filtering, and embed sanitisation.
 - Middleware: `middleware.ts` maps legacy `/portal`, `/login`, `/register`, etc. paths to STEVI and issues a 307 redirect while preserving query strings.
@@ -46,7 +46,7 @@
 
 ## Development Workflow
 1. Node.js 20.x (npm 10+). Install dependencies with `npm install`.
-2. Run `npm run dev` (port 3000). Supply `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` so Supabase reads succeed locally.
+2. Run `npm run dev` (port 3000). Supply `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` so Supabase reads succeed locally.
 3. Type checking: `npm run typecheck`. Linting: `npm run lint`. Build verification: `npm run build`.
 4. Vitest/playwright tooling remains in `package.json`, but the marketing app currently relies on manual verification. Add focused tests when building new data fetchers or components.
 
@@ -57,14 +57,14 @@
 
 ## Deployment Notes
 - Azure Static Web Apps deploys the `.next` artifact from `npm run build` (`next build`).
-- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
+- Configure Supabase public secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) in Azure SWA; no service-role keys should be exposed to the marketing runtimes.
 - Edge Functions are managed outside this repo; any ingestion or STEVI support functions are deployed separately.
 
 ### Donations
 - The Donate + Manage Donation flows call Supabase donation Edge Functions via same-origin API routes under `src/app/api/donations/*` to avoid browser CORS preflights against `*.supabase.co/functions/v1/*`.
 - The public donation catalogue (`/donate`) reads from the Supabase view `portal.donation_catalog_public`, which only includes rows from `donations.catalog_items` where `is_active = true`.
 - Donation catalogue changes are cached briefly in Next.js (see `src/data/donation-catalog.ts` + `src/app/(marketing)/donate/page.tsx`), so new items may take up to ~1 minute to appear after being added.
-- Stripe webhooks should target `https://iharc.ca/api/donations/stripe-webhook` (this forwards the raw webhook payload + `stripe-signature` header to the Supabase `donations_stripe_webhook` function using the anon key, so the Supabase function can keep JWT verification enabled).
+- Stripe webhooks should target `https://iharc.ca/api/donations/stripe-webhook` (this forwards the raw webhook payload + `stripe-signature` header to the Supabase `donations_stripe_webhook` function using the publishable key).
 - If your Supabase public key is the newer non-JWT `sb_publishable_*` format, any donation Edge Function you invoke must be deployed with `verify_jwt = false` (otherwise Supabase will return 401 before your function runs).
 - If you intentionally want to call Supabase Edge Functions directly from the browser, ensure the relevant donation functions are configured to allow unauthenticated preflights (typically `verify_jwt = false`) and that `IHARC_SITE_URL` is set so `_shared/http.ts` can emit correct CORS headers.
 

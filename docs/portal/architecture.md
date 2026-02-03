@@ -19,7 +19,7 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
 - `middleware.ts` intercepts legacy portal paths (e.g., `/portal`, `/ideas`, `/plans`, `/progress`, `/command-center`, `/solutions`, `/login`, `/register`, `/reset-password`, `/api/portal`) and redirects them to the STEVI origin with a 307 status.
 
 ### 2. Supabase Reads
-- `src/lib/supabase/rsc.ts` uses `@supabase/ssr` with the anon key to build the server-side client. There is no browser client because the site is read-only.
+- `src/lib/supabase/rsc.ts` uses `@supabase/ssr` with the publishable key to build the server-side client. There is no browser client because the site is read-only.
 - Data modules:
   - `src/data/metrics.ts` – queries `portal.metric_daily` and related `metric_catalog` rows, groups them, and powers both cards (`DashboardCards`) and charts (`TrendChart`).
   - `src/data/pit.ts` – reads PIT rollups (summary counts plus community breakdowns) exposed via Supabase views.

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   }
 
   const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL');
-  const supabaseAnonKey = requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const supabasePublishableKey = requireEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
   const contentType = req.headers.get('content-type') ?? 'application/json';
 
   const rawBody = await req.arrayBuffer();
@@ -27,8 +27,8 @@ export async function POST(req: Request) {
     headers: {
       'Content-Type': contentType,
       'stripe-signature': signature,
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+      apikey: supabasePublishableKey,
+      Authorization: `Bearer ${supabasePublishableKey}`,
     },
     body: rawBody,
   });
@@ -43,4 +43,3 @@ export async function POST(req: Request) {
     },
   });
 }
-
