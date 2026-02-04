@@ -1,13 +1,6 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { listResources, formatResourceDate } from '@/lib/resources';
 import { steviPortalUrl } from '@/lib/stevi-portal';
-
-export const metadata: Metadata = {
-  title: 'Blog — IHARC',
-  description:
-    'Long-form updates from IHARC on coordinated housing stability, outreach, and overdose response work across Northumberland County.',
-};
 
 export default async function BlogPage() {
   const steviHomeUrl = steviPortalUrl('/');
