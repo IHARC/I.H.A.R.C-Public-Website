@@ -1,0 +1,32 @@
+name: Idea
+description: Capture a rough idea for later shaping.
+title: "Idea: "
+labels:
+  - needs-spec
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / opportunity
+      description: What’s the underlying problem or opportunity?
+      placeholder: "Example: Visitors need an easier way to find outreach supports on mobile."
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should be true when this is solved?
+      placeholder: "Example: People can find X within Y clicks and understand next steps."
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Links, screenshots, rough UX notes, etc.
+    validations:
+      required: false
+

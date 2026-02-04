@@ -1,0 +1,72 @@
+name: Feature
+description: Build a new feature/change with clear acceptance criteria.
+title: "Feature: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep this issue buildable: **Problem → Outcome → Acceptance criteria → Validation plan**.
+        If this requires a STEVI admin surface or DB changes, create a linked issue in `IHARC/STEVI` and document merge order.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is broken/missing and who is impacted?
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should be true when this is done?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, testable checkboxes.
+      value: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan / notes (optional)
+      description: Key files/symbols, risks, constraints, UX notes.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Select what must be run/checked for this change.
+      options:
+        - label: `npm run lint`
+          required: true
+        - label: `npm run typecheck`
+          required: true
+        - label: `npm run test` (Vitest)
+          required: true
+        - label: `npm run build`
+          required: true
+        - label: `npm run e2e` (if end-to-end flows changed)
+        - label: Manual smoke test of the primary flow(s)
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      description: Related issues (STEVI), docs, PR link.
+    validations:
+      required: false
+

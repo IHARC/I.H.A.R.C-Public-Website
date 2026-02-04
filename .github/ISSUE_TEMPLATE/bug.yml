@@ -1,0 +1,63 @@
+name: Bug
+description: Report something that is broken in production or dev.
+title: "Bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who is impacted and how bad is it?
+      placeholder: "Example: The /resources page fails to load; blocks public access to help links."
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Clear steps to reproduce.
+      value: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context (optional)
+      description: Screenshots, logs, environment details (browser, URL), suspected area/files.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: validation
+    attributes:
+      label: Validation plan
+      options:
+        - label: `npm run lint`
+          required: true
+        - label: `npm run typecheck`
+          required: true
+        - label: `npm run test` (Vitest)
+          required: true
+        - label: `npm run build`
+          required: true
+

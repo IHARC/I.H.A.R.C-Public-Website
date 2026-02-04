@@ -39,6 +39,7 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 - Ship changes via a pull request from a branch (no direct commits to `main`).
 - Prefer GitHub CLI (`gh`) for PR ops: `gh pr create`, `gh pr view`, `gh pr checks --watch`, `gh pr merge`.
 - Codex Cloud automatically reviews PRs; treat it as a required gate alongside checks (often ~5 minutes each) and address feedback before merging.
+- Optional: if Codex review is enforced as a required check/review, enable auto-merge to avoid manual waiting (`gh pr merge --auto --squash`).
 - Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
 - Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
 

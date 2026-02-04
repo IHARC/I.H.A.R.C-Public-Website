@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: IHARC website architecture
+    url: https://github.com/IHARC/I.H.A.R.C-Public-Website/blob/main/docs/portal/architecture.md
+    about: Data flow, caching, and public surfaces.
+  - name: Marketing repository guide (AGENTS)
+    url: https://github.com/IHARC/I.H.A.R.C-Public-Website/blob/main/AGENTS.md
+    about: Codex guardrails and GitHub workflow for this repo.
+
