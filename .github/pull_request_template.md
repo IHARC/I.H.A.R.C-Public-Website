@@ -13,5 +13,5 @@
 
 ## Review gates
 - [ ] CI checks are green
-- [ ] Codex Cloud review has landed and feedback is addressed
-
+- [ ] Codex Cloud feedback has landed (comment or 👍) and is addressed
+- [ ] Branch will be deleted on merge (repo auto-delete enabled or merge via `gh pr merge --delete-branch`)
