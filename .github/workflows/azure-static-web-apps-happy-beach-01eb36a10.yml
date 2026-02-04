@@ -16,7 +16,7 @@ jobs:
     name: Build and Deploy Job
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       NEXT_PUBLIC_GA4_ID: ${{ secrets.NEXT_PUBLIC_GA4_ID }}
     steps:
       - uses: actions/checkout@v4

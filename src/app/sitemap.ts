@@ -14,6 +14,7 @@ const marketingPaths = [
   '/policies',
   '/get-help',
   '/news',
+  '/blog',
   '/context',
   '/myth-busting',
   '/resources',

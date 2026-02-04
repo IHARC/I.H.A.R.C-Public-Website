@@ -7,6 +7,7 @@ export const RESOURCE_KIND_LABELS = {
   presentation: 'Presentation',
   policy: 'Policy Brief',
   press: 'Press',
+  blog: 'Blog',
   dataset: 'Dataset',
   other: 'Other Resource',
 } as const;

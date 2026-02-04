@@ -9764,6 +9764,7 @@ export type Database = {
         | "presentation"
         | "policy"
         | "press"
+        | "blog"
         | "dataset"
         | "other"
     }
@@ -11650,6 +11651,7 @@ export const Constants = {
         "presentation",
         "policy",
         "press",
+        "blog",
         "dataset",
         "other",
       ],
