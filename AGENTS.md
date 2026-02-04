@@ -34,6 +34,12 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 - `/api/donations/request-manage-link` → `donations_request_manage_link`
 - `/api/donations/stripe-webhook` → `donations_stripe_webhook` (passes `stripe-signature` through; do not “parse then re-stringify” the body)
 
+## GitHub workflow
+- Track work in GitHub Issues; keep the issue body as the spec (acceptance criteria + validation steps).
+- Ship changes via a pull request from a branch (no direct commits to `main`).
+- Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
+- Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
+
 ## Development Workflow
 1. Install deps with `npm install` (Node 20.x, see `.nvmrc` + `package.json` engines).
 2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Supabase reads.
