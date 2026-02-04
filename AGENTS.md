@@ -37,6 +37,8 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 ## GitHub workflow
 - Track work in GitHub Issues; keep the issue body as the spec (acceptance criteria + validation steps).
 - Ship changes via a pull request from a branch (no direct commits to `main`).
+- Prefer GitHub CLI (`gh`) for PR ops: `gh pr create`, `gh pr view`, `gh pr checks --watch`, `gh pr merge`.
+- Codex Cloud automatically reviews PRs; treat it as a required gate alongside checks (often ~5 minutes each) and address feedback before merging.
 - Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
 - Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
 
