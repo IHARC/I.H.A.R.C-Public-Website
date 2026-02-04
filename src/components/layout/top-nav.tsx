@@ -59,6 +59,7 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
         createDropdownItem('/context', 'Local context', 'How homelessness and overdoses show up in Northumberland.'),
         createDropdownItem('/myth-busting', 'Myth busting', 'Evidence that challenges stigma and misconceptions.'),
         createDropdownItem('/news', 'News & updates', 'Latest announcements, press, and stories.'),
+        createDropdownItem('/blog', 'Blog', 'Long-form updates on community response work.'),
       ].filter(isPresent),
     },
     {
