@@ -44,6 +44,10 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 - Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
 - Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
 
+## Collaboration agents (optional)
+- Use Codex collaboration agents (`spawn_agent`) for bounded investigations or log-heavy tasks to conserve the main context window and reduce drift.
+- Keep workers tightly scoped; avoid parallel edits to the same files.
+
 ## Development Workflow
 1. Install deps with `npm install` (Node 20.x, see `.nvmrc` + `package.json` engines).
 2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Supabase reads.
