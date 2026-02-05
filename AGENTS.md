@@ -1,3 +1,23 @@
+# I.H.A.R.C-Public-Website Codex Agent Guide
+Last updated: 2026-02-05  
+Status: Working guide (living document)
+Standard: IHARC AGENTS v1
+
+## Maintenance (living document / persistent memory)
+This file is durable context for new Codex sessions. Keep it accurate and high-signal.
+
+- If you learn something that should persist across sessions (architecture invariants, guardrails, gotchas, key paths/commands), update this file in the same PR.
+- Remove or rewrite stale info when it stops being true (don’t just append). Prefer deleting obsolete bullets over keeping historical notes.
+- Keep it concise: link to canonical docs (e.g., `docs/*`) instead of duplicating long lists. Avoid “how we debugged X” narratives.
+- Keep the section order stable to reduce drift: Maintenance → Operating mode → Mission/guardrails → Snapshot → Architecture/API → Workflow → Safety/Deployment/Docs.
+- Never add secrets, tokens, donor personal data, or internal-only URLs.
+- When making a substantive change, update the `Last updated` date at the top.
+
+## Operating mode (Codex)
+- Keep fixes explicit and minimal: no hidden fallbacks, dead code, or backward‑compatibility shims.
+- Use `mcp__augment-context-engine__codebase-retrieval` for semantic code search; use `rg` for exact string matches.
+- Keep this repo marketing-only: do not reintroduce local auth or portal submissions—funnel secure collaboration into STEVI.
+
 ## Mission & Audience Context
 - This repository now serves the IHARC marketing site only. It shares public data, directs people to supports, and funnels all secure collaboration into STEVI (Supportive Technology to Enable Vulnerable Individuals).
 - Keep copy strengths-based and community-first. Highlight how IHARC convenes neighbours, agencies, and local government without recreating portal workflows on this site.
