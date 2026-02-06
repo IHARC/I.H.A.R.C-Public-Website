@@ -1,5 +1,5 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-02-05  
+Last updated: 2026-02-06  
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
@@ -64,9 +64,40 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 - Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
 - Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
 
-## Collaboration agents (optional)
-- Use Codex collaboration agents (`spawn_agent`) for bounded investigations or log-heavy tasks to conserve the main context window and reduce drift.
-- Keep workers tightly scoped; avoid parallel edits to the same files.
+## Collaboration agents (default-required for non-trivial work)
+- Keep this main session as orchestrator. Delegate non-trivial work to workers, then synthesize results before implementation decisions.
+- Use `spawn_agent`, `send_input`, `wait`, and `close_agent` for bounded analysis, log-heavy checks, and role-based feedback.
+- One level by default: workers should not spawn sub-agents unless explicitly allowed.
+
+### Triage: when to spawn
+- **Solo only for trivial work**: direct factual answers, tiny isolated edits, or quick low-risk read-only lookups.
+- **Spawn at least one worker**: medium-scope investigations, review tasks, or log-heavy validation.
+- **Spawn multiple specialized workers** for any of:
+  - crisis/help-content changes (`/get-help` messaging, emergency wording, hotline/resource references),
+  - navigation/information-architecture redesign,
+  - Supabase-backed public data and caching behavior changes,
+  - multi-page copy edits that change system-level messaging.
+
+### Worker guardrails (required)
+- Workers must receive explicit role, goal, constraints, and relevant path scope.
+- Default to read-only unless edits are explicitly authorized.
+- If edits are authorized, assign non-overlapping file ownership.
+- Never allow parallel edits to the same files.
+- Require a structured response from each worker: findings, recommendations, open questions, and file/route references.
+- Orchestrator synthesizes all worker outputs before proceeding.
+
+### Website SME personas (starter set, extend as needed)
+- `UI/UX Senior Designer` (marketing IA, conversion flow, and usability clarity).
+- `Social Services Communications SME` (dignity-first, non-stigmatizing, trauma-informed public wording heuristics).
+- `Content Accuracy Reviewer` (resource numbers, service references, and policy wording consistency).
+- `Security/Privacy Reviewer` (public/private boundary checks and data exposure risk).
+- `SEO/Analytics Reviewer` (discoverability, metadata coherence, measurement integrity).
+- `QA/Accessibility Reviewer` (content regressions, keyboard/screen-reader, and readability checks).
+- Add a task-specific SME persona whenever none of the starter personas fit the domain.
+
+### Persona feedback safety
+- Persona outputs are simulated heuristic feedback.
+- Do not treat simulated persona output as legal, clinical, or professional advice.
 
 ## Development Workflow
 1. Install deps with `npm install` (Node 20.x, see `.nvmrc` + `package.json` engines).
