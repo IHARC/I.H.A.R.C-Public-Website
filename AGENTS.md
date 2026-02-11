@@ -1,5 +1,5 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-02-06  
+Last updated: 2026-02-11  
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
@@ -14,8 +14,7 @@ This file is durable context for new Codex sessions. Keep it accurate and high-s
 - When making a substantive change, update the `Last updated` date at the top.
 
 ## Operating mode (Codex)
-- Keep fixes explicit and minimal: no hidden fallbacks, dead code, or backward‑compatibility shims.
-- Use `mcp__augment-context-engine__codebase-retrieval` for semantic code search; use `rg` for exact string matches.
+- Follow workspace-level operating defaults in `/home/jordan/github/AGENTS.md`.
 - Keep this repo marketing-only: do not reintroduce local auth or portal submissions—funnel secure collaboration into STEVI.
 
 ## Mission & Audience Context
@@ -55,36 +54,19 @@ These are thin proxies to Supabase Edge Functions. Keep them small and avoid mov
 - `/api/donations/stripe-webhook` → `donations_stripe_webhook` (passes `stripe-signature` through; do not “parse then re-stringify” the body)
 
 ## GitHub workflow
-- Track work in GitHub Issues; keep the issue body as the spec (acceptance criteria + validation steps).
-- Ship changes via a pull request from a branch (no direct commits to `main`).
-- Prefer GitHub CLI (`gh`) for PR ops: `gh pr create`, `gh pr view`, `gh pr checks --watch`, `gh pr merge`.
-- Codex Cloud comments on PRs (advisory by default); treat it as a manual gate alongside checks (often ~5 minutes each) and address feedback before merging.
-- Auto-merge is optional; only enable it after you’ve reviewed Codex feedback (otherwise it can merge before Codex comments arrive).
-- Delete branches after merge to keep the repo clean (prefer `gh pr merge --delete-branch`; also enable “Automatically delete head branches” in repo settings).
-- Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; merge order should be explicit (typically STEVI schema/admin first).
-- Validate before merge: `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
+- Follow the workspace-level GitHub workflow in `/home/jordan/github/AGENTS.md`.
+- Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; make merge order explicit (typically STEVI schema/admin first).
+- Repo merge gate: run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` before merge.
 
-## Collaboration agents (default-required for non-trivial work)
-- Keep this main session as orchestrator. Delegate non-trivial work to workers, then synthesize results before implementation decisions.
-- Use `spawn_agent`, `send_input`, `wait`, and `close_agent` for bounded analysis, log-heavy checks, and role-based feedback.
-- One level by default: workers should not spawn sub-agents unless explicitly allowed.
+## Collaboration agents (repo-specific additions)
+- Follow the workspace-level collaboration model in `/home/jordan/github/AGENTS.md`.
 
 ### Triage: when to spawn
-- **Solo only for trivial work**: direct factual answers, tiny isolated edits, or quick low-risk read-only lookups.
-- **Spawn at least one worker**: medium-scope investigations, review tasks, or log-heavy validation.
 - **Spawn multiple specialized workers** for any of:
   - crisis/help-content changes (`/get-help` messaging, emergency wording, hotline/resource references),
   - navigation/information-architecture redesign,
   - Supabase-backed public data and caching behavior changes,
   - multi-page copy edits that change system-level messaging.
-
-### Worker guardrails (required)
-- Workers must receive explicit role, goal, constraints, and relevant path scope.
-- Default to read-only unless edits are explicitly authorized.
-- If edits are authorized, assign non-overlapping file ownership.
-- Never allow parallel edits to the same files.
-- Require a structured response from each worker: findings, recommendations, open questions, and file/route references.
-- Orchestrator synthesizes all worker outputs before proceeding.
 
 ### Website SME personas (starter set, extend as needed)
 - `UI/UX Senior Designer` (marketing IA, conversion flow, and usability clarity).
