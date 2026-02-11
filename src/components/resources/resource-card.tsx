@@ -3,9 +3,18 @@ import { Badge } from '@/components/ui/badge';
 import type { Resource } from '@/lib/resources';
 import { formatResourceDate, getKindLabel } from '@/lib/resources';
 
-export function ResourceCard({ resource }: { resource: Resource }) {
+export function ResourceCard({
+  resource,
+  hrefBase = '/resources',
+  ctaLabel = 'View resource',
+}: {
+  resource: Resource;
+  hrefBase?: string;
+  ctaLabel?: string;
+}) {
   const kindLabel = getKindLabel(resource.kind);
   const formattedDate = formatResourceDate(resource.datePublished);
+  const href = `${hrefBase}/${resource.slug}`;
 
   return (
     <article className="flex h-full flex-col rounded-3xl border border-outline/20 bg-surface p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md focus-within:border-primary/60">
@@ -17,7 +26,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
       </div>
       <h2 className="mt-4 text-2xl font-semibold text-on-surface">
         <Link
-          href={`/resources/${resource.slug}`}
+          href={href}
           className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           {resource.title}
@@ -39,10 +48,10 @@ export function ResourceCard({ resource }: { resource: Resource }) {
       </div>
       <div className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
         <Link
-          href={`/resources/${resource.slug}`}
+          href={href}
           className="inline-flex items-center gap-2 rounded-full px-4 py-2 transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          View resource
+          {ctaLabel}
           <span aria-hidden>→</span>
         </Link>
       </div>

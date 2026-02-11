@@ -6,8 +6,8 @@ export const RESOURCE_KIND_LABELS = {
   report: 'Report',
   presentation: 'Presentation',
   policy: 'Policy Brief',
-  press: 'Press',
-  blog: 'Blog',
+  press: 'News Update',
+  blog: 'Blog Post',
   dataset: 'Dataset',
   other: 'Other Resource',
 } as const;
@@ -15,6 +15,7 @@ export const RESOURCE_KIND_LABELS = {
 type ResourceKindMap = typeof RESOURCE_KIND_LABELS;
 
 export type ResourceKind = keyof ResourceKindMap;
+export type ResourceChannel = Database['portal']['Enums']['public_content_channel'];
 
 export type ResourceAttachment = {
   label: string;
@@ -29,6 +30,9 @@ export type ResourceEmbed =
   | { type: 'html'; html: string };
 
 type ResourceRow = Database['portal']['Tables']['resource_pages']['Row'];
+type ResourceSelectRow = ResourceRow & {
+  resource_attachments?: Array<{ label: string; url: string; sort_order: number }> | null;
+};
 export type ResourceEmbedPlacement = Database['portal']['Enums']['resource_embed_placement'];
 
 export type Resource = {
@@ -36,6 +40,7 @@ export type Resource = {
   slug: string;
   title: string;
   kind: ResourceKind;
+  contentChannel: ResourceChannel;
   datePublished: string;
   summary?: string | null;
   location?: string | null;
@@ -66,6 +71,7 @@ export type ResourceFilters = {
   kind?: ResourceKind | null;
   tag?: string | null;
   year?: string | null;
+  channel?: ResourceChannel | null;
 };
 
 type FetchOptions = {
@@ -74,34 +80,36 @@ type FetchOptions = {
 
 export type NormalizedResourceFilters = Required<ResourceFilters>;
 
+const RESOURCE_SELECT = `
+  id,
+  slug,
+  title,
+  kind,
+  content_channel,
+  summary,
+  location,
+  date_published,
+  tags,
+  attachments,
+  embed,
+  embed_placement,
+  body_html,
+  is_published,
+  cover_image,
+  created_by_profile_id,
+  updated_by_profile_id,
+  created_at,
+  updated_at,
+  resource_attachments(label, url, sort_order)
+`;
+
 export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<Resource[]> {
   const supabase = await createSupabaseRSCClient();
   const portal = supabase.schema('portal');
 
   let query = portal
     .from('resource_pages')
-    .select(
-      `
-        id,
-        slug,
-        title,
-        kind,
-        summary,
-        location,
-        date_published,
-        tags,
-        attachments,
-        embed,
-        embed_placement,
-        body_html,
-        is_published,
-        cover_image,
-        created_by_profile_id,
-        updated_by_profile_id,
-        created_at,
-        updated_at
-      `,
-    )
+    .select(RESOURCE_SELECT)
     .order('date_published', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -114,7 +122,7 @@ export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<
     throw error;
   }
 
-  const rows = (data ?? []) as ResourceRow[];
+  const rows = (data ?? []) as ResourceSelectRow[];
   return rows.map(mapResourceRow);
 }
 
@@ -135,28 +143,7 @@ export async function getResourceBySlug(
 
   let query = portal
     .from('resource_pages')
-    .select(
-      `
-        id,
-        slug,
-        title,
-        kind,
-        summary,
-        location,
-        date_published,
-        tags,
-        attachments,
-        embed,
-        embed_placement,
-        body_html,
-        is_published,
-        cover_image,
-        created_by_profile_id,
-        updated_by_profile_id,
-        created_at,
-        updated_at
-      `,
-    )
+    .select(RESOURCE_SELECT)
     .eq('slug', slug)
     .limit(1);
 
@@ -164,7 +151,7 @@ export async function getResourceBySlug(
     query = query.eq('is_published', true);
   }
 
-  const { data, error } = await query.maybeSingle<ResourceRow>();
+  const { data, error } = await query.maybeSingle<ResourceSelectRow>();
 
   if (error) {
     if (error.code === 'PGRST116') {
@@ -186,6 +173,7 @@ export function normalizeFilters(filters: ResourceFilters): NormalizedResourceFi
     kind: filters.kind ?? null,
     tag: filters.tag?.toString().trim() || null,
     year: filters.year?.toString().trim() || null,
+    channel: filters.channel ?? null,
   } as NormalizedResourceFilters;
 
   if (normalized.kind && !Object.hasOwn(RESOURCE_KIND_LABELS, normalized.kind)) {
@@ -200,11 +188,20 @@ export function normalizeFilters(filters: ResourceFilters): NormalizedResourceFi
     normalized.tag = normalized.tag.toLowerCase();
   }
 
+  if (
+    normalized.channel &&
+    normalized.channel !== 'resources' &&
+    normalized.channel !== 'updates' &&
+    normalized.channel !== 'transparency'
+  ) {
+    normalized.channel = null;
+  }
+
   return normalized;
 }
 
 export function filterResources(dataset: Resource[], filters: ResourceFilters = {}): Resource[] {
-  const { q, kind, tag, year } = normalizeFilters(filters);
+  const { q, kind, tag, year, channel } = normalizeFilters(filters);
   const searchTerm = q?.trim().toLowerCase();
   const tagFilter = tag?.toLowerCase();
 
@@ -215,6 +212,10 @@ export function filterResources(dataset: Resource[], filters: ResourceFilters = 
       }
 
       if (kind && resource.kind !== kind) {
+        return false;
+      }
+
+      if (channel && resource.contentChannel !== channel) {
         return false;
       }
 
@@ -230,12 +231,7 @@ export function filterResources(dataset: Resource[], filters: ResourceFilters = 
         return true;
       }
 
-      const haystack = [
-        resource.title,
-        resource.summary ?? '',
-        resource.location ?? '',
-        resource.tags.join(' '),
-      ]
+      const haystack = [resource.title, resource.summary ?? '', resource.location ?? '', resource.tags.join(' ')]
         .join(' ')
         .toLowerCase();
 
@@ -283,7 +279,7 @@ export function isAllowedEmbedUrl(rawUrl: string | URL) {
     const parsed = rawUrl instanceof URL ? rawUrl : new URL(rawUrl);
     const hostname = parsed.hostname.toLowerCase();
     return ALLOWED_EMBED_HOSTS.has(hostname);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -308,17 +304,18 @@ export function normalizeResourceSlug(input: string): string {
     .slice(0, 80);
 }
 
-function mapResourceRow(row: ResourceRow): Resource {
+function mapResourceRow(row: ResourceSelectRow): Resource {
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
     kind: row.kind as ResourceKind,
+    contentChannel: row.content_channel,
     datePublished: row.date_published,
     summary: row.summary,
     location: row.location,
     tags: Array.isArray(row.tags) ? row.tags : [],
-    attachments: normalizeAttachmentList(row.attachments),
+    attachments: normalizeAttachmentList(row.resource_attachments, row.attachments),
     embed: normalizeEmbed(row.embed),
     embedPlacement: (row.embed_placement as ResourceEmbedPlacement) ?? 'above',
     bodyHtml: row.body_html ?? '',
@@ -329,12 +326,21 @@ function mapResourceRow(row: ResourceRow): Resource {
   };
 }
 
-function normalizeAttachmentList(value: Json | null): ResourceAttachment[] {
-  if (!Array.isArray(value)) {
+function normalizeAttachmentList(
+  linkedAttachments: Array<{ label: string; url: string; sort_order: number }> | null | undefined,
+  legacyAttachments: Json | null,
+): ResourceAttachment[] {
+  if (Array.isArray(linkedAttachments) && linkedAttachments.length > 0) {
+    return [...linkedAttachments]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((entry) => ({ label: entry.label, url: entry.url }));
+  }
+
+  if (!Array.isArray(legacyAttachments)) {
     return [];
   }
 
-  return value
+  return legacyAttachments
     .map((entry) => {
       if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
         return null;
@@ -362,37 +368,27 @@ function normalizeEmbed(value: Json | null): ResourceEmbed | null {
   switch (type) {
     case 'google-doc':
     case 'pdf': {
-      const url = 'url' in value && typeof value.url === 'string' ? value.url : null;
-      if (!url) {
-        return null;
-      }
+      const url = 'url' in value ? String(value.url) : '';
+      if (!url || !isAllowedEmbedUrl(url)) return null;
       return { type, url };
     }
     case 'video': {
-      const url = 'url' in value && typeof value.url === 'string' ? value.url : null;
-      const provider =
-        'provider' in value && (value.provider === 'youtube' || value.provider === 'vimeo')
-          ? value.provider
-          : null;
-      if (!url || !provider) {
-        return null;
-      }
-      return { type, url, provider };
+      const url = 'url' in value ? String(value.url) : '';
+      const provider = 'provider' in value ? String(value.provider) : '';
+      if (!url || !isAllowedEmbedUrl(url)) return null;
+      if (provider !== 'youtube' && provider !== 'vimeo') return null;
+      return { type: 'video', url, provider };
     }
     case 'external': {
-      const url = 'url' in value && typeof value.url === 'string' ? value.url : null;
-      if (!url) {
-        return null;
-      }
-      const label = 'label' in value && typeof value.label === 'string' ? value.label : undefined;
-      return { type, url, label };
+      const url = 'url' in value ? String(value.url) : '';
+      const label = 'label' in value ? String(value.label) : undefined;
+      if (!url) return null;
+      return { type: 'external', url, label };
     }
     case 'html': {
-      const html = 'html' in value && typeof value.html === 'string' ? value.html : null;
-      if (!html) {
-        return null;
-      }
-      return { type, html };
+      const html = 'html' in value ? String(value.html) : '';
+      if (!html) return null;
+      return { type: 'html', html };
     }
     default:
       return null;

@@ -10,7 +10,13 @@ function formatReviewed(value: string) {
   }
 }
 
-export function PolicyCard({ policy }: { policy: Policy }) {
+export function PolicyCard({
+  policy,
+  hrefBase = '/transparency/policies',
+}: {
+  policy: Policy;
+  hrefBase?: string;
+}) {
   return (
     <article className="flex h-full flex-col gap-4 rounded-3xl border border-outline/15 bg-surface p-6 text-on-surface shadow-level-1">
       <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +33,7 @@ export function PolicyCard({ policy }: { policy: Policy }) {
       </div>
       <div className="mt-auto">
         <Link
-          href={`/policies/${policy.slug}`}
+          href={`${hrefBase}/${policy.slug}`}
           className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Read policy

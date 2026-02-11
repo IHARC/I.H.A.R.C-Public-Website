@@ -58,8 +58,7 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
         createDropdownItem('/about', 'About IHARC', 'What IHARC is and how we collaborate.'),
         createDropdownItem('/context', 'Local context', 'How homelessness and overdoses show up in Northumberland.'),
         createDropdownItem('/myth-busting', 'Myth busting', 'Evidence that challenges stigma and misconceptions.'),
-        createDropdownItem('/news', 'News & updates', 'Latest announcements, press, and stories.'),
-        createDropdownItem('/blog', 'Blog', 'Long-form updates on community response work.'),
+        createDropdownItem('/updates', 'Updates', 'News and blog posts from the field.'),
       ].filter(isPresent),
     },
     {
@@ -76,8 +75,7 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
       items: [
         createDropdownItem('/stats', 'Community status', 'Live dashboards on calls, outreach, and flow.'),
         createDropdownItem('/data', 'Data stories', 'Point-in-time counts and trend explainers.'),
-        createDropdownItem('/transparency', 'Transparency', 'Governance, budgets, and stewardship commitments.'),
-        createDropdownItem('/policies', 'Policies', 'Published policies and privacy commitments.'),
+        createDropdownItem('/transparency', 'Transparency hub', 'SOPs, policies, and accountability artifacts.'),
       ].filter(isPresent),
     },
   ];

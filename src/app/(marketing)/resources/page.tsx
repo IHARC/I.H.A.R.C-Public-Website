@@ -17,7 +17,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 export const metadata: Metadata = {
   title: 'Reports & Resources — IHARC',
   description:
-    'Browse IHARC delegations, reports, policies, and press resources that document how Northumberland partners are coordinating housing and overdose response.',
+    'Browse IHARC research, presentations, datasets, and practical resources that support community response work in Northumberland County.',
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -29,23 +29,26 @@ export default async function ResourcesPage({
 }) {
   const resolved = (await searchParams) ?? {};
   const filters = fromSearchParams(resolved);
-  const normalized = normalizeFilters(filters);
+  const normalized = normalizeFilters({ ...filters, channel: 'resources' });
 
   const dataset = await fetchResourceLibrary();
-  const items = filterResources(dataset, normalized);
-  const tags = getResourceTags(dataset);
-  const years = getResourceYears(dataset);
-  const kinds = (Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>).map((value) => ({
-    value,
-    label: RESOURCE_KIND_LABELS[value],
-  }));
+  const baseResources = filterResources(dataset, { channel: 'resources' });
+  const items = filterResources(baseResources, normalized);
+  const tags = getResourceTags(baseResources);
+  const years = getResourceYears(baseResources);
+  const kinds = (Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>)
+    .map((value) => ({
+      value,
+      label: RESOURCE_KIND_LABELS[value],
+    }))
+    .filter((entry) => entry.value !== 'blog' && entry.value !== 'press' && entry.value !== 'policy');
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Reports & Resources — IHARC',
     description:
-      'Access delegations, impact reports, and policy resources from the Integrated Homelessness and Addictions Response Centre.',
+      'Access datasets, practical guides, and research resources from the Integrated Homelessness and Addictions Response Centre.',
     url: `${SITE_URL}/resources`,
     isPartOf: {
       '@type': 'WebSite',
@@ -64,7 +67,7 @@ export default async function ResourcesPage({
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Reports & Resources</p>
         <h1 className="text-4xl font-bold tracking-tight">Documenting the collaborative response to housing and overdose emergencies</h1>
         <p className="text-base text-on-surface/80">
-          IHARC publishes public delegations, data briefings, and policy updates so neighbours and partners can follow how decisions translate into action.
+          Browse practical tools, research summaries, and datasets published by IHARC teams and partners. For transparency documents and SOPs, use the Transparency Hub.
         </p>
       </header>
 
@@ -100,5 +103,6 @@ function fromSearchParams(params: Record<string, string | string[] | undefined>)
     kind: kind && kind in RESOURCE_KIND_LABELS ? (kind as keyof typeof RESOURCE_KIND_LABELS) : null,
     tag: getValue(params.tag),
     year: getValue(params.year),
+    channel: 'resources',
   } satisfies ResourceFilters;
 }

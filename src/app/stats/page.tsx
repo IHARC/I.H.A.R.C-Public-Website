@@ -117,7 +117,7 @@ function DashboardPlaceholder() {
             Visit the STEVI portal
           </Link>
           <Link
-            href="/news"
+            href="/updates"
             className="inline-flex items-center rounded-full border border-outline/40 bg-surface px-4 py-2 font-medium text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Read the latest updates

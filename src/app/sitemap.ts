@@ -11,10 +11,9 @@ const marketingPaths = [
   '/programs',
   '/data',
   '/transparency',
-  '/policies',
+  '/transparency/policies',
   '/get-help',
-  '/news',
-  '/blog',
+  '/updates',
   '/context',
   '/myth-busting',
   '/resources',
@@ -37,15 +36,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === '/' ? 1 : 0.6,
   }));
 
-  const resourceEntries = resources.map((resource) => ({
-    url: `${SITE_URL}/resources/${resource.slug}`,
-    lastModified: resource.updatedAt ?? resource.datePublished,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
+  const resourceEntries = resources.map((resource) => {
+    const path =
+      resource.contentChannel === 'updates'
+        ? `/updates/${resource.slug}`
+        : resource.contentChannel === 'transparency'
+          ? `/transparency/resources/${resource.slug}`
+          : `/resources/${resource.slug}`;
+
+    return {
+      url: `${SITE_URL}${path}`,
+      lastModified: resource.updatedAt ?? resource.datePublished,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    };
+  });
 
   const policyEntries = policies.map((policy) => ({
-    url: `${SITE_URL}/policies/${policy.slug}`,
+    url: `${SITE_URL}/transparency/policies/${policy.slug}`,
     lastModified: policy.updatedAt ?? policy.lastReviewedAt,
     changeFrequency: 'monthly' as const,
     priority: 0.6,

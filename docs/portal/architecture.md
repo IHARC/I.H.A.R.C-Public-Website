@@ -14,7 +14,9 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
 - Routes live under `/(marketing)` plus `/stats`. There are no `/portal/*`, `/login`, `/register`, or `/petition` pages in this repo anymore.
 - `/stats` is the Community Status Dashboard. It keeps `export const dynamic = 'force-dynamic'` so each request fetches fresh Supabase metrics.
 - `/data` combines PIT summaries with the latest metrics to tell the story of housing support and overdose response trends.
-- `/resources` lists, filters, and renders Supabase-managed resources (reports, delegations, presentations, etc.). Embeds are sanitised before rendering.
+- `/resources` lists non-update resource library entries (`content_channel='resources'`).
+- `/updates` is the consolidated news + blog surface (`content_channel='updates'`).
+- `/transparency` is the accountability hub for SOPs/policies and transparency artifacts (`/transparency/policies/*`, `/transparency/resources/*`).
 - Navigation (`TopNav`, `SiteFooter`, `AuthLinks`) links to STEVI for any login/request-access CTA.
 - `middleware.ts` intercepts legacy portal paths (e.g., `/portal`, `/ideas`, `/plans`, `/progress`, `/command-center`, `/solutions`, `/login`, `/register`, `/reset-password`, `/api/portal`) and redirects them to the STEVI origin with a 307 status.
 
@@ -24,7 +26,8 @@ The legacy portal experience now lives entirely inside STEVI. This document expl
   - `src/data/metrics.ts` – queries `portal.metric_daily` and related `metric_catalog` rows, groups them, and powers both cards (`DashboardCards`) and charts (`TrendChart`).
   - `src/data/pit.ts` – reads PIT rollups (summary counts plus community breakdowns) exposed via Supabase views.
   - `src/data/myths.ts` – loads myth-busting content curated in Supabase tables.
-  - `src/lib/resources.ts` – fetches `portal.resource_pages`, normalises attachments, and sanitises embedded HTML before passing data to Next.js routes.
+  - `src/lib/resources.ts` – fetches `portal.resource_pages`, reads normalized `portal.resource_attachments`, and routes content by `content_channel`.
+  - `src/data/policies.ts` – fetches published policies for transparency routes.
 - Each module wraps Supabase reads with `unstable_cache` and tags from `src/lib/cache/tags.ts`. The only active tags after the portal removal are `metrics`, `mythEntries`, `pitSummary`, and per-PIT `pitCount`.
 
 ### 3. Components

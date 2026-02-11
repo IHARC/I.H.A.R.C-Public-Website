@@ -9047,6 +9047,7 @@ export type Database = {
       }
       policies: {
         Row: {
+          archived_at: string | null
           body_html: string
           category: Database["portal"]["Enums"]["policy_category"]
           created_at: string
@@ -9057,6 +9058,10 @@ export type Database = {
           internal_ref: string | null
           is_published: boolean | null
           last_reviewed_at: string
+          owner_profile_id: string | null
+          published_at: string | null
+          review_due_at: string | null
+          reviewer_profile_id: string | null
           short_summary: string
           slug: string
           sort_order: number
@@ -9066,6 +9071,7 @@ export type Database = {
           updated_by_profile_id: string | null
         }
         Insert: {
+          archived_at?: string | null
           body_html?: string
           category?: Database["portal"]["Enums"]["policy_category"]
           created_at?: string
@@ -9076,6 +9082,10 @@ export type Database = {
           internal_ref?: string | null
           is_published?: boolean | null
           last_reviewed_at?: string
+          owner_profile_id?: string | null
+          published_at?: string | null
+          review_due_at?: string | null
+          reviewer_profile_id?: string | null
           short_summary: string
           slug: string
           sort_order?: number
@@ -9085,6 +9095,7 @@ export type Database = {
           updated_by_profile_id?: string | null
         }
         Update: {
+          archived_at?: string | null
           body_html?: string
           category?: Database["portal"]["Enums"]["policy_category"]
           created_at?: string
@@ -9095,6 +9106,10 @@ export type Database = {
           internal_ref?: string | null
           is_published?: boolean | null
           last_reviewed_at?: string
+          owner_profile_id?: string | null
+          published_at?: string | null
+          review_due_at?: string | null
+          reviewer_profile_id?: string | null
           short_summary?: string
           slug?: string
           sort_order?: number
@@ -9113,6 +9128,290 @@ export type Database = {
           },
           {
             foreignKeyName: "policies_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policies_owner_profile_id_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policies_reviewer_profile_id_fkey"
+            columns: ["reviewer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_branding: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          favicon_url: string | null
+          id: boolean
+          logo_dark_url: string | null
+          logo_light_url: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          favicon_url?: string | null
+          id?: boolean
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          favicon_url?: string | null
+          id?: boolean
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_branding_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_branding_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_footer: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          id: boolean
+          primary_text: string
+          secondary_text: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          primary_text: string
+          secondary_text?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          primary_text?: string
+          secondary_text?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_footer_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_footer_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_home: {
+        Row: {
+          context_cards: Json
+          created_at: string
+          created_by_profile_id: string | null
+          hero: Json
+          id: boolean
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          context_cards?: Json
+          created_at?: string
+          created_by_profile_id?: string | null
+          hero?: Json
+          id?: boolean
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          context_cards?: Json
+          created_at?: string
+          created_by_profile_id?: string | null
+          hero?: Json
+          id?: boolean
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_home_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_home_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_navigation: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          id: boolean
+          items: Json
+          portal_cta_label: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          items?: Json
+          portal_cta_label?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          items?: Json
+          portal_cta_label?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_navigation_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_navigation_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_programs: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          id: boolean
+          programs: Json
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          programs?: Json
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          programs?: Json
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_programs_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_programs_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_supports: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          id: boolean
+          mutual_aid: Json
+          updated_at: string
+          updated_by_profile_id: string | null
+          urgent: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          mutual_aid?: Json
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          urgent?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: boolean
+          mutual_aid?: Json
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          urgent?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_supports_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_supports_updated_by_profile_id_fkey"
             columns: ["updated_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -9502,8 +9801,10 @@ export type Database = {
       }
       resource_pages: {
         Row: {
+          archived_at: string | null
           attachments: Json
           body_html: string
+          content_channel: Database["portal"]["Enums"]["public_content_channel"]
           cover_image: string | null
           created_at: string
           created_by_profile_id: string | null
@@ -9514,6 +9815,10 @@ export type Database = {
           is_published: boolean
           kind: Database["portal"]["Enums"]["resource_kind"]
           location: string | null
+          owner_profile_id: string | null
+          published_at: string | null
+          review_due_at: string | null
+          reviewer_profile_id: string | null
           slug: string
           summary: string | null
           tags: string[]
@@ -9522,8 +9827,10 @@ export type Database = {
           updated_by_profile_id: string | null
         }
         Insert: {
+          archived_at?: string | null
           attachments?: Json
           body_html?: string
+          content_channel?: Database["portal"]["Enums"]["public_content_channel"]
           cover_image?: string | null
           created_at?: string
           created_by_profile_id?: string | null
@@ -9534,6 +9841,10 @@ export type Database = {
           is_published?: boolean
           kind?: Database["portal"]["Enums"]["resource_kind"]
           location?: string | null
+          owner_profile_id?: string | null
+          published_at?: string | null
+          review_due_at?: string | null
+          reviewer_profile_id?: string | null
           slug: string
           summary?: string | null
           tags?: string[]
@@ -9542,8 +9853,10 @@ export type Database = {
           updated_by_profile_id?: string | null
         }
         Update: {
+          archived_at?: string | null
           attachments?: Json
           body_html?: string
+          content_channel?: Database["portal"]["Enums"]["public_content_channel"]
           cover_image?: string | null
           created_at?: string
           created_by_profile_id?: string | null
@@ -9554,6 +9867,10 @@ export type Database = {
           is_published?: boolean
           kind?: Database["portal"]["Enums"]["resource_kind"]
           location?: string | null
+          owner_profile_id?: string | null
+          published_at?: string | null
+          review_due_at?: string | null
+          reviewer_profile_id?: string | null
           slug?: string
           summary?: string | null
           tags?: string[]
@@ -9574,6 +9891,65 @@ export type Database = {
             columns: ["updated_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_pages_owner_profile_id_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_pages_reviewer_profile_id_fkey"
+            columns: ["reviewer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_attachments: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          id: string
+          label: string
+          resource_page_id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          label: string
+          resource_page_id: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          label?: string
+          resource_page_id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_attachments_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_attachments_resource_page_id_fkey"
+            columns: ["resource_page_id"]
+            isOneToOne: false
+            referencedRelation: "resource_pages"
             referencedColumns: ["id"]
           },
         ]
@@ -9757,6 +10133,7 @@ export type Database = {
         | "operations"
         | "finance"
       policy_status: "draft" | "published" | "archived"
+      public_content_channel: "resources" | "updates" | "transparency"
       resource_embed_placement: "above" | "below"
       resource_kind:
         | "delegation"
@@ -11644,6 +12021,7 @@ export const Constants = {
         "finance",
       ],
       policy_status: ["draft", "published", "archived"],
+      public_content_channel: ["resources", "updates", "transparency"],
       resource_embed_placement: ["above", "below"],
       resource_kind: [
         "delegation",
