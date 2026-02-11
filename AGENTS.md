@@ -30,11 +30,13 @@ This file is durable context for new Codex sessions. Keep it accurate and high-s
 - Footer copy: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” and “Inclusive, accessible, community-first data platform.”
 
 ## Product Snapshot
-- All live routes are under `/(marketing)` plus `/stats`. Pages include Home, About, Programs, Get Help, News, Myth Busting, Context, PIT breakdowns, Supabase-backed Resources, Transparency (`/transparency`), and Policies (`/policies`, `/policies/[slug]`).
+- All live routes are under `/(marketing)` plus `/stats`. Pages include Home, About, Programs, Get Help, Updates (`/updates`, `/updates/[slug]`), Myth Busting, Context, PIT breakdowns, Supabase-backed Resources (`/resources`, `/resources/[slug]`), and Transparency Hub (`/transparency`, `/transparency/policies`, `/transparency/policies/[slug]`, `/transparency/resources/[slug]`).
 - `/stats` renders the Community Status Dashboard using `src/data/metrics.ts` and chart components in `src/components/metrics`.
 - `/data` uses PIT summaries + Supabase metrics to show trend cards and explanatory copy.
-- `/resources` and `/resources/[slug]` pull from `portal.resource_pages` via `src/lib/resources.ts` and sanitise embeds.
-- `/policies` and `/policies/[slug]` pull from `portal.policies` via `src/data/policies.ts` (tagged `marketing:policies`) and render sanitized HTML.
+- `/resources` and `/resources/[slug]` are the non-update resource library (`content_channel='resources'`) pulled from `portal.resource_pages` via `src/lib/resources.ts`.
+- `/updates` and `/updates/[slug]` consolidate news + blog updates from `portal.resource_pages` (`content_channel='updates'`).
+- Transparency SOPs/policies pull from `portal.policies` via `src/data/policies.ts` and render under `/transparency/policies/*`.
+- Marketing chrome/content blocks read from typed `portal.marketing_*` tables (not `portal.public_settings`).
 - Legacy `/portal/*`, `/login`, `/register`, `/reset-password`, `/petition`, `/command-center`, and `/solutions/*` paths now redirect to the STEVI origin inside `middleware.ts`. This repo does not implement local auth or portal submissions—public donation/volunteer flows are handled via the API proxies below.
 
 ## Architecture Notes

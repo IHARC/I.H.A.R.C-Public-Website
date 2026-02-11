@@ -32,6 +32,23 @@ export type Policy = {
   updatedAt: string;
 };
 
+type PolicySelectRow = Pick<
+  Database['portal']['Tables']['policies']['Row'],
+  | 'id'
+  | 'slug'
+  | 'title'
+  | 'category'
+  | 'short_summary'
+  | 'body_html'
+  | 'status'
+  | 'sort_order'
+  | 'last_reviewed_at'
+  | 'effective_from'
+  | 'effective_to'
+  | 'created_at'
+  | 'updated_at'
+>;
+
 const POLICY_SELECT = `
   id,
   slug,
@@ -108,7 +125,7 @@ export async function getPublishedPolicyBySlug(slug: string): Promise<Policy | n
   return fetchPolicyBySlugCached(slug);
 }
 
-function mapPolicyRow(row: Database['portal']['Tables']['policies']['Row']): Policy {
+function mapPolicyRow(row: PolicySelectRow): Policy {
   return {
     id: row.id,
     slug: row.slug,

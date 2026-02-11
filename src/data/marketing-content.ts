@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import { CACHE_TAGS } from '@/lib/cache/tags';
+import type { Database } from '@/types/supabase';
 
 type NavItem = {
   label: string;
@@ -54,58 +55,147 @@ export type ProgramEntry = {
   description: string;
 };
 
-type SettingsKey =
-  | 'marketing.nav.items'
-  | 'marketing.nav.portal_cta_label'
-  | 'marketing.branding'
-  | 'marketing.hero'
-  | 'marketing.home.context_cards'
-  | 'marketing.supports.urgent'
-  | 'marketing.supports.mutual_aid'
-  | 'marketing.programs';
+type MarketingRows = {
+  branding: Database['portal']['Tables']['marketing_branding']['Row'] | null;
+  navigation: Database['portal']['Tables']['marketing_navigation']['Row'] | null;
+  home: Database['portal']['Tables']['marketing_home']['Row'] | null;
+  supports: Database['portal']['Tables']['marketing_supports']['Row'] | null;
+  programs: Database['portal']['Tables']['marketing_programs']['Row'] | null;
+};
 
-type SettingsRow = { setting_key: string; setting_value: string | null };
-
-const SETTING_KEYS: SettingsKey[] = [
-  'marketing.nav.items',
-  'marketing.nav.portal_cta_label',
-  'marketing.branding',
-  'marketing.hero',
-  'marketing.home.context_cards',
-  'marketing.supports.urgent',
-  'marketing.supports.mutual_aid',
-  'marketing.programs',
+const DEFAULT_NAV_ITEMS: NavItem[] = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Context', href: '/context' },
+  { label: 'Myth Busting', href: '/myth-busting' },
+  { label: 'Updates', href: '/updates' },
+  { label: 'Get Help', href: '/get-help' },
+  { label: 'Programs', href: '/programs' },
+  { label: 'Resources', href: '/resources' },
+  { label: 'Community Status', href: '/stats' },
+  { label: 'Data', href: '/data' },
+  { label: 'Transparency', href: '/transparency' },
+  { label: 'Donate', href: '/donate' },
 ];
 
-const fetchSettings = unstable_cache(
-  async (): Promise<Record<SettingsKey, string | null>> => {
+const DEFAULT_HERO_CONTENT: HeroContent = {
+  pill: 'Northumberland County',
+  headline: 'Coordinating housing and health supports in the open',
+  body: 'IHARC brings neighbours, service providers, and local government together around one response model.',
+  supporting: 'Use this public site for updates and transparency. STEVI is the secure portal for clients and outreach teams.',
+  imageUrl: '/heroes/hero-main.jpg',
+  imageAlt: 'IHARC outreach workers coordinating supports in Northumberland County',
+  primaryCta: {
+    label: 'Get help',
+    href: '/get-help',
+  },
+  secondaryLink: {
+    label: 'Read updates',
+    href: '/updates',
+  },
+};
+
+const DEFAULT_CONTEXT_CARDS: ContextCard[] = [
+  {
+    id: 'local-context',
+    title: 'Local context',
+    description: 'How housing pressure, poverty, and health needs intersect across Northumberland County.',
+    href: '/context',
+  },
+  {
+    id: 'community-status',
+    title: 'Community status',
+    description: 'Track real-time indicators tied to outreach, emergency response, and housing flow.',
+    href: '/stats',
+  },
+  {
+    id: 'transparency',
+    title: 'Transparency hub',
+    description: 'Review SOPs, policies, and accountability resources published by IHARC.',
+    href: '/transparency',
+  },
+];
+
+const DEFAULT_SUPPORT_ENTRIES: SupportEntry[] = [
+  {
+    title: 'Immediate support',
+    summary: 'Call for urgent guidance and local service navigation.',
+    body: 'In an emergency call 911.',
+    contacts: [
+      { label: '211', href: 'tel:211' },
+      { label: '988', href: 'tel:988' },
+    ],
+  },
+  {
+    title: 'Coordinated entry',
+    summary: 'Transition House coordinated entry line.',
+    body: 'In an emergency call 911.',
+    contacts: [{ label: '905-376-9562', href: 'tel:9053769562' }],
+  },
+  {
+    title: 'Outreach and mental health supports',
+    summary: 'IHARC outreach and NHH Community Mental Health Services.',
+    body: 'In an emergency call 911.',
+    contacts: [
+      { label: 'outreach@iharc.ca', href: 'mailto:outreach@iharc.ca' },
+      { label: '905-377-9891', href: 'tel:9053779891' },
+    ],
+  },
+];
+
+const DEFAULT_MUTUAL_AID: string[] = [
+  'Carry naloxone where possible.',
+  'The Good Samaritan Drug Overdose Act protects people seeking emergency help.',
+  'RAAM clinic: Tuesdays 1-3 PM at 1011 Elgin St W, 2nd floor.',
+];
+
+const DEFAULT_PROGRAMS: ProgramEntry[] = [
+  {
+    title: 'Street outreach',
+    description: 'On-the-ground connection to shelter, overdose response, and care coordination.',
+  },
+  {
+    title: 'System coordination',
+    description: 'Cross-agency coordination to reduce service gaps and duplication.',
+  },
+  {
+    title: 'Transparency and public reporting',
+    description: 'Ongoing publication of policies, SOPs, and community status indicators.',
+  },
+];
+
+function isMissingTableError(error: { code?: string; message?: string } | null | undefined): boolean {
+  return Boolean(error && error.code === 'PGRST205');
+}
+
+const fetchMarketingRows = unstable_cache(
+  async (): Promise<MarketingRows> => {
     const supabase = getSupabasePublicClient();
     const portal = supabase.schema('portal');
 
-    const { data, error } = await portal
-      .from('public_settings')
-      .select('setting_key, setting_value')
-      .in('setting_key', SETTING_KEYS);
+    const [branding, navigation, home, supports, programs] = await Promise.all([
+      portal.from('marketing_branding').select('*').eq('id', true).maybeSingle(),
+      portal.from('marketing_navigation').select('*').eq('id', true).maybeSingle(),
+      portal.from('marketing_home').select('*').eq('id', true).maybeSingle(),
+      portal.from('marketing_supports').select('*').eq('id', true).maybeSingle(),
+      portal.from('marketing_programs').select('*').eq('id', true).maybeSingle(),
+    ]);
 
-    if (error) {
-      throw error;
+    const responses = [branding, navigation, home, supports, programs];
+    const blockingError = responses.find((response) => response.error && !isMissingTableError(response.error));
+    if (blockingError?.error) {
+      throw blockingError.error;
     }
 
-    const rows = (data ?? []) as SettingsRow[];
-    const map = SETTING_KEYS.reduce<Record<SettingsKey, string | null>>(
-      (acc, key) => ({ ...acc, [key]: null }),
-      {} as Record<SettingsKey, string | null>,
-    );
-
-    for (const row of rows) {
-      if (SETTING_KEYS.includes(row.setting_key as SettingsKey)) {
-        map[row.setting_key as SettingsKey] = row.setting_value;
-      }
-    }
-
-    return map;
+    return {
+      branding: branding.error ? null : branding.data,
+      navigation: navigation.error ? null : navigation.data,
+      home: home.error ? null : home.data,
+      supports: supports.error ? null : supports.data,
+      programs: programs.error ? null : programs.data,
+    };
   },
-  ['marketing:settings'],
+  ['marketing:tables:v1'],
   {
     tags: [
       CACHE_TAGS.marketingContent,
@@ -137,15 +227,20 @@ const ALLOWED_URGENT_CONTACT_LABELS = [
   'raamclinictuesdays123pmat1011elginstw2ndfloor',
 ];
 
-function parseJson<T>(raw: string | null, context: string): T {
-  if (!raw) {
+function parseJsonField<T>(value: unknown, context: string): T {
+  if (value == null) {
     throw new Error(`Missing required marketing setting: ${context}`);
   }
-  try {
-    return JSON.parse(raw) as T;
-  } catch (error) {
-    throw new Error(`Invalid JSON for marketing setting ${context}: ${String(error)}`);
+
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch (error) {
+      throw new Error(`Invalid JSON for marketing setting ${context}: ${String(error)}`);
+    }
   }
+
+  return value as T;
 }
 
 function normalizeContactHref(href: string): string {
@@ -198,39 +293,59 @@ export async function getMarketingNavigation(): Promise<{
   items: NavItem[];
   portalCtaLabel: string;
 }> {
-  const settings = await fetchSettings();
-  const items = parseJson<NavItem[]>(settings['marketing.nav.items'], 'marketing.nav.items');
-  const portalCtaLabel = settings['marketing.nav.portal_cta_label'] ?? '';
+  const rows = await fetchMarketingRows();
+  const items = rows.navigation?.items
+    ? parseJsonField<NavItem[]>(rows.navigation.items, 'marketing_navigation.items')
+    : DEFAULT_NAV_ITEMS;
+  const portalCtaLabel = rows.navigation?.portal_cta_label ?? 'Access S.T.E.V.I.';
 
   return { items, portalCtaLabel };
 }
 
 export async function getBrandingAssets(): Promise<BrandingAssets | null> {
-  const settings = await fetchSettings();
-  const raw = settings['marketing.branding'];
-  if (!raw) return null;
-  return parseJson<BrandingAssets>(raw, 'marketing.branding');
+  const rows = await fetchMarketingRows();
+  const branding = rows.branding;
+  if (!branding) return null;
+
+  return {
+    logoLightUrl: branding.logo_light_url,
+    logoDarkUrl: branding.logo_dark_url,
+    faviconUrl: branding.favicon_url,
+  };
 }
 
 export async function getHeroContent(): Promise<HeroContent> {
-  const settings = await fetchSettings();
-  return parseJson<HeroContent>(settings['marketing.hero'], 'marketing.hero');
+  const rows = await fetchMarketingRows();
+  if (!rows.home?.hero) {
+    return DEFAULT_HERO_CONTENT;
+  }
+  return parseJsonField<HeroContent>(rows.home.hero, 'marketing_home.hero');
 }
 
 export async function getContextCards(): Promise<ContextCard[]> {
-  const settings = await fetchSettings();
-  return parseJson<ContextCard[]>(settings['marketing.home.context_cards'], 'marketing.home.context_cards');
+  const rows = await fetchMarketingRows();
+  if (!rows.home?.context_cards) {
+    return DEFAULT_CONTEXT_CARDS;
+  }
+  return parseJsonField<ContextCard[]>(rows.home.context_cards, 'marketing_home.context_cards');
 }
 
 export async function getSupportEntries(): Promise<{ urgent: SupportEntry[]; mutualAid: string[] }> {
-  const settings = await fetchSettings();
-  const urgent = parseJson<SupportEntry[]>(settings['marketing.supports.urgent'], 'marketing.supports.urgent');
-  const mutualAid = parseJson<string[]>(settings['marketing.supports.mutual_aid'], 'marketing.supports.mutual_aid');
+  const rows = await fetchMarketingRows();
+  const urgent = rows.supports?.urgent
+    ? parseJsonField<SupportEntry[]>(rows.supports.urgent, 'marketing_supports.urgent')
+    : DEFAULT_SUPPORT_ENTRIES;
+  const mutualAid = rows.supports?.mutual_aid
+    ? parseJsonField<string[]>(rows.supports.mutual_aid, 'marketing_supports.mutual_aid')
+    : DEFAULT_MUTUAL_AID;
   assertUrgentSupportContacts(urgent);
   return { urgent, mutualAid };
 }
 
 export async function getProgramEntries(): Promise<ProgramEntry[]> {
-  const settings = await fetchSettings();
-  return parseJson<ProgramEntry[]>(settings['marketing.programs'], 'marketing.programs');
+  const rows = await fetchMarketingRows();
+  if (!rows.programs?.programs) {
+    return DEFAULT_PROGRAMS;
+  }
+  return parseJsonField<ProgramEntry[]>(rows.programs.programs, 'marketing_programs.programs');
 }

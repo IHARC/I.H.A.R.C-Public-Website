@@ -7,44 +7,40 @@ type SiteFooterContent = {
   secondaryText: string | null;
 };
 
-const PRIMARY_KEY = 'marketing.footer.primary_text';
-const SECONDARY_KEY = 'marketing.footer.secondary_text';
+const DEFAULT_SITE_FOOTER: SiteFooterContent = {
+  primaryText: 'IHARC - Integrated Homelessness and Addictions Response Centre',
+  secondaryText: 'Inclusive, accessible, community-first data platform.',
+};
+
+function isMissingTableError(error: { code?: string; message?: string } | null | undefined): boolean {
+  return Boolean(error && error.code === 'PGRST205');
+}
 
 const fetchSiteFooter = unstable_cache(
   async (): Promise<SiteFooterContent> => {
-    try {
-      const supabase = getSupabasePublicClient();
-      const portal = supabase.schema('portal');
+    const supabase = getSupabasePublicClient();
+    const portal = supabase.schema('portal');
 
-      const { data, error } = await portal
-        .from('public_settings')
-        .select('setting_key, setting_value')
-        .eq('is_public', true)
-        .in('setting_key', [PRIMARY_KEY, SECONDARY_KEY]);
+    const { data, error } = await portal
+      .from('marketing_footer')
+      .select('primary_text, secondary_text')
+      .eq('id', true)
+      .maybeSingle();
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        throw new Error('No footer settings returned from Supabase');
-      }
-
-      const primaryText =
-        data.find((row) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ?? '';
-      const secondaryTextRaw =
-        data.find((row) => row.setting_key === SECONDARY_KEY)?.setting_value?.trim() ?? null;
-
-      return {
-        primaryText,
-        secondaryText: secondaryTextRaw && secondaryTextRaw.length ? secondaryTextRaw : null,
-      };
-    } catch (error) {
-      console.error('Unable to query site footer content', error);
-      return { primaryText: '', secondaryText: null };
+    if (error && !isMissingTableError(error)) {
+      throw error;
     }
+
+    if (!data || isMissingTableError(error)) {
+      return DEFAULT_SITE_FOOTER;
+    }
+
+    return {
+      primaryText: data.primary_text.trim(),
+      secondaryText: data.secondary_text?.trim() || null,
+    };
   },
-  ['marketing:footer:public'],
+  ['marketing:footer:public:v2'],
   {
     tags: [CACHE_TAGS.siteFooter],
     revalidate: 60,

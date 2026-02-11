@@ -26,7 +26,13 @@ export async function SiteFooter() {
           href="/resources"
           className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Reports & Resources
+          Resources
+        </Link>
+        <Link
+          href="/updates"
+          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Updates
         </Link>
         <Link
           href="/donate"
@@ -35,10 +41,10 @@ export async function SiteFooter() {
           Donate
         </Link>
         <Link
-          href="/policies"
+          href="/transparency"
           className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Policies
+          Transparency
         </Link>
       </nav>
     </footer>
