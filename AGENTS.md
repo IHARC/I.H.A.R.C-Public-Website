@@ -1,5 +1,5 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-02-11  
+Last updated: 2026-02-12  
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
@@ -15,6 +15,7 @@ This file is durable context for new Codex sessions. Keep it accurate and high-s
 
 ## Operating mode (Codex)
 - Follow workspace-level operating defaults in `/home/jordan/github/AGENTS.md`.
+- For codebase discovery each session, search via Augment Context MCP first (more efficient than manual repo scans); use manual CLI search only when MCP is unavailable or the task explicitly requires local grep/rg confirmation.
 - Keep this repo marketing-only: do not reintroduce local auth or portal submissions—funnel secure collaboration into STEVI.
 
 ## Mission & Audience Context
