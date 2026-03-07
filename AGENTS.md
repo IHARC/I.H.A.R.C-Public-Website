@@ -1,106 +1,55 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-02-12  
+Last updated: 2026-02-25
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
 ## Maintenance (living document / persistent memory)
-This file is durable context for new Codex sessions. Keep it accurate and high-signal.
+This file is durable context for new Codex sessions.
 
-- If you learn something that should persist across sessions (architecture invariants, guardrails, gotchas, key paths/commands), update this file in the same PR.
-- Remove or rewrite stale info when it stops being true (don’t just append). Prefer deleting obsolete bullets over keeping historical notes.
-- Keep it concise: link to canonical docs (e.g., `docs/*`) instead of duplicating long lists. Avoid “how we debugged X” narratives.
-- Keep the section order stable to reduce drift: Maintenance → Operating mode → Mission/guardrails → Snapshot → Architecture/API → Workflow → Safety/Deployment/Docs.
-- Never add secrets, tokens, donor personal data, or internal-only URLs.
-- When making a substantive change, update the `Last updated` date at the top.
+- Keep this file concise and high-signal. Link to docs for deep architecture detail.
+- Remove stale guidance when behavior changes.
+- Update `Last updated` for substantive changes.
+- Never add secrets, donor personal data, or internal-only URLs.
 
 ## Operating mode (Codex)
-- Follow workspace-level operating defaults in `/home/jordan/github/AGENTS.md`.
-- For codebase discovery each session, search via Augment Context MCP first (more efficient than manual repo scans); use manual CLI search only when MCP is unavailable or the task explicitly requires local grep/rg confirmation.
-- Keep this repo marketing-only: do not reintroduce local auth or portal submissions—funnel secure collaboration into STEVI.
+- Follow workspace defaults in `/home/jordan/github/AGENTS.md`.
+- Prefer semantic code search MCP when available; use `rg` for exact checks.
+- Keep this repo marketing-only. Secure collaboration/auth flows belong in STEVI.
 
-## Mission & Audience Context
-- This repository now serves the IHARC marketing site only. It shares public data, directs people to supports, and funnels all secure collaboration into STEVI (Supportive Technology to Enable Vulnerable Individuals).
-- Keep copy strengths-based and community-first. Highlight how IHARC convenes neighbours, agencies, and local government without recreating portal workflows on this site.
-- Use the full name **Integrated Homelessness and Addictions Response Centre (IHARC)** in formal copy and metadata. Always describe STEVI as the secure portal for clients, IHARC outreach staff, volunteers, and partners.
-- Site-wide title/description stay locked to `IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County` and the coordinated response description.
-- Any sign-in/register link must point to STEVI (`steviPortalUrl`). Do not reintroduce local authentication, petitions, idea submissions, or other portal workflows here.
-- Transparency/policies are Supabase-backed. Marketing is read-only on `portal.policies` (anon only sees `status='published'`). All CRUD happens in STEVI.
+## Mission and guardrails
+- Use the full name: Integrated Homelessness and Addictions Response Centre (IHARC).
+- Describe STEVI as the secure portal for clients, IHARC outreach staff, volunteers, and partners.
+- Any sign-in/register path must point to STEVI (`steviPortalUrl`).
+- Do not reintroduce local auth, petitions, idea submissions, or portal workflows.
+- Transparency/policies are read-only here; CRUD belongs in STEVI.
 
-### Marketing Content Guardrails
-- **Get Help**: list only the verified numbers — 2-1-1, Transition House coordinated entry **905-376-9562**, 9-8-8, and NHH Community Mental Health Services **905-377-9891**. The text line is offline; direct people to `outreach@iharc.ca`. Repeat “In an emergency call 911” anywhere crisis supports appear and include the Good Samaritan + RAAM clinic reminders.
-- Footer copy: “© {year} IHARC — Integrated Homelessness and Addictions Response Centre” and “Inclusive, accessible, community-first data platform.”
+## Critical public copy constraints
+- Keep verified support contacts current and exact on help surfaces:
+  - 2-1-1
+  - Transition House coordinated entry: `905-376-9562`
+  - 9-8-8
+  - NHH Community Mental Health Services: `905-377-9891`
+  - Email fallback: `outreach@iharc.ca`
+- Include `In an emergency call 911` anywhere crisis supports are shown.
+- Preserve Good Samaritan and RAAM reminders where crisis supports are presented.
 
-## Product Snapshot
-- All live routes are under `/(marketing)` plus `/stats`. Pages include Home, About, Programs, Get Help, Updates (`/updates`, `/updates/[slug]`), Myth Busting, Context, PIT breakdowns, Supabase-backed Resources (`/resources`, `/resources/[slug]`), and Transparency Hub (`/transparency`, `/transparency/policies`, `/transparency/policies/[slug]`, `/transparency/resources/[slug]`).
-- `/stats` renders the Community Status Dashboard using `src/data/metrics.ts` and chart components in `src/components/metrics`.
-- `/data` uses PIT summaries + Supabase metrics to show trend cards and explanatory copy.
-- `/resources` and `/resources/[slug]` are the non-update resource library (`content_channel='resources'`) pulled from `portal.resource_pages` via `src/lib/resources.ts`.
-- `/updates` and `/updates/[slug]` consolidate news + blog updates from `portal.resource_pages` (`content_channel='updates'`).
-- Transparency SOPs/policies pull from `portal.policies` via `src/data/policies.ts` and render under `/transparency/policies/*`.
-- Marketing chrome/content blocks read from typed `portal.marketing_*` tables (not `portal.public_settings`).
-- Legacy `/portal/*`, `/login`, `/register`, `/reset-password`, `/petition`, `/command-center`, and `/solutions/*` paths now redirect to the STEVI origin inside `middleware.ts`. This repo does not implement local auth or portal submissions—public donation/volunteer flows are handled via the API proxies below.
+## Validation matrix (run what matches your change)
+- Typical app changes: `npm run lint`, `npm run typecheck`, `npm run test`.
+- Build-affecting changes: `npm run build`.
+- Content/data loading changes: verify cache invalidation logic and affected routes.
 
-## Architecture Notes
-- Framework: Next.js 15 App Router. Marketing pages rely on React Server Components; `/stats` forces dynamic rendering for real-time Supabase reads.
-- Data access: `src/lib/supabase/rsc.ts` builds the anon client for dynamic reads; cacheable reads can reuse `src/lib/supabase/public-client.ts`. Cached loaders live in `src/data/*.ts`.
-- Tag-based caching: see `src/lib/cache/tags.ts` and `src/lib/cache/invalidate.ts`. Active tags include `metrics`, `mythEntries`, `pitSummary`, per-PIT `pitCount`, `siteFooter`, and `marketing:policies`.
-- Components for the legacy portal were removed. Shared marketing UI now sits under `src/components/layout`, `src/components/site`, `src/components/resources`, and `src/components/metrics`.
-- Middleware intercepts `/portal`, `/auth`, `/login`, `/register`, `/reset-password`, `/api/portal`, `/ideas`, `/plans`, `/progress`, `/command-center`, and `/solutions/*` and issues 307 redirects to `steviPortalUrl`.
+## Public API and data boundaries
+- Keep API routes as thin proxies to Supabase Edge Functions.
+- Do not move business logic into this repo.
+- Only expose data intended for public audiences.
 
-## Public API routes (keep minimal)
-These are thin proxies to Supabase Edge Functions. Keep them small and avoid moving business logic into the marketing site.
+## Directory routing and overrides
+Use nearest `AGENTS.override.md` rules first for specialized work.
 
-- `/api/volunteer/submit` → `volunteer_submit_application`
-- `/api/donations/create-checkout-session` → `donations_create_checkout_session`
-- `/api/donations/create-subscription-session` → `donations_create_subscription_session`
-- `/api/donations/request-manage-link` → `donations_request_manage_link`
-- `/api/donations/stripe-webhook` → `donations_stripe_webhook` (passes `stripe-signature` through; do not “parse then re-stringify” the body)
+- `src/app/(marketing)/get-help/AGENTS.override.md`: crisis/help content safety and copy constraints.
 
-## GitHub workflow
-- Follow the workspace-level GitHub workflow in `/home/jordan/github/AGENTS.md`.
-- Cross-repo features (public surface + admin): create one issue here and a linked issue in STEVI; make merge order explicit (typically STEVI schema/admin first).
-- Repo merge gate: run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` before merge.
-
-## Collaboration agents (repo-specific additions)
-- Follow the workspace-level collaboration model in `/home/jordan/github/AGENTS.md`.
-
-### Triage: when to spawn
-- **Spawn multiple specialized workers** for any of:
-  - crisis/help-content changes (`/get-help` messaging, emergency wording, hotline/resource references),
-  - navigation/information-architecture redesign,
-  - Supabase-backed public data and caching behavior changes,
-  - multi-page copy edits that change system-level messaging.
-
-### Website SME personas (starter set, extend as needed)
-- `UI/UX Senior Designer` (marketing IA, conversion flow, and usability clarity).
-- `Social Services Communications SME` (dignity-first, non-stigmatizing, trauma-informed public wording heuristics).
-- `Content Accuracy Reviewer` (resource numbers, service references, and policy wording consistency).
-- `Security/Privacy Reviewer` (public/private boundary checks and data exposure risk).
-- `SEO/Analytics Reviewer` (discoverability, metadata coherence, measurement integrity).
-- `QA/Accessibility Reviewer` (content regressions, keyboard/screen-reader, and readability checks).
-- Add a task-specific SME persona whenever none of the starter personas fit the domain.
-
-### Persona feedback safety
-- Persona outputs are simulated heuristic feedback.
-- Do not treat simulated persona output as legal, clinical, or professional advice.
-
-## Development Workflow
-1. Install deps with `npm install` (Node 20.x, see `.nvmrc` + `package.json` engines).
-2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Supabase reads.
-3. `npm run dev` to develop, `npm run lint`, `npm run typecheck`, `npm run build` to validate.
-4. Keep analytics + consent logic intact (`ThemeProvider`, `AnalyticsProvider`, `ConsentBanner`).
-
-## Data & Safety
-- Only expose data meant for the public. Any sensitive plan/idea/petition workflow should happen in STEVI or Supabase Edge Functions.
-- Maintain accessible semantics and consistent emergency messaging.
-- When editing Supabase-backed content (metrics, PIT, resources, policies), invalidate caches through the helpers in `src/lib/cache/invalidate.ts`.
-
-## Deployment & Docs
-- Azure Static Web Apps deploys from `npm run build`.
-- Supabase public env vars must exist in Azure; do not commit service-role keys.
-- This repo does not contain Supabase Edge Function source; it invokes Edge Functions via API routes. Any ingestion or background jobs live in STEVI or external automation.
-- Reference docs:
-  - `README.md` – overview + workflow
-  - `docs/portal/architecture.md` – marketing-site architecture + data flow
-  - `docs/portal/mvp-plan.md` – roadmap/backlog for public surfaces
-  - `INTEGRATIONS.md` – analytics/chat configuration
+## Canonical docs
+- `README.md`
+- `docs/portal/architecture.md`
+- `docs/portal/mvp-plan.md`
+- `INTEGRATIONS.md`
