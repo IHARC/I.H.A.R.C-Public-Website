@@ -1,5 +1,5 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-02-25
+Last updated: 2026-03-08
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
@@ -13,7 +13,8 @@ This file is durable context for new Codex sessions.
 
 ## Operating mode (Codex)
 - Follow workspace defaults in `/home/jordan/github/AGENTS.md`.
-- Prefer semantic code search MCP when available; use `rg` for exact checks.
+- Use a read-only `explorer` sub-agent for non-trivial codebase context gathering first, and only spawn it when you intend to wait for and use its output.
+- Do not repeat that same delegated context search in the main session while it is still unresolved or after a brief poll; use `rg` only for narrowly scoped follow-up verification of specific details.
 - Keep this repo marketing-only. Secure collaboration/auth flows belong in STEVI.
 
 ## Mission and guardrails
