@@ -6,7 +6,6 @@ Standard: IHARC AGENTS v1
 ## Maintenance (living document / persistent memory)
 This file is durable context for new Codex sessions.
 
-- Keep this file concise and high-signal. Link to docs for deep architecture detail.
 - Remove stale guidance when behavior changes.
 - Update `Last updated` for substantive changes.
 - Never add secrets, donor personal data, or internal-only URLs.
@@ -14,8 +13,6 @@ This file is durable context for new Codex sessions.
 ## Operating mode (Codex)
 - Follow workspace defaults in `/home/jordan/github/AGENTS.md`.
 - This repo uses Next.js route-group folders such as `src/app/(marketing)`; quote these paths in shell commands to avoid bash parse errors.
-- Use a read-only `explorer` sub-agent for non-trivial codebase context gathering first, and only spawn it when you intend to wait for and use its output.
-- Do not repeat that same delegated context search in the main session while it is still unresolved or after a brief poll; use `rg` only for narrowly scoped follow-up verification of specific details.
 - Keep this repo marketing-only. Secure collaboration/auth flows belong in STEVI.
 
 ## Mission and guardrails
