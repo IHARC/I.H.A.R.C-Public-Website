@@ -32,3 +32,34 @@ export async function invalidatePolicies() {
 export async function invalidateDonationCatalog() {
   await revalidateTag(CACHE_TAGS.donationCatalog);
 }
+
+export async function invalidateVolunteerRoleCaches() {
+  await revalidateTag(CACHE_TAGS.volunteerRoles);
+}
+
+export async function invalidateMarketingContentCaches() {
+  const tags = [
+    CACHE_TAGS.marketingContent,
+    CACHE_TAGS.navigation,
+    CACHE_TAGS.hero,
+    CACHE_TAGS.branding,
+    CACHE_TAGS.context,
+    CACHE_TAGS.supports,
+    CACHE_TAGS.programs,
+  ] as const;
+
+  for (const tag of tags) {
+    await revalidateTag(tag);
+  }
+}
+
+export async function invalidateAllPublicSiteCaches() {
+  await invalidateMarketingContentCaches();
+  await invalidateMetricCaches();
+  await invalidateMythCaches();
+  await invalidatePitCaches();
+  await invalidateSiteFooter();
+  await invalidatePolicies();
+  await invalidateDonationCatalog();
+  await invalidateVolunteerRoleCaches();
+}

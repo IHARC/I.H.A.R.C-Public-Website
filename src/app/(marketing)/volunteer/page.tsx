@@ -96,7 +96,7 @@ export default async function VolunteerPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-on-surface/80">
             <p>
-              Roles are coordinated through the IHARC portal (STEVI). Once you apply, our team will follow up to confirm availability, training, and next steps.
+              Roles are coordinated through STEVI. Once you apply, our team will follow up to confirm availability, training, and next steps.
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>We prioritize community-first, trauma-informed support.</li>

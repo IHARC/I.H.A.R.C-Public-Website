@@ -4,15 +4,8 @@ import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Menu } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
@@ -92,103 +85,152 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
     ];
   }, [links, pathname]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 rounded-[var(--md-sys-shape-corner-small)] bg-transparent text-on-surface hover:bg-surface-container"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="h-5 w-5" aria-hidden />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="flex h-full w-[min(22rem,100vw)] flex-col gap-6 border-none bg-surface px-5 py-6 text-on-surface shadow-lg"
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 rounded-[var(--md-sys-shape-corner-small)] bg-transparent text-on-surface hover:bg-surface-container"
+        aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="mobile-navigation-drawer"
+        onClick={() => setOpen((previous) => !previous)}
       >
-        <SheetHeader className="space-y-1 text-left">
-          <SheetTitle className="text-xl font-semibold tracking-tight text-on-surface">
-            Navigation
-          </SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-1 flex-col gap-6 overflow-y-auto pb-8">
-          <nav aria-label="Primary navigation" className="flex flex-col gap-6">
-            {navSections.map((section) => (
-              <div key={section.id} className="flex flex-col gap-1.5">
-                <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
-                  {section.title}
-                </p>
-                {section.items.map((item) =>
-                  item.type === 'link' ? (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        'flex items-center justify-between rounded-[var(--md-sys-shape-corner-small)] px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-                        item.isActive
-                          ? 'bg-secondary-container text-on-secondary-container'
-                          : 'text-on-surface hover:bg-surface-container-highest'
-                      )}
-                      aria-current={item.isActive ? 'page' : undefined}
-                    >
-                      <span>{item.label}</span>
-                      {item.isActive ? (
-                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                          Active
-                        </span>
-                      ) : null}
-                    </Link>
-                  ) : (
-                    <MobileNavCollapsible key={item.label} item={item} closeSheet={() => setOpen(false)} />
-                  )
-                )}
+        {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+      </Button>
+      {open ? (
+        <div className="fixed inset-0 z-50 md:hidden" aria-hidden={!open}>
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            aria-label="Close navigation menu"
+            onClick={() => setOpen(false)}
+          />
+          <section
+            id="mobile-navigation-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-navigation-title"
+            className="absolute inset-y-0 left-0 flex h-full w-[min(22rem,100vw)] flex-col gap-6 bg-surface px-5 py-6 text-on-surface shadow-lg"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1 text-left">
+                <h2 id="mobile-navigation-title" className="text-xl font-semibold tracking-tight text-on-surface">
+                  Navigation
+                </h2>
               </div>
-            ))}
-          </nav>
-          {quickAction ? (
-            <div
-              className="flex flex-col gap-2"
-              onClickCapture={(event) => {
-                const target = event.target as HTMLElement | null;
-                if (!target) {
-                  return;
-                }
-                if (target.closest('a[href],button')) {
-                  setOpen(false);
-                }
-              }}
-            >
-              <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
-                Quick action
-              </p>
-              {quickAction}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 rounded-full"
+                aria-label="Close navigation menu"
+                onClick={() => setOpen(false)}
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </Button>
             </div>
-          ) : null}
-          {accountSection ? (
-            <div
-              className="flex flex-col gap-2"
-              onClickCapture={(event) => {
-                const target = event.target as HTMLElement | null;
-                if (!target) {
-                  return;
-                }
-                if (target.closest('a[href],button')) {
-                  setOpen(false);
-                }
-              }}
-            >
-              <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
-                STEVI portal access
-              </p>
-              {accountSection}
+            <div className="flex flex-1 flex-col gap-6 overflow-y-auto pb-8">
+              <nav aria-label="Primary navigation" className="flex flex-col gap-6">
+                {navSections.map((section) => (
+                  <div key={section.id} className="flex flex-col gap-1.5">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
+                      {section.title}
+                    </p>
+                    {section.items.map((item) =>
+                      item.type === 'link' ? (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className={cn(
+                            'flex min-h-11 items-center justify-between rounded-[var(--md-sys-shape-corner-small)] px-4 py-3 text-base font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+                            item.isActive
+                              ? 'bg-secondary-container text-on-secondary-container'
+                              : 'text-on-surface hover:bg-surface-container-highest'
+                          )}
+                          aria-current={item.isActive ? 'page' : undefined}
+                        >
+                          <span>{item.label}</span>
+                          {item.isActive ? (
+                            <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                              Active
+                            </span>
+                          ) : null}
+                        </Link>
+                      ) : (
+                        <MobileNavCollapsible key={item.label} item={item} closeSheet={() => setOpen(false)} />
+                      )
+                    )}
+                  </div>
+                ))}
+              </nav>
+              {quickAction ? (
+                <div
+                  className="flex flex-col gap-2"
+                  onClickCapture={(event) => {
+                    const target = event.target as HTMLElement | null;
+                    if (!target) {
+                      return;
+                    }
+                    if (target.closest('a[href],button')) {
+                      setOpen(false);
+                    }
+                  }}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
+                    Quick action
+                  </p>
+                  {quickAction}
+                </div>
+              ) : null}
+              {accountSection ? (
+                <div
+                  className="flex flex-col gap-2"
+                  onClickCapture={(event) => {
+                    const target = event.target as HTMLElement | null;
+                    if (!target) {
+                      return;
+                    }
+                    if (target.closest('a[href],button')) {
+                      setOpen(false);
+                    }
+                  }}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-wide text-on-surface/80">
+                    STEVI sign-in
+                  </p>
+                  {accountSection}
+                </div>
+              ) : null}
             </div>
-          ) : null}
+          </section>
         </div>
-      </SheetContent>
-    </Sheet>
+      ) : null}
+    </>
   );
 }
 

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DashboardCards } from '@/components/metrics/dashboard-cards';
 import { TrendChart } from '@/components/metrics/trend-chart';
@@ -5,6 +6,11 @@ import { getMetricRows, getMetricCards, getMetricSummary, groupMetricRows } from
 import { steviPortalUrl } from '@/lib/stevi-portal';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Community Status Dashboard — IHARC',
+  description:
+    'Track IHARC community status indicators for outreach, housing stability, and drug poisoning response across Northumberland County.',
+};
 
 const STEVI_HOME_URL = steviPortalUrl('/');
 
@@ -34,7 +40,7 @@ export default async function StatsDashboardPage({
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-balance">
-          <h2 className="type-headline-medium text-on-surface">Community Status Dashboard</h2>
+          <h1 className="type-headline-medium text-on-surface">Community Status Dashboard</h1>
           <p className="type-body-medium text-on-surface/80">
             Real-time indicators from partners focused on housing stability, drug poisoning response, and outreach efforts.
           </p>
@@ -113,8 +119,9 @@ function DashboardPlaceholder() {
             href={STEVI_HOME_URL}
             prefetch={false}
             className="inline-flex items-center rounded-full bg-primary px-4 py-2 font-medium text-on-primary shadow-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            aria-label="Open STEVI sign-in"
           >
-            Visit the STEVI portal
+            STEVI Login
           </Link>
           <Link
             href="/updates"

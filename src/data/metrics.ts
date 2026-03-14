@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getSupabasePublicClient } from '@/lib/supabase/public-client';
 import type { Database } from '@/types/supabase';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 
@@ -64,7 +64,7 @@ type MetricDailyRow = Database['portal']['Tables']['metric_daily']['Row'] & {
 
 const fetchMetricRows = unstable_cache(
   async ({ range }: MetricCacheKey): Promise<MetricRow[]> => {
-    const supabase = await createSupabaseRSCClient();
+    const supabase = getSupabasePublicClient();
     const portal = supabase.schema('portal');
 
     const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

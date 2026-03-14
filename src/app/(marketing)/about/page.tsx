@@ -31,7 +31,7 @@ const collaborationLoops = [
 export const metadata: Metadata = {
   title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
   description:
-    'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
+    'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how STEVI keeps clients and partners coordinated.',
   alternates: {
     canonical: '/about',
   },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
+      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how STEVI keeps clients and partners coordinated.',
     url: '/about',
     images: [
       {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'About IHARC — Integrated Homelessness and Addictions Response Centre',
     description:
-      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how the secure STEVI portal keeps clients and partners coordinated.',
+      'Learn how the Integrated Homelessness and Addictions Response Centre provides frontline outreach and navigation across Northumberland County, and how STEVI keeps clients and partners coordinated.',
     images: ['/logo.png'],
   },
 };
@@ -73,7 +73,7 @@ export default function AboutPage() {
           We work across Northumberland County alongside partners in Cobourg, Port Hope, Alderville First Nation, and rural townships.
         </p>
         <p className="text-sm text-on-surface/70">
-          STEVI (Supportive Technology to Enable Vulnerable Individuals) is our secure portal for clients and participating organizations to manage services, appointments, and documents. It is invitation-only and not a public ideas forum.
+          STEVI (Supportive Technology to Enable Vulnerable Individuals) is our secure coordination workspace for clients and participating organizations to manage services, appointments, and documents. It is invitation-only and not a public ideas forum.
         </p>
       </header>
 

@@ -1,0 +1,113 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - paragraph [ref=e5]: This site is under active development. You may encounter bugs or outdated copy while we finish updates.
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "IHARC home" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - img "IHARC" [ref=e11]
+          - navigation "Marketing pages" [ref=e12]:
+            - link "Home" [ref=e13] [cursor=pointer]:
+              - /url: /
+            - button "About IHARC menu" [ref=e14] [cursor=pointer]:
+              - generic [ref=e15]: About IHARC
+              - img [ref=e16]
+            - button "Support & Programs menu" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: Support & Programs
+              - img [ref=e20]
+            - button "Data & Accountability menu" [ref=e22] [cursor=pointer]:
+              - generic [ref=e23]: Data & Accountability
+              - img [ref=e24]
+        - generic [ref=e26]:
+          - link "Get help" [ref=e27] [cursor=pointer]:
+            - /url: /get-help
+          - link "Donate" [ref=e28] [cursor=pointer]:
+            - /url: /donate
+          - link "Open STEVI Portal" [ref=e29] [cursor=pointer]:
+            - /url: https://stevi.iharc.ca
+          - button "Toggle color theme" [ref=e30] [cursor=pointer]:
+            - img
+    - main [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - paragraph [ref=e34]: Transparency Hub
+          - heading "How IHARC stays accountable to neighbours" [level=1] [ref=e35]
+          - paragraph [ref=e36]: This hub centralizes SOPs, policies, and accountability artifacts. Use Updates for news/blog posts and Resources for research and practical materials.
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - heading "SOPs & policies" [level=2] [ref=e39]
+            - paragraph [ref=e40]: Browse published standards for client rights, safety, governance, and operations.
+            - link "Browse all SOPs" [ref=e41] [cursor=pointer]:
+              - /url: /transparency/policies
+          - generic [ref=e42]:
+            - heading "Accountability artifacts" [level=2] [ref=e43]
+            - paragraph [ref=e44]: Access delegations, governance briefings, and transparency records associated with public decisions.
+            - link "View artifacts" [ref=e45] [cursor=pointer]:
+              - /url: /transparency#resources
+          - generic [ref=e46]:
+            - heading "Community metrics" [level=2] [ref=e47]
+            - paragraph [ref=e48]: Follow current trend dashboards and PIT context to understand how response work is evolving.
+            - link "Browse data stories" [ref=e49] [cursor=pointer]:
+              - /url: /data
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - heading "Published SOPs & policies" [level=2] [ref=e52]
+            - link "View all" [ref=e53] [cursor=pointer]:
+              - /url: /transparency/policies
+          - generic [ref=e54]:
+            - article [ref=e55]:
+              - generic [ref=e56]:
+                - generic [ref=e57]: Governance
+                - generic [ref=e58]: Last reviewed Nov 28, 2025
+              - generic [ref=e59]:
+                - heading "Client Service Agreement" [level=3] [ref=e60]
+                - paragraph [ref=e61]: What clients can expect from IHARC and what IHARC commits to.
+              - link "Read policy" [ref=e63] [cursor=pointer]:
+                - /url: /transparency/policies/client-service-agreement
+            - article [ref=e64]:
+              - generic [ref=e65]:
+                - generic [ref=e66]: Governance
+                - generic [ref=e67]: Last reviewed Nov 28, 2025
+              - generic [ref=e68]:
+                - heading "Privacy & Data Protection Notice" [level=3] [ref=e69]
+                - paragraph [ref=e70]: How IHARC collects, shares, and protects your information.
+              - link "Read policy" [ref=e72] [cursor=pointer]:
+                - /url: /transparency/policies/client-privacy-notice
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - heading "Transparency artifacts" [level=2] [ref=e75]
+            - link "Open full resource library" [ref=e76] [cursor=pointer]:
+              - /url: /resources
+          - article [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e80]: Delegation
+              - generic [ref=e81]: October 16, 2025
+            - heading "Northumberland County Council Delegation — Warming Hub \"Option 5\"" [level=2] [ref=e82]:
+              - link "Northumberland County Council Delegation — Warming Hub \"Option 5\"" [ref=e83] [cursor=pointer]:
+                - /url: /transparency/resources/county-waming-hub-delegation-2025
+            - paragraph [ref=e84]: Northumberland County Council Chambers
+            - paragraph [ref=e85]: IHARC shared an alternative option for a warming hub to County Council as well as further insights on local homelessness and addictions.
+            - generic [ref=e86]:
+              - generic [ref=e87]: council
+              - generic [ref=e88]: emergency response
+              - generic [ref=e89]: coordination
+            - link "View artifact" [ref=e91] [cursor=pointer]:
+              - /url: /transparency/resources/county-waming-hub-delegation-2025
+              - text: View artifact
+              - generic [ref=e92]: →
+    - contentinfo [ref=e93]:
+      - paragraph [ref=e94]: © 2026 I.H.A.R.C. is operated by BuildX Community Response Team - A registered non-profit
+      - navigation "Footer navigation" [ref=e95]:
+        - link "Get help" [ref=e96] [cursor=pointer]:
+          - /url: /get-help
+        - link "Resources" [ref=e97] [cursor=pointer]:
+          - /url: /resources
+        - link "Updates" [ref=e98] [cursor=pointer]:
+          - /url: /updates
+        - link "Donate" [ref=e99] [cursor=pointer]:
+          - /url: /donate
+        - link "Transparency" [ref=e100] [cursor=pointer]:
+          - /url: /transparency

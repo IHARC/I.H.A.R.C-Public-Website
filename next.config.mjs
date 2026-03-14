@@ -32,13 +32,18 @@ const analyticsOrigins = [
 ];
 
 const stripeOrigins = ['https://js.stripe.com', 'https://checkout.stripe.com', 'https://api.stripe.com'];
+const scriptSrcUnsafeDirectives = ["'unsafe-inline'"];
+
+if (process.env.NODE_ENV !== 'production') {
+  scriptSrcUnsafeDirectives.push("'unsafe-eval'");
+}
 
 const csp = [
   `default-src 'self'`,
   `base-uri 'self'`,
   `frame-ancestors 'none'`,
   `object-src 'none'`,
-  `script-src 'self' 'unsafe-inline' ${[...analyticsOrigins, ...stripeOrigins].join(' ')}`.trim(),
+  `script-src 'self' ${[...scriptSrcUnsafeDirectives, ...analyticsOrigins, ...stripeOrigins].join(' ')}`.trim(),
   `style-src 'self' 'unsafe-inline'`,
   `img-src 'self' data: blob: ${[supabaseOrigin].filter(Boolean).join(' ')}`.trim(),
   `font-src 'self' data:`,

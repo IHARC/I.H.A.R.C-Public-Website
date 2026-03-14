@@ -14,6 +14,22 @@ type NavItem = {
 
 const isPresent = <T,>(value: T | null | undefined): value is T => Boolean(value);
 
+function formatSteviCtaLabel(label: string | null | undefined): string {
+  const trimmed = label?.trim();
+  if (!trimmed) return 'STEVI Login';
+  if (
+    /^open stevi portal$/i.test(trimmed) ||
+    /^launch stevi$/i.test(trimmed) ||
+    /^open stevi$/i.test(trimmed) ||
+    /^access s\.?t\.?e\.?v\.?i\.?$/i.test(trimmed) ||
+    /^access stevi$/i.test(trimmed) ||
+    /^sign in$/i.test(trimmed)
+  ) {
+    return 'STEVI Login';
+  }
+  return trimmed.replace(/\bportal\b/gi, 'STEVI');
+}
+
 function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
   const itemsByHref = new Map(items.map((item) => [item.href, item]));
   const used = new Set<string>();
@@ -71,11 +87,11 @@ function buildGroupedNavigation(items: NavItem[]): MarketingNavItem[] {
       ].filter(isPresent),
     },
     {
-      label: 'Data & Accountability',
+      label: 'Transparency & Data',
       items: [
+        createDropdownItem('/transparency', 'Transparency hub', 'SOPs, policies, and accountability artifacts.'),
         createDropdownItem('/stats', 'Community status', 'Live dashboards on calls, outreach, and flow.'),
         createDropdownItem('/data', 'Data stories', 'Point-in-time counts and trend explainers.'),
-        createDropdownItem('/transparency', 'Transparency hub', 'SOPs, policies, and accountability artifacts.'),
       ].filter(isPresent),
     },
   ];
@@ -113,7 +129,7 @@ export async function TopNav() {
   const donateNavItem = items.find((item) => item.href === '/donate');
   const marketingNavigation = buildGroupedNavigation(items.filter((item) => item.href !== '/donate'));
   const steviHomeUrl = steviPortalUrl('/');
-  const portalCtaLabel = portalCtaLabelSetting || 'Access S.T.E.V.I.';
+  const portalCtaLabel = formatSteviCtaLabel(portalCtaLabelSetting);
   const donateCtaLabel = donateNavItem?.label || 'Donate';
 
   const getHelpCtaDesktop = (
@@ -139,6 +155,7 @@ export async function TopNav() {
       href={steviHomeUrl}
       className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
+      aria-label="Open STEVI sign-in"
     >
       {portalCtaLabel}
     </Link>
@@ -149,6 +166,7 @@ export async function TopNav() {
       href={steviHomeUrl}
       className="inline-flex w-full items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-3 text-base font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       prefetch={false}
+      aria-label="Open STEVI sign-in"
     >
       {portalCtaLabel}
     </Link>
@@ -157,7 +175,7 @@ export async function TopNav() {
   const donateCtaDesktop = (
     <Link
       href="/donate"
-      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-tertiary px-4 py-2 text-sm font-semibold text-on-tertiary shadow-md shadow-tertiary/30 transition hover:bg-tertiary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
     >
       {donateCtaLabel}
@@ -177,42 +195,29 @@ export async function TopNav() {
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className="mx-auto w-full max-w-7xl px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3 rounded-lg px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-              aria-label="IHARC home"
-            >
-              <Image
-                src={lightLogo}
-                alt="IHARC"
-                width={160}
-                height={48}
-                priority
-                className="dark:hidden"
-              />
-              <Image
-                src={darkLogo}
-                alt="IHARC"
-                width={160}
-                height={48}
-                priority
-                className="hidden dark:block"
-              />
-            </Link>
-            <nav aria-label="Marketing pages" className="hidden flex-1 flex-wrap items-center gap-1.5 lg:flex">
-              {marketingNavigation.map((item) =>
-                item.type === 'link' ? (
-                  <TopNavLink key={item.href} href={item.href}>
-                    {item.label}
-                  </TopNavLink>
-                ) : (
-                  <TopNavDropdown key={item.label} label={item.label} items={item.items} />
-                ),
-              )}
-            </nav>
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 rounded-lg px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            aria-label="IHARC home"
+          >
+            <Image
+              src={lightLogo}
+              alt="IHARC"
+              width={160}
+              height={48}
+              priority
+              className="dark:hidden"
+            />
+            <Image
+              src={darkLogo}
+              alt="IHARC"
+              width={160}
+              height={48}
+              priority
+              className="hidden dark:block"
+            />
+          </Link>
           <div className="hidden items-center gap-3 md:flex">
             {getHelpCtaDesktop}
             {donateCtaDesktop}
@@ -233,6 +238,20 @@ export async function TopNav() {
             />
           </div>
         </div>
+        <nav
+          aria-label="Marketing pages"
+          className="mt-3 hidden items-center justify-center gap-1.5 border-t border-outline/5 pt-3 lg:flex"
+        >
+          {marketingNavigation.map((item) =>
+            item.type === 'link' ? (
+              <TopNavLink key={item.href} href={item.href}>
+                {item.label}
+              </TopNavLink>
+            ) : (
+              <TopNavDropdown key={item.label} label={item.label} items={item.items} />
+            ),
+          )}
+        </nav>
       </div>
     </header>
   );

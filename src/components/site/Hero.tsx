@@ -73,7 +73,7 @@ export function Hero({ content }: HeroProps) {
             <dd>Coordinated visits, warm referrals, and follow-through with partners.</dd>
           </div>
           <div className="rounded-[var(--md-sys-shape-corner-medium)] bg-surface-container p-4">
-            <dt className="font-semibold text-on-surface">Secure STEVI portal.</dt>
+            <dt className="font-semibold text-on-surface">Secure STEVI access.</dt>
             <dd>Clients and staff manage appointments, plans, and documents together.</dd>
           </div>
         </dl>

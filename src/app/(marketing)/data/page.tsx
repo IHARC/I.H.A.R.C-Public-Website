@@ -36,7 +36,7 @@ const dataPrinciples = [
 export const metadata: Metadata = {
   title: 'Community Data & Metrics — IHARC',
   description:
-    'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
+    'Understand which housing and overdose response indicators feed STEVI reporting and how residents can request new metrics.',
   alternates: {
     canonical: '/data',
   },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
+      'Understand which housing and overdose response indicators feed STEVI reporting and how residents can request new metrics.',
     url: '/data',
     images: [
       {
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Community Data & Metrics — IHARC',
     description:
-      'Understand which housing and overdose response indicators feed the STEVI portal and how residents can request new metrics.',
+      'Understand which housing and overdose response indicators feed STEVI reporting and how residents can request new metrics.',
     images: ['/logo.png'],
   },
 };
@@ -160,7 +160,7 @@ export default async function DataPage() {
           prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Open STEVI
+          STEVI Login
         </Link>
       </section>
     </div>

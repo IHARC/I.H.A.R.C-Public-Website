@@ -29,7 +29,7 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
         )}
       >
-        Sign in
+        STEVI Login
       </Link>
       <Link
         href={SIGN_UP_URL}
@@ -39,7 +39,7 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
         )}
       >
-        Request access
+        Request STEVI access
       </Link>
     </div>
   );

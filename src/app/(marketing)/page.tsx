@@ -48,7 +48,7 @@ export default async function MarketingHomePage() {
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 text-balance">
           <h2 className="type-headline-medium text-on-surface">How we got here</h2>
           <p className="max-w-3xl type-body-large text-on-surface/80">
-            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal used by clients and outreach partners—not a public forum.
+            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure coordination workspace used by clients and outreach partners, not a public forum.
           </p>
         </div>
         <ContextCards topics={contextCards} />
@@ -60,11 +60,11 @@ export default async function MarketingHomePage() {
             <h2 className="type-title-large text-on-surface">Stay involved</h2>
             <p className="mt-2 max-w-xl type-body-large text-on-surface/80">
               This site shares public data while STEVI keeps IHARC&apos;s clients and staff connected. If you&apos;re already
-              working with IHARC, STEVI is the secure portal for updates, documents, and outreach coordination.
+              working with IHARC, use STEVI for updates, documents, and outreach coordination.
             </p>
           </div>
           <div className="grid w-full gap-4 sm:max-w-2xl md:max-w-none md:grid-cols-2">
-            <StayInvolvedLink href={steviHomeUrl} label="Sign in to STEVI">
+            <StayInvolvedLink href={steviHomeUrl} label="STEVI Login">
               Review your IHARC plan, appointments, secure documents, and outreach updates.
             </StayInvolvedLink>
             <StayInvolvedLink href={steviRegisterUrl} label="Request STEVI access">
@@ -115,7 +115,10 @@ function HelpCard({ support }: HelpCardProps) {
         {support.contacts.map((contact) =>
           contact.href ? (
             <li key={`${support.title}-${contact.label}`}>
-              <Link href={contact.href} className="underline">
+              <Link
+                href={contact.href}
+                className="inline-flex min-h-[44px] items-center rounded-full px-3 py-2 underline underline-offset-4"
+              >
                 {contact.label}
               </Link>
             </li>

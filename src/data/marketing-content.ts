@@ -82,7 +82,7 @@ const DEFAULT_HERO_CONTENT: HeroContent = {
   pill: 'Northumberland County',
   headline: 'Coordinating housing and health supports in the open',
   body: 'IHARC brings neighbours, service providers, and local government together around one response model.',
-  supporting: 'Use this public site for updates and transparency. STEVI is the secure portal for clients and outreach teams.',
+  supporting: 'Use this public site for updates and transparency. STEVI is the secure workspace for clients and outreach teams.',
   imageUrl: '/heroes/hero-main.jpg',
   imageAlt: 'IHARC outreach workers coordinating supports in Northumberland County',
   primaryCta: {
@@ -263,6 +263,18 @@ function normalizeContactLabel(label: string): string {
   return label.toLowerCase().replace(/[^0-9a-z@]/g, '');
 }
 
+function normalizeMarketingHref(href: string): string {
+  switch (href.trim()) {
+    case '/news':
+    case '/blog':
+      return '/updates';
+    case '/policies':
+      return '/transparency/policies';
+    default:
+      return href.trim();
+  }
+}
+
 export function assertUrgentSupportContacts(entries: SupportEntry[]): void {
   const invalidContacts: string[] = [];
 
@@ -294,10 +306,13 @@ export async function getMarketingNavigation(): Promise<{
   portalCtaLabel: string;
 }> {
   const rows = await fetchMarketingRows();
-  const items = rows.navigation?.items
+  const items = (rows.navigation?.items
     ? parseJsonField<NavItem[]>(rows.navigation.items, 'marketing_navigation.items')
-    : DEFAULT_NAV_ITEMS;
-  const portalCtaLabel = rows.navigation?.portal_cta_label ?? 'Access S.T.E.V.I.';
+    : DEFAULT_NAV_ITEMS).map((item) => ({
+      ...item,
+      href: normalizeMarketingHref(item.href),
+    }));
+  const portalCtaLabel = rows.navigation?.portal_cta_label ?? 'STEVI Login';
 
   return { items, portalCtaLabel };
 }
@@ -319,7 +334,21 @@ export async function getHeroContent(): Promise<HeroContent> {
   if (!rows.home?.hero) {
     return DEFAULT_HERO_CONTENT;
   }
-  return parseJsonField<HeroContent>(rows.home.hero, 'marketing_home.hero');
+  const hero = parseJsonField<HeroContent>(rows.home.hero, 'marketing_home.hero');
+
+  return {
+    ...hero,
+    primaryCta: {
+      ...hero.primaryCta,
+      href: normalizeMarketingHref(hero.primaryCta.href),
+    },
+    secondaryLink: hero.secondaryLink
+      ? {
+          ...hero.secondaryLink,
+          href: normalizeMarketingHref(hero.secondaryLink.href),
+        }
+      : null,
+  };
 }
 
 export async function getContextCards(): Promise<ContextCard[]> {
@@ -327,7 +356,10 @@ export async function getContextCards(): Promise<ContextCard[]> {
   if (!rows.home?.context_cards) {
     return DEFAULT_CONTEXT_CARDS;
   }
-  return parseJsonField<ContextCard[]>(rows.home.context_cards, 'marketing_home.context_cards');
+  return parseJsonField<ContextCard[]>(rows.home.context_cards, 'marketing_home.context_cards').map((card) => ({
+    ...card,
+    href: normalizeMarketingHref(card.href),
+  }));
 }
 
 export async function getSupportEntries(): Promise<{ urgent: SupportEntry[]; mutualAid: string[] }> {

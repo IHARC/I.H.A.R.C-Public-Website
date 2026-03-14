@@ -99,14 +99,14 @@ export default async function UpdatesPage({ searchParams }: { searchParams?: Sea
       <section className="rounded-3xl border border-outline/20 bg-surface-container p-8 text-sm text-on-surface/80">
         <h2 className="text-2xl font-semibold text-on-surface">Want the full public record?</h2>
         <p className="mt-2">
-          STEVI tracks public plan updates, decisions, and metrics. Visit the portal to review source records and exports.
+          STEVI tracks public plan updates, decisions, and metrics. Sign in to review source records and exports.
         </p>
         <Link
           href={steviHomeUrl}
           prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Open STEVI
+          STEVI Login
         </Link>
       </section>
     </div>

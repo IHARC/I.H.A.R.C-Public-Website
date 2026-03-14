@@ -1,0 +1,171 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - paragraph [ref=e5]: This site is under active development. You may encounter bugs or outdated copy while we finish updates.
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "IHARC home" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - img "IHARC" [ref=e11]
+          - navigation "Marketing pages" [ref=e12]:
+            - link "Home" [ref=e13] [cursor=pointer]:
+              - /url: /
+            - button "About IHARC menu" [ref=e14] [cursor=pointer]:
+              - generic [ref=e15]: About IHARC
+              - img [ref=e16]
+            - button "Support & Programs menu" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: Support & Programs
+              - img [ref=e20]
+            - button "Data & Accountability menu" [ref=e22] [cursor=pointer]:
+              - generic [ref=e23]: Data & Accountability
+              - img [ref=e24]
+        - generic [ref=e26]:
+          - link "Get help" [ref=e27] [cursor=pointer]:
+            - /url: /get-help
+          - link "Donate" [ref=e28] [cursor=pointer]:
+            - /url: /donate
+          - link "Open STEVI Portal" [ref=e29] [cursor=pointer]:
+            - /url: https://stevi.iharc.ca
+          - button "Toggle color theme" [ref=e30] [cursor=pointer]:
+            - img
+    - main [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Integrated Homelessness and Addictions Response Centre
+            - heading "Northumberland neighbours working for housing stability and overdose prevention." [level=1] [ref=e36]
+            - paragraph [ref=e37]: IHARC is the Integrated Homelessness and Addictions Response Centre, a non-profit working across Northumberland County. This main site keeps neighbours, service agencies, and local government aligned on the story, while STEVI (Supportive Technology to Enable Vulnerable Individuals) hosts secure outreach plans and crisis coordination.
+            - paragraph [ref=e38]: Together we co-design rapid responses that centre housing stability, overdose prevention, and accountable public reporting.
+            - link "Get Help Now" [ref=e40] [cursor=pointer]:
+              - /url: /get-help
+            - link "Read the latest updates" [ref=e42] [cursor=pointer]:
+              - /url: /updates
+              - text: Read the latest updates
+              - generic [ref=e43]: →
+          - generic [ref=e44]:
+            - heading "What IHARC offers" [level=2] [ref=e45]
+            - generic [ref=e46]:
+              - generic [ref=e47]:
+                - term [ref=e48]: Shared data.
+                - definition [ref=e49]: One public picture to guide action.
+              - generic [ref=e50]:
+                - term [ref=e51]: Outreach and navigation.
+                - definition [ref=e52]: Coordinated visits, warm referrals, and follow-through with partners.
+              - generic [ref=e53]:
+                - term [ref=e54]: Secure STEVI portal.
+                - definition [ref=e55]: Clients and staff manage appointments, plans, and documents together.
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - heading "Need support right now?" [level=2] [ref=e58]
+            - paragraph [ref=e59]: Reach out to partners offering housing navigation, overdose response, and compassionate crisis support. Moderators keep this list current.
+            - link "Get help" [ref=e61] [cursor=pointer]:
+              - /url: /get-help
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: In an emergency call 911.
+            - paragraph [ref=e65]:
+              - text: The Good Samaritan Drug Overdose Act protects the caller and the person receiving help. For same-day support, visit the RAAM clinic Tuesdays, 12–3 pm at 1011 Elgin St. W. The text line is offline; email
+              - link "outreach@iharc.ca" [ref=e66] [cursor=pointer]:
+                - /url: mailto:outreach@iharc.ca
+              - text: .
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - heading "Shelter placement and warming sites" [level=3] [ref=e69]
+              - paragraph [ref=e70]: Call 2-1-1 or Transition House coordinated entry for placement and transportation when beds are full.
+              - list [ref=e71]:
+                - listitem [ref=e72]:
+                  - link "Dial 2-1-1" [ref=e73] [cursor=pointer]:
+                    - /url: tel:211
+                - listitem [ref=e74]:
+                  - link "905-376-9562" [ref=e75] [cursor=pointer]:
+                    - /url: tel:19053769562
+            - generic [ref=e76]:
+              - heading "Overdose response and essential health supplies" [level=3] [ref=e77]
+              - paragraph [ref=e78]: Call 911 if someone is unresponsive; outreach can coordinate naloxone and follow-up.
+              - list [ref=e79]:
+                - listitem [ref=e80]:
+                  - link "outreach@iharc.ca" [ref=e81] [cursor=pointer]:
+                    - /url: mailto:outreach@iharc.ca
+            - generic [ref=e82]:
+              - heading "Mental health crisis support" [level=3] [ref=e83]
+              - paragraph [ref=e84]: Use 9-8-8 for immediate counselling; local follow-up via NHH Community Mental Health Services.
+              - list [ref=e85]:
+                - listitem [ref=e86]:
+                  - link "Call or text 9-8-8" [ref=e87] [cursor=pointer]:
+                    - /url: tel:988
+                - listitem [ref=e88]:
+                  - link "905-377-9891" [ref=e89] [cursor=pointer]:
+                    - /url: tel:19053779891
+                - listitem [ref=e90]: RAAM clinic Tuesdays 12–3 pm at 1011 Elgin St. W., 2nd floor
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - heading "How we got here" [level=2] [ref=e93]
+            - paragraph [ref=e94]: Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure IHARC portal used by clients and outreach partners—not a public forum.
+          - generic [ref=e96]:
+            - link "How we got here Housing shortage Rents keep rising faster than incomes, leaving neighbours without stable options. Read more" [ref=e97] [cursor=pointer]:
+              - /url: /context#housing
+              - generic [ref=e98]:
+                - paragraph [ref=e99]: How we got here
+                - heading "Housing shortage" [level=3] [ref=e100]
+                - paragraph [ref=e101]: Rents keep rising faster than incomes, leaving neighbours without stable options.
+              - generic [ref=e102]:
+                - text: Read more
+                - generic [ref=e103]: →
+            - link "How we got here Toxic drug supply Unpredictable street supply drives overdose emergencies and long-term health risks. Read more" [ref=e104] [cursor=pointer]:
+              - /url: /context#supply
+              - generic [ref=e105]:
+                - paragraph [ref=e106]: How we got here
+                - heading "Toxic drug supply" [level=3] [ref=e107]
+                - paragraph [ref=e108]: Unpredictable street supply drives overdose emergencies and long-term health risks.
+              - generic [ref=e109]:
+                - text: Read more
+                - generic [ref=e110]: →
+            - link "How we got here Justice churn Frequent release and short stays create gaps in care and disrupt healing plans. Read more" [ref=e111] [cursor=pointer]:
+              - /url: /context#justice
+              - generic [ref=e112]:
+                - paragraph [ref=e113]: How we got here
+                - heading "Justice churn" [level=3] [ref=e114]
+                - paragraph [ref=e115]: Frequent release and short stays create gaps in care and disrupt healing plans.
+              - generic [ref=e116]:
+                - text: Read more
+                - generic [ref=e117]: →
+            - link "How we got here Fragmented support Services are spread across agencies, making it hard to navigate help in real time. Read more" [ref=e118] [cursor=pointer]:
+              - /url: /context#support
+              - generic [ref=e119]:
+                - paragraph [ref=e120]: How we got here
+                - heading "Fragmented support" [level=3] [ref=e121]
+                - paragraph [ref=e122]: Services are spread across agencies, making it hard to navigate help in real time.
+              - generic [ref=e123]:
+                - text: Read more
+                - generic [ref=e124]: →
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - heading "Stay involved" [level=2] [ref=e128]
+            - paragraph [ref=e129]: This site shares public data while STEVI keeps IHARC's clients and staff connected. If you're already working with IHARC, STEVI is the secure portal for updates, documents, and outreach coordination.
+          - generic [ref=e130]:
+            - link "Sign in to STEVI Review your IHARC plan, appointments, secure documents, and outreach updates." [ref=e131] [cursor=pointer]:
+              - /url: https://stevi.iharc.ca
+              - generic [ref=e132]: Sign in to STEVI
+              - generic [ref=e133]: Review your IHARC plan, appointments, secure documents, and outreach updates.
+            - link "Request STEVI access Working with IHARC? Request credentials so we can coordinate care in one place." [ref=e134] [cursor=pointer]:
+              - /url: https://stevi.iharc.ca/register
+              - generic [ref=e135]: Request STEVI access
+              - generic [ref=e136]: Working with IHARC? Request credentials so we can coordinate care in one place.
+            - link "Explore live data Supabase-powered stats keep neighbours informed about shelter, overdose, and outreach trends." [ref=e137] [cursor=pointer]:
+              - /url: /data
+              - generic [ref=e138]: Explore live data
+              - generic [ref=e139]: Supabase-powered stats keep neighbours informed about shelter, overdose, and outreach trends.
+    - contentinfo [ref=e140]:
+      - paragraph [ref=e141]: © 2026 I.H.A.R.C. is operated by BuildX Community Response Team - A registered non-profit
+      - navigation "Footer navigation" [ref=e142]:
+        - link "Get help" [ref=e143] [cursor=pointer]:
+          - /url: /get-help
+        - link "Resources" [ref=e144] [cursor=pointer]:
+          - /url: /resources
+        - link "Updates" [ref=e145] [cursor=pointer]:
+          - /url: /updates
+        - link "Donate" [ref=e146] [cursor=pointer]:
+          - /url: /donate
+        - link "Transparency" [ref=e147] [cursor=pointer]:
+          - /url: /transparency

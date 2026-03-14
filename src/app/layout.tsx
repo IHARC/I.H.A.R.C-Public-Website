@@ -37,7 +37,7 @@ const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response 
 
 const SITE_TITLE = 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County';
 const SITE_DESCRIPTION =
-  'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while the secure STEVI portal helps clients and partners coordinate care.';
+  'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while STEVI gives clients and partners a secure place to coordinate care.';
 
 const ORGANIZATION_JSON_LD = {
   '@context': 'https://schema.org',

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { ResourceCard } from '@/components/resources/resource-card';
 import { ResourceFiltersControls } from '@/components/resources/resource-filters';
 import { ResourceIndexAnalytics } from '@/components/resources/resource-analytics';
@@ -84,6 +85,20 @@ export default async function ResourcesPage({
         ) : (
           <div className="rounded-3xl border border-outline/20 bg-surface p-8 text-on-surface/80">
             <p>No resources match the selected filters yet. Try clearing filters or checking back soon.</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/transparency"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-outline/30 px-4 py-2 font-semibold text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              >
+                Visit the Transparency Hub
+              </Link>
+              <Link
+                href="/updates"
+                className="inline-flex min-h-[44px] items-center rounded-full bg-primary px-4 py-2 font-semibold text-on-primary transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              >
+                Read public updates
+              </Link>
+            </div>
           </div>
         )}
       </section>

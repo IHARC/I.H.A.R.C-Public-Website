@@ -179,6 +179,10 @@ export function DonateClient({ catalog }: Props) {
   }, [catalog, cartLines, customAmount]);
 
   const itemCount = useMemo(() => Object.values(cart).reduce((sum, qty) => sum + (qty ?? 0), 0), [cart]);
+  const oneTimeCustomAmountCents = useMemo(() => normalizeMoneyInputToCents(customAmount), [customAmount]);
+  const hasOneTimeSelection =
+    cartLines.length > 0 || (oneTimeCustomAmountCents !== null && oneTimeCustomAmountCents > 0);
+  const canStartOneTimeCheckout = !checkoutState.loading && oneTimeCustomAmountCents !== null && hasOneTimeSelection;
 
   function bumpItem(itemId: string, delta: number) {
     setCart((prev) => {
@@ -439,7 +443,7 @@ export function DonateClient({ catalog }: Props) {
                     <Button
                       type="button"
                       className="w-full"
-                      disabled={checkoutState.loading}
+                      disabled={!canStartOneTimeCheckout}
                       onClick={startOneTimeCheckout}
                     >
                       {checkoutState.loading && checkoutState.kind === 'one_time' ? (
@@ -454,6 +458,14 @@ export function DonateClient({ catalog }: Props) {
                         </>
                       )}
                     </Button>
+
+                    {!hasOneTimeSelection ? (
+                      <p className="text-xs text-on-surface-variant">
+                        {catalog.length === 0
+                          ? 'Catalogue items are temporarily unavailable. Enter a custom amount above to continue with an amount-only donation.'
+                          : 'Choose at least one symbolic item or enter a custom amount to continue.'}
+                      </p>
+                    ) : null}
 
                     {checkoutState.error && checkoutState.kind === 'one_time' ? (
                       <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-on-surface">
@@ -548,7 +560,9 @@ export function DonateClient({ catalog }: Props) {
 
                 {filteredCatalog.length === 0 ? (
                   <div className="rounded-xl border border-outline-variant bg-surface-container-low p-6 text-sm text-on-surface-variant">
-                    No catalogue items match your filters.
+                    {catalog.length === 0
+                      ? 'Catalogue items are temporarily unavailable. You can still make an amount-only donation using the custom amount field.'
+                      : 'No catalogue items match your filters.'}
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

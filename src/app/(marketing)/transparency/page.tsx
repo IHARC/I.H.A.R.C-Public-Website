@@ -38,7 +38,7 @@ export default async function TransparencyPage() {
           </p>
           <Link
             href="/transparency/policies"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-[44px] items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Browse all SOPs
           </Link>
@@ -50,7 +50,7 @@ export default async function TransparencyPage() {
           </p>
           <Link
             href="/transparency#resources"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-outline/30 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             View artifacts
           </Link>
@@ -62,7 +62,7 @@ export default async function TransparencyPage() {
           </p>
           <Link
             href="/data"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-outline/30 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Browse data stories
           </Link>
@@ -74,7 +74,7 @@ export default async function TransparencyPage() {
           <h2 className="text-2xl font-semibold text-on-surface">Published SOPs & policies</h2>
           <Link
             href="/transparency/policies"
-            className="text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-outline/30 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             View all
           </Link>
@@ -95,7 +95,7 @@ export default async function TransparencyPage() {
           <h2 className="text-2xl font-semibold text-on-surface">Transparency artifacts</h2>
           <Link
             href="/resources"
-            className="text-sm font-semibold text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-outline/30 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Open full resource library
           </Link>

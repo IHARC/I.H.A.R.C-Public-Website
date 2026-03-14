@@ -35,7 +35,10 @@ export default async function GetHelpPage() {
               {support.contacts.map((contact) =>
                 contact.href ? (
                   <p key={`${support.title}-${contact.label}`}>
-                    <Link href={contact.href} className="underline">
+                    <Link
+                      href={contact.href}
+                      className="inline-flex min-h-[44px] items-center rounded-full px-3 py-2 underline underline-offset-4"
+                    >
                       {contact.label}
                     </Link>
                   </p>
@@ -67,14 +70,14 @@ export default async function GetHelpPage() {
       <section className="rounded-3xl border border-outline/10 bg-surface p-8 text-sm text-on-surface/80">
         <h2 className="text-2xl font-semibold text-on-surface">When to use STEVI</h2>
         <p className="mt-2">
-          STEVI (stevi.iharc.ca) is the secure IHARC portal for neighbours already working with outreach teams. Use it to request appointments, share updates, download letters, and see upcoming visits without repeating your story.
+          STEVI (stevi.iharc.ca) is the secure IHARC workspace for neighbours already working with outreach teams. Use it to request appointments, share updates, download letters, and see upcoming visits without repeating your story.
         </p>
         <Link
           href={steviHomeUrl}
           prefetch={false}
           className="mt-4 inline-flex w-fit rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
-          Open STEVI
+          STEVI Login
         </Link>
       </section>
     </div>

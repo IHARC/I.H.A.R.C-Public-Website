@@ -1,5 +1,5 @@
 # I.H.A.R.C-Public-Website Codex Agent Guide
-Last updated: 2026-03-12
+Last updated: 2026-03-14
 Status: Working guide (living document)
 Standard: IHARC AGENTS v1
 
@@ -18,6 +18,8 @@ This file is durable context for new Codex sessions.
 ## Mission and guardrails
 - Use the full name: Integrated Homelessness and Addictions Response Centre (IHARC).
 - Describe STEVI as the secure portal for clients, IHARC outreach staff, volunteers, and partners.
+- In public-facing copy, name STEVI explicitly instead of using a generic `portal` label by itself.
+- Avoid `Launch STEVI` wording; prefer compact auth language such as `STEVI Login`, `Sign in to STEVI`, or `Request STEVI access` depending on context.
 - Any sign-in/register path must point to STEVI (`steviPortalUrl`).
 - Do not reintroduce local auth, petitions, idea submissions, or portal workflows.
 - Transparency/policies are read-only here; CRUD belongs in STEVI.

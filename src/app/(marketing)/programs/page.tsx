@@ -4,7 +4,7 @@ import { getProgramEntries } from '@/data/marketing-content';
 export const metadata: Metadata = {
   title: 'Programs & Collaborative Supports — IHARC',
   description:
-    'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
+    'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how STEVI keeps clients and organizations aligned.',
   alternates: {
     canonical: '/programs',
   },
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Programs & Collaborative Supports — IHARC',
     description:
-      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
+      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how STEVI keeps clients and organizations aligned.',
     url: '/programs',
     images: [
       {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Programs & Collaborative Supports — IHARC',
     description:
-      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how the STEVI portal keeps clients and organizations aligned.',
+      'Explore how the Integrated Homelessness and Addictions Response Centre coordinates outreach and service navigation with partners, and how STEVI keeps clients and organizations aligned.',
     images: ['/logo.png'],
   },
 };
