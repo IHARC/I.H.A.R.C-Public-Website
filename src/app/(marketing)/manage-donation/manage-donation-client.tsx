@@ -98,7 +98,7 @@ export function ManageDonationClient() {
 
         <p className="text-xs text-on-surface-variant">
           Having trouble? Email{' '}
-          <a href="mailto:donations@iharc.ca" className="font-semibold text-primary underline">
+          <a href="mailto:donations@iharc.ca" className="support-link">
             donations@iharc.ca
           </a>
           .

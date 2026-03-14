@@ -804,7 +804,7 @@ export function DonateClient({ catalog }: Props) {
         <p className="font-semibold text-on-surface">Need a different way to give?</p>
         <p className="mt-1">
           Email{' '}
-          <a href="mailto:donations@iharc.ca" className="font-semibold text-primary underline">
+          <a href="mailto:donations@iharc.ca" className="support-link">
             donations@iharc.ca
           </a>{' '}
           and we will coordinate safely.

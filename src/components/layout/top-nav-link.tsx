@@ -19,8 +19,10 @@ export function TopNavLink({ href, children }: TopNavLinkProps) {
     <Link
       href={href}
       className={cn(
-        'rounded-[var(--md-sys-shape-corner-small)] px-2.5 py-1.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-        isActive ? 'bg-brand-soft text-brand' : 'text-on-surface/80 hover:bg-brand-soft hover:text-brand'
+        'inline-flex min-h-10 items-center rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+        isActive
+          ? 'bg-primary-container text-on-primary-container'
+          : 'text-on-surface/80 hover:bg-primary-container hover:text-on-primary-container'
       )}
       aria-current={isActive ? 'page' : undefined}
     >

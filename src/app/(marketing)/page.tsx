@@ -30,7 +30,7 @@ export default async function MarketingHomePage() {
           <div>
             <Link
               href="/get-help"
-              className="inline-flex w-fit items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              className="inline-flex min-h-11 w-fit items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
               Get help
             </Link>

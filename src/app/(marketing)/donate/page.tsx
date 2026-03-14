@@ -46,7 +46,7 @@ export default async function DonatePage() {
       {catalogUnavailable ? (
         <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 text-sm text-on-surface-variant">
           The donation catalogue is temporarily unavailable. Please try again later or email{' '}
-          <a className="font-semibold text-primary underline" href="mailto:donations@iharc.ca">
+          <a className="support-link" href="mailto:donations@iharc.ca">
             donations@iharc.ca
           </a>{' '}
           if you need help right away.

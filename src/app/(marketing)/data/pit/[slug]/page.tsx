@@ -224,7 +224,7 @@ export default async function PitCountPage({ params }: { params: RouteParams }) 
       <section className="rounded-3xl border border-outline/10 bg-surface-container p-6 text-sm text-on-surface-variant">
         <p className="font-semibold text-on-surface">Need follow-up data?</p>
         <p className="mt-2">
-          Moderators can share additional anonymised summaries with partner agencies. Email <a href="mailto:outreach@iharc.ca" className="font-medium text-primary underline">outreach@iharc.ca</a> with the count slug and the specific context you need.
+          Moderators can share additional anonymised summaries with partner agencies. Email <a href="mailto:outreach@iharc.ca" className="support-link">outreach@iharc.ca</a> with the count slug and the specific context you need.
         </p>
       </section>
     </div>

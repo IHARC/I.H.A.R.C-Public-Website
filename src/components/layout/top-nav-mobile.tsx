@@ -112,7 +112,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
       <Button
         variant="ghost"
         size="icon"
-        className="h-10 w-10 rounded-[var(--md-sys-shape-corner-small)] bg-transparent text-on-surface hover:bg-surface-container"
+        className="h-11 w-11 rounded-[var(--md-sys-shape-corner-small)] bg-transparent text-on-surface hover:bg-surface-container"
         aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
         aria-haspopup="dialog"
         aria-expanded={open}

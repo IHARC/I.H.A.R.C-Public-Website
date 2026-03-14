@@ -27,7 +27,7 @@ export function CrisisNotice({ variant = 'banner', className }: CrisisNoticeProp
           support, visit the RAAM clinic Tuesdays, 12–3 pm at 1011 Elgin St. W. The text line is offline; email{' '}
           <Link
             href="mailto:outreach@iharc.ca"
-            className="inline-flex min-h-[44px] items-center rounded-full px-2 font-semibold underline underline-offset-4"
+            className="support-link"
           >
             outreach@iharc.ca
           </Link>

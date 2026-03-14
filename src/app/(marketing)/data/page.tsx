@@ -158,7 +158,7 @@ export default async function DataPage() {
         <Link
           href={steviHomeUrl}
           prefetch={false}
-          className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="mt-4 inline-flex min-h-11 w-fit items-center rounded-full bg-primary px-5 py-2.5 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           STEVI Login
         </Link>
@@ -212,7 +212,7 @@ function PitCountCard({ summary }: { summary: PitSummaryRow }) {
       <div className="flex flex-wrap gap-3">
         <Link
           href={`/data/pit/${summary.slug}`}
-          className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           View full dashboard
         </Link>

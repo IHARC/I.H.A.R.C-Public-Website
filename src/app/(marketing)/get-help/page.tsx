@@ -60,7 +60,7 @@ export default async function GetHelpPage() {
         </ul>
         <p className="mt-4">
           Want to add a community resource? Email{' '}
-          <Link href="mailto:outreach@iharc.ca" className="font-semibold text-primary underline">
+          <Link href="mailto:outreach@iharc.ca" className="support-link">
             outreach@iharc.ca
           </Link>{' '}
           with details and we will follow up within one business day.
@@ -75,7 +75,7 @@ export default async function GetHelpPage() {
         <Link
           href={steviHomeUrl}
           prefetch={false}
-          className="mt-4 inline-flex w-fit rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="mt-4 inline-flex min-h-11 w-fit items-center rounded-full border border-outline/30 px-5 py-2.5 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           STEVI Login
         </Link>

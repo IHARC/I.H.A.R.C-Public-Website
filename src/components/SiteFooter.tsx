@@ -14,35 +14,35 @@ export async function SiteFooter() {
       ) : null}
       <nav
         aria-label="Footer navigation"
-        className="mt-3 flex items-center justify-center gap-4 text-xs font-semibold"
+        className="mt-3 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold sm:gap-4"
       >
         <Link
           href="/get-help"
-          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Get help
         </Link>
         <Link
           href="/resources"
-          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Resources
         </Link>
         <Link
           href="/updates"
-          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Updates
         </Link>
         <Link
           href="/donate"
-          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Donate
         </Link>
         <Link
           href="/transparency"
-          className="rounded-full px-3 py-1 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-primary underline-offset-4 transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           Transparency
         </Link>

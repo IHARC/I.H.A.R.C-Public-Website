@@ -505,4 +505,29 @@
   .text-muted-subtle {
     color: rgb(var(--md-sys-color-on-surface-variant) / 0.72);
   }
+
+  .support-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    padding-inline: 0.25rem;
+    font-weight: 600;
+    color: rgb(var(--md-sys-color-on-primary-container) / 1);
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .support-link:hover,
+  .support-link:focus-visible,
+  .support-link:visited {
+    color: rgb(var(--md-sys-color-on-primary-container) / 1);
+  }
+
+  .support-link:hover,
+  .support-link:focus-visible {
+    background-color: rgb(var(--md-sys-color-primary-container) / 0.5);
+  }
 }

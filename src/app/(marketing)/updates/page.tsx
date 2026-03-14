@@ -104,7 +104,7 @@ export default async function UpdatesPage({ searchParams }: { searchParams?: Sea
         <Link
           href={steviHomeUrl}
           prefetch={false}
-          className="mt-4 inline-flex w-fit rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="mt-4 inline-flex min-h-11 w-fit items-center rounded-full bg-primary px-5 py-2.5 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           STEVI Login
         </Link>

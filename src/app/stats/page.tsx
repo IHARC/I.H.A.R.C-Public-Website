@@ -142,7 +142,7 @@ function DashboardPlaceholder() {
           <h4 className="text-base font-semibold text-on-surface">How to contribute</h4>
           <p className="mt-2 text-on-surface/80">
             If you&apos;re supporting someone connected to IHARC, request STEVI credentials. Everyone else can follow public updates here and email{' '}
-            <a href="mailto:outreach@iharc.ca" className="text-brand underline">
+            <a href="mailto:outreach@iharc.ca" className="support-link">
               outreach@iharc.ca
             </a>{' '}
             with urgent tips.

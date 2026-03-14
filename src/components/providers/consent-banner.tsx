@@ -60,7 +60,7 @@ export function ConsentBanner() {
             size="sm"
             onClick={() => handleChoice('denied')}
             data-testid="consent-decline"
-            className="w-full sm:w-auto"
+            className="min-h-11 w-full sm:w-auto"
           >
             No, prefer fewer cookies
           </Button>
@@ -68,7 +68,7 @@ export function ConsentBanner() {
             size="sm"
             onClick={() => handleChoice('granted')}
             data-testid="consent-accept"
-            className="w-full sm:w-auto"
+            className="min-h-11 w-full sm:w-auto"
           >
             Yes, support IHARC insights
           </Button>

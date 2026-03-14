@@ -106,14 +106,14 @@ export default function AboutPage() {
           <Link
             href={steviHomeUrl}
             prefetch={false}
-            className="rounded-full bg-primary px-5 py-2 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2.5 text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Sign in to STEVI
           </Link>
           <Link
             href={steviRegisterUrl}
             prefetch={false}
-            className="rounded-full border border-outline/30 px-5 py-2 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex min-h-11 items-center rounded-full border border-outline/30 px-5 py-2.5 text-on-surface transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             Request access
           </Link>

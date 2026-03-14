@@ -67,7 +67,7 @@ export default async function DonateSuccessPage({ searchParams }: { searchParams
           <CardContent className="space-y-4">
             <p className="text-sm text-on-surface-variant">
               Questions? Email{' '}
-              <a href="mailto:donations@iharc.ca" className="font-semibold text-primary underline">
+              <a href="mailto:donations@iharc.ca" className="support-link">
                 donations@iharc.ca
               </a>
               .
@@ -140,7 +140,7 @@ export default async function DonateSuccessPage({ searchParams }: { searchParams
             <div className="space-y-2">
               <p className="text-sm text-on-surface-variant">
                 Questions or corrections? Email{' '}
-                <a href="mailto:donations@iharc.ca" className="font-semibold text-primary underline">
+                <a href="mailto:donations@iharc.ca" className="support-link">
                   donations@iharc.ca
                 </a>
                 .

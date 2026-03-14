@@ -135,7 +135,7 @@ export async function TopNav() {
   const getHelpCtaDesktop = (
     <Link
       href="/get-help"
-      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-md transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      className="hidden min-h-11 items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary shadow-md transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
     >
       Get help
     </Link>
@@ -153,7 +153,7 @@ export async function TopNav() {
   const portalCtaDesktop = (
     <Link
       href={steviHomeUrl}
-      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      className="hidden min-h-11 items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
       aria-label="Open STEVI sign-in"
     >
@@ -175,7 +175,7 @@ export async function TopNav() {
   const donateCtaDesktop = (
     <Link
       href="/donate"
-      className="hidden items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
+      className="hidden min-h-11 items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
       prefetch={false}
     >
       {donateCtaLabel}

@@ -131,7 +131,7 @@ export default async function MythBustingPage() {
 
                     <p className="text-xs text-on-surface/60">
                       Need support or have evidence to add? Email{' '}
-                      <a className="font-semibold text-primary underline-offset-4 hover:underline" href="mailto:outreach@iharc.ca">
+                      <a className="support-link" href="mailto:outreach@iharc.ca">
                         outreach@iharc.ca
                       </a>{' '}
                       so the Integrated Homelessness and Addictions Response Centre can update this entry with you.
@@ -146,7 +146,7 @@ export default async function MythBustingPage() {
         <div className="rounded-3xl border border-outline/20 bg-surface p-8 text-sm text-on-surface/80">
           <p>
             We are compiling myth busting notes alongside neighbours and agency partners. If you hear a claim that needs a fact check, email{' '}
-            <a className="font-semibold text-primary underline-offset-4 hover:underline" href="mailto:outreach@iharc.ca">
+            <a className="support-link" href="mailto:outreach@iharc.ca">
               outreach@iharc.ca
             </a>{' '}
             and we will share the response here.

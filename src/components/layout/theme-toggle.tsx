@@ -50,7 +50,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-transparent text-on-surface hover:bg-surface-container focus-visible:ring-primary"
+          className="h-11 w-11 rounded-full bg-transparent text-on-surface hover:bg-surface-container focus-visible:ring-primary"
           aria-label="Toggle color theme"
         >
           <ActiveIcon className="h-5 w-5" aria-hidden />
