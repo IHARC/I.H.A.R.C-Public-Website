@@ -208,6 +208,7 @@ export async function TopNav() {
               height={48}
               priority
               className="dark:hidden"
+              style={{ width: 'auto', height: 'auto' }}
             />
             <Image
               src={darkLogo}
@@ -216,6 +217,7 @@ export async function TopNav() {
               height={48}
               priority
               className="hidden dark:block"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </Link>
           <div className="hidden items-center gap-3 md:flex">

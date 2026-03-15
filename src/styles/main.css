@@ -139,10 +139,6 @@
     color: rgb(var(--md-sys-color-primary) / 1);
   }
 
-  a:visited {
-    color: rgb(var(--md-sys-color-primary) / 0.8);
-  }
-
   a:hover {
     color: rgb(var(--md-sys-color-primary) / 1);
     text-decoration: underline;
