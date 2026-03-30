@@ -9045,104 +9045,127 @@ export type Database = {
           },
         ]
       }
-      policies: {
+      controlled_documents: {
         Row: {
+          access_scope: Database["portal"]["Enums"]["controlled_document_access_scope"]
+          activated_at: string | null
+          approved_at: string | null
+          approver: string | null
           archived_at: string | null
           body_html: string
-          category: Database["portal"]["Enums"]["policy_category"]
+          body_rich: Json | null
+          body_text: string
+          category: Database["portal"]["Enums"]["controlled_document_category"]
           created_at: string
           created_by_profile_id: string | null
-          effective_from: string | null
-          effective_to: string | null
+          document_id: string | null
+          document_type: Database["portal"]["Enums"]["controlled_document_type"]
+          effective_date: string | null
           id: string
-          internal_ref: string | null
-          is_published: boolean | null
-          last_reviewed_at: string
-          owner_profile_id: string | null
-          published_at: string | null
-          review_due_at: string | null
-          reviewer_profile_id: string | null
+          last_revised_at: string | null
+          maintainer: string | null
+          next_review_date: string | null
+          organization_ids: number[]
+          process_owner: string | null
+          publication_status: Database["portal"]["Enums"]["controlled_document_publication_status"]
+          related_documents: Json
+          review_notes: string | null
+          revision_history: Json
           short_summary: string
           slug: string
-          sort_order: number
-          status: Database["portal"]["Enums"]["policy_status"]
+          status: Database["portal"]["Enums"]["controlled_document_status"]
+          template_id: string | null
+          template_snapshot: Json
           title: string
           updated_at: string
           updated_by_profile_id: string | null
         }
         Insert: {
+          access_scope?: Database["portal"]["Enums"]["controlled_document_access_scope"]
+          activated_at?: string | null
+          approved_at?: string | null
+          approver?: string | null
           archived_at?: string | null
           body_html?: string
-          category?: Database["portal"]["Enums"]["policy_category"]
+          body_rich?: Json | null
+          body_text?: string
+          category: Database["portal"]["Enums"]["controlled_document_category"]
           created_at?: string
           created_by_profile_id?: string | null
-          effective_from?: string | null
-          effective_to?: string | null
+          document_id?: string | null
+          document_type: Database["portal"]["Enums"]["controlled_document_type"]
+          effective_date?: string | null
           id?: string
-          internal_ref?: string | null
-          is_published?: boolean | null
-          last_reviewed_at?: string
-          owner_profile_id?: string | null
-          published_at?: string | null
-          review_due_at?: string | null
-          reviewer_profile_id?: string | null
+          last_revised_at?: string | null
+          maintainer?: string | null
+          next_review_date?: string | null
+          organization_ids?: number[]
+          process_owner?: string | null
+          publication_status?: Database["portal"]["Enums"]["controlled_document_publication_status"]
+          related_documents?: Json
+          review_notes?: string | null
+          revision_history?: Json
           short_summary: string
           slug: string
-          sort_order?: number
-          status?: Database["portal"]["Enums"]["policy_status"]
+          status?: Database["portal"]["Enums"]["controlled_document_status"]
+          template_id?: string | null
+          template_snapshot?: Json
           title: string
           updated_at?: string
           updated_by_profile_id?: string | null
         }
         Update: {
+          access_scope?: Database["portal"]["Enums"]["controlled_document_access_scope"]
+          activated_at?: string | null
+          approved_at?: string | null
+          approver?: string | null
           archived_at?: string | null
           body_html?: string
-          category?: Database["portal"]["Enums"]["policy_category"]
+          body_rich?: Json | null
+          body_text?: string
+          category?: Database["portal"]["Enums"]["controlled_document_category"]
           created_at?: string
           created_by_profile_id?: string | null
-          effective_from?: string | null
-          effective_to?: string | null
+          document_id?: string | null
+          document_type?: Database["portal"]["Enums"]["controlled_document_type"]
+          effective_date?: string | null
           id?: string
-          internal_ref?: string | null
-          is_published?: boolean | null
-          last_reviewed_at?: string
-          owner_profile_id?: string | null
-          published_at?: string | null
-          review_due_at?: string | null
-          reviewer_profile_id?: string | null
+          last_revised_at?: string | null
+          maintainer?: string | null
+          next_review_date?: string | null
+          organization_ids?: number[]
+          process_owner?: string | null
+          publication_status?: Database["portal"]["Enums"]["controlled_document_publication_status"]
+          related_documents?: Json
+          review_notes?: string | null
+          revision_history?: Json
           short_summary?: string
           slug?: string
-          sort_order?: number
-          status?: Database["portal"]["Enums"]["policy_status"]
+          status?: Database["portal"]["Enums"]["controlled_document_status"]
+          template_id?: string | null
+          template_snapshot?: Json
           title?: string
           updated_at?: string
           updated_by_profile_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "policies_created_by_profile_id_fkey"
+            foreignKeyName: "controlled_documents_created_by_profile_id_fkey"
             columns: ["created_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "policies_updated_by_profile_id_fkey"
+            foreignKeyName: "controlled_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "controlled_document_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "controlled_documents_updated_by_profile_id_fkey"
             columns: ["updated_by_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "policies_owner_profile_id_fkey"
-            columns: ["owner_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "policies_reviewer_profile_id_fkey"
-            columns: ["reviewer_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -10102,6 +10125,32 @@ export type Database = {
       refresh_profile_claims: { Args: { p_profile_id: string }; Returns: Json }
     }
     Enums: {
+      controlled_document_access_scope:
+        | "all_staff"
+        | "organization_limited"
+        | "restricted"
+      controlled_document_category:
+        | "governance"
+        | "service_delivery"
+        | "communications"
+        | "data_privacy_records"
+        | "finance_procurement"
+        | "people_training_admin"
+        | "it_security"
+        | "quality_risk_compliance"
+        | "business_continuity_emergency"
+        | "templates_reference"
+      controlled_document_publication_status:
+        | "internal_only"
+        | "public"
+        | "public_with_internal_annex"
+      controlled_document_status:
+        | "draft"
+        | "active"
+        | "superseded"
+        | "archived"
+        | "withdrawn"
+      controlled_document_type: "policy" | "sop" | "work_instruction" | "template"
       affiliation_status: "approved" | "pending" | "revoked"
       affiliation_type: "client" | "agency_partner" | "government_partner"
       appointment_channel: "in_person" | "phone" | "video" | "field" | "other"
@@ -10128,14 +10177,6 @@ export type Database = {
         | "former"
         | "prefer_not_to_share"
       metric_value_status: "reported" | "pending"
-      policy_category:
-        | "client_rights"
-        | "safety"
-        | "staff"
-        | "governance"
-        | "operations"
-        | "finance"
-      policy_status: "draft" | "published" | "archived"
       public_content_channel: "resources" | "updates" | "transparency"
       resource_embed_placement: "above" | "below"
       resource_kind:
@@ -12015,15 +12056,26 @@ export const Constants = {
         "prefer_not_to_share",
       ],
       metric_value_status: ["reported", "pending"],
-      policy_category: [
-        "client_rights",
-        "safety",
-        "staff",
+      controlled_document_access_scope: ["all_staff", "organization_limited", "restricted"],
+      controlled_document_category: [
         "governance",
-        "operations",
-        "finance",
+        "service_delivery",
+        "communications",
+        "data_privacy_records",
+        "finance_procurement",
+        "people_training_admin",
+        "it_security",
+        "quality_risk_compliance",
+        "business_continuity_emergency",
+        "templates_reference",
       ],
-      policy_status: ["draft", "published", "archived"],
+      controlled_document_publication_status: [
+        "internal_only",
+        "public",
+        "public_with_internal_annex",
+      ],
+      controlled_document_status: ["draft", "active", "superseded", "archived", "withdrawn"],
+      controlled_document_type: ["policy", "sop", "work_instruction", "template"],
       public_content_channel: ["resources", "updates", "transparency"],
       resource_embed_placement: ["above", "below"],
       resource_kind: [

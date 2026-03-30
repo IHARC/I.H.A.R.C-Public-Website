@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { PolicyCard } from '@/components/policies/policy-card';
+import { PublicDocumentCard } from '@/components/policies/policy-card';
 import { ResourceCard } from '@/components/resources/resource-card';
-import { fetchPublishedPolicies } from '@/data/policies';
+import { fetchPublishedPublicDocuments } from '@/data/policies';
 import { buildMarketingMetadata } from '@/lib/site-metadata';
 import { listResources } from '@/lib/resources';
 
@@ -32,12 +32,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TransparencyPage() {
-  const [policies, transparencyResources] = await Promise.all([
-    fetchPublishedPolicies(),
+  const [publicDocuments, transparencyResources] = await Promise.all([
+    fetchPublishedPublicDocuments(),
     listResources({ channel: 'transparency' }),
   ]);
 
-  const featuredPolicies = policies.slice(0, 6);
+  const featuredDocuments = publicDocuments.slice(0, 6);
   const featuredResources = transparencyResources.slice(0, 6);
 
   return (
@@ -92,7 +92,7 @@ export default async function TransparencyPage() {
           <div className="flex flex-col gap-3 border-b border-outline/12 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-                Published policies
+                Published policies and SOPs
               </p>
               <h2 className="font-heading text-3xl font-semibold tracking-tight">
                 Standards currently published for public review.
@@ -105,12 +105,12 @@ export default async function TransparencyPage() {
               Browse all SOPs
             </Link>
           </div>
-          {featuredPolicies.length === 0 ? (
+          {featuredDocuments.length === 0 ? (
             <p className="text-sm leading-7 text-on-surface/72">Published policies will appear here.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {featuredPolicies.map((policy) => (
-                <PolicyCard key={policy.id} policy={policy} hrefBase="/transparency/policies" />
+              {featuredDocuments.map((publicDocument) => (
+                <PublicDocumentCard key={publicDocument.id} publicDocument={publicDocument} hrefBase="/transparency/policies" />
               ))}
             </div>
           )}

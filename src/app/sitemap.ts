@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { fetchResourceLibrary } from '@/lib/resources';
-import { fetchPublishedPolicies } from '@/data/policies';
+import { fetchPublishedPublicDocuments } from '@/data/policies';
 import { fetchVolunteerRoles } from '@/data/volunteers';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
@@ -23,9 +23,9 @@ const marketingPaths = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const generatedAt = new Date().toISOString();
 
-  const [resources, policies, volunteerRoles] = await Promise.all([
+  const [resources, publicDocuments, volunteerRoles] = await Promise.all([
     fetchResourceLibrary(),
-    fetchPublishedPolicies(),
+    fetchPublishedPublicDocuments(),
     fetchVolunteerRoles(),
   ]);
 
@@ -52,9 +52,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  const policyEntries = policies.map((policy) => ({
-    url: `${SITE_URL}/transparency/policies/${policy.slug}`,
-    lastModified: policy.updatedAt ?? policy.lastReviewedAt,
+  const publicDocumentEntries = publicDocuments.map((document) => ({
+    url: `${SITE_URL}/transparency/policies/${document.slug}`,
+    lastModified: document.updatedAt ?? document.lastRevisedAt ?? undefined,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -66,5 +66,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...resourceEntries, ...policyEntries, ...volunteerEntries];
+  return [...staticEntries, ...resourceEntries, ...publicDocumentEntries, ...volunteerEntries];
 }

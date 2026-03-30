@@ -2,14 +2,18 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { getPublishedPolicyBySlug, POLICY_CATEGORY_LABELS } from '@/data/policies';
+import {
+  CONTROLLED_DOCUMENT_CATEGORY_LABELS,
+  getPublishedPublicDocumentBySlug,
+  type PublicDocument,
+} from '@/data/policies';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 export const dynamic = 'force-dynamic';
 
-type RouteParams = Promise<Record<string, string | string[] | undefined>>;
+type RouteParams = Promise<{ slug?: string | string[] }>;
 
 function formatDate(value: string | null) {
   if (!value) return null;
@@ -30,29 +34,45 @@ export async function generateMetadata({ params }: { params: RouteParams }): Pro
     };
   }
 
-  const policy = await getPublishedPolicyBySlug(slug);
-  if (!policy) {
+  const publicDocument = await getPublishedPublicDocumentBySlug(slug);
+  if (!publicDocument) {
     return {
       title: 'Policy not found — IHARC',
     };
   }
 
-  const description = policy.shortSummary || 'Read IHARC policy details for public transparency.';
+  const description = publicDocument.shortSummary || 'Read IHARC policy details for public transparency.';
 
   return {
-    title: `${policy.title} — IHARC`,
+    title: `${publicDocument.title} — IHARC`,
     description,
     openGraph: {
-      title: policy.title,
+      title: publicDocument.title,
       description,
       type: 'article',
-      publishedTime: policy.lastReviewedAt,
-      url: `${SITE_URL}/transparency/policies/${policy.slug}`,
+      publishedTime: publicDocument.lastRevisedAt ?? undefined,
+      url: `${SITE_URL}/transparency/policies/${publicDocument.slug}`,
     },
     alternates: {
-      canonical: `${SITE_URL}/transparency/policies/${policy.slug}`,
+      canonical: `${SITE_URL}/transparency/policies/${publicDocument.slug}`,
     },
   } satisfies Metadata;
+}
+
+function buildDocumentJsonLd(document: PublicDocument) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: document.title,
+    dateModified: document.updatedAt,
+    datePublished: document.effectiveDate ?? document.lastRevisedAt ?? undefined,
+    mainEntityOfPage: `${SITE_URL}/transparency/policies/${document.slug}`,
+    about: CONTROLLED_DOCUMENT_CATEGORY_LABELS[document.category],
+    author: {
+      '@type': 'Organization',
+      name: 'Integrated Homelessness and Addictions Response Centre',
+    },
+  } as const;
 }
 
 export default async function TransparencyPolicyDetailPage({ params }: { params: RouteParams }) {
@@ -63,26 +83,15 @@ export default async function TransparencyPolicyDetailPage({ params }: { params:
     notFound();
   }
 
-  const policy = await getPublishedPolicyBySlug(slug);
-  if (!policy) {
+  const publicDocument = await getPublishedPublicDocumentBySlug(slug);
+  if (!publicDocument) {
     notFound();
   }
 
-  const reviewed = formatDate(policy.lastReviewedAt);
-
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: policy.title,
-    dateModified: policy.updatedAt,
-    datePublished: policy.lastReviewedAt,
-    mainEntityOfPage: `${SITE_URL}/transparency/policies/${policy.slug}`,
-    about: POLICY_CATEGORY_LABELS[policy.category],
-    author: {
-      '@type': 'Organization',
-      name: 'Integrated Homelessness and Addictions Response Centre',
-    },
-  } as const;
+  const reviewed = formatDate(publicDocument.lastRevisedAt);
+  const effectiveDate = formatDate(publicDocument.effectiveDate);
+  const nextReviewDate = formatDate(publicDocument.nextReviewDate);
+  const jsonLd = buildDocumentJsonLd(publicDocument);
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-10 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
@@ -98,27 +107,27 @@ export default async function TransparencyPolicyDetailPage({ params }: { params:
       <header className="space-y-4 text-balance">
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="outline" className="border-primary/60 bg-primary/10 text-primary">
-            {POLICY_CATEGORY_LABELS[policy.category]}
+            {CONTROLLED_DOCUMENT_CATEGORY_LABELS[publicDocument.category]}
           </Badge>
           {reviewed ? <span className="text-xs font-medium uppercase tracking-wide text-on-surface/60">Last reviewed {reviewed}</span> : null}
-          {policy.effectiveFrom ? (
+          {effectiveDate ? (
             <span className="text-xs font-medium uppercase tracking-wide text-on-surface/60">
-              Effective {formatDate(policy.effectiveFrom)}
+              Effective {effectiveDate}
             </span>
           ) : null}
-          {policy.effectiveTo ? (
+          {nextReviewDate ? (
             <span className="text-xs font-medium uppercase tracking-wide text-on-surface/60">
-              Expires {formatDate(policy.effectiveTo)}
+              Next review {nextReviewDate}
             </span>
           ) : null}
         </div>
-        <h1 className="text-4xl font-bold tracking-tight">{policy.title}</h1>
-        <p className="text-base text-on-surface/80">{policy.shortSummary}</p>
+        <h1 className="text-4xl font-bold tracking-tight">{publicDocument.title}</h1>
+        <p className="text-base text-on-surface/80">{publicDocument.shortSummary}</p>
       </header>
 
       <article
         className="prose prose-slate max-w-none rounded-3xl border border-outline/15 bg-surface p-6 text-on-surface prose-headings:text-on-surface prose-strong:text-on-surface prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-        dangerouslySetInnerHTML={{ __html: sanitizeResourceHtml(policy.bodyHtml) }}
+        dangerouslySetInnerHTML={{ __html: sanitizeResourceHtml(publicDocument.bodyHtml) }}
       />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

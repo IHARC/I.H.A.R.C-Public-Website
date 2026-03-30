@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
-import { PolicyCard } from '@/components/policies/policy-card';
-import { fetchPublishedPolicies, POLICY_CATEGORY_LABELS, type Policy } from '@/data/policies';
+import { PublicDocumentCard } from '@/components/policies/policy-card';
+import {
+  CONTROLLED_DOCUMENT_CATEGORY_LABELS,
+  fetchPublishedPublicDocuments,
+  type PublicDocument,
+} from '@/data/policies';
 
 export const metadata: Metadata = {
   title: 'SOPs & Policies — Transparency Hub — IHARC',
@@ -8,20 +12,20 @@ export const metadata: Metadata = {
     'Browse published IHARC SOPs and policies, including client rights, safety practices, and governance procedures.',
 };
 
-function groupByCategory(policies: Policy[]) {
-  const map = new Map<Policy['category'], Policy[]>();
-  for (const policy of policies) {
-    if (!map.has(policy.category)) {
-      map.set(policy.category, []);
+function groupByCategory(documents: PublicDocument[]) {
+  const map = new Map<PublicDocument['category'], PublicDocument[]>();
+  for (const document of documents) {
+    if (!map.has(document.category)) {
+      map.set(document.category, []);
     }
-    map.get(policy.category)?.push(policy);
+    map.get(document.category)?.push(document);
   }
   return Array.from(map.entries());
 }
 
 export default async function TransparencyPoliciesPage() {
-  const policies = await fetchPublishedPolicies();
-  const grouped = groupByCategory(policies);
+  const documents = await fetchPublishedPublicDocuments();
+  const grouped = groupByCategory(documents);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-16 text-on-surface sm:px-6 lg:px-8">
@@ -41,10 +45,12 @@ export default async function TransparencyPoliciesPage() {
         <div className="space-y-10">
           {grouped.map(([category, items]) => (
             <section key={category} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-on-surface">{POLICY_CATEGORY_LABELS[category]}</h2>
+              <h2 className="text-2xl font-semibold text-on-surface">
+                {CONTROLLED_DOCUMENT_CATEGORY_LABELS[category]}
+              </h2>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {items.map((policy) => (
-                  <PolicyCard key={policy.id} policy={policy} hrefBase="/transparency/policies" />
+                {items.map((document) => (
+                  <PublicDocumentCard key={document.id} publicDocument={document} hrefBase="/transparency/policies" />
                 ))}
               </div>
             </section>

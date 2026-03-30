@@ -3,7 +3,7 @@ export const CACHE_TAGS = {
   mythEntries: 'marketing:myths',
   pitSummary: 'marketing:pit:summary',
   siteFooter: 'marketing:site-footer',
-  policies: 'marketing:policies',
+  publicDocuments: 'marketing:public-documents',
   donationCatalog: 'marketing:donation-catalog',
   volunteerRoles: 'marketing:volunteer-roles',
   marketingContent: 'marketing:content',

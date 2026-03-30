@@ -25,8 +25,8 @@ export async function invalidateSiteFooter() {
   await revalidateTag(CACHE_TAGS.siteFooter);
 }
 
-export async function invalidatePolicies() {
-  await revalidateTag(CACHE_TAGS.policies);
+export async function invalidatePublicDocumentCaches() {
+  await revalidateTag(CACHE_TAGS.publicDocuments);
 }
 
 export async function invalidateDonationCatalog() {
@@ -59,7 +59,7 @@ export async function invalidateAllPublicSiteCaches() {
   await invalidateMythCaches();
   await invalidatePitCaches();
   await invalidateSiteFooter();
-  await invalidatePolicies();
+  await invalidatePublicDocumentCaches();
   await invalidateDonationCatalog();
   await invalidateVolunteerRoleCaches();
 }
