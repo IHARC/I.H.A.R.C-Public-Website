@@ -20,7 +20,10 @@ export type HeroContent = {
   body: string;
   supporting: string;
   imageUrl?: string | null;
+  mobileImageUrl?: string | null;
   imageAlt?: string | null;
+  imageFocalPoint?: string | null;
+  overlayStrength?: 'soft' | 'medium' | 'strong' | null;
   primaryCta: CtaLink;
   secondaryLink: CtaLink | null;
 };
@@ -29,6 +32,7 @@ export type BrandingAssets = {
   logoLightUrl: string | null;
   logoDarkUrl: string | null;
   faviconUrl: string | null;
+  ogImageUrl: string | null;
 };
 
 export type ContextCard = {
@@ -79,12 +83,16 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
 ];
 
 const DEFAULT_HERO_CONTENT: HeroContent = {
-  pill: 'Northumberland County',
-  headline: 'Coordinating housing and health supports in the open',
-  body: 'IHARC brings neighbours, service providers, and local government together around one response model.',
-  supporting: 'Use this public site for updates and transparency. STEVI is the secure workspace for clients and outreach teams.',
-  imageUrl: '/heroes/hero-main.jpg',
-  imageAlt: 'IHARC outreach workers coordinating supports in Northumberland County',
+  pill: 'Integrated Homelessness and Addictions Response Centre',
+  headline: 'Coordinated care for housing stability, overdose prevention, and community accountability.',
+  body: 'IHARC aligns neighbours, service providers, and local government around faster, safer support across Northumberland County.',
+  supporting:
+    'Use this public site for trusted updates and public accountability. Use STEVI for secure coordination with clients and outreach teams.',
+  imageUrl: null,
+  mobileImageUrl: null,
+  imageAlt: null,
+  imageFocalPoint: 'center',
+  overlayStrength: 'medium',
   primaryCta: {
     label: 'Get help',
     href: '/get-help',
@@ -326,6 +334,7 @@ export async function getBrandingAssets(): Promise<BrandingAssets | null> {
     logoLightUrl: branding.logo_light_url,
     logoDarkUrl: branding.logo_dark_url,
     faviconUrl: branding.favicon_url,
+    ogImageUrl: branding.og_image_url,
   };
 }
 
@@ -337,7 +346,13 @@ export async function getHeroContent(): Promise<HeroContent> {
   const hero = parseJsonField<HeroContent>(rows.home.hero, 'marketing_home.hero');
 
   return {
+    ...DEFAULT_HERO_CONTENT,
     ...hero,
+    imageUrl: hero.imageUrl?.trim() || null,
+    mobileImageUrl: hero.mobileImageUrl?.trim() || null,
+    imageAlt: hero.imageAlt?.trim() || null,
+    imageFocalPoint: hero.imageFocalPoint?.trim() || DEFAULT_HERO_CONTENT.imageFocalPoint,
+    overlayStrength: hero.overlayStrength ?? DEFAULT_HERO_CONTENT.overlayStrength,
     primaryCta: {
       ...hero.primaryCta,
       href: normalizeMarketingHref(hero.primaryCta.href),

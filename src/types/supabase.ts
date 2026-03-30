@@ -9157,6 +9157,7 @@ export type Database = {
           id: boolean
           logo_dark_url: string | null
           logo_light_url: string | null
+          og_image_url: string | null
           updated_at: string
           updated_by_profile_id: string | null
         }
@@ -9167,6 +9168,7 @@ export type Database = {
           id?: boolean
           logo_dark_url?: string | null
           logo_light_url?: string | null
+          og_image_url?: string | null
           updated_at?: string
           updated_by_profile_id?: string | null
         }
@@ -9177,6 +9179,7 @@ export type Database = {
           id?: boolean
           logo_dark_url?: string | null
           logo_light_url?: string | null
+          og_image_url?: string | null
           updated_at?: string
           updated_by_profile_id?: string | null
         }

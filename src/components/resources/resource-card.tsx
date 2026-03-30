@@ -17,30 +17,30 @@ export function ResourceCard({
   const href = `${hrefBase}/${resource.slug}`;
 
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-outline/20 bg-surface p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md focus-within:border-primary/60">
+    <article className="flex h-full flex-col rounded-[2rem] border border-outline/12 bg-surface-container-low px-6 py-6 transition hover:border-primary/24 hover:bg-surface focus-within:border-primary/50">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Badge variant="outline" className="border-primary/60 bg-primary/10 text-primary">
+        <Badge variant="outline" className="border-primary/40 bg-primary/8 text-primary">
           {kindLabel}
         </Badge>
-        <span className="text-xs font-medium uppercase tracking-wide text-on-surface/60">{formattedDate}</span>
+        <span className="text-xs font-medium uppercase tracking-[0.18em] text-on-surface/60">{formattedDate}</span>
       </div>
-      <h2 className="mt-4 text-2xl font-semibold text-on-surface">
+      <h2 className="mt-4 font-heading text-2xl font-semibold tracking-[-0.03em] text-on-surface">
         <Link
           href={href}
-          className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-low"
         >
           {resource.title}
         </Link>
       </h2>
       {resource.location ? (
-        <p className="mt-2 text-sm font-medium text-on-surface/70">{resource.location}</p>
+        <p className="mt-2 text-sm font-medium uppercase tracking-[0.14em] text-on-surface/62">{resource.location}</p>
       ) : null}
-      {resource.summary ? <p className="mt-3 text-sm text-on-surface/80">{resource.summary}</p> : null}
+      {resource.summary ? <p className="mt-3 text-sm leading-7 text-on-surface/76">{resource.summary}</p> : null}
       <div className="mt-4 flex flex-wrap gap-2">
         {resource.tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center rounded-full border border-outline/30 bg-surface px-3 py-1 text-xs font-medium uppercase tracking-wide text-on-surface/60"
+            className="inline-flex items-center rounded-full border border-outline/20 bg-surface px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-on-surface/60"
           >
             {tag}
           </span>
@@ -49,7 +49,7 @@ export function ResourceCard({
       <div className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
         <Link
           href={href}
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-outline/20 px-4 py-2 transition hover:border-primary/28 hover:bg-primary/6 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-low"
         >
           {ctaLabel}
           <span aria-hidden>→</span>

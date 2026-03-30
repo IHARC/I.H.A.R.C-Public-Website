@@ -126,11 +126,9 @@ export async function TopNav() {
   const branding = await getBrandingAssets();
   const lightLogo = branding?.logoLightUrl || '/logos/logo-default.png';
   const darkLogo = branding?.logoDarkUrl || '/logos/logoinverted.png';
-  const donateNavItem = items.find((item) => item.href === '/donate');
-  const marketingNavigation = buildGroupedNavigation(items.filter((item) => item.href !== '/donate'));
+  const marketingNavigation = buildGroupedNavigation(items);
   const steviHomeUrl = steviPortalUrl('/');
   const portalCtaLabel = formatSteviCtaLabel(portalCtaLabelSetting);
-  const donateCtaLabel = donateNavItem?.label || 'Donate';
 
   const getHelpCtaDesktop = (
     <Link
@@ -172,28 +170,8 @@ export async function TopNav() {
     </Link>
   );
 
-  const donateCtaDesktop = (
-    <Link
-      href="/donate"
-      className="hidden min-h-11 items-center justify-center rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface md:inline-flex"
-      prefetch={false}
-    >
-      {donateCtaLabel}
-    </Link>
-  );
-
-  const donateCtaMobile = (
-    <Link
-      href="/donate"
-      className="inline-flex w-full items-center justify-center rounded-[var(--md-sys-shape-corner-small)] bg-tertiary px-4 py-3 text-base font-semibold text-on-tertiary shadow-md transition hover:bg-tertiary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-      prefetch={false}
-    >
-      {donateCtaLabel}
-    </Link>
-  );
-
   return (
-    <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+    <header className="sticky top-0 z-40 border-b border-outline/12 bg-surface/92 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/76">
       <div className="mx-auto w-full max-w-7xl px-4 py-4">
         <div className="flex items-center justify-between gap-3">
           <Link
@@ -222,7 +200,6 @@ export async function TopNav() {
           </Link>
           <div className="hidden items-center gap-3 md:flex">
             {getHelpCtaDesktop}
-            {donateCtaDesktop}
             {portalCtaDesktop}
             <ThemeToggle />
           </div>
@@ -233,7 +210,6 @@ export async function TopNav() {
               quickAction={
                 <div className="flex flex-col gap-2">
                   {getHelpCtaMobile}
-                  {donateCtaMobile}
                   {portalCtaMobile}
                 </div>
               }

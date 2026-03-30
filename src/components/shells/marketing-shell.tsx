@@ -8,8 +8,8 @@ export function MarketingShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-on-background">
       {showDevNotice ? (
-        <div className="w-full bg-amber-100 px-4 py-2 text-sm text-amber-900 shadow-sm">
-          <p className="mx-auto max-w-7xl text-center">
+        <div className="w-full border-b border-amber-200 bg-amber-50/90 px-4 py-1.5 text-xs text-amber-900">
+          <p className="mx-auto max-w-7xl text-center tracking-[0.02em]">
             This site is under active development. You may encounter bugs or outdated copy while we finish updates.
           </p>
         </div>

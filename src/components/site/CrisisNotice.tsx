@@ -7,22 +7,22 @@ type CrisisNoticeProps = {
 };
 
 const VARIANT_STYLES: Record<NonNullable<CrisisNoticeProps['variant']>, string> = {
-  banner: 'border-destructive/40 bg-destructive/5 text-destructive-foreground',
-  card: 'border-outline/20 bg-surface-container text-on-surface/80',
+  banner: 'border-error/25 bg-error-container text-on-error-container',
+  card: 'border-outline/16 bg-surface-container-low text-on-surface/82',
 };
 
 export function CrisisNotice({ variant = 'banner', className }: CrisisNoticeProps) {
   return (
     <section
       className={cn(
-        'rounded-3xl border p-6 text-sm',
+        'rounded-[2rem] border p-6 text-sm shadow-[0_16px_40px_rgba(17,12,16,0.08)]',
         VARIANT_STYLES[variant],
         className,
       )}
     >
-      <div className="space-y-2">
-        <p className="font-semibold">In an emergency call 911.</p>
-        <p>
+      <div className="space-y-3">
+        <p className="font-heading text-xl font-semibold tracking-[-0.02em]">In an emergency call 911.</p>
+        <p className="leading-7">
           The Good Samaritan Drug Overdose Act protects the caller and the person receiving help. For same-day
           support, visit the RAAM clinic Tuesdays, 12–3 pm at 1011 Elgin St. W. The text line is offline; email{' '}
           <Link

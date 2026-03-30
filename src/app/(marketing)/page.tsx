@@ -17,63 +17,90 @@ export default async function MarketingHomePage() {
   const urgentSupports = supports.urgent;
 
   return (
-    <div className="space-y-20 pb-16">
+    <div className="bg-background pb-20">
       <Hero content={heroContent} />
 
-      <section id="help" className="mx-auto w-full max-w-7xl space-y-6 px-4">
-        <div className="flex flex-col gap-3 text-balance">
-          <h2 className="type-headline-medium text-on-surface">Need support right now?</h2>
-          <p className="max-w-3xl type-body-large text-on-surface/80">
-            Reach out to partners offering housing navigation, overdose response, and compassionate crisis support.
-            Moderators keep this list current.
-          </p>
-          <div>
+      <section id="help" className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)] lg:px-6 lg:py-20">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Get help first</p>
+            <h2 className="font-heading text-4xl font-semibold leading-tight tracking-[-0.03em] text-on-surface text-balance sm:text-5xl">
+              Find urgent support fast without sorting through a crowded homepage.
+            </h2>
+            <p className="max-w-2xl text-lg leading-8 text-on-surface/78">
+              IHARC keeps verified housing, overdose, and crisis contacts visible in one place. The public site stays
+              readable under pressure, and STEVI stays reserved for secure coordination after someone is already
+              connected.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/get-help"
-              className="inline-flex min-h-11 w-fit items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              className="inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-[0_12px_30px_rgba(207,18,63,0.24)] transition hover:bg-primary/92 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              Get help
+              Open Get Help
+            </Link>
+            <Link
+              href="/resources"
+              className="inline-flex min-h-12 items-center rounded-full border border-outline/30 px-5 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              Browse public resources
             </Link>
           </div>
+
+          <CrisisNotice variant="card" />
         </div>
-        <CrisisNotice variant="card" />
-        <div className="grid gap-4 md:grid-cols-3">
-          {urgentSupports.map((support) => (
-            <HelpCard key={support.title} support={support} />
+
+        <div className="space-y-4">
+          {urgentSupports.map((support, index) => (
+            <SupportRow key={support.title} support={support} index={index} />
           ))}
         </div>
       </section>
 
-      <section className="space-y-8">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 text-balance">
-          <h2 className="type-headline-medium text-on-surface">How we got here</h2>
-          <p className="max-w-3xl type-body-large text-on-surface/80">
-            Community members asked for one shared picture of what is happening. These focus areas now guide the support plans inside STEVI, the secure coordination workspace used by clients and outreach partners, not a public forum.
-          </p>
-        </div>
-        <ContextCards topics={contextCards} />
-      </section>
-
-      <section className="bg-surface-container py-12">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 text-balance md:flex-row md:items-center md:justify-between md:gap-12">
-          <div>
-            <h2 className="type-title-large text-on-surface">Stay involved</h2>
-            <p className="mt-2 max-w-xl type-body-large text-on-surface/80">
-              This site shares public data while STEVI keeps IHARC&apos;s clients and staff connected. If you&apos;re already
-              working with IHARC, use STEVI for updates, documents, and outreach coordination.
+      <section className="border-y border-outline/12 bg-surface-container-low">
+        <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-16 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)] lg:px-6 lg:py-20">
+          <div className="space-y-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">How IHARC works differently</p>
+            <h2 className="font-heading text-4xl font-semibold leading-tight tracking-[-0.03em] text-on-surface text-balance sm:text-5xl">
+              Public accountability up front. Secure coordination only when it matters.
+            </h2>
+            <p className="max-w-2xl text-lg leading-8 text-on-surface/78">
+              IHARC is not another closed program microsite. The public side explains the local reality, shows what is
+              changing, and makes it easier to find support. Confidential planning, updates, and documents move into
+              STEVI once someone is actively working with outreach teams.
             </p>
           </div>
-          <div className="grid w-full gap-4 sm:max-w-2xl md:max-w-none md:grid-cols-2">
-            <StayInvolvedLink href={steviHomeUrl} label="STEVI Login">
-              Review your IHARC plan, appointments, secure documents, and outreach updates.
-            </StayInvolvedLink>
-            <StayInvolvedLink href={steviRegisterUrl} label="Request STEVI access">
-              Working with IHARC? Request credentials so we can coordinate care in one place.
-            </StayInvolvedLink>
-            <StayInvolvedLink href="/data" label="Explore live data">
-              Supabase-powered stats keep neighbours informed about shelter, overdose, and outreach trends.
-            </StayInvolvedLink>
-          </div>
+          <ContextCards topics={contextCards} />
+        </div>
+      </section>
+
+      <section className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:px-6 lg:py-20">
+        <div className="space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Stay involved</p>
+          <h2 className="font-heading text-4xl font-semibold leading-tight tracking-[-0.03em] text-on-surface text-balance sm:text-5xl">
+            Follow the public work here. Move into STEVI only when you need secure coordination.
+          </h2>
+          <p className="max-w-2xl text-lg leading-8 text-on-surface/78">
+            Community members can track updates, transparency, and public data without logging in. Clients, outreach
+            staff, volunteers, and partners use STEVI when the work becomes personal, scheduled, or document-based.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <StayInvolvedLink href={steviHomeUrl} label="STEVI Login">
+            Open the secure workspace for appointments, documents, and active outreach coordination.
+          </StayInvolvedLink>
+          <StayInvolvedLink href={steviRegisterUrl} label="Request STEVI access">
+            Request secure access only if you are already working directly with IHARC or an approved partner team.
+          </StayInvolvedLink>
+          <StayInvolvedLink href="/data" label="Explore live data">
+            Review public trends tied to housing pressure, overdose response, and service coordination.
+          </StayInvolvedLink>
+          <StayInvolvedLink href="/updates" label="Read field updates">
+            Follow the latest reporting on response work, operating changes, and community-facing progress.
+          </StayInvolvedLink>
         </div>
       </section>
     </div>
@@ -94,39 +121,57 @@ function StayInvolvedLink({ href, label, children }: StayInvolvedLinkProps) {
       href={href}
       prefetch={!isExternal}
       rel={isExternal ? 'noreferrer' : undefined}
-      className="group flex h-full w-full flex-col rounded-[var(--md-sys-shape-corner-large)] border border-outline/30 bg-surface px-6 py-5 text-left text-sm transition hover:bg-primary/8 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container sm:text-base md:px-7"
+      className="group flex h-full flex-col justify-between rounded-[2rem] border border-outline/15 bg-surface px-6 py-6 text-left transition hover:border-primary/25 hover:bg-surface-container-low focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <span className="block font-semibold text-on-surface">{label}</span>
-      <span className="mt-2 block text-on-surface-variant type-body-medium">{children}</span>
+      <span className="block font-heading text-2xl font-semibold tracking-[-0.03em] text-on-surface">{label}</span>
+      <span className="mt-3 block text-base leading-7 text-on-surface/74">{children}</span>
+      <span className="mt-6 inline-flex items-center text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+        Continue
+        <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-1">
+          →
+        </span>
+      </span>
     </Link>
   );
 }
 
-type HelpCardProps = {
+type SupportRowProps = {
   support: Awaited<ReturnType<typeof getSupportEntries>>['urgent'][number];
+  index: number;
 };
 
-function HelpCard({ support }: HelpCardProps) {
+function SupportRow({ support, index }: SupportRowProps) {
   return (
-    <div className="rounded-[var(--md-sys-shape-corner-large)] border border-outline/20 bg-surface p-6 shadow-sm">
-      <h3 className="type-title-medium text-on-surface">{support.title}</h3>
-      <p className="mt-2 type-body-medium text-on-surface/80">{support.summary}</p>
-      <ul className="mt-3 space-y-1 text-sm font-semibold text-primary">
-        {support.contacts.map((contact) =>
-          contact.href ? (
-            <li key={`${support.title}-${contact.label}`}>
-              <Link
-                href={contact.href}
-                className="inline-flex min-h-[44px] items-center rounded-full px-3 py-2 underline underline-offset-4"
-              >
+    <article className="border-t border-outline/15 pt-6 first:border-t-0 first:pt-0">
+      <div className="grid gap-4 md:grid-cols-[5rem_minmax(0,1fr)_minmax(14rem,18rem)] md:items-start">
+        <div className="text-sm font-semibold uppercase tracking-[0.24em] text-primary/72">
+          {String(index + 1).padStart(2, '0')}
+        </div>
+        <div className="space-y-3">
+          <h3 className="font-heading text-3xl font-semibold tracking-[-0.03em] text-on-surface text-balance">
+            {support.title}
+          </h3>
+          <p className="max-w-2xl text-base leading-7 text-on-surface/78">{support.summary}</p>
+        </div>
+        <ul className="space-y-2 text-sm font-semibold text-primary">
+          {support.contacts.map((contact) =>
+            contact.href ? (
+              <li key={`${support.title}-${contact.label}`}>
+                <Link
+                  href={contact.href}
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-outline/20 px-4 py-2 underline-offset-4 transition hover:border-primary/30 hover:bg-primary/6 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  {contact.label}
+                </Link>
+              </li>
+            ) : (
+              <li key={`${support.title}-${contact.label}`} className="text-on-surface/74">
                 {contact.label}
-              </Link>
-            </li>
-          ) : (
-            <li key={`${support.title}-${contact.label}`}>{contact.label}</li>
-          ),
-        )}
-      </ul>
-    </div>
+              </li>
+            ),
+          )}
+        </ul>
+      </div>
+    </article>
   );
 }

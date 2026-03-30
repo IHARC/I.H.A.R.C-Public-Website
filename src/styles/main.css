@@ -4,40 +4,40 @@
 
 :root {
   color-scheme: light;
-  --md-sys-color-primary: 210 35 77;
+  --md-sys-color-primary: 207 18 63;
   --md-sys-color-on-primary: 255 255 255;
-  --md-sys-color-primary-container: 255 217 226;
-  --md-sys-color-on-primary-container: 88 0 23;
-  --md-sys-color-secondary: 54 50 60;
+  --md-sys-color-primary-container: 252 227 234;
+  --md-sys-color-on-primary-container: 96 7 33;
+  --md-sys-color-secondary: 61 53 58;
   --md-sys-color-on-secondary: 255 255 255;
-  --md-sys-color-secondary-container: 234 230 240;
-  --md-sys-color-on-secondary-container: 30 26 36;
-  --md-sys-color-tertiary: 100 80 140;
+  --md-sys-color-secondary-container: 238 231 235;
+  --md-sys-color-on-secondary-container: 35 28 33;
+  --md-sys-color-tertiary: 130 65 53;
   --md-sys-color-on-tertiary: 255 255 255;
-  --md-sys-color-tertiary-container: 236 223 255;
-  --md-sys-color-on-tertiary-container: 35 16 70;
+  --md-sys-color-tertiary-container: 255 219 208;
+  --md-sys-color-on-tertiary-container: 50 16 9;
   --md-sys-color-error: 186 26 26;
   --md-sys-color-on-error: 255 255 255;
   --md-sys-color-error-container: 255 218 214;
   --md-sys-color-on-error-container: 65 0 2;
-  --md-sys-color-background: 249 249 251;
-  --md-sys-color-on-background: 28 28 32;
-  --md-sys-color-surface: 249 249 251;
-  --md-sys-color-on-surface: 28 28 32;
-  --md-sys-color-surface-variant: 230 224 233;
-  --md-sys-color-on-surface-variant: 74 68 77;
-  --md-sys-color-outline: 187 178 189;
-  --md-sys-color-outline-variant: 207 198 208;
-  --md-sys-color-surface-bright: 255 249 253;
-  --md-sys-color-surface-dim: 228 224 230;
+  --md-sys-color-background: 248 245 244;
+  --md-sys-color-on-background: 28 24 27;
+  --md-sys-color-surface: 249 246 245;
+  --md-sys-color-on-surface: 28 24 27;
+  --md-sys-color-surface-variant: 233 226 229;
+  --md-sys-color-on-surface-variant: 82 71 76;
+  --md-sys-color-outline: 191 179 185;
+  --md-sys-color-outline-variant: 216 206 211;
+  --md-sys-color-surface-bright: 255 251 250;
+  --md-sys-color-surface-dim: 229 223 224;
   --md-sys-color-surface-container-lowest: 255 255 255;
-  --md-sys-color-surface-container-low: 244 240 247;
-  --md-sys-color-surface-container: 238 234 241;
-  --md-sys-color-surface-container-high: 232 228 235;
-  --md-sys-color-surface-container-highest: 226 222 229;
+  --md-sys-color-surface-container-low: 244 239 240;
+  --md-sys-color-surface-container: 239 233 234;
+  --md-sys-color-surface-container-high: 232 226 228;
+  --md-sys-color-surface-container-highest: 226 220 222;
   --md-sys-color-inverse-surface: 49 48 53;
   --md-sys-color-inverse-on-surface: 244 240 248;
-  --md-sys-color-inverse-primary: 255 170 195;
+  --md-sys-color-inverse-primary: 255 177 199;
   --md-sys-color-shadow: 0 0 0;
   --md-sys-color-scrim: 0 0 0;
 
@@ -47,8 +47,8 @@
   --md-sys-shape-corner-large: 1.5rem;
   --md-sys-shape-corner-extra-large: 2rem;
 
-  --md-sys-typescale-body-font: var(--font-body), 'Roboto Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --md-sys-typescale-headline-font: var(--font-heading), 'Roboto Flex Fallback', 'Roboto Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --md-sys-typescale-body-font: var(--font-body), 'Manrope Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --md-sys-typescale-headline-font: var(--font-heading), 'Space Grotesk Fallback', 'Manrope Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   --shadow-level-1: 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-level-2: 0 3px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -56,18 +56,18 @@
 
 .dark {
   color-scheme: dark;
-  --md-sys-color-primary: 255 170 195;
-  --md-sys-color-on-primary: 90 0 25;
-  --md-sys-color-primary-container: 140 0 40;
-  --md-sys-color-on-primary-container: 255 217 226;
+  --md-sys-color-primary: 255 177 199;
+  --md-sys-color-on-primary: 101 7 36;
+  --md-sys-color-primary-container: 144 16 50;
+  --md-sys-color-on-primary-container: 255 218 228;
   --md-sys-color-secondary: 206 198 208;
   --md-sys-color-on-secondary: 40 35 45;
   --md-sys-color-secondary-container: 76 68 79;
   --md-sys-color-on-secondary-container: 236 230 240;
-  --md-sys-color-tertiary: 208 190 255;
-  --md-sys-color-on-tertiary: 49 29 90;
-  --md-sys-color-tertiary-container: 77 61 117;
-  --md-sys-color-on-tertiary-container: 236 223 255;
+  --md-sys-color-tertiary: 247 188 171;
+  --md-sys-color-on-tertiary: 77 27 16;
+  --md-sys-color-tertiary-container: 106 49 37;
+  --md-sys-color-on-tertiary-container: 255 219 208;
   --md-sys-color-error: 255 180 171;
   --md-sys-color-on-error: 105 0 5;
   --md-sys-color-error-container: 147 0 10;
@@ -89,7 +89,7 @@
   --md-sys-color-surface-container-highest: 52 49 56;
   --md-sys-color-inverse-surface: 230 225 232;
   --md-sys-color-inverse-on-surface: 39 36 43;
-  --md-sys-color-inverse-primary: 210 35 77;
+  --md-sys-color-inverse-primary: 207 18 63;
   --md-sys-color-shadow: 0 0 0;
   --md-sys-color-scrim: 0 0 0;
 
@@ -99,15 +99,15 @@
 
 /* Font display optimization */
 @font-face {
-  font-family: 'Roboto Flex Fallback';
+  font-family: 'Space Grotesk Fallback';
   size-adjust: 102%;
-  src: local('Roboto');
+  src: local('Trebuchet MS');
 }
 
 @font-face {
-  font-family: 'Roboto Fallback';
+  font-family: 'Manrope Fallback';
   size-adjust: 100%;
-  src: local('Arial');
+  src: local('Helvetica');
 }
 
 @layer base {
@@ -129,6 +129,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--md-sys-typescale-headline-font);
     color: inherit;
+    text-wrap: balance;
   }
 
   p, li {
@@ -292,6 +293,17 @@
     }
   }
 
+  @keyframes hero-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -392,24 +404,24 @@
   .type-headline-large {
     font-family: var(--md-sys-typescale-headline-font);
     font-weight: 700;
-    font-size: 2rem;
-    line-height: 2.5rem;
-    letter-spacing: -0.01em;
+    font-size: 2.5rem;
+    line-height: 2.8rem;
+    letter-spacing: -0.03em;
   }
 
   .type-headline-medium {
     font-family: var(--md-sys-typescale-headline-font);
     font-weight: 700;
-    font-size: 1.75rem;
-    line-height: 2.25rem;
-    letter-spacing: -0.008em;
+    font-size: 2rem;
+    line-height: 2.35rem;
+    letter-spacing: -0.03em;
   }
 
   .type-title-large {
     font-weight: 700;
-    font-size: 1.375rem;
-    line-height: 1.75rem;
-    letter-spacing: -0.006em;
+    font-size: 1.5rem;
+    line-height: 1.9rem;
+    letter-spacing: -0.02em;
   }
 
   .type-title-medium {
@@ -421,16 +433,16 @@
 
   .type-body-large {
     font-weight: 400;
-    font-size: 1rem;
-    line-height: 1.5rem;
-    letter-spacing: 0.01em;
+    font-size: 1.0625rem;
+    line-height: 1.75rem;
+    letter-spacing: 0;
   }
 
   .type-body-medium {
     font-weight: 400;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    letter-spacing: 0.01em;
+    font-size: 0.9375rem;
+    line-height: 1.55rem;
+    letter-spacing: 0;
   }
 
   /* Material state layers */

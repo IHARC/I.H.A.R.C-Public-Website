@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
-import type { Metadata } from 'next';
-import { Roboto, Roboto_Flex } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
+import { Manrope, Space_Grotesk } from 'next/font/google';
 import Script from 'next/script';
 import { cn } from '@/lib/utils';
 import { getBrandingAssets } from '@/data/marketing-content';
+import { getMarketingSocialImage } from '@/lib/site-metadata';
 import '@/styles/main.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -11,7 +12,25 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider';
 import { ConsentBanner } from '@/components/providers/consent-banner';
 
 const DEFAULT_APP_URL = 'https://iharc.ca';
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
+function resolvePublicAppUrl() {
+  const rawValue =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.PUBLIC_SITE_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    DEFAULT_APP_URL;
+
+  try {
+    const parsed = new URL(rawValue);
+    if (parsed.hostname.startsWith('stevi.') && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+      return DEFAULT_APP_URL;
+    }
+    return parsed.toString();
+  } catch {
+    return DEFAULT_APP_URL;
+  }
+}
+
+const appUrl = resolvePublicAppUrl();
 const metadataBase = (() => {
   try {
     return new URL(appUrl);
@@ -20,24 +39,30 @@ const metadataBase = (() => {
   }
 })();
 
-const roboto = Roboto({
+const manrope = Manrope({
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-body',
 });
-const robotoFlex = Roboto_Flex({ subsets: ['latin'], variable: '--font-heading' });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-heading',
+});
 
 const DEFAULT_GA_MEASUREMENT_ID = 'G-5B08FDG9J6';
 const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? DEFAULT_GA_MEASUREMENT_ID;
 const ANALYTICS_DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false').toLowerCase() === 'true';
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
-const OG_IMAGE_PATH = '/logo.png';
-const OG_IMAGE_ALT = 'IHARC — Integrated Homelessness and Addictions Response Centre';
 
 const SITE_TITLE = 'IHARC — Integrated Homelessness and Addictions Response Centre | Northumberland County';
 const SITE_DESCRIPTION =
   'IHARC provides street outreach and service navigation across Northumberland County, sharing public data while STEVI gives clients and partners a secure place to coordinate care.';
+
+export const viewport: Viewport = {
+  themeColor: '#cf123f',
+};
 
 const ORGANIZATION_JSON_LD = {
   '@context': 'https://schema.org',
@@ -61,13 +86,16 @@ const WEBSITE_JSON_LD = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const branding = await getBrandingAssets();
+  const [branding, socialImage] = await Promise.all([getBrandingAssets(), getMarketingSocialImage()]);
   const favicon = branding?.faviconUrl || '/favicon.svg';
 
   return {
     metadataBase,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    alternates: {
+      canonical: '/',
+    },
     icons: {
       icon: favicon,
     },
@@ -78,8 +106,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: SITE_DESCRIPTION,
       images: [
         {
-          url: OG_IMAGE_PATH,
-          alt: OG_IMAGE_ALT,
+          url: socialImage.url,
+          alt: socialImage.alt,
         },
       ],
     },
@@ -87,7 +115,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: SITE_TITLE,
       description: SITE_DESCRIPTION,
-      images: [OG_IMAGE_PATH],
+      images: [socialImage.url],
     },
   };
 }
@@ -98,8 +126,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body
         className={cn(
           'min-h-screen bg-background text-on-background antialiased',
-          roboto.variable,
-          robotoFlex.variable,
+          manrope.variable,
+          spaceGrotesk.variable,
           'font-sans'
         )}
       >

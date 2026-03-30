@@ -45,16 +45,16 @@ export function ConsentBanner() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-outline bg-surface shadow-lg">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 text-sm md:flex-row md:items-center md:justify-between md:px-6">
-        <div className="text-on-surface md:max-w-xl">
-          <p className="font-medium">Cookies that strengthen community care</p>
+    <div className="pointer-events-none fixed inset-x-3 bottom-3 z-30">
+      <div className="pointer-events-auto mx-auto flex w-full max-w-5xl flex-col gap-4 rounded-[1.75rem] border border-outline/18 bg-surface/96 px-4 py-4 text-sm shadow-[0_20px_60px_rgba(17,12,16,0.18)] backdrop-blur md:flex-row md:items-center md:justify-between md:px-6">
+        <div className="text-on-surface md:max-w-2xl">
+          <p className="font-medium tracking-[-0.01em]">Cookies that strengthen community care</p>
           <p className="mt-1 text-muted-foreground">
             We use privacy-aware analytics to learn where neighbours need more support. Approving cookies helps us
             improve shared solutions faster.
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end md:w-auto">
           <Button
             variant="outline"
             size="sm"
